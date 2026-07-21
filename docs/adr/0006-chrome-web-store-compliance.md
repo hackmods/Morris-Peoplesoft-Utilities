@@ -10,7 +10,7 @@ Legacy tooling struggled with public Store standards. End goal is an official Ch
 
 ## Decision
 
-Minimal permissions, tightened WAR matches, privacy policy, store asset pack, listing copy, submission checklist, and `audit:store` / `audit:compliance` CI gates. Do not reuse legacy manifest `key`.
+Minimal permissions, Chrome-valid WAR matches (origin-only path `/*`; content scripts retain `psp`/`psc` path scoping), privacy policy, store asset pack, listing copy, submission checklist, and `audit:store` / `audit:compliance` CI gates. Do not reuse legacy manifest `key`.
 
 ## Consequences
 

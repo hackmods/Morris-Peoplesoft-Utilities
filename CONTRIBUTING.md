@@ -16,7 +16,7 @@ npm run build
 
 - Read ADRs in `docs/adr/` and Cursor rules in `.cursor/rules/`
 - Do not add credential storage or telemetry
-- Keep WAR host matches tight; MV3 only
+- Keep WAR matches Chrome-valid (origin-only `/*` path); scope PeopleSoft URLs via content scripts; MV3 only
 - Include tests for URL/adapter/storage changes
 - Run `npm run release:check` before release-related PRs
 

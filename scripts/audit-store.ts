@@ -35,8 +35,14 @@ if (existsSync(manifestPath)) {
   }
   const war = manifest.web_accessible_resources ?? [];
   for (const entry of war) {
-    if (entry.matches?.includes("*://*/*")) {
-      errors.push("web_accessible_resources must not use *://*/*");
+    for (const pattern of entry.matches ?? []) {
+      // Chrome rejects WAR match patterns whose path is not exactly /*.
+      // See: https://developer.chrome.com/docs/extensions/reference/manifest/web-accessible-resources
+      if (!/^[a-z*]+:\/\/[^/]+\/\*$/i.test(pattern) && pattern !== "<all_urls>") {
+        errors.push(
+          `web_accessible_resources match must be origin-only (path /*): ${pattern}`,
+        );
+      }
     }
   }
   const csp = manifest.content_security_policy?.extension_pages ?? "";

@@ -4,6 +4,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-07-21
+
+### Fixed
+
+- Chrome load failure: `web_accessible_resources` match patterns must be origin-only (`*://*/*`). Path-scoped patterns like `*://*/psp/*` are rejected by Chrome with “Invalid match pattern.”
+
 ## [1.0.1] — 2026-07-21
 
 ### Added
