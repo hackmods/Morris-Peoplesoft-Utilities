@@ -1,6 +1,6 @@
 import type { MpuSettings } from "../storage/schema";
 import type { ParsedPsUrl } from "../adapters/ps-page";
-import { extractPageMeta, findHeaderMount, getTargetDocument } from "../adapters/ps-page";
+import { collectPageMeta, findHeaderMount } from "../adapters/ps-page";
 import { isYes } from "../storage/schema";
 
 export interface BarContext {
@@ -82,7 +82,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   }
 
   if (!loginOnly && isYes(f.userIdOption)) {
-    const meta = extractPageMeta(getTargetDocument(doc));
+    const meta = collectPageMeta(doc);
     const user = document.createElement("span");
     user.className = "mpu-user";
     user.textContent = meta.userId ? `User: ${meta.userId}` : "User: —";
@@ -241,7 +241,7 @@ function showHelpDialog(doc: Document): void {
 }
 
 export function showPageInfoDialog(doc: Document, parsed: ParsedPsUrl): void {
-  const meta = extractPageMeta(getTargetDocument(doc));
+  const meta = collectPageMeta(doc);
   const lines = [
     `Menu: ${meta.menu ?? parsed.menu ?? "—"}`,
     `Component: ${meta.component ?? parsed.component ?? "—"}`,

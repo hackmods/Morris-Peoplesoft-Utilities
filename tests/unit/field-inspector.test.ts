@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
+import { getTargetDocument } from "@/adapters/ps-page";
 import {
   isFieldInspectorActive,
   startFieldInspector,
@@ -55,9 +56,10 @@ describe("field inspector", () => {
 
   it("injects inline SVG icons only for PeopleSoft-style ids containing underscore", () => {
     startFieldInspector(document);
-    const icons = Array.from(document.querySelectorAll(".mpu-recfield-icon")) as HTMLImageElement[];
+    const icons = Array.from(document.querySelectorAll(".mpu-recfield-icon"));
     expect(icons.length).toBe(2);
-    expect(icons.every((img) => img.src.startsWith("data:image/svg+xml"))).toBe(true);
+    expect(icons.every((el) => el.namespaceURI === "http://www.w3.org/2000/svg")).toBe(true);
+    expect(icons.every((el) => el.querySelector("circle[stroke='#E36B22']"))).toBe(true);
     expect(document.querySelector(".mpu-recfield-area")).toBeTruthy();
     expect(document.querySelector("a#ICSave")?.closest(".mpu-recfield-area")).toBeNull();
     stopFieldInspector(document);
@@ -71,18 +73,18 @@ describe("field inspector", () => {
     expect(document.getElementById("mpu-field")?.textContent).toBe("Inspect ON");
     expect(document.getElementById("mpu-recfield-name")?.hidden).toBe(false);
 
-    const img = document.querySelector(
+    const icon = document.querySelector(
       '.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID$0"]',
-    ) as HTMLImageElement;
-    expect(img).toBeTruthy();
+    ) as SVGElement;
+    expect(icon).toBeTruthy();
 
-    img.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    icon.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
     expect(document.getElementById("mpu-recfield-name")?.textContent).toBe("JOB_EMPLID");
 
-    img.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    icon.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(getLockedFieldName()).toBe("JOB_EMPLID");
-    expect(img.src).toContain(encodeURIComponent("#5DA027"));
-    expect((img.parentElement as HTMLElement).style.border).toContain("rgb(93, 160, 39)");
+    expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#5DA027");
+    expect((icon.parentElement as HTMLElement).style.border).toContain("rgb(93, 160, 39)");
 
     stopFieldInspector(document);
     syncFieldInspectorChrome(document);
@@ -105,5 +107,38 @@ describe("field inspector", () => {
     expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
     expect(reinjectFieldInspector(document)).toBe(2);
     expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
+  });
+
+  it("injects into Classic TargetContent iframe document", () => {
+    stopFieldInspector(document);
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div id="ptifrmtarget">
+        <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+      </div>
+    `;
+    const iframe = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    const iframeDoc = iframe.contentDocument!;
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!doctype html><html><body>
+        <div><input id="JOB_EMPLID$0" value="1" /></div>
+        <div><span class="PSEDITBOX_DISPONLY" id="NAMES_NAME_DISPLAY">Ada</span></div>
+      </body></html>
+    `);
+    iframeDoc.close();
+
+    // Cross-realm: iframe nodes are not instanceof parent HTMLElement
+    expect(iframeDoc.querySelector("input") instanceof HTMLElement).toBe(false);
+    expect(getTargetDocument(document)).toBe(iframeDoc);
+
+    startFieldInspector(document);
+    expect(iframe.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
+    expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
+    stopFieldInspector(document);
+    expect(iframe.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
   });
 });
