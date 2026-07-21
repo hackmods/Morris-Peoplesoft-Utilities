@@ -4,6 +4,17 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.11] — 2026-07-21
+
+### Added
+
+- **Wave 3 remaining P1 + key P2** (see `docs/findings/future-enhancements.md`):
+  - Field Inspector: viewport-scoped decoration + scroll/resize reinject (FI-05); HTML type / maxlength / disabled chips (UX-05)
+  - **Recent** components dropdown (local, capped) (PI-04)
+  - Favorites / Recent **New win** checkbox using `_newwin` site rules (FV-03)
+  - Page Info **Page token: present|not detected** boolean only — never shows ICSID value (TR-03)
+  - Stronger environment color strip via CSS custom property (UX-03)
+
 ## [1.0.10] — 2026-07-21
 
 ### Added

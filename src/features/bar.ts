@@ -1,4 +1,4 @@
-import type { Favorite, MpuSettings } from "../storage/schema";
+import type { Favorite, MpuSettings, RecentComponent } from "../storage/schema";
 import type { ParsedPsUrl } from "../adapters/ps-page";
 import {
   collectPageMeta,
@@ -134,7 +134,10 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     env.textContent = ctx.envLabel || ctx.parsed.siteNormalized || "Environment";
     env.title = "Environment";
     const color = ctx.settings.environments.find((e) => e.label === ctx.envLabel)?.color;
-    if (color) env.style.borderBottomColor = color;
+    if (color) {
+      env.style.setProperty("--mpu-env-color", color);
+      env.setAttribute("data-mpu-env-colored", "true");
+    }
     bar.appendChild(env);
   }
 
@@ -152,10 +155,12 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     fav.addEventListener("click", () => ctx.onAddFavorite());
     bar.appendChild(fav);
 
-    if (ctx.settings.favorites.length) {
-      const wrap = document.createElement("span");
-      wrap.className = "mpu-fav-wrap";
+    const wrap = document.createElement("span");
+    wrap.className = "mpu-fav-wrap";
+    let wrapUsed = false;
 
+    if (ctx.settings.favorites.length) {
+      wrapUsed = true;
       const filter = document.createElement("input");
       filter.type = "search";
       filter.id = "mpu-fav-filter";
@@ -212,15 +217,98 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
         if (Number.isNaN(idx)) return;
         const item = ctx.settings.favorites[idx];
         if (!item || !ctx.parsed.baseURL) return;
+        const newWin =
+          isYes(f.newWindowOption) &&
+          (doc.getElementById("mpu-fav-newwin") as HTMLInputElement | null)?.checked === true;
         injectClearBcs(doc);
-        const site = ctx.parsed.site || ctx.parsed.siteNormalized;
-        const url = `${ctx.parsed.baseURL}/${item.Servlet}/${site}/${ctx.parsed.portal}/${ctx.parsed.node}/c/${item.Menu}.${item.Component}.${item.Market}${item.Parameters || ""}`;
+        const url = buildComponentUrl({
+          baseURL: ctx.parsed.baseURL,
+          servlet: item.Servlet,
+          site: ctx.parsed.site || ctx.parsed.siteNormalized,
+          portal: ctx.parsed.portal,
+          node: ctx.parsed.node,
+          menu: item.Menu,
+          component: item.Component,
+          market: item.Market,
+          parameters: item.Parameters || "",
+          newWin,
+        });
+        if (!url) return;
+        if (newWin) {
+          window.open(url, "_blank");
+          select.value = "";
+          return;
+        }
         window.location.href = url;
       });
 
       wrap.append(filter, select);
-      bar.appendChild(wrap);
     }
+
+    if (
+      isYes(f.newWindowOption) &&
+      (ctx.settings.favorites.length > 0 || (ctx.settings.recentComponents || []).length > 0)
+    ) {
+      wrapUsed = true;
+      const lab = document.createElement("label");
+      lab.className = "mpu-fav-newwin";
+      lab.title = "Open selected favorite or recent component in a new window";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = "mpu-fav-newwin";
+      lab.append(cb, document.createTextNode(" New win"));
+      wrap.appendChild(lab);
+    }
+
+    const recent = ctx.settings.recentComponents || [];
+    if (recent.length) {
+      wrapUsed = true;
+      const recentSelect = document.createElement("select");
+      recentSelect.id = "mpu-recent-select";
+      recentSelect.className = "mpu-select";
+      recentSelect.setAttribute("aria-label", "Open recent component");
+      const ph = document.createElement("option");
+      ph.value = "";
+      ph.textContent = "Recent…";
+      recentSelect.appendChild(ph);
+      recent.forEach((item, index) => {
+        const opt = document.createElement("option");
+        opt.value = String(index);
+        opt.textContent = `${item.Menu}.${item.Component}.${item.Market || "GBL"}`;
+        recentSelect.appendChild(opt);
+      });
+      recentSelect.addEventListener("change", () => {
+        const idx = Number(recentSelect.value);
+        if (Number.isNaN(idx)) return;
+        const item = recent[idx] as RecentComponent | undefined;
+        if (!item || !ctx.parsed.baseURL) return;
+        const newWin =
+          isYes(f.newWindowOption) &&
+          (doc.getElementById("mpu-fav-newwin") as HTMLInputElement | null)?.checked === true;
+        injectClearBcs(doc);
+        const url = buildComponentUrl({
+          baseURL: ctx.parsed.baseURL,
+          servlet: item.Servlet,
+          site: item.Site || ctx.parsed.site || ctx.parsed.siteNormalized,
+          portal: item.Portal || ctx.parsed.portal,
+          node: item.Node || ctx.parsed.node,
+          menu: item.Menu,
+          component: item.Component,
+          market: item.Market,
+          newWin,
+        });
+        if (!url) return;
+        if (newWin) {
+          window.open(url, "_blank");
+          recentSelect.value = "";
+          return;
+        }
+        window.location.href = url;
+      });
+      wrap.appendChild(recentSelect);
+    }
+
+    if (wrapUsed) bar.appendChild(wrap);
   }
 
   if (!loginOnly && isYes(f.traceOption)) {

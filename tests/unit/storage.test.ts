@@ -6,7 +6,7 @@ import {
   originAllowed,
   migrateFromLegacy,
 } from "@/storage/settings";
-import { createDefaultSettings } from "@/storage/schema";
+import { createDefaultSettings, pushRecentComponent } from "@/storage/schema";
 import { getChromeStorageSnapshot, resetChromeStorage } from "../setup/chrome-mock";
 
 describe("storage load/save/update", () => {
@@ -30,10 +30,57 @@ describe("storage load/save/update", () => {
       SubCategory: "",
       Description: "Demo",
     });
+    s.recentComponents = pushRecentComponent([], {
+      Servlet: "psp",
+      Menu: "M",
+      Component: "C",
+      Market: "GBL",
+      Portal: "EMPLOYEE",
+      Node: "HRMS",
+      Site: "ps",
+      visitedAt: 1,
+    });
     await saveSettings(s);
     const loaded = await loadSettings();
     expect(loaded.favorites).toHaveLength(1);
     expect(loaded.favorites[0].Description).toBe("Demo");
+    expect(loaded.recentComponents).toHaveLength(1);
+    expect(loaded.recentComponents[0].Component).toBe("C");
+  });
+
+  it("pushRecentComponent de-dupes and caps", () => {
+    let list = pushRecentComponent([], {
+      Servlet: "psp",
+      Menu: "A",
+      Component: "C1",
+      Market: "GBL",
+      Portal: "P",
+      Node: "N",
+      Site: "ps",
+      visitedAt: 1,
+    });
+    list = pushRecentComponent(list, {
+      Servlet: "psp",
+      Menu: "A",
+      Component: "C2",
+      Market: "GBL",
+      Portal: "P",
+      Node: "N",
+      Site: "ps",
+      visitedAt: 2,
+    });
+    list = pushRecentComponent(list, {
+      Servlet: "psp",
+      Menu: "A",
+      Component: "C1",
+      Market: "GBL",
+      Portal: "P",
+      Node: "N",
+      Site: "ps",
+      visitedAt: 3,
+    });
+    expect(list.map((r) => r.Component)).toEqual(["C1", "C2"]);
+    expect(list[0].visitedAt).toBe(3);
   });
 
   it("updateSettings applies patches", async () => {

@@ -225,6 +225,19 @@ describe("utilities bar", () => {
         Description: "Rehire",
       },
     ];
+    settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No", color: "#2288aa" }];
+    settings.recentComponents = [
+      {
+        Servlet: "psp",
+        Menu: "UTILITIES",
+        Component: "PEOPLECODE_TRACE",
+        Market: "GBL",
+        Portal: "EMPLOYEE",
+        Node: "HRMS",
+        Site: "ps",
+        visitedAt: 1,
+      },
+    ];
     mountBar({
       settings,
       parsed,
@@ -241,6 +254,10 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-ui-mode")?.textContent).toBeTruthy();
     expect(document.getElementById("mpu-fav-filter")).toBeTruthy();
     expect(document.querySelector("#mpu-fav-select optgroup")?.getAttribute("label")).toBe("Campus");
+    expect(document.getElementById("mpu-fav-newwin")).toBeTruthy();
+    expect(document.getElementById("mpu-recent-select")).toBeTruthy();
+    const env = document.querySelector(".mpu-env") as HTMLElement;
+    expect(env.style.getPropertyValue("--mpu-env-color")).toBe("#2288aa");
   });
 
   it("shows Go to dialog and builds navigation URL", () => {

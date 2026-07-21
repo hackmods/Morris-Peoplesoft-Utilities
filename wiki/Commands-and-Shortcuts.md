@@ -12,6 +12,7 @@
 | Trace presets | Options → Tracing → Off / Default / SQL / PeopleCode / Verbose |
 | Go to component | Bar → Go to · **Alt+Shift+G** (Menu.Component.Market + optional params) |
 | Add Favorite | Bar → ★ |
+| Open favorite / recent | Favorites dropdown · Recent dropdown; optional **New win** checkbox |
 | Filter Favorites | Bar filter box next to Favorites dropdown (grouped by Category) |
 | Close dialogs | **Escape** or Close button |
 

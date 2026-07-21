@@ -1,6 +1,6 @@
 import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta } from "../adapters/ps-page";
 import { loadSettings, originAllowed, updateSettings } from "../storage/settings";
-import { isYes, type MpuSettings } from "../storage/schema";
+import { isYes, pushRecentComponent, type MpuSettings } from "../storage/schema";
 import {
   mountBar,
   removeBar,
@@ -182,6 +182,41 @@ async function refresh(): Promise<void> {
   const { label, index } = resolveEnv(settings, location.href);
   const traceRunning =
     index >= 0 && isYes(settings.environments[index]?.trcProfRunning);
+
+  // PI-04: record component visits locally (skip if already top to avoid churn)
+  if (
+    !loginMode &&
+    parsed.kind === "component" &&
+    parsed.menu &&
+    parsed.component &&
+    parsed.baseURL &&
+    parsed.portal &&
+    parsed.node
+  ) {
+    const entry = {
+      Servlet: (parsed.servlet || "psp") as "psp" | "psc",
+      Menu: parsed.menu,
+      Component: parsed.component,
+      Market: parsed.market || "GBL",
+      Portal: parsed.portal,
+      Node: parsed.node,
+      Site: parsed.site || parsed.siteNormalized,
+      visitedAt: Date.now(),
+    };
+    const top = settings.recentComponents?.[0];
+    const same =
+      top &&
+      top.Menu === entry.Menu &&
+      top.Component === entry.Component &&
+      top.Market === entry.Market &&
+      top.Site === entry.Site;
+    if (!same) {
+      settings = await updateSettings((s) => ({
+        ...s,
+        recentComponents: pushRecentComponent(s.recentComponents || [], entry),
+      }));
+    }
+  }
 
   mountBar({
     settings,
