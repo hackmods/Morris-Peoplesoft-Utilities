@@ -153,6 +153,41 @@
   margin-top: 0.75rem;
 }
 
+.mpu-dialog-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.mpu-goto-form {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.mpu-goto-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mpu-goto-form input[type="text"],
+.mpu-goto-form input:not([type]),
+.mpu-goto-form input[type="search"] {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c5d0d8;
+  border-radius: 4px;
+}
+
+.mpu-goto-check {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 500 !important;
+}
+
 .mpu-dialog .mpu-btn {
   background: #1f3a4d;
   color: #fff;

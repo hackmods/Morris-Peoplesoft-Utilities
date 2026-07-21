@@ -13,6 +13,8 @@ import {
   parseRecField,
   formatRecFieldPlain,
   formatRecFieldCopy,
+  preferredFluidBoxHost,
+  nearbyPageLabel,
 } from "@/features/field-inspector";
 
 describe("field inspector", () => {
@@ -232,5 +234,33 @@ describe("field inspector", () => {
     expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
     stopFieldInspector(document);
     expect(iframe.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
+  });
+
+  it("wraps Fluid ps_box hosts without swallowing the whole group", () => {
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div class="ps_box-group">
+        <div class="ps_box-label">Emplid</div>
+        <div class="ps_box-control">
+          <div class="ps_box-edit"><input id="JOB_EMPLID$0" /></div>
+        </div>
+        <div class="ps_box-control">
+          <div class="ps_box-edit"><input id="JOB_EMPL_RCD$0" /></div>
+        </div>
+      </div>
+    `;
+    const input = document.getElementById("JOB_EMPLID$0")!;
+    expect(preferredFluidBoxHost(input)?.classList.contains("ps_box-edit")).toBe(true);
+
+    startFieldInspector(document);
+    expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
+    expect(document.querySelector(".ps_box-group > .mpu-recfield-area")).toBeNull();
+    expect(document.querySelector(".ps_box-control .mpu-recfield-area .ps_box-edit")).toBeTruthy();
+    const el = document.getElementById("JOB_EMPLID$0")!;
+    expect(nearbyPageLabel(el)).toBe("Emplid");
+    stopFieldInspector(document);
   });
 });

@@ -187,6 +187,18 @@ textarea {
   margin: 0.35rem 0;
 }
 
+.hint {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.trace-presets-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
 .help {
   font-size: 0.9rem;
   opacity: 0.85;

@@ -7,6 +7,12 @@ import {
   type TraceSettings,
   type YesNo,
 } from "../../storage/schema";
+import {
+  TRACE_PRESET_META,
+  applyTracePreset,
+  summarizeActiveTraceFlags,
+  type TracePresetId,
+} from "../../features/trace-presets";
 
 const toast = document.getElementById("toast")!;
 
@@ -97,9 +103,48 @@ function renderTrace(settings: MpuSettings): void {
     input.type = "checkbox";
     input.id = `trace-${f.key}`;
     input.checked = t[f.key] === "Yes";
+    input.addEventListener("change", () => refreshTraceSummaryFromDom());
     label.append(input, document.createTextNode(f.label));
     root.appendChild(label);
   }
+
+  const presets = document.getElementById("trace-presets")!;
+  presets.replaceChildren();
+  for (const p of TRACE_PRESET_META) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = p.label;
+    b.title = p.hint;
+    b.setAttribute("aria-label", `Apply ${p.label} trace preset: ${p.hint}`);
+    b.addEventListener("click", () => applyPresetToDom(p.id));
+    presets.appendChild(b);
+  }
+  refreshTraceSummaryFromDom();
+}
+
+function readTraceFromDom(): TraceSettings {
+  const next = { ...DEFAULT_TRACE };
+  for (const f of TRACE_LABELS) {
+    const el = document.getElementById(`trace-${f.key}`) as HTMLInputElement | null;
+    next[f.key] = (el?.checked ? "Yes" : "No") as YesNo;
+  }
+  return next;
+}
+
+function applyPresetToDom(id: TracePresetId): void {
+  const preset = applyTracePreset(id);
+  for (const f of TRACE_LABELS) {
+    const el = document.getElementById(`trace-${f.key}`) as HTMLInputElement | null;
+    if (el) el.checked = preset[f.key] === "Yes";
+  }
+  refreshTraceSummaryFromDom();
+  say(`Applied ${id} preset — Save to keep`);
+}
+
+function refreshTraceSummaryFromDom(): void {
+  const el = document.getElementById("trace-summary");
+  if (!el) return;
+  el.textContent = `Active flags: ${summarizeActiveTraceFlags(readTraceFromDom())}`;
 }
 
 function renderFavorites(settings: MpuSettings): void {
@@ -250,12 +295,7 @@ async function init(): Promise<void> {
 
   document.getElementById("save-trace")!.addEventListener("click", async () => {
     const s = await loadSettings();
-    const next = { ...s.traceSettings };
-    for (const f of TRACE_LABELS) {
-      const el = document.getElementById(`trace-${f.key}`) as HTMLInputElement;
-      next[f.key] = (el.checked ? "Yes" : "No") as YesNo;
-    }
-    s.traceSettings = next;
+    s.traceSettings = readTraceFromDom();
     await saveSettings(s);
     say("Trace settings saved");
   });

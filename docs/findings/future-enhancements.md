@@ -25,7 +25,7 @@
 | ~~FI-01~~ | ~~One-click **copy** `RECORD.FIELD` (and row) to clipboard on lock~~ | BA, Dev | Done in 1.0.9 | Also Copy field button + Alt+Shift+C |
 | ~~FI-02~~ | ~~Show **page label** text next to technical name when a `<label>` / `PSlabel` is nearby~~ | BA | Done in 1.0.9 | |
 | ~~FI-03~~ | ~~**DERIVED_** / work-record badge in readout~~ | Dev | Done in 1.0.9 | Type: Work |
-| FI-04 | **Fluid** field selectors (`ps_box-control`, data attrs) parity | BA, Dev | Customers mix Classic portal + Fluid pages | Keep Classic iframe path; add Fluid adapter branch |
+| ~~FI-04~~ | ~~**Fluid** field selectors (`ps_box-control`, data attrs) parity~~ | BA, Dev | Done in 1.0.10 | Classic iframe path retained |
 | FI-05 | Large-grid performance: only decorate **visible** rows / debounce MutationObserver | Dev | Big scroll grids get sluggish with full wrap | IntersectionObserver or throttle |
 
 ### Page Info / environment awareness
@@ -50,7 +50,7 @@
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| TR-01 | Trace Options UI: show **which flags** are on; named **presets** (SQL only, PeopleCode only, etc.) | Dev | Less tribal knowledge | Keep delivered UTILITIES POST protocol |
+| ~~TR-01~~ | ~~Trace Options UI: show **which flags** are on; named **presets** (SQL only, PeopleCode only, etc.)~~ | Dev | Done in 1.0.10 | Keep delivered UTILITIES POST protocol |
 | ~~TR-02~~ | ~~Clearer **Trace 🔒** help when security blocks components~~ | Dev | Done in 1.0.9 | |
 | TR-03 | Optional **ICSID / page token present?** indicator (boolean only, never display full token) | Dev | Debug postback / session issues | Do not copy secrets into clipboard by default |
 
@@ -58,8 +58,8 @@
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| SR-01 | Harden **Correct History** + **Advanced Search** for more PeopleTools versions / Fluid search | BA | Still flaky across releases | Prefer inject scripts; version-gate if needed |
-| SR-02 | “Expand all search criteria” for Fluid search pages | BA | Parity with Classic expand | Fluid selectors in adapter |
+| ~~SR-01~~ | ~~Harden **Correct History** + **Advanced Search** for more PeopleTools versions / Fluid search~~ | BA | Done in 1.0.10 | Prefer inject scripts |
+| ~~SR-02~~ | ~~“Expand all search criteria” for Fluid search pages~~ | BA | Done in 1.0.10 | MORE/expand loops in inject |
 
 ---
 
@@ -68,7 +68,7 @@
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | ~~UX-01~~ | ~~Keyboard shortcuts: Page Info, Inspect toggle, copy locked field~~ | BA, Dev | Done in 1.0.9 (Alt+Shift+P/I/C) | |
-| UX-02 | In-bar **component URL builder** (Menu.Component.Market + optional params) | Dev | Jump without Favorites | Validate against current site/portal/node |
+| ~~UX-02~~ | ~~In-bar **component URL builder** (Menu.Component.Market + optional params)~~ | Dev | Done in 1.0.10 (Go to · Alt+Shift+G) | |
 | UX-03 | Environment **color strip** / stronger env affordance beyond underline | BA | Reduce wrong-env mistakes | AODA contrast check |
 | UX-04 | Favorites **notes** field (local) | BA | “Use this for payroll calc test” | Export includes notes → warn |
 | UX-05 | Field Inspector: show **input type / maxlength / disabled** chips | Dev | Quick HTML property check | From DOM attrs only |
@@ -109,8 +109,8 @@
 
 1. ~~**FI-01, PI-02, PI-01** — documentation speed for BAs filing tickets~~ (shipped 1.0.9)
 2. ~~**FV-01, FV-02** — favorites scale~~ (shipped 1.0.9)
-3. **FI-04, SR-01** — Fluid / search reliability  
-4. **TR-01, UX-02** — developer daily drivers  
+3. ~~**FI-04, SR-01** — Fluid / search reliability~~ (shipped 1.0.10)
+4. ~~**TR-01, UX-02** — developer daily drivers~~ (shipped 1.0.10)
 5. P3 items only with ADR if they add permissions or major UI surface  
 
 ---
@@ -121,3 +121,4 @@
 |---|---|
 | 2026-07-21 | Initial backlog from Classic Inspect/Page Info work, legacy PS Utilities audit, BA/tech use cases, and PeopleTools 8.61 Classic+Fluid field reality |
 | 2026-07-21 | Wave 1 implemented in v1.0.9 (FI-01..03, PI-01..03, FV-01/02/04, TR-02, UX-01/06) — plan: `.cursor/plans/implement-p1-wave1.md` |
+| 2026-07-21 | Wave 2 implemented in v1.0.10 (FI-04, SR-01/02, TR-01, UX-02) — plan: `.cursor/plans/implement-wave2.md` |

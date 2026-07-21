@@ -5,6 +5,7 @@ import {
   mountBar,
   removeBar,
   showPageInfoDialog,
+  showGoToComponentDialog,
   announce,
 } from "../features/bar";
 import {
@@ -212,6 +213,7 @@ async function refresh(): Promise<void> {
       void copyLockedField(document);
     },
     onNewWindow: () => openNewWindow(parsed),
+    onGoToComponent: () => showGoToComponentDialog(document, parsed),
     onAddFavorite: () => void addFavorite(settings, parsed),
   });
 
@@ -236,7 +238,7 @@ async function refresh(): Promise<void> {
 function onMpuShortcut(e: KeyboardEvent): void {
   if (!(e.altKey && e.shiftKey) || e.ctrlKey || e.metaKey) return;
   const key = e.key.toLowerCase();
-  if (key !== "p" && key !== "i" && key !== "c") return;
+  if (key !== "p" && key !== "i" && key !== "c" && key !== "g") return;
   e.preventDefault();
   if (key === "p") {
     const parsed = parsePsUrl(location.href);
@@ -246,6 +248,10 @@ function onMpuShortcut(e: KeyboardEvent): void {
   if (key === "i") {
     toggleFieldInspector(document);
     syncFieldInspectorChrome(document);
+    return;
+  }
+  if (key === "g") {
+    showGoToComponentDialog(document, parsePsUrl(location.href));
     return;
   }
   void copyLockedField(document);
