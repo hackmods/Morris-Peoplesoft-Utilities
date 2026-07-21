@@ -4,9 +4,18 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.9] — 2026-07-21
+
 ### Added
 
-- BA + PeopleSoft developer **future enhancements** backlog (`docs/findings/future-enhancements.md`), Cursor plan (`.cursor/plans/future-enhancements.md`), and `product-roadmap` Cursor rule for agents
+- **Wave 1 BA/Dev enhancements** (see `docs/findings/future-enhancements.md`):
+  - Field Inspector: copy `RECORD.FIELD` on lock + Copy field control; nearby **Label**; **Work** badge for `DERIVED_`/`WRK_`
+  - Page Info: DB name/type, AppsRel, UI mode, portal/node/site; **Copy Markdown** for tickets
+  - Toolbar **Classic/Fluid/Nav** mode badge
+  - Favorites **Category** optgroups + bar **filter**
+  - Favorites CSV export **business-key warning**
+  - Shortcuts: **Alt+Shift+P** Page Info, **Alt+Shift+I** Inspect, **Alt+Shift+C** copy field
+  - Clearer Trace 🔒 help when UTILITIES security blocks access
 
 ## [1.0.8] — 2026-07-21
 

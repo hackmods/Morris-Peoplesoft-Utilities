@@ -34,6 +34,48 @@
   font-weight: 500;
 }
 
+.mpu-mode {
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+  border: 1px solid #8aa0b0;
+  background: #0f2433;
+  font: 600 11px/1.2 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #f0d56a;
+}
+
+.mpu-fav-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 22rem;
+}
+
+.mpu-fav-filter {
+  width: 5.5rem;
+  font: inherit;
+  border-radius: 3px;
+  border: 1px solid #8aa0b0;
+  background: #0f2433;
+  color: #f4f7fa;
+  padding: 0.2rem 0.3rem;
+}
+
+.mpu-fav-filter:focus-visible {
+  outline: 2px solid #f0d56a;
+}
+
+.mpu-select {
+  max-width: 12rem;
+  font: inherit;
+  border-radius: 3px;
+  border: 1px solid #8aa0b0;
+  background: #0f2433;
+  color: #f4f7fa;
+  padding: 0.2rem;
+}
+
 .mpu-btn {
   appearance: none;
   border: 1px solid #8aa0b0;
@@ -61,16 +103,6 @@
 .mpu-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-.mpu-select {
-  max-width: 12rem;
-  font: inherit;
-  border-radius: 3px;
-  border: 1px solid #8aa0b0;
-  background: #0f2433;
-  color: #f4f7fa;
-  padding: 0.2rem;
 }
 
 .mpu-select:focus-visible {

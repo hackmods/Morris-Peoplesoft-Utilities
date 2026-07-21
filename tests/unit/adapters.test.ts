@@ -4,6 +4,8 @@ import {
   detectUiModel,
   extractPageMeta,
   findHeaderMount,
+  formatPageInfoMarkdown,
+  formatPageInfoPlain,
   getTargetDocument,
   parseConnectionComment,
   parsePsUrl,
@@ -58,6 +60,15 @@ AppServ=//appserver:9000
     expect(meta.toolsRel).toBe("8.60.05");
     expect(meta.userId).toBe("BA1");
     expect(meta.appServer).toBeUndefined();
+  });
+
+  it("parses DB name, type, and apps release", () => {
+    const meta = parseConnectionComment(
+      "User=X; ToolsRel=8.61; DBName=CSDEV; DBType=MICROSOFT; AppsRel=Campus.9.20; AppServ=//h:1",
+    );
+    expect(meta.dbName).toBe("CSDEV");
+    expect(meta.dbType).toBe("MICROSOFT");
+    expect(meta.appsRel).toBe("Campus.9.20");
   });
 
   it("returns empty for unrelated comments", () => {
@@ -150,6 +161,25 @@ describe("extractPageMeta", () => {
     const meta = collectPageMeta(document);
     expect(meta.toolsRel).toBe("8.61.15");
     expect(meta.menu).toBe("M");
+    expect(meta.uiMode).toBe("classic");
+  });
+
+  it("formats page info plain and markdown", () => {
+    const meta = {
+      menu: "M",
+      component: "C",
+      page: "P",
+      toolsRel: "8.61",
+      dbName: "CSDEV",
+      uiMode: "classic",
+    };
+    const parsed = parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL");
+    const plain = formatPageInfoPlain(meta, parsed, "JOB.EMPLID");
+    expect(plain).toContain("DB Name: CSDEV");
+    expect(plain).toContain("Locked field: JOB.EMPLID");
+    const md = formatPageInfoMarkdown(meta, parsed, "JOB.EMPLID");
+    expect(md).toContain("### PeopleSoft page info");
+    expect(md).toContain("| ToolsRel | 8.61 |");
   });
 });
 

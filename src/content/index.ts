@@ -14,6 +14,7 @@ import {
   getLockedFieldName,
   syncFieldInspectorChrome,
   reinjectFieldInspector,
+  copyLockedField,
 } from "../features/field-inspector";
 import { toggleTrace } from "../features/trace";
 import { runSearchOptions } from "../features/search";
@@ -193,13 +194,22 @@ async function refresh(): Promise<void> {
     onTraceToggle: async () => {
       const result = await toggleTrace(settings, parsed, index, !traceRunning);
       traceLocked = result.locked;
+      if (result.locked) {
+        announce(
+          document,
+          "Trace locked — missing security access to UTILITIES PeopleCode/SQL Trace components",
+        );
+      }
       await refresh();
     },
-    onPageInfo: () => showPageInfoDialog(document, parsed),
+    onPageInfo: () => showPageInfoDialog(document, parsed, getLockedFieldName()),
     onFieldInspector: () => {
       // Avoid full remount/resizeAll here — it wipes iframe Field Inspector icons.
       toggleFieldInspector(document);
       syncFieldInspectorChrome(document);
+    },
+    onCopyLockedField: () => {
+      void copyLockedField(document);
     },
     onNewWindow: () => openNewWindow(parsed),
     onAddFavorite: () => void addFavorite(settings, parsed),
@@ -222,6 +232,25 @@ async function refresh(): Promise<void> {
   void detectUiModel();
 }
 
+/** Alt+Shift shortcuts — avoid stealing CTRL+J (PeopleSoft System Information). */
+function onMpuShortcut(e: KeyboardEvent): void {
+  if (!(e.altKey && e.shiftKey) || e.ctrlKey || e.metaKey) return;
+  const key = e.key.toLowerCase();
+  if (key !== "p" && key !== "i" && key !== "c") return;
+  e.preventDefault();
+  if (key === "p") {
+    const parsed = parsePsUrl(location.href);
+    showPageInfoDialog(document, parsed, getLockedFieldName());
+    return;
+  }
+  if (key === "i") {
+    toggleFieldInspector(document);
+    syncFieldInspectorChrome(document);
+    return;
+  }
+  void copyLockedField(document);
+}
+
 chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }) => {
   if (msg.type === "mpu-refresh" || msg.command === "refresh") {
     void refresh();
@@ -234,5 +263,7 @@ chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }) 
 chrome.storage.onChanged.addListener(() => {
   void refresh();
 });
+
+document.addEventListener("keydown", onMpuShortcut, true);
 
 void refresh();
