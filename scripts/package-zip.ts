@@ -1,6 +1,6 @@
 import { createWriteStream, readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 
 const pkg = JSON.parse(readFileSync(resolve("package.json"), "utf8")) as { version: string };
 const dist = resolve("dist");
@@ -12,7 +12,7 @@ if (!existsSync(resolve(dist, "manifest.json"))) {
 const outName = `morris-peoplesoft-utilities-v${pkg.version}.zip`;
 const outPath = resolve(outName);
 const output = createWriteStream(outPath);
-const archive = archiver("zip", { zlib: { level: 9 } });
+const archive = new ZipArchive({ zlib: { level: 9 } });
 
 await new Promise<void>((resolvePromise, reject) => {
   output.on("close", () => resolvePromise());
