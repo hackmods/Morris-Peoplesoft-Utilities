@@ -1,0 +1,17 @@
+---
+description: PeopleSoft Classic/Fluid adapter conventions
+globs:
+  - src/adapters/**/*
+  - src/features/**/*
+  - src/inject/**/*
+  - src/content/**/*
+alwaysApply: false
+---
+
+# PeopleSoft adapters
+
+- Treat `.reference/PS-Utilities` as behavior oracle only — do not vendor it into the extension package.
+- Detect UI model before DOM assumptions: classic frame vs Fluid header vs nav collection iframe.
+- Prefer shared helpers in `src/adapters/ps-page.ts` over duplicating selectors in features.
+- Search automation must attempt Fluid selectors, not only `ptifrmtgtframe`.
+- Never store PeopleSoft credentials.

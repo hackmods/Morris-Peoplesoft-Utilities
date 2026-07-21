@@ -1,0 +1,96 @@
+:root {
+  --bg: #f3f6f8;
+  --fg: #15202b;
+  --accent: #1f3a4d;
+  --gold: #b8922a;
+  --focus: #0b57d0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121a22;
+    --fg: #e8eef2;
+    --accent: #7eb0d0;
+    --gold: #e0c15a;
+    --focus: #8ab4f8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 280px;
+  max-width: 320px;
+  font: 14px/1.4 "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 0.75rem 0.9rem 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.tagline {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+fieldset {
+  border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem 0.65rem;
+}
+
+legend {
+  padding: 0 0.25rem;
+  font-weight: 650;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.label-row:last-child {
+  border-bottom: none;
+}
+
+input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--gold);
+}
+
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.links {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+}
+
+a {
+  color: var(--accent);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}

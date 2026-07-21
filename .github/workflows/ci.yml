@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run generate:icons
+      - run: npm run generate:store-assets
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run audit:a11y
+      - run: npm run build
+      - run: npm run audit:store
+      - run: npm run audit:compliance

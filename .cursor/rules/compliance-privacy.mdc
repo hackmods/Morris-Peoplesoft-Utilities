@@ -1,0 +1,17 @@
+---
+description: Privacy and compliance hard rules
+globs:
+  - src/**/*
+  - docs/**/*
+  - store/**/*
+alwaysApply: true
+---
+
+# Compliance / privacy
+
+- Never implement password vaults, Quick Logins, or credential fields.
+- No analytics, telemetry, or advertising SDKs.
+- Settings stay in `chrome.storage.local` only.
+- Host allowlist is opt-in; default remains pattern-scoped public access.
+- Favorites export may contain business keys — warn in UI/docs when relevant.
+- Credit hackmods and upstream PS Utilities authors in user-facing About/README/Store copy.

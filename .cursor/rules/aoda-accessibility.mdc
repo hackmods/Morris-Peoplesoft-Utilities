@@ -1,0 +1,16 @@
+---
+description: AODA / WCAG 2.1 AA requirements for MPU UI
+globs:
+  - src/ui/**/*
+  - src/features/bar.ts
+  - src/content/content.css
+alwaysApply: false
+---
+
+# AODA accessibility
+
+- Target WCAG 2.1 AA for popup, options, and injected bar/dialogs.
+- Icon buttons need accessible names; pressed states use `aria-pressed` plus text, not color alone.
+- Dialogs: `role="dialog"`, `aria-modal`, labelled title, Escape to close, initial focus.
+- Respect `prefers-reduced-motion`.
+- Keep axe audits green (`npm run audit:a11y`).

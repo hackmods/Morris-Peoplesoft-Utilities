@@ -1,0 +1,18 @@
+---
+description: Manifest V3 extension engineering rules for MPU
+globs:
+  - src/**/*
+  - scripts/**/*
+  - vite.config.ts
+alwaysApply: false
+---
+
+# MPU — MV3 extension rules
+
+- Manifest V3 only. No remote code, no `eval`, no `unsafe-eval` CSP.
+- Keep permissions minimal (`storage` preferred). Justify any new permission in `docs/privacy.md` and `store/privacy-practices.md`.
+- `web_accessible_resources.matches` must stay limited to PeopleSoft `psp`/`psc` patterns — never `*://*/*`.
+- Do not add a Chrome Web Store private `key` to the manifest.
+- No jQuery. Prefer TypeScript modules under `src/`.
+- Page-context access goes through small `src/inject/*` files only.
+- Run `npm run lint` and `npm run test:unit` before committing multi-file changes.

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MPU Options</title>
+    <link rel="stylesheet" href="./options.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <h1>Morris PeopleSoft Utilities</h1>
+      <p>Configure features for business analysts and technical staff. Data stays on this device.</p>
+    </header>
+    <nav class="tabs" role="tablist" aria-label="Options sections">
+      <button type="button" class="tab" role="tab" data-tab="features" aria-selected="true" id="tab-features" aria-controls="panel-features">Features</button>
+      <button type="button" class="tab" role="tab" data-tab="favorites" aria-selected="false" id="tab-favorites" aria-controls="panel-favorites">Favorites</button>
+      <button type="button" class="tab" role="tab" data-tab="tracing" aria-selected="false" id="tab-tracing" aria-controls="panel-tracing">Tracing</button>
+      <button type="button" class="tab" role="tab" data-tab="environments" aria-selected="false" id="tab-environments" aria-controls="panel-environments">Environments</button>
+      <button type="button" class="tab" role="tab" data-tab="allowlist" aria-selected="false" id="tab-allowlist" aria-controls="panel-allowlist">Host allowlist</button>
+      <button type="button" class="tab" role="tab" data-tab="about" aria-selected="false" id="tab-about" aria-controls="panel-about">About</button>
+    </nav>
+    <main id="main">
+      <section id="panel-features" class="panel" data-panel="features" role="tabpanel" aria-labelledby="tab-features">
+        <h2>Features</h2>
+        <div id="feature-toggles"></div>
+        <label class="row">
+          <input type="checkbox" id="quietEnvPrompt" />
+          Quiet mode — don’t prompt to name new environments
+        </label>
+        <button type="button" class="primary" id="save-features">Save features</button>
+      </section>
+
+      <section id="panel-favorites" class="panel hidden" data-panel="favorites" role="tabpanel" aria-labelledby="tab-favorites" hidden>
+        <h2>Favorites</h2>
+        <p>Import/export CSV with columns: Servlet, Menu, Component, Market, Parameters, Category, SubCategory, Description</p>
+        <div class="row-actions">
+          <button type="button" id="export-fav">Export CSV</button>
+          <label class="file-btn">Import CSV <input type="file" id="import-fav" accept=".csv,text/csv" /></label>
+          <button type="button" id="export-json">Backup JSON</button>
+          <label class="file-btn">Restore JSON <input type="file" id="import-json" accept=".json,application/json" /></label>
+        </div>
+        <div class="table-wrap">
+          <table id="fav-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Menu</th>
+                <th>Component</th>
+                <th>Market</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="panel-tracing" class="panel hidden" data-panel="tracing" role="tabpanel" aria-labelledby="tab-tracing" hidden>
+        <h2>Tracing profiles</h2>
+        <p>Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+        <div id="trace-flags" class="grid-2"></div>
+        <button type="button" class="primary" id="save-trace">Save trace settings</button>
+      </section>
+
+      <section id="panel-environments" class="panel hidden" data-panel="environments" role="tabpanel" aria-labelledby="tab-environments" hidden>
+        <h2>Environments</h2>
+        <div id="env-list"></div>
+        <button type="button" id="add-env">Add environment</button>
+      </section>
+
+      <section id="panel-allowlist" class="panel hidden" data-panel="allowlist" role="tabpanel" aria-labelledby="tab-allowlist" hidden>
+        <h2>Host allowlist (optional)</h2>
+        <p>
+          Default: MPU runs on any host matching PeopleSoft <code>psp</code>/<code>psc</code> URL patterns
+          (equal access to classic PS Utilities). Enable this toggle to restrict to org origins only.
+        </p>
+        <label class="row">
+          <input type="checkbox" id="hostAllowlistEnabled" />
+          Enable host allowlist (opt-in)
+        </label>
+        <label for="hostAllowlist">Origins (one per line), e.g. https://hr.college.edu</label>
+        <textarea id="hostAllowlist" rows="6" aria-describedby="allowlist-help"></textarea>
+        <p id="allowlist-help" class="help">When enabled with an empty list, MPU will not inject on any page.</p>
+        <button type="button" class="primary" id="save-allowlist">Save allowlist</button>
+      </section>
+
+      <section id="panel-about" class="panel hidden" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>
+        <h2>About</h2>
+        <p>
+          <strong>Morris PeopleSoft Utilities</strong> is maintained by
+          <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>
+          (Ryan Morris).
+        </p>
+        <p>
+          Inspired by <strong>PS Utilities</strong> (Uffe Graakjaer, Neil Yetman, and contributors).
+          This is a greenfield Manifest V3 rewrite for Chrome Web Store standards, PeopleSoft Fluid,
+          and AODA / WCAG 2.1 AA.
+        </p>
+        <ul>
+          <li>No password storage</li>
+          <li>No telemetry or analytics</li>
+          <li>Settings stored only in <code>chrome.storage.local</code></li>
+        </ul>
+        <p>
+          <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities" target="_blank" rel="noopener"
+            >GitHub repository</a
+          >
+          ·
+          <a
+            href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/privacy.md"
+            target="_blank"
+            rel="noopener"
+            id="privacy-link"
+            >Privacy</a
+          >
+        </p>
+      </section>
+    </main>
+    <div id="toast" class="sr-only" aria-live="polite"></div>
+    <script type="module" src="./options.ts"></script>
+  </body>
+</html>

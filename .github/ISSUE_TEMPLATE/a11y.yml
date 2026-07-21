@@ -1,0 +1,19 @@
+name: Accessibility issue
+description: AODA / WCAG barrier in MPU chrome
+labels: [a11y]
+body:
+  - type: textarea
+    id: barrier
+    attributes:
+      label: Barrier description
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options: [Popup, Options, Utilities bar, Dialog, Other]
+  - type: textarea
+    id: at
+    attributes:
+      label: Assistive tech / browser (optional)

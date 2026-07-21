@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a defect in Morris PeopleSoft Utilities
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve MPU (hackmods). Do not include passwords or personal data.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: ui
+    attributes:
+      label: PeopleSoft UI
+      options: [Classic, Fluid, Navigation Collection, Login, Unknown]
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true

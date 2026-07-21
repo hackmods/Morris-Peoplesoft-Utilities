@@ -1,0 +1,17 @@
+node_modules/
+dist/
+*.zip
+coverage/
+.DS_Store
+*.log
+proxmox_mcp.log
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+*.crx
+*.pem
+
+# Local legacy oracle — keep untracked by default (large vendor tree)
+.reference/

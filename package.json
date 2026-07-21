@@ -1,0 +1,46 @@
+{
+  "name": "morris-peoplesoft-utilities",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Morris PeopleSoft Utilities — Chrome extension for PeopleSoft Classic and Fluid productivity",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "tsc --noEmit && vite build",
+    "lint": "eslint . && tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "audit:a11y": "vitest run tests/a11y",
+    "audit:store": "tsx scripts/audit-store.ts",
+    "audit:compliance": "tsx scripts/audit-compliance.ts",
+    "audit": "npm run audit:a11y && npm run audit:store && npm run audit:compliance",
+    "package": "npm run build && tsx scripts/package-zip.ts",
+    "release:check": "npm run lint && npm run test:unit && npm run audit && npm run package",
+    "generate:icons": "tsx scripts/generate-icons.ts",
+    "generate:store-assets": "tsx scripts/generate-store-assets.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hackmods/Morris-Peoplesoft-Utilities.git"
+  },
+  "author": "hackmods (Ryan Morris)",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@types/chrome": "^0.0.326",
+    "@types/node": "^22.15.29",
+    "axe-core": "^4.10.3",
+    "eslint": "^9.28.0",
+    "globals": "^16.2.0",
+    "jsdom": "^26.1.0",
+    "pngjs": "^7.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.1",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.1",
+    "archiver": "^7.0.1",
+    "@types/archiver": "^6.0.3",
+    "@types/pngjs": "^6.0.5"
+  }
+}
