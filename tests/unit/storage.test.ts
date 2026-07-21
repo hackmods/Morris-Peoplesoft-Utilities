@@ -14,6 +14,7 @@ describe("storage load/save/update", () => {
     const s = await loadSettings();
     expect(s.schemaVersion).toBe(1);
     expect(s.features.hostAllowlistEnabled).toBe("No");
+    expect(s.features.traceOption).toBe("No");
     expect(getChromeStorageSnapshot().mpuSettings).toBeTruthy();
   });
 

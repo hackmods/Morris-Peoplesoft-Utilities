@@ -12,6 +12,8 @@ import {
   toggleFieldInspector,
   stopFieldInspector,
   getLockedFieldName,
+  syncFieldInspectorChrome,
+  reinjectFieldInspector,
 } from "../features/field-inspector";
 import { toggleTrace } from "../features/trace";
 import { runSearchOptions } from "../features/search";
@@ -191,8 +193,9 @@ async function refresh(): Promise<void> {
     },
     onPageInfo: () => showPageInfoDialog(document, parsed),
     onFieldInspector: () => {
+      // Avoid full remount/resizeAll here — it wipes iframe Field Inspector icons.
       toggleFieldInspector(document);
-      void refresh();
+      syncFieldInspectorChrome(document);
     },
     onNewWindow: () => openNewWindow(parsed),
     onAddFavorite: () => void addFavorite(settings, parsed),
@@ -205,6 +208,11 @@ async function refresh(): Promise<void> {
     bindTargetFrameLoad();
   } else {
     lastSearchSettings = null;
+  }
+
+  if (isFieldInspectorActive()) {
+    reinjectFieldInspector(document);
+    syncFieldInspectorChrome(document);
   }
 
   void detectUiModel();

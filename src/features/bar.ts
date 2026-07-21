@@ -176,7 +176,10 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
 
   if (classicTarget?.parentElement) {
     classicTarget.parentElement.insertBefore(bar, classicTarget);
-    injectResizeFrame(doc);
+    // resizeAll can rebuild the content iframe and wipe Field Inspector icons
+    if (!ctx.fieldInspectorActive) {
+      injectResizeFrame(doc);
+    }
   } else if (mount === doc.body) {
     mount.insertBefore(bar, mount.firstChild);
   } else {

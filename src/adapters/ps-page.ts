@@ -201,13 +201,20 @@ export function findHeaderMount(doc: Document = document): Element | null {
 }
 
 export function getTargetDocument(doc: Document = document): Document {
-  const frame = doc.querySelector(
-    "#ptifrmtgtframe",
-  ) as HTMLIFrameElement | null;
-  if (frame?.contentDocument) return frame.contentDocument;
+  // Classic portal exposes the content window as TargetContent
+  try {
+    const win = doc.defaultView as (Window & { frames: Record<string, Window | undefined> }) | null;
+    const tc = win?.frames?.TargetContent;
+    if (tc?.document?.body) return tc.document;
+  } catch {
+    /* cross-origin or unavailable */
+  }
+
+  const frame = doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null;
+  if (frame?.contentDocument?.body) return frame.contentDocument;
 
   const nav = doc.querySelector(".ps_target-iframe") as HTMLIFrameElement | null;
-  if (nav?.contentDocument) return nav.contentDocument;
+  if (nav?.contentDocument?.body) return nav.contentDocument;
 
   return doc;
 }
