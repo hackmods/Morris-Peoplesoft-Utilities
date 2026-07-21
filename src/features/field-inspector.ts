@@ -29,9 +29,73 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 let mutationObserver: MutationObserver | null = null;
 let reinjectTimer: ReturnType<typeof setTimeout> | null = null;
 let applying = false;
+/** Base ids (no $occ) seen on the current page — used to split RECORD vs FIELD. */
+let peerFieldBases: string[] = [];
+
+export interface ParsedRecField {
+  /** Full element id */
+  raw: string;
+  /** Id with $occurrence removed */
+  base: string;
+  record?: string;
+  field?: string;
+  /** Occurrence / row index after $ */
+  occurrence?: string;
+}
 
 export function fieldNameFromId(id: string): string {
   return id.split("$")[0] || id;
+}
+
+/**
+ * Infer RECORD from the longest underscore-aligned prefix shared with peer field ids.
+ * PeopleSoft HTML ids are RECORD_FIELD[$occ]; both parts may contain underscores.
+ */
+export function inferRecordName(base: string, peers: string[] = []): string | undefined {
+  const pool = [...new Set([base, ...peers].map(fieldNameFromId))].filter((p) => p.includes("_"));
+  if (pool.length < 2) return undefined;
+
+  let prefix = pool[0]!;
+  for (const p of pool) {
+    let i = 0;
+    while (i < prefix.length && i < p.length && prefix[i] === p[i]) i += 1;
+    prefix = prefix.slice(0, i);
+  }
+  if (!prefix) return undefined;
+
+  // Align to a full token boundary (…_TOKEN_)
+  if (prefix.endsWith("_")) {
+    prefix = prefix.slice(0, -1);
+  } else {
+    const cut = prefix.lastIndexOf("_");
+    if (cut <= 0) return undefined;
+    prefix = prefix.slice(0, cut);
+  }
+  if (!prefix || !base.startsWith(`${prefix}_`)) return undefined;
+
+  const sharing = pool.filter((p) => p === prefix || p.startsWith(`${prefix}_`));
+  if (sharing.length < 2) return undefined;
+  return prefix;
+}
+
+export function parseRecField(id: string, peers: string[] = peerFieldBases): ParsedRecField {
+  const dollar = id.indexOf("$");
+  const base = dollar >= 0 ? id.slice(0, dollar) : id;
+  const occurrence = dollar >= 0 ? id.slice(dollar + 1) || undefined : undefined;
+  const record = inferRecordName(base, peers);
+  const field =
+    record && base.startsWith(`${record}_`) ? base.slice(record.length + 1) || undefined : undefined;
+  return { raw: id, base, record, field, occurrence };
+}
+
+/** Human-readable label for announcements / plain-text copy. */
+export function formatRecFieldPlain(parsed: ParsedRecField): string {
+  if (parsed.record && parsed.field) {
+    const occ = parsed.occurrence != null && parsed.occurrence !== "" ? ` (row ${parsed.occurrence})` : "";
+    return `${parsed.record}.${parsed.field}${occ}`;
+  }
+  const occ = parsed.occurrence != null && parsed.occurrence !== "" ? `$${parsed.occurrence}` : "";
+  return `${parsed.base}${occ}`;
 }
 
 export function isFieldInspectorActive(): boolean {
@@ -39,7 +103,8 @@ export function isFieldInspectorActive(): boolean {
 }
 
 export function getLockedFieldName(): string | null {
-  return lockedId ? fieldNameFromId(lockedId) : null;
+  if (!lockedId) return null;
+  return formatRecFieldPlain(parseRecField(lockedId));
 }
 
 /** Real SVG nodes — PeopleSoft CSP often blocks chrome-extension:// and data: img sources. */
@@ -113,11 +178,44 @@ function ensureTargetStyles(doc: Document): void {
   (doc.head || doc.documentElement).appendChild(style);
 }
 
-function setNamePanel(name: string): void {
+function setNamePanel(id: string | null): void {
   const panel = topDocRef.getElementById("mpu-recfield-name");
-  if (panel) {
-    panel.hidden = false;
-    panel.textContent = name;
+  if (!panel) return;
+  panel.hidden = false;
+
+  if (!id) {
+    panel.textContent = "";
+    panel.removeAttribute("title");
+    panel.setAttribute("data-mpu-empty", "true");
+    return;
+  }
+
+  panel.removeAttribute("data-mpu-empty");
+  const parsed = parseRecField(id);
+  panel.title = formatRecFieldPlain(parsed);
+  panel.replaceChildren();
+
+  const addPart = (cls: string, label: string, value: string) => {
+    const part = topDocRef.createElement("span");
+    part.className = `mpu-rf-part ${cls}`;
+    const lbl = topDocRef.createElement("span");
+    lbl.className = "mpu-rf-lbl";
+    lbl.textContent = label;
+    const val = topDocRef.createElement("span");
+    val.className = "mpu-rf-val";
+    val.textContent = value;
+    part.append(lbl, val);
+    panel.appendChild(part);
+  };
+
+  if (parsed.record && parsed.field) {
+    addPart("mpu-rf-rec", "Rec", parsed.record);
+    addPart("mpu-rf-fld", "Fld", parsed.field);
+  } else {
+    addPart("mpu-rf-id", "ID", parsed.base);
+  }
+  if (parsed.occurrence != null && parsed.occurrence !== "") {
+    addPart("mpu-rf-occ", "Row", parsed.occurrence);
   }
 }
 
@@ -160,6 +258,7 @@ function injectIcons(target: Document): number {
   try {
     removeIcons(target);
     let count = 0;
+    const bases: string[] = [];
 
     for (const doc of collectDocs(target)) {
       ensureTargetStyles(doc);
@@ -186,6 +285,7 @@ function injectIcons(target: Document): number {
 
         const field = findFieldElement(area);
         const fieldId = field?.id ?? node.id;
+        bases.push(fieldNameFromId(fieldId));
 
         const icon = createIcon(doc, ORANGE, fieldId);
         area.insertBefore(icon, area.firstChild);
@@ -193,6 +293,8 @@ function injectIcons(target: Document): number {
         count += 1;
       }
     }
+
+    peerFieldBases = [...new Set(bases)];
 
     if (lockedId) {
       for (const doc of collectDocs(target)) {
@@ -204,7 +306,7 @@ function injectIcons(target: Document): number {
           if (lockedIcon.parentElement) {
             (lockedIcon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
           }
-          setNamePanel(fieldNameFromId(lockedId));
+          setNamePanel(lockedId);
           break;
         }
       }
@@ -243,7 +345,7 @@ function onPointerOver(e: Event): void {
   const icon = t?.closest?.(`.${ICON}`) as HTMLElement | SVGElement | null;
   const fieldId = icon?.getAttribute?.("data-mpu-field-id") ?? (icon as HTMLElement | null)?.dataset?.mpuFieldId;
   if (!fieldId) return;
-  setNamePanel(fieldNameFromId(fieldId));
+  setNamePanel(fieldId);
 }
 
 function onPointerOut(e: Event): void {
@@ -253,7 +355,7 @@ function onPointerOut(e: Event): void {
   if (!icon) return;
   const related = (e as MouseEvent).relatedTarget as Node | null;
   if (related && icon.contains(related)) return;
-  setNamePanel("");
+  setNamePanel(null);
 }
 
 function onIconClick(e: MouseEvent): void {
@@ -272,9 +374,8 @@ function onIconClick(e: MouseEvent): void {
   if (icon.parentElement) {
     (icon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
   }
-  const name = fieldNameFromId(fieldId);
-  setNamePanel(name);
-  announce(topDocRef, `Locked field ${name}`);
+  setNamePanel(fieldId);
+  announce(topDocRef, `Locked field ${formatRecFieldPlain(parseRecField(fieldId))}`);
 }
 
 function onKey(e: KeyboardEvent): void {
@@ -475,7 +576,7 @@ export function startFieldInspector(doc: Document = document): void {
 
   const panel = doc.getElementById("mpu-recfield-name");
   if (panel) panel.hidden = false;
-  setNamePanel("");
+  setNamePanel(null);
 }
 
 export function stopFieldInspector(doc: Document = document): void {
@@ -498,10 +599,13 @@ export function stopFieldInspector(doc: Document = document): void {
     /* ignore */
   }
   lockedId = null;
+  peerFieldBases = [];
   const panel = doc.getElementById("mpu-recfield-name");
   if (panel) {
     panel.textContent = "";
     panel.hidden = true;
+    panel.removeAttribute("title");
+    panel.removeAttribute("data-mpu-empty");
   }
   announce(doc, "Field inspector off");
 }
@@ -526,7 +630,14 @@ export function syncFieldInspectorChrome(doc: Document = document): void {
   }
   if (panel) {
     panel.hidden = !active;
-    if (!active) panel.textContent = "";
-    else if (lockedId) panel.textContent = fieldNameFromId(lockedId);
+    if (!active) {
+      panel.textContent = "";
+      panel.removeAttribute("title");
+      panel.removeAttribute("data-mpu-empty");
+    } else if (lockedId) {
+      setNamePanel(lockedId);
+    } else {
+      setNamePanel(null);
+    }
   }
 }

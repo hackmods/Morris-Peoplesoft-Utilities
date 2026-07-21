@@ -8,6 +8,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 - BA + PeopleSoft developer **future enhancements** backlog (`docs/findings/future-enhancements.md`), Cursor plan (`.cursor/plans/future-enhancements.md`), and `product-roadmap` Cursor rule for agents
 
+## [1.0.8] — 2026-07-21
+
+### Changed
+
+- **Field Inspector readout:** show separate **Rec** / **Fld** / **Row** labels (inferred from other fields on the page) instead of one opaque `RECORD_FIELD` string; hide the yellow panel when empty
+
 ## [1.0.7] — 2026-07-21
 
 ### Fixed

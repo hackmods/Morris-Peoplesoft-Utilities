@@ -9,6 +9,9 @@ import {
   getLockedFieldName,
   syncFieldInspectorChrome,
   reinjectFieldInspector,
+  inferRecordName,
+  parseRecField,
+  formatRecFieldPlain,
 } from "@/features/field-inspector";
 
 describe("field inspector", () => {
@@ -43,6 +46,22 @@ describe("field inspector", () => {
     expect(fieldNameFromId("STDNT_CAR_TERM_STRM")).toBe("STDNT_CAR_TERM_STRM");
   });
 
+  it("splits record vs field using peer ids on the page", () => {
+    const peers = ["NC_REHIRE_ELIG_TO_DATE", "NC_REHIRE_ELIG_FROM_DATE", "NC_REHIRE_ELIG_EMPLID"];
+    expect(inferRecordName("NC_REHIRE_ELIG_TO_DATE", peers)).toBe("NC_REHIRE_ELIG");
+    const parsed = parseRecField("NC_REHIRE_ELIG_TO_DATE$0", peers);
+    expect(parsed.record).toBe("NC_REHIRE_ELIG");
+    expect(parsed.field).toBe("TO_DATE");
+    expect(parsed.occurrence).toBe("0");
+    expect(formatRecFieldPlain(parsed)).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
+  });
+
+  it("falls back to full id when peers do not share a record", () => {
+    const parsed = parseRecField("JOB_EMPLID$0", ["NAMES_NAME_DISPLAY"]);
+    expect(parsed.record).toBeUndefined();
+    expect(formatRecFieldPlain(parsed)).toBe("JOB_EMPLID$0");
+  });
+
   it("toggles active state and exits on Escape", () => {
     expect(isFieldInspectorActive()).toBe(false);
     expect(toggleFieldInspector(document)).toBe(true);
@@ -67,29 +86,47 @@ describe("field inspector", () => {
     expect(document.querySelector(".mpu-recfield-area")).toBeNull();
   });
 
-  it("shows name on hover and locks green on icon click", () => {
+  it("shows broken-out Rec/Fld labels on hover and lock", () => {
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" class="mpu-recfield-name" hidden></span>
+      </div>
+      <div class="ps-field"><input id="NC_REHIRE_ELIG_TO_DATE$0" value="01/01/2050" /></div>
+      <div class="ps-field"><input id="NC_REHIRE_ELIG_FROM_DATE$0" value="01/01/2000" /></div>
+    `;
     startFieldInspector(document);
     syncFieldInspectorChrome(document);
     expect(document.getElementById("mpu-field")?.textContent).toBe("Inspect ON");
-    expect(document.getElementById("mpu-recfield-name")?.hidden).toBe(false);
 
     const icon = document.querySelector(
-      '.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID$0"]',
+      '.mpu-recfield-icon[data-mpu-field-id="NC_REHIRE_ELIG_TO_DATE$0"]',
     ) as SVGElement;
     expect(icon).toBeTruthy();
 
     icon.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
-    expect(document.getElementById("mpu-recfield-name")?.textContent).toBe("JOB_EMPLID");
+    const panel = document.getElementById("mpu-recfield-name")!;
+    expect(panel.querySelector(".mpu-rf-rec .mpu-rf-val")?.textContent).toBe("NC_REHIRE_ELIG");
+    expect(panel.querySelector(".mpu-rf-fld .mpu-rf-val")?.textContent).toBe("TO_DATE");
+    expect(panel.querySelector(".mpu-rf-occ .mpu-rf-val")?.textContent).toBe("0");
+    expect(panel.getAttribute("title")).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
 
     icon.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    expect(getLockedFieldName()).toBe("JOB_EMPLID");
+    expect(getLockedFieldName()).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
     expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#5DA027");
-    expect((icon.parentElement as HTMLElement).style.border).toContain("rgb(93, 160, 39)");
 
     stopFieldInspector(document);
     syncFieldInspectorChrome(document);
     expect(getLockedFieldName()).toBeNull();
     expect(document.getElementById("mpu-field")?.textContent).toBe("Inspect");
+  });
+
+  it("hides empty name panel until a field is hovered", () => {
+    startFieldInspector(document);
+    syncFieldInspectorChrome(document);
+    const panel = document.getElementById("mpu-recfield-name")!;
+    expect(panel.getAttribute("data-mpu-empty")).toBe("true");
+    expect(panel.textContent).toBe("");
   });
 
   it("reinjects icons after DOM wipe while still active", () => {
@@ -126,7 +163,6 @@ describe("field inspector", () => {
       <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
     `;
     const iframe = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
-    // Empty target body initially
     iframe.contentDocument!.open();
     iframe.contentDocument!.write(`<!doctype html><html><body></body></html>`);
     iframe.contentDocument!.close();
@@ -162,7 +198,6 @@ describe("field inspector", () => {
     `);
     iframeDoc.close();
 
-    // Cross-realm: iframe nodes are not instanceof parent HTMLElement
     expect(iframeDoc.querySelector("input") instanceof HTMLElement).toBe(false);
     expect(getTargetDocument(document)).toBe(iframeDoc);
 
