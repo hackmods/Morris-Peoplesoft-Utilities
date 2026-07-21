@@ -7,6 +7,7 @@ const LOCKED_BORDER = "solid 2px #5DA027";
 const ACTIVE_BORDER = "solid 2px #E36B22";
 const ORANGE = "#E36B22";
 const GREEN = "#5DA027";
+const STYLE_ID = "mpu-field-inspector-style";
 
 /** Match Classic PeopleSoft field hosts (parity with PS Utilities). */
 const FIELD_SELECTOR = [
@@ -25,6 +26,9 @@ let topDocRef: Document = document;
 let targetDocRef: Document = document;
 let frameLoadHandler: (() => void) | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
+let mutationObserver: MutationObserver | null = null;
+let reinjectTimer: ReturnType<typeof setTimeout> | null = null;
+let applying = false;
 
 export function fieldNameFromId(id: string): string {
   return id.split("$")[0] || id;
@@ -38,14 +42,75 @@ export function getLockedFieldName(): string | null {
   return lockedId ? fieldNameFromId(lockedId) : null;
 }
 
-/** Inline SVG avoids PeopleSoft page CSP blocking chrome-extension:// images. */
-function iconDataUri(stroke: string): string {
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16">` +
-    `<circle cx="6.5" cy="6.5" r="4" fill="none" stroke="${stroke}" stroke-width="2"/>` +
-    `<path d="M9.5 9.5L14 14" stroke="${stroke}" stroke-width="2" stroke-linecap="round"/>` +
-    `</svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+/** Real SVG nodes — PeopleSoft CSP often blocks chrome-extension:// and data: img sources. */
+function createIcon(doc: Document, stroke: string, fieldId: string): SVGSVGElement {
+  const svg = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  svg.setAttribute("width", "12");
+  svg.setAttribute("height", "12");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  svg.classList.add(ICON);
+  svg.dataset.mpuFieldId = fieldId;
+  svg.dataset.mpuStroke = stroke;
+  svg.setAttribute("title", "Click to lock record.field name");
+  svg.style.cssText =
+    "width:12px;height:12px;padding-right:4px;vertical-align:top;cursor:pointer;display:inline-block;flex-shrink:0;";
+
+  const circle = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
+  circle.setAttribute("cx", "6.5");
+  circle.setAttribute("cy", "6.5");
+  circle.setAttribute("r", "4");
+  circle.setAttribute("fill", "none");
+  circle.setAttribute("stroke", stroke);
+  circle.setAttribute("stroke-width", "2");
+
+  const path = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M9.5 9.5L14 14");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", stroke);
+  path.setAttribute("stroke-width", "2");
+  path.setAttribute("stroke-linecap", "round");
+
+  svg.appendChild(circle);
+  svg.appendChild(path);
+  return svg;
+}
+
+function setIconStroke(icon: Element, stroke: string): void {
+  icon.setAttribute("data-mpu-stroke", stroke);
+  if (icon instanceof HTMLElement || icon instanceof SVGElement) {
+    (icon as SVGElement).dataset.mpuStroke = stroke;
+  }
+  icon.querySelectorAll("circle, path").forEach((node) => {
+    node.setAttribute("stroke", stroke);
+  });
+}
+
+function ensureTargetStyles(doc: Document): void {
+  if (doc.getElementById(STYLE_ID)) return;
+  const style = doc.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = `
+    .${AREA} {
+      border: ${ACTIVE_BORDER};
+      white-space: nowrap;
+      margin: 1px;
+      padding: 1px;
+      display: inline-block;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .${ICON} {
+      width: 12px !important;
+      height: 12px !important;
+      padding-right: 4px;
+      vertical-align: top;
+      cursor: pointer;
+      display: inline-block;
+    }
+  `;
+  (doc.head || doc.documentElement).appendChild(style);
 }
 
 function setNamePanel(name: string): void {
@@ -56,19 +121,24 @@ function setNamePanel(name: string): void {
   }
 }
 
+function isHtmlElement(node: EventTarget | Node | null | undefined): node is HTMLElement {
+  return !!node && (node as Node).nodeType === Node.ELEMENT_NODE && "id" in (node as Element);
+}
+
 function findFieldElement(area: Element): HTMLElement | null {
   const el = area.querySelector(FIELD_SELECTOR);
-  return el instanceof HTMLElement && el.id ? el : null;
+  return isHtmlElement(el) && el.id ? el : null;
 }
 
 function clearLocks(target: Document): void {
-  const orange = iconDataUri(ORANGE);
-  target.querySelectorAll(`.${ICON}`).forEach((node) => {
-    (node as HTMLImageElement).src = orange;
-  });
-  target.querySelectorAll(`.${AREA}`).forEach((node) => {
-    (node as HTMLElement).style.border = ACTIVE_BORDER;
-  });
+  for (const doc of collectDocs(target)) {
+    doc.querySelectorAll(`.${ICON}`).forEach((node) => {
+      setIconStroke(node, ORANGE);
+    });
+    doc.querySelectorAll(`.${AREA}`).forEach((node) => {
+      (node as HTMLElement).style.border = ACTIVE_BORDER;
+    });
+  }
 }
 
 function collectDocs(root: Document, out: Document[] = []): Document[] {
@@ -86,66 +156,67 @@ function collectDocs(root: Document, out: Document[] = []): Document[] {
 }
 
 function injectIcons(target: Document): number {
-  removeIcons(target);
-  const orange = iconDataUri(ORANGE);
-  let count = 0;
+  applying = true;
+  try {
+    removeIcons(target);
+    let count = 0;
 
-  for (const doc of collectDocs(target)) {
-    const candidates = Array.from(doc.querySelectorAll(FIELD_SELECTOR));
-    const wrappedParents = new Set<HTMLElement>();
+    for (const doc of collectDocs(target)) {
+      ensureTargetStyles(doc);
+      const candidates = Array.from(doc.querySelectorAll(FIELD_SELECTOR));
+      const wrappedParents = new Set<Element>();
 
-    for (const node of candidates) {
-      if (!(node instanceof HTMLElement)) continue;
-      if (!node.id || !node.id.includes("_")) continue;
-      const parent = node.parentElement;
-      if (!parent || wrappedParents.has(parent)) continue;
-      if (parent.classList.contains(AREA) || parent.querySelector(`.${AREA}`)) continue;
-      if (parent.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop")) continue;
+      for (const node of candidates) {
+        if (!isHtmlElement(node)) continue;
+        if (!node.id || !node.id.includes("_")) continue;
+        const parent = node.parentElement;
+        if (!parent || wrappedParents.has(parent)) continue;
+        if (parent.classList.contains(AREA) || parent.querySelector(`.${AREA}`)) continue;
+        if (parent.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
 
-      wrappedParents.add(parent);
+        wrappedParents.add(parent);
 
-      const area = doc.createElement("span");
-      area.className = AREA;
-      area.style.cssText = `border: ${ACTIVE_BORDER}; white-space: nowrap; margin: 1px; padding: 1px; display: inline-block;`;
+        const area = doc.createElement("span");
+        area.className = AREA;
+        area.style.cssText = `border: ${ACTIVE_BORDER}; white-space: nowrap; margin: 1px; padding: 1px; display: inline-block; vertical-align: middle; box-sizing: border-box;`;
 
-      while (parent.firstChild) {
-        area.appendChild(parent.firstChild);
+        while (parent.firstChild) {
+          area.appendChild(parent.firstChild);
+        }
+
+        const field = findFieldElement(area);
+        const fieldId = field?.id ?? node.id;
+
+        const icon = createIcon(doc, ORANGE, fieldId);
+        area.insertBefore(icon, area.firstChild);
+        parent.appendChild(area);
+        count += 1;
       }
-
-      const field = findFieldElement(area);
-      const fieldId = field?.id ?? node.id;
-
-      const img = doc.createElement("img");
-      img.className = ICON;
-      img.src = orange;
-      img.width = 12;
-      img.height = 12;
-      img.alt = "";
-      img.title = "Click to lock record.field name";
-      img.dataset.mpuFieldId = fieldId;
-      img.style.cssText =
-        "width:12px;height:12px;padding-right:4px;vertical-align:top;cursor:pointer;";
-
-      area.insertBefore(img, area.firstChild);
-      parent.appendChild(area);
-      count += 1;
     }
-  }
 
-  if (lockedId) {
-    const lockedImg = target.querySelector(
-      `.${ICON}[data-mpu-field-id="${CSS.escape(lockedId)}"]`,
-    ) as HTMLImageElement | null;
-    if (lockedImg) {
-      lockedImg.src = iconDataUri(GREEN);
-      if (lockedImg.parentElement) {
-        (lockedImg.parentElement as HTMLElement).style.border = LOCKED_BORDER;
+    if (lockedId) {
+      for (const doc of collectDocs(target)) {
+        const lockedIcon = doc.querySelector(
+          `.${ICON}[data-mpu-field-id="${CSS.escape(lockedId)}"]`,
+        );
+        if (lockedIcon) {
+          setIconStroke(lockedIcon, GREEN);
+          if (lockedIcon.parentElement) {
+            (lockedIcon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
+          }
+          setNamePanel(fieldNameFromId(lockedId));
+          break;
+        }
       }
-      setNamePanel(fieldNameFromId(lockedId));
     }
-  }
 
-  return count;
+    return count;
+  } finally {
+    // Defer so MutationObserver does not see our own wrap as an external change
+    queueMicrotask(() => {
+      applying = false;
+    });
+  }
 }
 
 function removeIcons(target: Document): void {
@@ -162,41 +233,44 @@ function removeIcons(target: Document): void {
       }
       area.remove();
     });
+    doc.getElementById(STYLE_ID)?.remove();
   }
 }
 
 function onPointerOver(e: Event): void {
   if (!active || lockedId) return;
-  const t = e.target as HTMLElement | null;
-  const img = t?.closest?.(`.${ICON}`) as HTMLImageElement | null;
-  if (!img?.dataset.mpuFieldId) return;
-  setNamePanel(fieldNameFromId(img.dataset.mpuFieldId));
+  const t = e.target as Element | null;
+  const icon = t?.closest?.(`.${ICON}`) as HTMLElement | SVGElement | null;
+  const fieldId = icon?.getAttribute?.("data-mpu-field-id") ?? (icon as HTMLElement | null)?.dataset?.mpuFieldId;
+  if (!fieldId) return;
+  setNamePanel(fieldNameFromId(fieldId));
 }
 
 function onPointerOut(e: Event): void {
   if (!active || lockedId) return;
-  const t = e.target as HTMLElement | null;
-  const img = t?.closest?.(`.${ICON}`);
-  if (!img) return;
+  const t = e.target as Element | null;
+  const icon = t?.closest?.(`.${ICON}`);
+  if (!icon) return;
   const related = (e as MouseEvent).relatedTarget as Node | null;
-  if (related && img.contains(related)) return;
+  if (related && icon.contains(related)) return;
   setNamePanel("");
 }
 
 function onIconClick(e: MouseEvent): void {
   if (!active) return;
-  const t = e.target as HTMLElement | null;
-  const img = t?.closest?.(`.${ICON}`) as HTMLImageElement | null;
-  if (!img?.dataset.mpuFieldId) return;
+  const t = e.target as Element | null;
+  const icon = t?.closest?.(`.${ICON}`) as HTMLElement | SVGElement | null;
+  const fieldId =
+    icon?.getAttribute?.("data-mpu-field-id") ?? (icon as HTMLElement | null)?.dataset?.mpuFieldId;
+  if (!icon || !fieldId) return;
   e.preventDefault();
   e.stopPropagation();
 
-  const fieldId = img.dataset.mpuFieldId;
   clearLocks(targetDocRef);
   lockedId = fieldId;
-  img.src = iconDataUri(GREEN);
-  if (img.parentElement) {
-    (img.parentElement as HTMLElement).style.border = LOCKED_BORDER;
+  setIconStroke(icon, GREEN);
+  if (icon.parentElement) {
+    (icon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
   }
   const name = fieldNameFromId(fieldId);
   setNamePanel(name);
@@ -236,6 +310,48 @@ function clearPoll(): void {
   }
 }
 
+function clearReinjectTimer(): void {
+  if (reinjectTimer != null) {
+    clearTimeout(reinjectTimer);
+    reinjectTimer = null;
+  }
+}
+
+function scheduleReinject(doc: Document): void {
+  clearReinjectTimer();
+  reinjectTimer = setTimeout(() => {
+    reinjectTimer = null;
+    if (!active || applying) return;
+    applyToTarget(doc);
+  }, 150);
+}
+
+function detachMutations(): void {
+  mutationObserver?.disconnect();
+  mutationObserver = null;
+  clearReinjectTimer();
+}
+
+function attachMutations(target: Document, portalDoc: Document): void {
+  detachMutations();
+  mutationObserver = new MutationObserver((records) => {
+    if (!active || applying) return;
+    const relevant = records.some((r) => {
+      const nodes = [...Array.from(r.addedNodes), ...Array.from(r.removedNodes)];
+      if (!nodes.length && r.type === "attributes") return false;
+      return nodes.some((n) => {
+        if (!(n instanceof Element)) return n.nodeType === Node.TEXT_NODE;
+        return !n.classList?.contains(AREA) && !n.classList?.contains(ICON) && n.id !== STYLE_ID;
+      });
+    });
+    if (relevant) scheduleReinject(portalDoc);
+  });
+  for (const doc of collectDocs(target)) {
+    if (!doc.body) continue;
+    mutationObserver.observe(doc.body, { childList: true, subtree: true });
+  }
+}
+
 function applyToTarget(doc: Document): number {
   const prev = targetDocRef;
   targetDocRef = getTargetDocument(doc);
@@ -247,12 +363,16 @@ function applyToTarget(doc: Document): number {
     }
   }
   bindTarget(targetDocRef);
-  return injectIcons(targetDocRef);
+  const n = injectIcons(targetDocRef);
+  attachMutations(targetDocRef, doc);
+  return n;
 }
 
 function attachFrameReload(doc: Document): void {
   detachFrameReload(doc);
-  const frame = doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null;
+  const frame =
+    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
   if (!frame) return;
   frameLoadHandler = () => {
     if (!active) return;
@@ -269,7 +389,9 @@ function attachFrameReload(doc: Document): void {
 
 function detachFrameReload(doc: Document): void {
   if (!frameLoadHandler) return;
-  const frame = doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null;
+  const frame =
+    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
   frame?.removeEventListener("load", frameLoadHandler);
   frameLoadHandler = null;
 }
@@ -289,10 +411,13 @@ export function startFieldInspector(doc: Document = document): void {
   doc.addEventListener("keydown", onKey, true);
   attachFrameReload(doc);
 
-  const frame = doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null;
+  const frame =
+    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
   let n = applyToTarget(doc);
 
-  if (n === 0 && frame) {
+  // Classic portal: content iframe may still be loading or mid-AJAX
+  if (n === 0) {
     announce(doc, "Field inspector waiting for page content…");
     clearPoll();
     let attempts = 0;
@@ -303,7 +428,7 @@ export function startFieldInspector(doc: Document = document): void {
       }
       attempts += 1;
       n = applyToTarget(doc);
-      if (n > 0 || attempts >= 25) {
+      if (n > 0 || attempts >= 40) {
         clearPoll();
         announce(
           doc,
@@ -312,7 +437,7 @@ export function startFieldInspector(doc: Document = document): void {
             : "Field inspector on — no PeopleSoft fields found on this page.",
         );
       }
-    }, 200);
+    }, 250);
   } else {
     announce(
       doc,
@@ -320,6 +445,32 @@ export function startFieldInspector(doc: Document = document): void {
         ? `Field inspector on — ${n} fields. Hover icons; click to lock; Esc exits.`
         : "Field inspector on — no PeopleSoft fields found on this page.",
     );
+  }
+
+  // Keep a light poll while Classic iframe exists — AJAX search pages rebuild without load events
+  if (frame && n > 0) {
+    clearPoll();
+    let quiet = 0;
+    pollTimer = setInterval(() => {
+      if (!active) {
+        clearPoll();
+        return;
+      }
+      if (applying) return;
+      const existing = targetDocRef.querySelectorAll(`.${ICON}`).length;
+      const fields = Array.from(
+        collectDocs(getTargetDocument(doc)).flatMap((d) =>
+          Array.from(d.querySelectorAll(FIELD_SELECTOR)),
+        ),
+      ).filter((el) => isHtmlElement(el) && el.id?.includes("_")).length;
+      if (fields > 0 && existing === 0) {
+        applyToTarget(doc);
+        quiet = 0;
+      } else {
+        quiet += 1;
+        if (quiet >= 20) clearPoll();
+      }
+    }, 500);
   }
 
   const panel = doc.getElementById("mpu-recfield-name");
@@ -332,6 +483,7 @@ export function stopFieldInspector(doc: Document = document): void {
   active = false;
   topDocRef = doc;
   clearPoll();
+  detachMutations();
   const target = targetDocRef;
   doc.removeEventListener("keydown", onKey, true);
   try {

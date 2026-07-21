@@ -1,4 +1,4 @@
-import { detectUiModel, getTargetDocument, parsePsUrl, extractPageMeta } from "../adapters/ps-page";
+import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta } from "../adapters/ps-page";
 import { loadSettings, originAllowed, updateSettings } from "../storage/settings";
 import { isYes, type MpuSettings } from "../storage/schema";
 import {
@@ -122,11 +122,15 @@ let lastSearchSettings: MpuSettings | null = null;
 function onTargetFrameReady(): void {
   const user = document.querySelector(".mpu-user");
   if (user) {
-    const meta = extractPageMeta(getTargetDocument(document));
+    const meta = collectPageMeta(document);
     user.textContent = meta.userId ? `User: ${meta.userId}` : "User: —";
   }
   if (lastSearchSettings) {
     runSearchOptions(lastSearchSettings);
+  }
+  if (isFieldInspectorActive()) {
+    reinjectFieldInspector(document);
+    syncFieldInspectorChrome(document);
   }
 }
 

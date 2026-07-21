@@ -147,6 +147,8 @@ describe("utilities bar", () => {
     showPageInfoDialog(document, parsed);
     expect(document.getElementById("mpu-dialog")).toBeTruthy();
     expect(document.getElementById("mpu-pi-body")?.textContent).toContain("Menu:");
+    expect(document.getElementById("mpu-pi-body")?.textContent).toContain("ToolsRel: 8.60");
+    expect(document.getElementById("mpu-pi-body")?.textContent).toContain("User: BA1");
 
     document.getElementById("mpu-pi-copy")?.dispatchEvent(new Event("click"));
     await Promise.resolve();

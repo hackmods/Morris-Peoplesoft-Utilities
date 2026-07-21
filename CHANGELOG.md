@@ -4,6 +4,13 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.7] — 2026-07-21
+
+### Fixed
+
+- **Page Info:** capture Tools Release (`ToolsRel`) from multiline / document-level HTML comments and merge portal + Classic `TargetContent` meta (no longer requires `User`+`ToolsRel`+`AppServ` in one rigid regex)
+- **Field Inspector (Classic):** icons never appeared in `#ptifrmtgtframe` because `instanceof HTMLElement` is false across iframe realms — use nodeType checks instead; real inline SVG icons (CSP-safe); prefer iframe element over unreliable `window.TargetContent`; reinject on load / MutationObserver / short poll for Classic AJAX
+
 ## [1.0.6] — 2026-07-21
 
 ### Fixed

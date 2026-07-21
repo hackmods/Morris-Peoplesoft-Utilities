@@ -1,9 +1,11 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import {
+  collectPageMeta,
   detectUiModel,
   extractPageMeta,
   findHeaderMount,
   getTargetDocument,
+  parseConnectionComment,
   parsePsUrl,
 } from "@/adapters/ps-page";
 
@@ -31,6 +33,38 @@ describe("parsePsUrl edge cases", () => {
   });
 });
 
+describe("parseConnectionComment", () => {
+  it("parses semicolon-delimited ToolsRel without requiring field order beyond keys", () => {
+    const meta = parseConnectionComment(
+      "SID=abc; ToolsRel=8.61.15; User=RMORRIS; AppServ=//WCSVDCAPP11:9410",
+    );
+    expect(meta.userId).toBe("RMORRIS");
+    expect(meta.toolsRel).toBe("8.61.15");
+    expect(meta.appServer).toBe("//WCSVDCAPP11:9410");
+  });
+
+  it("parses newline-delimited connection comments", () => {
+    const meta = parseConnectionComment(`
+User=RMORRIS
+ToolsRel=8.61.15
+AppServ=//appserver:9000
+`);
+    expect(meta.toolsRel).toBe("8.61.15");
+    expect(meta.userId).toBe("RMORRIS");
+  });
+
+  it("captures ToolsRel even when AppServ is absent", () => {
+    const meta = parseConnectionComment("User=BA1; ToolsRel=8.60.05;");
+    expect(meta.toolsRel).toBe("8.60.05");
+    expect(meta.userId).toBe("BA1");
+    expect(meta.appServer).toBeUndefined();
+  });
+
+  it("returns empty for unrelated comments", () => {
+    expect(parseConnectionComment(" just a note ")).toEqual({});
+  });
+});
+
 describe("extractPageMeta", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
@@ -48,12 +82,74 @@ describe("extractPageMeta", () => {
     expect(meta.appServer).toContain("appserver");
   });
 
+  it("parses multiline connection comment for ToolsRel", () => {
+    document.documentElement.innerHTML = `
+      <head></head>
+      <body>
+        <!--
+          User=RMORRIS;
+          SID=abc;
+          ToolsRel=8.61.15;
+          AppServ=//WCSVDCAPP11:9410
+        -->
+        <div id="pt_pageinfo" menu="NUI_FRAMEWORK" component="PT_LANDINGPAGE" page="PT_LANDINGPAGE"></div>
+      </body>`;
+    const meta = extractPageMeta(document);
+    expect(meta.toolsRel).toBe("8.61.15");
+    expect(meta.page).toBe("PT_LANDINGPAGE");
+  });
+
+  it("reads document-level comments before html", () => {
+    const comment = document.createComment(
+      " User=RMORRIS; ToolsRel=8.61.15; AppServ=//host:9410 ",
+    );
+    document.insertBefore(comment, document.documentElement);
+    const meta = extractPageMeta(document);
+    expect(meta.toolsRel).toBe("8.61.15");
+    comment.remove();
+  });
+
   it("reads #pt_pageinfo attributes", () => {
     document.body.innerHTML = `<div id="pt_pageinfo" menu="MENU" component="COMP" page="PAGE"></div>`;
     const meta = extractPageMeta(document);
     expect(meta.menu).toBe("MENU");
     expect(meta.component).toBe("COMP");
     expect(meta.page).toBe("PAGE");
+  });
+
+  it("reads nested HTML comments via serialized scan", () => {
+    document.body.innerHTML = `<div><span><!-- User=NEST; ToolsRel=8.59.01; AppServ=//n --></span></div>`;
+    const meta = extractPageMeta(document);
+    expect(meta.toolsRel).toBe("8.59.01");
+    expect(meta.userId).toBe("NEST");
+  });
+
+  it("reads data-* pageinfo attributes", () => {
+    document.body.innerHTML = `<div id="pt_pageinfo" data-menu="DM" data-component="DC" data-page="DP"></div>`;
+    const meta = extractPageMeta(document);
+    expect(meta.menu).toBe("DM");
+    expect(meta.component).toBe("DC");
+    expect(meta.page).toBe("DP");
+  });
+
+  it("collectPageMeta merges portal + iframe ToolsRel", () => {
+    document.body.innerHTML = `
+      <div id="ptifrmtarget">
+        <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+      </div>
+    `;
+    const iframe = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    const iframeDoc = iframe.contentDocument!;
+    iframeDoc.open();
+    iframeDoc.write(`<!doctype html><html><body>
+      <!-- User=RMORRIS; ToolsRel=8.61.15; AppServ=//WCSVDCAPP11:9410 -->
+      <div id="pt_pageinfo" menu="M" component="C" page="P"></div>
+    </body></html>`);
+    iframeDoc.close();
+
+    const meta = collectPageMeta(document);
+    expect(meta.toolsRel).toBe("8.61.15");
+    expect(meta.menu).toBe("M");
   });
 });
 
@@ -87,5 +183,24 @@ describe("header mount and UI model", () => {
 
   it("getTargetDocument returns same doc without frames", () => {
     expect(getTargetDocument(document)).toBe(document);
+  });
+
+  it("getTargetDocument follows nested nav collection iframe", () => {
+    document.body.innerHTML = `
+      <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+    `;
+    const outer = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    const outerDoc = outer.contentDocument!;
+    outerDoc.open();
+    outerDoc.write(`<!doctype html><html><body>
+      <iframe class="ps_target-iframe"></iframe>
+    </body></html>`);
+    outerDoc.close();
+    const nested = outerDoc.querySelector(".ps_target-iframe") as HTMLIFrameElement;
+    nested.contentDocument!.open();
+    nested.contentDocument!.write(`<!doctype html><html><body><p id="inner">ok</p></body></html>`);
+    nested.contentDocument!.close();
+
+    expect(getTargetDocument(document).getElementById("inner")?.textContent).toBe("ok");
   });
 });
