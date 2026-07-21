@@ -15,4 +15,5 @@ alwaysApply: false
 - Do not add a Chrome Web Store private `key` to the manifest.
 - No jQuery. Prefer TypeScript modules under `src/`.
 - Page-context access goes through small `src/inject/*` files only.
+- Built `content.js` must be a self-contained classic script (IIFE) — Chrome content scripts cannot use ESM `import` unless `type: "module"` is set; prefer IIFE.
 - Run `npm run lint` and `npm run test:unit` before committing multi-file changes.

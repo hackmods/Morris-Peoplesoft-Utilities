@@ -87,4 +87,11 @@ describe("built extension smoke (when dist present)", () => {
     expect(popup).toContain('src="assets/');
     expect(popup).not.toContain('src="/assets/');
   });
+
+  it.skipIf(!hasDist)("content.js is a classic script without ESM imports", () => {
+    const content = readFileSync(resolve("dist/content.js"), "utf8");
+    // Chrome injects content_scripts as classic scripts unless type:module.
+    expect(content).not.toMatch(/^\s*import\b/m);
+    expect(content).toMatch(/^\s*(?:["']use strict["'];\s*)?\(/);
+  });
 });

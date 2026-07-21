@@ -4,6 +4,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.3] — 2026-07-21
+
+### Fixed
+
+- Content script runtime error: Vite was emitting `content.js` as ESM with shared-chunk imports. Chrome loads content scripts as classic scripts, so the build now rebundles `content.js` as a self-contained IIFE.
+
 ## [1.0.2] — 2026-07-21
 
 ### Fixed
