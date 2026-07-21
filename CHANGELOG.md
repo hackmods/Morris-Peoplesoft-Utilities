@@ -4,6 +4,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.4] — 2026-07-21
+
+### Fixed
+
+- Field Inspector parity with classic PS Utilities: inject orange magnifying icons beside PeopleSoft fields, show the record/field name on the bar on hover, and lock green on click (replaces hover-only tip that did not fully render on Classic pages).
+
 ## [1.0.3] — 2026-07-21
 
 ### Fixed
