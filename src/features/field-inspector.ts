@@ -745,10 +745,23 @@ function attachFrameReload(doc: Document): void {
   detachFrameReload(doc);
   const frame =
     (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
-    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
+    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null) ||
+    (doc.querySelector(".ps_target-iframe") as HTMLIFrameElement | null);
   if (!frame) return;
   frameLoadHandler = () => {
     if (!active) return;
+    // Also listen for nested nav-collection loads after outer frame paints
+    try {
+      const nested = frame.contentDocument?.querySelector(
+        ".ps_target-iframe",
+      ) as HTMLIFrameElement | null;
+      nested?.addEventListener("load", () => {
+        if (!active) return;
+        applyToTarget(doc);
+      });
+    } catch {
+      /* ignore */
+    }
     const n = applyToTarget(doc);
     announce(
       doc,

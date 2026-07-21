@@ -82,6 +82,10 @@ export async function loadSettings(): Promise<MpuSettings> {
       features: { ...createDefaultSettings().features, ...s.features },
       traceSettings: { ...createDefaultSettings().traceSettings, ...s.traceSettings },
       recentComponents: Array.isArray(s.recentComponents) ? s.recentComponents : [],
+      featureUiScopes: {
+        ...createDefaultSettings().featureUiScopes,
+        ...(s.featureUiScopes || {}),
+      },
     };
   }
 

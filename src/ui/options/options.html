@@ -24,6 +24,9 @@
       <section id="panel-features" class="panel" data-panel="features" role="tabpanel" aria-labelledby="tab-features">
         <h2>Features</h2>
         <div id="feature-toggles"></div>
+        <h3>Classic / Fluid scope</h3>
+        <p class="hint">Limit noisy helpers to Classic portal, Fluid, or both (UX-09).</p>
+        <div id="feature-ui-scopes"></div>
         <label class="row">
           <input type="checkbox" id="quietEnvPrompt" />
           Quiet mode — don’t prompt to name new environments
@@ -33,8 +36,8 @@
 
       <section id="panel-favorites" class="panel hidden" data-panel="favorites" role="tabpanel" aria-labelledby="tab-favorites" hidden>
         <h2>Favorites</h2>
-        <p>Import/export CSV with columns: Servlet, Menu, Component, Market, Parameters, Category, SubCategory, Description</p>
-        <p class="hint"><strong>Note:</strong> Export may contain business keys in Parameters or descriptions — share carefully.</p>
+        <p>Import/export CSV with columns: Servlet, Menu, Component, Market, Parameters, Category, SubCategory, Description, Notes</p>
+        <p class="hint"><strong>Note:</strong> Export may contain business keys in Parameters, descriptions, or Notes — share carefully.</p>
         <div class="row-actions">
           <button type="button" id="export-fav">Export CSV</button>
           <label class="file-btn">Import CSV <input type="file" id="import-fav" accept=".csv,text/csv" /></label>
@@ -49,6 +52,7 @@
                 <th>Menu</th>
                 <th>Component</th>
                 <th>Market</th>
+                <th>Notes</th>
                 <th></th>
               </tr>
             </thead>

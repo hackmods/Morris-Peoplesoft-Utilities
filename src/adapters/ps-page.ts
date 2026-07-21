@@ -453,6 +453,71 @@ export function formatPageInfoMarkdown(
   return `### PeopleSoft page info\n\n| | |\n|---|---|\n${body}\n`;
 }
 
+const PAGE_INFO_COMPARE_KEYS = [
+  "Menu",
+  "Component",
+  "Page",
+  "Market",
+  "Site",
+  "Portal",
+  "Node",
+  "Mode",
+  "ToolsRel",
+  "AppsRel",
+  "DB Name",
+  "DB Type",
+] as const;
+
+function parsePageInfoLines(text: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^\s*(?:\|\s*)?([^|:]+)\s*[|:]\s*(.+?)\s*(?:\|)?\s*$/);
+    if (!m) continue;
+    const key = m[1]!.trim();
+    const val = m[2]!.trim();
+    if (key && key !== "—" && key !== "") out[key] = val;
+  }
+  return out;
+}
+
+export interface PageInfoDiffLine {
+  key: string;
+  current: string;
+  other: string;
+  changed: boolean;
+}
+
+/** Compare current Page Info to a clipboard / buffer string (UX-07). */
+export function comparePageInfoToBuffer(
+  currentPlain: string,
+  buffer: string,
+): { lines: PageInfoDiffLine[]; changedCount: number } {
+  const cur = parsePageInfoLines(currentPlain);
+  const other = parsePageInfoLines(buffer);
+  const lines: PageInfoDiffLine[] = PAGE_INFO_COMPARE_KEYS.map((key) => {
+    const current = cur[key] ?? "—";
+    const o = other[key] ?? "—";
+    return { key, current, other: o, changed: current !== o };
+  });
+  return { lines, changedCount: lines.filter((l) => l.changed).length };
+}
+
+/** Favorite description template from Page Info + locked field (UX-10). */
+export function formatFavoriteDescriptionTemplate(
+  meta: PageMeta,
+  parsed: ParsedPsUrl,
+  lockedField?: string | null,
+): string {
+  const parts = [
+    `${meta.menu ?? parsed.menu ?? "?"}.${meta.component ?? parsed.component ?? "?"}.${parsed.market || "GBL"}`,
+  ];
+  if (meta.page) parts.push(`Page ${meta.page}`);
+  if (meta.toolsRel) parts.push(`ToolsRel ${meta.toolsRel}`);
+  if (meta.dbName) parts.push(`DB ${meta.dbName}`);
+  if (lockedField) parts.push(`Field ${lockedField}`);
+  return parts.join(" · ");
+}
+
 export function findHeaderMount(doc: Document = document): Element | null {
   // Classic portal: bar sits immediately above the content iframe container
   if (doc.querySelector("#ptifrmtarget")) {
@@ -484,9 +549,16 @@ export function getTargetDocument(doc: Document = document): Document {
   const win = doc.defaultView as NamedFrameWindow | null;
 
   const resolveNested = (contentDoc: Document): Document => {
-    const nested = contentDoc.querySelector(".ps_target-iframe") as HTMLIFrameElement | null;
-    if (nested?.contentDocument?.body) return nested.contentDocument;
-    return contentDoc;
+    // Prefer deepest same-origin nav-collection / content iframe (UX-08)
+    let current = contentDoc;
+    for (let depth = 0; depth < 4; depth += 1) {
+      const nested =
+        (current.querySelector(".ps_target-iframe") as HTMLIFrameElement | null) ||
+        (current.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
+      if (!nested?.contentDocument?.body) break;
+      current = nested.contentDocument;
+    }
+    return current;
   };
 
   // Prefer Classic iframe elements first — named window.TargetContent is unreliable

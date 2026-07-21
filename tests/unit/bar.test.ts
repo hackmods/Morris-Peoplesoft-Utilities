@@ -207,6 +207,17 @@ describe("utilities bar", () => {
     await Promise.resolve();
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("### PeopleSoft page info"));
 
+    const readText = vi.fn(async () => "Menu: OTHER\nComponent: C\nToolsRel: 8.50");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      configurable: true,
+      value: { writeText, readText },
+    });
+    document.getElementById("mpu-pi-compare")?.dispatchEvent(new Event("click"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(document.getElementById("mpu-pi-diff")?.hidden).toBe(false);
+    expect(document.getElementById("mpu-pi-diff")?.textContent).toContain("≠");
+
     document.getElementById("mpu-pi-close")?.click();
     expect(document.getElementById("mpu-dialog")).toBeNull();
   });
