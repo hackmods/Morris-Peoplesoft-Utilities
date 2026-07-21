@@ -135,25 +135,53 @@
 }
 
 .mpu-recfield-name {
-  display: inline-block;
-  min-width: 10rem;
-  max-width: 28rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  max-width: min(40rem, 55vw);
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   border: 1px solid #decc00;
   border-radius: 2px;
   background: #decc00;
   color: #2f3c45;
   font: 700 13px/1.2 ui-monospace, Consolas, monospace;
-  padding: 0.15rem 0.4rem;
+  padding: 0.15rem 0.45rem;
   vertical-align: middle;
   user-select: text;
   cursor: text;
 }
 
+.mpu-recfield-name[data-mpu-empty="true"],
 .mpu-recfield-name:empty {
-  min-width: 8rem;
+  display: none;
+}
+
+.mpu-rf-part {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.mpu-rf-part + .mpu-rf-part::before {
+  content: "·";
+  margin-right: 0.45rem;
+  color: #6b5a00;
+  font-weight: 700;
+}
+
+.mpu-rf-lbl {
+  font: 600 10px/1.2 system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b5a00;
+}
+
+.mpu-rf-val {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
