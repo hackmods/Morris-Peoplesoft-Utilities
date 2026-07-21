@@ -4,7 +4,7 @@ Status for shipping Morris PeopleSoft Utilities as an official Chrome extension.
 
 **As of:** 2026-07-21  
 **Repo:** https://github.com/hackmods/Morris-Peoplesoft-Utilities  
-**Latest tagged zip:** [v1.0.0](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.0)
+**Latest tagged zip:** [v1.0.1](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.1)
 
 Code, CI, audits, privacy docs, Store asset pack, and GitHub product surface are in place. Remaining work is mostly QA and Developer Dashboard steps.
 
@@ -31,9 +31,9 @@ These must be done before uploading / submitting for review:
    - Upload extension zip and submit for review  
 
 4. **Refresh the upload zip from current `main`**  
-   The v1.0.0 Release zip may predate later commits (e.g. expanded tests). Before submit either:  
+   Prefer the latest Release zip (currently v1.0.1). Before Store submit either:  
    - Run `npm run release:check` / `npm run package` locally and upload that zip, **or**  
-   - Tag `v1.0.1` (or next patch) so GitHub Actions publishes a fresh Release artifact.
+   - Tag the next patch so GitHub Actions publishes a fresh Release artifact.
 
 Operational checklist: [`store/SUBMISSION_CHECKLIST.md`](../store/SUBMISSION_CHECKLIST.md).
 

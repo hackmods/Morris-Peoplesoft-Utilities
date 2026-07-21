@@ -4,10 +4,18 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-07-21
+
 ### Added
 
 - Release readiness doc with blocking vs nice-to-have Store submit items (`docs/release-readiness.md`)
 - Expanded Store submission checklist aligned to pre-submit blockers
+- Expanded automated test suites with coverage gates
+
+### Changed
+
+- Dependency upgrades (Vite 8, ESLint 10, Node types) for current CI toolchain
+- Store listing mockup assets for dashboard preview
 
 ## [1.0.0] — 2026-07-21
 
