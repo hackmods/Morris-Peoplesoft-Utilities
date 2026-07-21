@@ -17,6 +17,7 @@ Welcome! MPU is a Chrome extension for PeopleSoft Classic and Fluid, maintained 
 - [Development](Development)
 - [Migrating from PS Utilities](Migrating-from-PS-Utilities)
 - [FAQ](FAQ)
+- [Future enhancements (repo backlog)](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/findings/future-enhancements.md)
 
 ## Credits
 
