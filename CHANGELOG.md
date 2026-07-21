@@ -4,6 +4,13 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.6] — 2026-07-21
+
+### Fixed
+
+- **Field Inspector:** icons use inline SVG (PeopleSoft CSP can block `chrome-extension://` images); resolve Classic `TargetContent` / wait for iframe; do not remount/resizeAll on Inspect toggle (that wiped icons); reinject after bar refresh
+- **Tracing:** default feature flag is off for new installs (`traceOption: No`)
+
 ## [1.0.5] — 2026-07-21
 
 ### Fixed

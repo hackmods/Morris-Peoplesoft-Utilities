@@ -74,8 +74,10 @@ describe("utilities bar", () => {
   });
 
   it("shows locked trace state", () => {
+    const settings = createDefaultSettings();
+    settings.features.traceOption = "Yes";
     mountBar({
-      settings: createDefaultSettings(),
+      settings,
       parsed,
       envLabel: "DEV",
       fieldInspectorActive: false,

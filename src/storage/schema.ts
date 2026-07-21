@@ -83,7 +83,7 @@ export const DEFAULT_FEATURES: FeatureFlags = {
   userIdOption: "Yes",
   greetingOption: "Yes",
   shortcutsOption: "Yes",
-  traceOption: "Yes",
+  traceOption: "No",
   pageInfoOption: "Yes",
   recFieldInfoOption: "Yes",
   newWindowOption: "Yes",
