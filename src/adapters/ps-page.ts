@@ -629,14 +629,37 @@ export function getTargetDocument(doc: Document = document): Document {
   const win = doc.defaultView as NamedFrameWindow | null;
 
   const resolveNested = (contentDoc: Document): Document => {
-    // Prefer deepest same-origin nav-collection / content iframe (UX-08)
+    // Prefer deepest same-origin nav-collection / content iframe (UX-08),
+    // but never abandon a Classic page that already has PeopleSoft fields for an
+    // empty nested iframe (e.g. unrelated .ps_target-iframe / lookup shells).
+    const hasPsFields = (d: Document): boolean => {
+      try {
+        return Boolean(
+          d.querySelector(
+            'input[id*="_"],select[id*="_"],textarea[id*="_"],span.PSEDITBOX_DISPONLY[id],span.ps_box-value[id]',
+          ),
+        );
+      } catch {
+        return false;
+      }
+    };
+
     let current = contentDoc;
     for (let depth = 0; depth < 4; depth += 1) {
       const nested =
         (current.querySelector(".ps_target-iframe") as HTMLIFrameElement | null) ||
         (current.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
       if (!nested?.contentDocument?.body) break;
-      current = nested.contentDocument;
+      const next = nested.contentDocument;
+      if (hasPsFields(next)) {
+        current = next;
+        continue;
+      }
+      if (!hasPsFields(current)) {
+        current = next;
+        continue;
+      }
+      break;
     }
     return current;
   };

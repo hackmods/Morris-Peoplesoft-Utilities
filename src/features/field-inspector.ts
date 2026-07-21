@@ -37,6 +37,8 @@ let reinjectTimer: ReturnType<typeof setTimeout> | null = null;
 let viewportBound = false;
 let viewportScrollHandler: ((e: Event) => void) | null = null;
 let viewportResizeHandler: ((e: Event) => void) | null = null;
+/** Windows we attached scroll/resize to (portal + Classic/Fluid content frames). */
+let viewportWindows: Window[] = [];
 let applying = false;
 /** Base ids (no $occ) seen on the current page — used to split RECORD vs FIELD. */
 let peerFieldBases: string[] = [];
@@ -480,21 +482,33 @@ export function preferredFluidBoxHost(node: Element): Element | null {
  * FI-05: only decorate fields near the viewport (plus locked field).
  * Margin keeps a small buffer for partial rows.
  * Zero-size rects (jsdom / not laid out) are treated as visible so Classic tests still decorate.
+ *
+ * Measure the field (or Fluid box / Fluid grid row) — not a Classic `<tr>`.
+ * Entire table rows often report off-screen / wrong geometry from the portal content
+ * script, which made Inspect ON with zero icons on Classic TargetContent pages.
  */
 export function isFieldInViewport(el: Element, marginPx = 200): boolean {
-  const host =
-    preferredFluidBoxHost(el) ||
-    el.closest("tr, .ps_grid-row, .ps_box-group, .ps_box-control") ||
-    el;
-  const rect = host.getBoundingClientRect();
+  const host = preferredFluidBoxHost(el) || el.closest(".ps_grid-row") || el;
+  let rect: DOMRect;
+  try {
+    rect = host.getBoundingClientRect();
+  } catch {
+    return true;
+  }
   if (!rect || (rect.width === 0 && rect.height === 0)) {
     return true;
   }
   const view = el.ownerDocument?.defaultView || window;
+  const vh = view.innerHeight;
+  const vw = view.innerWidth;
+  // Unusable viewport metrics → decorate (safer for Classic iframes)
+  if (!Number.isFinite(vh) || !Number.isFinite(vw) || (vh <= 0 && vw <= 0)) {
+    return true;
+  }
   const top = -marginPx;
-  const bottom = view.innerHeight + marginPx;
+  const bottom = vh + marginPx;
   const left = -marginPx;
-  const right = view.innerWidth + marginPx;
+  const right = vw + marginPx;
   return rect.bottom >= top && rect.top <= bottom && rect.right >= left && rect.left <= right;
 }
 
@@ -719,21 +733,54 @@ function detachViewportListeners(): void {
   if (!viewportBound) return;
   viewportBound = false;
   if (viewportScrollHandler) {
-    window.removeEventListener("scroll", viewportScrollHandler, true);
+    for (const w of viewportWindows) {
+      try {
+        w.removeEventListener("scroll", viewportScrollHandler, true);
+      } catch {
+        /* frame gone */
+      }
+    }
   }
   if (viewportResizeHandler) {
-    window.removeEventListener("resize", viewportResizeHandler);
+    for (const w of viewportWindows) {
+      try {
+        w.removeEventListener("resize", viewportResizeHandler);
+      } catch {
+        /* frame gone */
+      }
+    }
+    try {
+      window.removeEventListener("resize", viewportResizeHandler);
+    } catch {
+      /* ignore */
+    }
   }
   viewportScrollHandler = null;
   viewportResizeHandler = null;
+  viewportWindows = [];
 }
 
 function attachViewportListeners(): void {
   detachViewportListeners();
   viewportScrollHandler = onViewportChange;
   viewportResizeHandler = onViewportChange;
-  window.addEventListener("scroll", viewportScrollHandler, true);
-  window.addEventListener("resize", viewportResizeHandler);
+  const roots = new Set<Window>([window]);
+  try {
+    for (const d of collectDocs(targetDocRef)) {
+      if (d.defaultView) roots.add(d.defaultView);
+    }
+  } catch {
+    /* ignore */
+  }
+  viewportWindows = [...roots];
+  for (const w of viewportWindows) {
+    try {
+      w.addEventListener("scroll", viewportScrollHandler, true);
+      w.addEventListener("resize", viewportResizeHandler);
+    } catch {
+      /* ignore */
+    }
+  }
   viewportBound = true;
 }
 
@@ -751,8 +798,12 @@ function attachMutations(target: Document, portalDoc: Document): void {
       const nodes = [...Array.from(r.addedNodes), ...Array.from(r.removedNodes)];
       if (!nodes.length && r.type === "attributes") return false;
       return nodes.some((n) => {
-        if (!(n instanceof Element)) return n.nodeType === Node.TEXT_NODE;
-        return !n.classList?.contains(AREA) && !n.classList?.contains(ICON) && n.id !== STYLE_ID;
+        // Cross-realm iframe nodes fail `instanceof Element` in the portal script —
+        // use nodeType (same class of bug as Classic icon inject pre-1.0.7).
+        if (n.nodeType === Node.TEXT_NODE) return true;
+        if (n.nodeType !== Node.ELEMENT_NODE) return false;
+        const el = n as Element;
+        return !el.classList?.contains(AREA) && !el.classList?.contains(ICON) && el.id !== STYLE_ID;
       });
     });
     if (relevant) scheduleReinject(portalDoc);
@@ -828,6 +879,38 @@ export function reinjectFieldInspector(doc: Document = document): number {
   return applyToTarget(doc);
 }
 
+function countCandidateFields(doc: Document): number {
+  return Array.from(
+    collectDocs(getTargetDocument(doc)).flatMap((d) => Array.from(d.querySelectorAll(FIELD_SELECTOR))),
+  ).filter((el) => isHtmlElement(el) && el.id?.includes("_")).length;
+}
+
+/** Light poll: Classic AJAX / Soft Refresh can wipe icons without a frame load event. */
+function startRecoveryPoll(doc: Document): void {
+  const frame =
+    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
+  if (!frame) return;
+  clearPoll();
+  let quiet = 0;
+  pollTimer = setInterval(() => {
+    if (!active) {
+      clearPoll();
+      return;
+    }
+    if (applying) return;
+    const existing = targetDocRef.querySelectorAll(`.${ICON}`).length;
+    const fields = countCandidateFields(doc);
+    if (fields > 0 && existing === 0) {
+      applyToTarget(doc);
+      quiet = 0;
+    } else {
+      quiet += 1;
+      if (quiet >= 20) clearPoll();
+    }
+  }, 500);
+}
+
 export function startFieldInspector(doc: Document = document): void {
   if (active) return;
   active = true;
@@ -861,41 +944,15 @@ export function startFieldInspector(doc: Document = document): void {
             ? `Field inspector on — ${n} fields. Hover icons; click to lock; Esc exits.`
             : "Field inspector on — no PeopleSoft fields found on this page.",
         );
+        if (frame) startRecoveryPoll(doc);
       }
     }, 250);
   } else {
     announce(
       doc,
-      n > 0
-        ? `Field inspector on — ${n} fields. Hover icons; click to lock; Esc exits.`
-        : "Field inspector on — no PeopleSoft fields found on this page.",
+      `Field inspector on — ${n} fields. Hover icons; click to lock; Esc exits.`,
     );
-  }
-
-  // Keep a light poll while Classic iframe exists — AJAX search pages rebuild without load events
-  if (frame && n > 0) {
-    clearPoll();
-    let quiet = 0;
-    pollTimer = setInterval(() => {
-      if (!active) {
-        clearPoll();
-        return;
-      }
-      if (applying) return;
-      const existing = targetDocRef.querySelectorAll(`.${ICON}`).length;
-      const fields = Array.from(
-        collectDocs(getTargetDocument(doc)).flatMap((d) =>
-          Array.from(d.querySelectorAll(FIELD_SELECTOR)),
-        ),
-      ).filter((el) => isHtmlElement(el) && el.id?.includes("_")).length;
-      if (fields > 0 && existing === 0) {
-        applyToTarget(doc);
-        quiet = 0;
-      } else {
-        quiet += 1;
-        if (quiet >= 20) clearPoll();
-      }
-    }, 500);
+    if (frame) startRecoveryPoll(doc);
   }
 
   const panel = doc.getElementById("mpu-recfield-name");
