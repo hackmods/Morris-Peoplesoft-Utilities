@@ -9,6 +9,7 @@ import {
   getTargetDocument,
   parseConnectionComment,
   parsePsUrl,
+  buildComponentUrl,
 } from "@/adapters/ps-page";
 
 describe("parsePsUrl edge cases", () => {
@@ -32,6 +33,51 @@ describe("parsePsUrl edge cases", () => {
     const p = parsePsUrl("not-a-url");
     expect(p.kind).toBe("unknown");
     expect(p.origin).toBe("");
+  });
+});
+
+describe("buildComponentUrl", () => {
+  it("builds Menu.Component.Market paths and optional newwin site", () => {
+    expect(
+      buildComponentUrl({
+        baseURL: "https://hr.example.edu",
+        servlet: "psp",
+        site: "ps",
+        portal: "EMPLOYEE",
+        node: "HRMS",
+        menu: "MENU",
+        component: "COMP",
+        market: "GBL",
+        parameters: "?x=1",
+      }),
+    ).toBe("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/MENU.COMP.GBL?x=1");
+
+    expect(
+      buildComponentUrl({
+        baseURL: "https://hr.example.edu/",
+        servlet: "psc",
+        site: "ps_2",
+        portal: "EMPLOYEE",
+        node: "HRMS",
+        menu: "M",
+        component: "C",
+        newWin: true,
+      }),
+    ).toBe("https://hr.example.edu/psc/ps_newwin/EMPLOYEE/HRMS/c/M.C.GBL");
+  });
+
+  it("returns null when required parts missing", () => {
+    expect(
+      buildComponentUrl({
+        baseURL: "",
+        servlet: "psp",
+        site: "ps",
+        portal: "EMPLOYEE",
+        node: "HRMS",
+        menu: "M",
+        component: "C",
+      }),
+    ).toBeNull();
   });
 });
 

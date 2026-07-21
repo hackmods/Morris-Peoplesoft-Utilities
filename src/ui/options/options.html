@@ -60,6 +60,11 @@
       <section id="panel-tracing" class="panel hidden" data-panel="tracing" role="tabpanel" aria-labelledby="tab-tracing" hidden>
         <h2>Tracing profiles</h2>
         <p>Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+        <div class="trace-presets" role="group" aria-label="Trace presets">
+          <span class="trace-presets-label">Presets</span>
+          <div id="trace-presets" class="row-actions"></div>
+        </div>
+        <p id="trace-summary" class="hint" aria-live="polite"></p>
         <div id="trace-flags" class="grid-2"></div>
         <button type="button" class="primary" id="save-trace">Save trace settings</button>
       </section>

@@ -4,6 +4,7 @@ import {
   removeBar,
   announce,
   showPageInfoDialog,
+  showGoToComponentDialog,
   groupFavoritesByCategory,
 } from "@/features/bar";
 import { createDefaultSettings } from "@/storage/schema";
@@ -240,5 +241,50 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-ui-mode")?.textContent).toBeTruthy();
     expect(document.getElementById("mpu-fav-filter")).toBeTruthy();
     expect(document.querySelector("#mpu-fav-select optgroup")?.getAttribute("label")).toBe("Campus");
+  });
+
+  it("shows Go to dialog and builds navigation URL", () => {
+    const onGo = vi.fn();
+    mountBar({
+      settings: createDefaultSettings(),
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+      onGoToComponent: onGo,
+    });
+    document.getElementById("mpu-goto")?.click();
+    expect(onGo).toHaveBeenCalledOnce();
+
+    let navigated = "";
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: {
+        get href() {
+          return navigated || parsed.href;
+        },
+        set href(v: string) {
+          navigated = v;
+        },
+      },
+    });
+
+    showGoToComponentDialog(document, parsed);
+    expect(document.getElementById("mpu-goto-title")?.textContent).toBe("Go to component");
+    (document.getElementById("mpu-goto-menu") as HTMLInputElement).value = "UTILITIES";
+    (document.getElementById("mpu-goto-comp") as HTMLInputElement).value = "PEOPLECODE_TRACE";
+    (document.getElementById("mpu-goto-market") as HTMLInputElement).value = "GBL";
+    document
+      .getElementById("mpu-goto-form")
+      ?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    expect(navigated).toBe(
+      "https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/UTILITIES.PEOPLECODE_TRACE.GBL",
+    );
   });
 });

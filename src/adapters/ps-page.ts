@@ -24,6 +24,36 @@ export interface ParsedPsUrl {
   market?: string;
 }
 
+/** Build a Classic/Fluid component navigation URL (UX-02). */
+export function buildComponentUrl(parts: {
+  baseURL: string;
+  servlet: "psp" | "psc";
+  site: string;
+  portal: string;
+  node: string;
+  menu: string;
+  component: string;
+  market?: string;
+  parameters?: string;
+  newWin?: boolean;
+}): string | null {
+  const baseURL = parts.baseURL.replace(/\/$/, "");
+  const menu = parts.menu.trim();
+  const component = parts.component.trim();
+  const portal = parts.portal.trim();
+  const node = parts.node.trim();
+  const siteRaw = parts.site.trim();
+  if (!baseURL || !menu || !component || !portal || !node || !siteRaw) return null;
+  const site = parts.newWin
+    ? siteRaw.endsWith("_newwin")
+      ? siteRaw
+      : `${normalizeSite(siteRaw)}_newwin`
+    : siteRaw;
+  const market = (parts.market || "GBL").trim() || "GBL";
+  const parameters = parts.parameters || "";
+  return `${baseURL}/${parts.servlet}/${site}/${portal}/${node}/c/${menu}.${component}.${market}${parameters}`;
+}
+
 const COMPONENT_RE =
   /^(https?:\/\/[^/]+)\/(psp|psc)\/([^/]+)\/([^/]+)\/([^/]+)\/c\/([^.]+)\.([^.]+)\.([^/?#]+)/i;
 const HOME_RE =

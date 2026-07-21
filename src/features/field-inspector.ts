@@ -9,7 +9,7 @@ const ORANGE = "#E36B22";
 const GREEN = "#5DA027";
 const STYLE_ID = "mpu-field-inspector-style";
 
-/** Match Classic PeopleSoft field hosts (parity with PS Utilities). */
+/** Match Classic + Fluid PeopleSoft field hosts. */
 const FIELD_SELECTOR = [
   "input:not([type=hidden])",
   "select",
@@ -17,6 +17,11 @@ const FIELD_SELECTOR = [
   "span.PSEDITBOX_DISPONLY",
   "span.PSDROPDOWNLIST_DISPONLY",
   "span.PALEVEL0PRIMARY",
+  "span.ps_box-value",
+  ".ps_box-edit input",
+  ".ps_box-control input",
+  ".ps_box-select select",
+  ".ps_box-dropdown select",
   "a",
 ].join(",");
 
@@ -103,8 +108,9 @@ export function nearbyPageLabel(el: Element): string | undefined {
   }
 
   const scope =
-    el.closest("tr, .ps_box-group, .ps_box-control, .ps_box-widget, td, th, .ps-field") ||
-    el.parentElement;
+    el.closest(
+      "tr, .ps_box-group, .ps_box-control, .ps_box-widget, .ps_box-edit, .ps_box-label, td, th, .ps-field",
+    ) || el.parentElement;
   if (!scope) return undefined;
 
   const label =
@@ -113,8 +119,20 @@ export function nearbyPageLabel(el: Element): string | undefined {
     ) || scope.previousElementSibling;
   if (label && label !== el) {
     const t = label.textContent?.replace(/\s+/g, " ").trim();
-    if (t && t.length < 120) return t;
+    if (t && t.length < 120 && !label.classList?.contains?.("mpu-recfield-icon")) return t;
   }
+
+  // Fluid: label often sits as a sibling of .ps_box-control inside .ps_box-group
+  const group = el.closest(".ps_box-group");
+  const control = el.closest(".ps_box-control");
+  const fluidLabel =
+    (control?.previousElementSibling?.matches?.(".ps_box-label, label, .ps-label")
+      ? control.previousElementSibling
+      : null) ||
+    group?.querySelector(".ps_box-label, label, .ps-label") ||
+    control?.parentElement?.querySelector(".ps_box-label, label, .ps-label");
+  const ft = fluidLabel?.textContent?.replace(/\s+/g, " ").trim();
+  if (ft && ft.length < 120) return ft;
   return undefined;
 }
 
@@ -353,6 +371,18 @@ function collectDocs(root: Document, out: Document[] = []): Document[] {
   return out;
 }
 
+/** Prefer Fluid box hosts so we wrap a control, not a large group/page container. */
+export function preferredFluidBoxHost(node: Element): Element | null {
+  if ((node as HTMLElement).matches?.("span.ps_box-value")) return node;
+  return (
+    node.closest(".ps_box-edit") ||
+    node.closest(".ps_box-select") ||
+    node.closest(".ps_box-dropdown") ||
+    node.closest(".ps_box-control") ||
+    node.closest("span.ps_box-value")
+  );
+}
+
 function injectIcons(target: Document): number {
   applying = true;
   try {
@@ -363,33 +393,44 @@ function injectIcons(target: Document): number {
     for (const doc of collectDocs(target)) {
       ensureTargetStyles(doc);
       const candidates = Array.from(doc.querySelectorAll(FIELD_SELECTOR));
-      const wrappedParents = new Set<Element>();
+      const wrappedHosts = new Set<Element>();
 
       for (const node of candidates) {
         if (!isHtmlElement(node)) continue;
         if (!node.id || !node.id.includes("_")) continue;
-        const parent = node.parentElement;
-        if (!parent || wrappedParents.has(parent)) continue;
-        if (parent.classList.contains(AREA) || parent.querySelector(`.${AREA}`)) continue;
-        if (parent.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
+        if (node.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
+        if (node.closest(`.${AREA}`)) continue;
 
-        wrappedParents.add(parent);
+        const fluidHost = preferredFluidBoxHost(node);
+        const parent = fluidHost?.parentElement || node.parentElement;
+        if (!parent) continue;
+
+        // Fluid: wrap only the box host. Classic: wrap all siblings under the parent (legacy).
+        const hostKey = fluidHost || parent;
+        if (wrappedHosts.has(hostKey)) continue;
+        if (parent.classList.contains(AREA) || parent.querySelector(`:scope > .${AREA}`)) continue;
+        wrappedHosts.add(hostKey);
 
         const area = doc.createElement("span");
         area.className = AREA;
         area.style.cssText = `border: ${ACTIVE_BORDER}; white-space: nowrap; margin: 1px; padding: 1px; display: inline-block; vertical-align: middle; box-sizing: border-box;`;
 
-        while (parent.firstChild) {
-          area.appendChild(parent.firstChild);
+        if (fluidHost) {
+          parent.insertBefore(area, fluidHost);
+          area.appendChild(fluidHost);
+        } else {
+          while (parent.firstChild) {
+            area.appendChild(parent.firstChild);
+          }
+          parent.appendChild(area);
         }
 
-        const field = findFieldElement(area);
+        const field = findFieldElement(area) || (isHtmlElement(node) ? node : null);
         const fieldId = field?.id ?? node.id;
         bases.push(fieldNameFromId(fieldId));
 
         const icon = createIcon(doc, ORANGE, fieldId);
         area.insertBefore(icon, area.firstChild);
-        parent.appendChild(area);
         count += 1;
       }
     }

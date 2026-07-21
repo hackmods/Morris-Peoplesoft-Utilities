@@ -4,6 +4,16 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.10] — 2026-07-21
+
+### Added
+
+- **Wave 2 Fluid / search / Dev tools** (see `docs/findings/future-enhancements.md`):
+  - Field Inspector: Fluid `ps_box-*` selectors + wrap Fluid edit hosts without swallowing large groups
+  - Search helpers: broader Classic iframe + Fluid detection; Advanced Search MORE/expand-all; Correct History selector fallbacks; late reinject retries
+  - Trace Options **presets** (Off / Default / SQL / PeopleCode / Verbose) + active flag summary
+  - In-bar **Go to** component URL builder (Menu.Component.Market) · **Alt+Shift+G**
+
 ## [1.0.9] — 2026-07-21
 
 ### Added

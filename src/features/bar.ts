@@ -6,6 +6,7 @@ import {
   findHeaderMount,
   formatPageInfoMarkdown,
   formatPageInfoPlain,
+  buildComponentUrl,
 } from "../adapters/ps-page";
 import { isYes } from "../storage/schema";
 
@@ -18,6 +19,7 @@ export interface BarContext {
   onFieldInspector: () => void;
   onNewWindow: () => void;
   onAddFavorite: () => void;
+  onGoToComponent?: () => void;
   onCopyLockedField?: () => void;
   fieldInspectorActive: boolean;
   lockedFieldName?: string | null;
@@ -276,6 +278,18 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(nw);
   }
 
+  if (
+    !loginOnly &&
+    ctx.parsed.baseURL &&
+    ctx.parsed.portal &&
+    ctx.parsed.node &&
+    ctx.onGoToComponent
+  ) {
+    const go = btn("mpu-goto", "Go to", "Go to Menu.Component.Market (Alt+Shift+G)");
+    go.addEventListener("click", () => ctx.onGoToComponent?.());
+    bar.appendChild(go);
+  }
+
   const help = btn("mpu-help", "?", "Help");
   help.addEventListener("click", () => showHelpDialog(doc));
   bar.appendChild(help);
@@ -322,8 +336,9 @@ function showHelpDialog(doc: Document): void {
       <li><strong>Favorites</strong> — jump to components</li>
       <li><strong>Page Info</strong> — menu/component/page without CTRL+J</li>
       <li><strong>Field Inspector</strong> — orange icons; hover/lock for Rec/Fld/Row; copy on lock (Alt+Shift+C)</li>
+      <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
-      <li><strong>Shortcuts</strong> — Alt+Shift+P Page Info · Alt+Shift+I Inspect · Alt+Shift+C copy field</li>
+      <li><strong>Shortcuts</strong> — Alt+Shift+P Page Info · Alt+Shift+I Inspect · Alt+Shift+C copy field · Alt+Shift+G Go to</li>
     </ul>
     <p>Maintained by <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>. Inspired by PS Utilities.</p>
     <button type="button" class="mpu-btn" id="mpu-dialog-close">Close</button>
@@ -403,6 +418,99 @@ export function showPageInfoDialog(
     if (e.target === backdrop) close();
   });
   (dialog.querySelector("#mpu-pi-close") as HTMLButtonElement)?.focus();
+}
+
+/** In-bar component URL builder (UX-02). */
+export function showGoToComponentDialog(doc: Document, parsed: ParsedPsUrl): void {
+  if (!parsed.baseURL || !parsed.portal || !parsed.node) {
+    announce(doc, "Cannot build component URL on this page");
+    return;
+  }
+
+  const existing = doc.getElementById("mpu-dialog");
+  existing?.remove();
+
+  const backdrop = doc.createElement("div");
+  backdrop.id = "mpu-dialog";
+  backdrop.className = "mpu-dialog-backdrop";
+
+  const dialog = doc.createElement("div");
+  dialog.className = "mpu-dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "mpu-goto-title");
+  dialog.innerHTML = `
+    <h2 id="mpu-goto-title">Go to component</h2>
+    <p class="mpu-dialog-hint">Navigates in the current portal/node/site. Optional query parameters start with <code>?</code>.</p>
+    <form id="mpu-goto-form" class="mpu-goto-form">
+      <label>Menu <input id="mpu-goto-menu" name="menu" required autocomplete="off" /></label>
+      <label>Component <input id="mpu-goto-comp" name="component" required autocomplete="off" /></label>
+      <label>Market <input id="mpu-goto-market" name="market" value="GBL" autocomplete="off" /></label>
+      <label>Parameters <input id="mpu-goto-params" name="parameters" placeholder="?ICACTION=..." autocomplete="off" /></label>
+      <label class="mpu-goto-check"><input type="checkbox" id="mpu-goto-newwin" /> Open in new window</label>
+      <div class="mpu-dialog-actions">
+        <button type="submit" class="mpu-btn" id="mpu-goto-go">Go</button>
+        <button type="button" class="mpu-btn" id="mpu-goto-close">Close</button>
+      </div>
+    </form>
+  `;
+
+  (dialog.querySelector("#mpu-goto-menu") as HTMLInputElement).value = parsed.menu || "";
+  (dialog.querySelector("#mpu-goto-comp") as HTMLInputElement).value = parsed.component || "";
+  (dialog.querySelector("#mpu-goto-market") as HTMLInputElement).value = parsed.market || "GBL";
+
+  backdrop.appendChild(dialog);
+  doc.body.appendChild(backdrop);
+
+  const close = () => backdrop.remove();
+  dialog.querySelector("#mpu-goto-close")?.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  doc.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key === "Escape") close();
+    },
+    { once: true },
+  );
+
+  dialog.querySelector("#mpu-goto-form")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const menu = (dialog.querySelector("#mpu-goto-menu") as HTMLInputElement).value.trim();
+    const component = (dialog.querySelector("#mpu-goto-comp") as HTMLInputElement).value.trim();
+    const market = (dialog.querySelector("#mpu-goto-market") as HTMLInputElement).value.trim() || "GBL";
+    let parameters = (dialog.querySelector("#mpu-goto-params") as HTMLInputElement).value.trim();
+    const newWin = (dialog.querySelector("#mpu-goto-newwin") as HTMLInputElement).checked;
+    if (parameters && !parameters.startsWith("?") && !parameters.startsWith("/")) {
+      parameters = `?${parameters}`;
+    }
+    const url = buildComponentUrl({
+      baseURL: parsed.baseURL,
+      servlet: parsed.servlet || "psp",
+      site: parsed.site || parsed.siteNormalized,
+      portal: parsed.portal,
+      node: parsed.node,
+      menu,
+      component,
+      market,
+      parameters,
+      newWin,
+    });
+    if (!url) {
+      announce(doc, "Enter Menu and Component");
+      return;
+    }
+    injectClearBcs(doc);
+    if (newWin) {
+      window.open(url, "_blank");
+      close();
+      return;
+    }
+    window.location.href = url;
+  });
+
+  (dialog.querySelector("#mpu-goto-menu") as HTMLInputElement)?.focus();
 }
 
 function injectClearBcs(doc: Document): void {
