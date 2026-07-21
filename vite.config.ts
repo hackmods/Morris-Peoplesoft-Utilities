@@ -68,10 +68,9 @@ function writeManifest() {
           "inject/clear-bcs.js",
           "icons/*",
         ],
-        matches: [
-          "*://*/psp/*",
-          "*://*/psc/*",
-        ],
+        // Chrome WAR matches are origin-only: path must be exactly /*.
+        // Content scripts still scope injection to PeopleSoft psp/psc paths.
+        matches: ["*://*/*"],
       },
     ],
     content_security_policy: {

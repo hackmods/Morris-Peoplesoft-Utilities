@@ -75,7 +75,10 @@ describe("built extension smoke (when dist present)", () => {
     expect(existsSync(resolve("dist", manifest.options_page))).toBe(true);
     expect(existsSync(resolve("dist", manifest.content_scripts[0].js[0]))).toBe(true);
     for (const entry of manifest.web_accessible_resources) {
-      expect(entry.matches.includes("*://*/*")).toBe(false);
+      for (const pattern of entry.matches) {
+        // Chrome WAR matches are origin-only; path must be exactly /*.
+        expect(pattern).toMatch(/^[a-z*]+:\/\/[^/]+\/\*$/i);
+      }
     }
   });
 

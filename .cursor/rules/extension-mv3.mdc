@@ -11,7 +11,7 @@ alwaysApply: false
 
 - Manifest V3 only. No remote code, no `eval`, no `unsafe-eval` CSP.
 - Keep permissions minimal (`storage` preferred). Justify any new permission in `docs/privacy.md` and `store/privacy-practices.md`.
-- `web_accessible_resources.matches` must stay limited to PeopleSoft `psp`/`psc` patterns — never `*://*/*`.
+- `web_accessible_resources.matches` must use Chrome origin-only patterns (path exactly `/*`). Do not use path-scoped patterns like `*://*/psp/*` — Chrome rejects them. Content scripts keep PeopleSoft `psp`/`psc` path scoping.
 - Do not add a Chrome Web Store private `key` to the manifest.
 - No jQuery. Prefer TypeScript modules under `src/`.
 - Page-context access goes through small `src/inject/*` files only.

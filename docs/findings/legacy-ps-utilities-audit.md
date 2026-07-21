@@ -26,7 +26,7 @@ User ID, Environment indicator, Favorites, Tracing, Page Info, Field Inspector, 
 | Risk | MPU response |
 |---|---|
 | Ancient jQuery CVEs / tech debt | TypeScript, no jQuery |
-| `web_accessible_resources` matches `*://*/*` | Restrict to `psp`/`psc` |
+| `web_accessible_resources` matches `*://*/*` | Keep origin-only WAR (`*://*/*`); scope injection via content-script `psp`/`psc` matches (Chrome rejects path-scoped WAR) |
 | Classic-first search injects | Classic + Fluid adapters |
 | No a11y model | AODA / WCAG 2.1 AA + axe CI |
 | Store policy friction | Privacy docs, minimal permissions, audits |
