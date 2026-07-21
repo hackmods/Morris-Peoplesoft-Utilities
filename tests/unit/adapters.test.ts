@@ -354,9 +354,31 @@ describe("header mount and UI model", () => {
     outerDoc.close();
     const nested = outerDoc.querySelector(".ps_target-iframe") as HTMLIFrameElement;
     nested.contentDocument!.open();
-    nested.contentDocument!.write(`<!doctype html><html><body><p id="inner">ok</p></body></html>`);
+    nested.contentDocument!.write(`<!doctype html><html><body><p id="inner">ok</p><input id="JOB_EMPLID$0" /></body></html>`);
     nested.contentDocument!.close();
 
     expect(getTargetDocument(document).getElementById("inner")?.textContent).toBe("ok");
+  });
+
+  it("getTargetDocument keeps Classic fields when nested iframe is empty", () => {
+    document.body.innerHTML = `
+      <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+    `;
+    const outer = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    const outerDoc = outer.contentDocument!;
+    outerDoc.open();
+    outerDoc.write(`<!doctype html><html><body>
+      <input id="PRCSRUNCNTL_RUN_CNTL_ID" value="TEST" />
+      <iframe class="ps_target-iframe"></iframe>
+    </body></html>`);
+    outerDoc.close();
+    const nested = outerDoc.querySelector(".ps_target-iframe") as HTMLIFrameElement;
+    nested.contentDocument!.open();
+    nested.contentDocument!.write(`<!doctype html><html><body></body></html>`);
+    nested.contentDocument!.close();
+
+    expect((getTargetDocument(document).getElementById("PRCSRUNCNTL_RUN_CNTL_ID") as HTMLInputElement).value).toBe(
+      "TEST",
+    );
   });
 });

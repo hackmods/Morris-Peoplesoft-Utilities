@@ -272,6 +272,131 @@ describe("field inspector", () => {
     expect(isFieldInViewport(el)).toBe(true);
   });
 
+  it("measures the field itself — not a Classic tr host with off-screen geometry", () => {
+    document.body.innerHTML = `
+      <table>
+        <tr id="row">
+          <td><input id="NC_ADVANCE_TERM$0" value="1252" /></td>
+        </tr>
+      </table>
+    `;
+    const input = document.getElementById("NC_ADVANCE_TERM$0")!;
+    const row = document.getElementById("row")!;
+    // Simulate Classic table row reporting far off-screen while the field is visible
+    vi.spyOn(row, "getBoundingClientRect").mockReturnValue({
+      top: -8000,
+      bottom: -7800,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 200,
+      x: 0,
+      y: -8000,
+      toJSON() {
+        return {};
+      },
+    } as DOMRect);
+    vi.spyOn(input, "getBoundingClientRect").mockReturnValue({
+      top: 120,
+      bottom: 140,
+      left: 80,
+      right: 280,
+      width: 200,
+      height: 20,
+      x: 80,
+      y: 120,
+      toJSON() {
+        return {};
+      },
+    } as DOMRect);
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 700 });
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1100 });
+
+    expect(isFieldInViewport(input)).toBe(true);
+
+    stopFieldInspector(document);
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div id="ptifrmtarget">
+        <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+      </div>
+    `;
+    const iframe = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    const iframeDoc = iframe.contentDocument!;
+    iframeDoc.open();
+    iframeDoc.write(`<!doctype html><html><body>
+      <table><tr id="bad-row"><td><input id="NC_ADVANCE_TERM$0" value="1252" /></td></tr></table>
+    </body></html>`);
+    iframeDoc.close();
+    const iframeInput = iframeDoc.getElementById("NC_ADVANCE_TERM$0")!;
+    const iframeRow = iframeDoc.getElementById("bad-row")!;
+    vi.spyOn(iframeRow, "getBoundingClientRect").mockReturnValue({
+      top: -8000,
+      bottom: -7800,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 200,
+      x: 0,
+      y: -8000,
+      toJSON() {
+        return {};
+      },
+    } as DOMRect);
+    vi.spyOn(iframeInput, "getBoundingClientRect").mockReturnValue({
+      top: 120,
+      bottom: 140,
+      left: 80,
+      right: 280,
+      width: 200,
+      height: 20,
+      x: 80,
+      y: 120,
+      toJSON() {
+        return {};
+      },
+    } as DOMRect);
+    Object.defineProperty(iframeDoc.defaultView!, "innerHeight", { configurable: true, value: 700 });
+    Object.defineProperty(iframeDoc.defaultView!, "innerWidth", { configurable: true, value: 1100 });
+
+    startFieldInspector(document);
+    expect(iframeDoc.querySelectorAll(".mpu-recfield-icon").length).toBe(1);
+    stopFieldInspector(document);
+  });
+
+  it("decorates Classic TargetContent even when an empty nested iframe exists", () => {
+    stopFieldInspector(document);
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div id="ptifrmtarget">
+        <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+      </div>
+    `;
+    const iframe = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    const iframeDoc = iframe.contentDocument!;
+    iframeDoc.open();
+    iframeDoc.write(`<!doctype html><html><body>
+      <div><input id="PRCSRUNCNTL_RUN_CNTL_ID" value="TEST" /></div>
+      <iframe class="ps_target-iframe"></iframe>
+    </body></html>`);
+    iframeDoc.close();
+    const nested = iframeDoc.querySelector(".ps_target-iframe") as HTMLIFrameElement;
+    nested.contentDocument!.open();
+    nested.contentDocument!.write(`<!doctype html><html><body></body></html>`);
+    nested.contentDocument!.close();
+
+    expect(getTargetDocument(document).getElementById("PRCSRUNCNTL_RUN_CNTL_ID")).toBeTruthy();
+    startFieldInspector(document);
+    expect(iframeDoc.querySelectorAll(".mpu-recfield-icon").length).toBe(1);
+    stopFieldInspector(document);
+  });
+
   it("wraps Fluid ps_box hosts without swallowing the whole group", () => {
     document.body.innerHTML = `
       <div id="mpu-bar">

@@ -4,6 +4,16 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.14] — 2026-07-21
+
+### Fixed
+
+- **Classic Field Inspector:** Inspect ON with zero orange icons on TargetContent pages
+  - Viewport gating no longer uses Classic `<tr>` hosts (off-screen row geometry skipped every field)
+  - Nested empty `.ps_target-iframe` no longer steals the Classic content document
+  - MutationObserver reinject uses `nodeType` (cross-realm iframe safe)
+  - Scroll/resize reinject listens on content frame windows; recovery poll always arms for Classic iframes
+
 ## [1.0.13] — 2026-07-21
 
 ### Added
