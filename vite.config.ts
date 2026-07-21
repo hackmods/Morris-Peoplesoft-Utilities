@@ -1,9 +1,26 @@
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
 import { mkdirSync, readFileSync, writeFileSync, cpSync, existsSync } from "node:fs";
+import { build as esbuildBuild } from "esbuild";
 
 const root = resolve(__dirname);
 const outDir = resolve(root, "dist");
+
+/** Content scripts are classic scripts — no ESM imports allowed. */
+async function bundleContentScriptAsIife() {
+  const contentPath = resolve(outDir, "content.js");
+  if (!existsSync(contentPath)) return;
+  await esbuildBuild({
+    absWorkingDir: outDir,
+    entryPoints: [contentPath],
+    bundle: true,
+    format: "iife",
+    outfile: contentPath,
+    allowOverwrite: true,
+    sourcemap: true,
+    logLevel: "silent",
+  });
+}
 
 function writeManifest() {
   const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8")) as {
@@ -115,7 +132,7 @@ export default defineConfig({
   plugins: [
     {
       name: "mpu-extension-finalize",
-      closeBundle() {
+      async closeBundle() {
         mkdirSync(resolve(outDir, "icons"), { recursive: true });
         const iconsSrc = resolve(root, "public/icons");
         if (existsSync(iconsSrc)) {
@@ -135,6 +152,7 @@ export default defineConfig({
 
         flattenHtml(resolve(outDir, "src/ui/popup/popup.html"), "popup.html");
         flattenHtml(resolve(outDir, "src/ui/options/options.html"), "options.html");
+        await bundleContentScriptAsIife();
         writeManifest();
       },
     },
