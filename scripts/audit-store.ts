@@ -29,7 +29,7 @@ if (existsSync(manifestPath)) {
   if (manifest.manifest_version !== 3) errors.push("manifest_version must be 3");
   if (manifest.key) errors.push("Do not ship legacy private key in manifest");
   const perms = manifest.permissions ?? [];
-  const allowed = new Set(["storage", "clipboardWrite", "tabs"]);
+  const allowed = new Set(["storage", "clipboardWrite", "tabs", "sidePanel"]);
   for (const p of perms) {
     if (!allowed.has(p)) warnings.push(`Unexpected permission: ${p}`);
   }

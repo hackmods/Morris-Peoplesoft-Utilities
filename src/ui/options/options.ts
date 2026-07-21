@@ -2,10 +2,12 @@ import { loadSettings, saveSettings } from "../../storage/settings";
 import {
   DEFAULT_FEATURE_UI_SCOPES,
   DEFAULT_TRACE,
+  FIELD_COPY_FORMATS,
   type Favorite,
   type FeatureFlags,
   type FeatureUiScope,
   type FeatureUiScopes,
+  type FieldCopyFormat,
   type MpuSettings,
   type TraceSettings,
   type YesNo,
@@ -99,6 +101,23 @@ function renderFeatures(settings: MpuSettings): void {
   }
   (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked =
     settings.quietEnvPrompt === "Yes";
+
+  const fmtSel = document.getElementById("fieldCopyFormat") as HTMLSelectElement | null;
+  if (fmtSel) {
+    fmtSel.replaceChildren();
+    for (const f of FIELD_COPY_FORMATS) {
+      const o = document.createElement("option");
+      o.value = f.id;
+      o.textContent = `${f.label} — e.g. ${f.example}`;
+      if ((settings.fieldCopyFormat || "record.field") === f.id) o.selected = true;
+      fmtSel.appendChild(o);
+    }
+  }
+
+  const onboard = document.getElementById("onboarding");
+  if (onboard) {
+    onboard.hidden = settings.showOnboarding !== "Yes";
+  }
 
   const scopesRoot = document.getElementById("feature-ui-scopes");
   if (scopesRoot) {
@@ -348,6 +367,11 @@ async function init(): Promise<void> {
     s.quietEnvPrompt = (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked
       ? "Yes"
       : "No";
+    const fmt = (document.getElementById("fieldCopyFormat") as HTMLSelectElement | null)?.value as
+      | FieldCopyFormat
+      | undefined;
+    s.fieldCopyFormat =
+      fmt === "ampersand" || fmt === "getfield" || fmt === "record.field" ? fmt : "record.field";
     const scopes = { ...DEFAULT_FEATURE_UI_SCOPES };
     for (const f of SCOPE_LABELS) {
       const el = document.getElementById(`scope-${f.key}`) as HTMLSelectElement | null;
@@ -358,6 +382,15 @@ async function init(): Promise<void> {
     await saveSettings(s);
     broadcast();
     say("Features saved");
+  });
+
+  document.getElementById("dismiss-onboarding")?.addEventListener("click", async () => {
+    const s = await loadSettings();
+    s.showOnboarding = "No";
+    await saveSettings(s);
+    const onboard = document.getElementById("onboarding");
+    if (onboard) onboard.hidden = true;
+    say("Onboarding dismissed");
   });
 
   document.getElementById("save-trace")!.addEventListener("click", async () => {
@@ -407,12 +440,22 @@ async function init(): Promise<void> {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const text = await file.text();
+    const imported = parseCsv(text);
+    if (!imported.length) {
+      say("No favorites found in CSV");
+      return;
+    }
+    const replace = (document.getElementById("import-replace") as HTMLInputElement | null)?.checked;
     const s = await loadSettings();
-    s.favorites = [...s.favorites, ...parseCsv(text)];
+    s.favorites = replace ? imported : [...s.favorites, ...imported];
     await saveSettings(s);
     renderFavorites(s);
     broadcast();
-    say("Favorites imported");
+    say(
+      replace
+        ? `Replaced with ${imported.length} favorite(s)`
+        : `Imported ${imported.length} favorite(s)`,
+    );
   });
 
   document.getElementById("export-json")!.addEventListener("click", async () => {

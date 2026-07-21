@@ -414,6 +414,11 @@ export function formatPageInfoPlain(
     `Page token: ${meta.pageTokenPresent ? "present" : "not detected"}`,
   ];
   if (lockedField) lines.push(`Locked field: ${lockedField}`);
+  const tips = toolsRelTips(meta.toolsRel, meta.uiMode);
+  if (tips.length) {
+    lines.push("", "Tips:");
+    for (const tip of tips) lines.push(`- ${tip}`);
+  }
   return lines.join("\n");
 }
 
@@ -450,7 +455,37 @@ export function formatPageInfoMarkdown(
   ];
   if (lockedField) rows.push(["Locked field", lockedField]);
   const body = rows.map(([k, v]) => `| ${k} | ${v} |`).join("\n");
-  return `### PeopleSoft page info\n\n| | |\n|---|---|\n${body}\n`;
+  const tips = toolsRelTips(meta.toolsRel, meta.uiMode);
+  const tipBlock = tips.length ? `\n\n**Tips**\n\n${tips.map((t) => `- ${t}`).join("\n")}\n` : "\n";
+  return `### PeopleSoft page info\n\n| | |\n|---|---|\n${body}${tipBlock}`;
+}
+
+/** Context tips from ToolsRel / UI mode (SP-04). */
+export function toolsRelTips(toolsRel?: string, uiMode?: string): string[] {
+  const tips: string[] = [];
+  const rel = (toolsRel || "").trim();
+  const major = Number.parseFloat(rel);
+  if (uiMode === "classic") {
+    if (!Number.isNaN(major) && major >= 8.6) {
+      tips.push(
+        "Classic 8.6+: Field Inspector targets #ptifrmtgtframe — wait for TargetContent to finish loading before Inspect.",
+      );
+    }
+  }
+  if (uiMode === "fluid") {
+    tips.push("Fluid: Inspect wraps ps_box-edit/control hosts; use Recents or Go to for component jumps.");
+  }
+  if (uiMode === "navCollection") {
+    tips.push("Nav collection: Inspect walks nested .ps_target-iframe documents when same-origin.");
+  }
+  if (!rel) {
+    tips.push("ToolsRel not detected yet — open a component page or wait for the content frame, then reopen Page Info.");
+  } else if (!Number.isNaN(major) && major < 8.55) {
+    tips.push(`ToolsRel ${rel}: older layouts may use different search/Correct History control ids.`);
+  } else if (rel) {
+    tips.push(`ToolsRel ${rel}: Trace uses delivered UTILITIES components; 🔒 means security is missing.`);
+  }
+  return tips;
 }
 
 const PAGE_INFO_COMPARE_KEYS = [
@@ -518,11 +553,27 @@ export function formatFavoriteDescriptionTemplate(
   return parts.join(" · ");
 }
 
-export function findHeaderMount(doc: Document = document): Element | null {
+export function findHeaderMount(
+  doc: Document = document,
+  opts?: { loginMode?: boolean },
+): Element | null {
   // Classic portal: bar sits immediately above the content iframe container
   if (doc.querySelector("#ptifrmtarget")) {
     return doc.querySelector("#ptifrmtarget");
   }
+
+  if (opts?.loginMode) {
+    // SP-08: place bar safely above the password form — never read input values
+    const pwd = doc.querySelector('input[type="password"]');
+    if (pwd) {
+      const form =
+        pwd.closest("form") ||
+        pwd.closest(".ps_signinentry, .psloginframe, .ps_box-group, #login, .pslogin") ||
+        pwd.parentElement;
+      if (form?.parentElement) return form;
+    }
+  }
+
   return (
     doc.querySelector("#pthdr2container") ||
     doc.querySelector("#PT_HEADER") ||
@@ -531,6 +582,35 @@ export function findHeaderMount(doc: Document = document): Element | null {
     doc.querySelector(".psloginframe") ||
     doc.body
   );
+}
+
+/** Discover delivered PeopleSoft page/tab links for CSP-safe Page Tabs dialog (SP-01). */
+export function collectPageTabs(doc: Document = document): Array<{ label: string; el: HTMLElement }> {
+  const target = getTargetDocument(doc);
+  const out: Array<{ label: string; el: HTMLElement }> = [];
+  const seen = new Set<string>();
+  const selectors = [
+    "#pstabs a",
+    ".PSLEVEL1NAV a",
+    ".PSLEVEL2NAVORIZONTAL a",
+    ".ps_box-tab a",
+    ".ps_tabs a",
+    '[role="tab"]',
+    "#pttablist a",
+  ];
+  for (const sel of selectors) {
+    for (const node of Array.from(target.querySelectorAll(sel))) {
+      if (!(node instanceof HTMLElement)) continue;
+      const label = (node.textContent || node.getAttribute("title") || "").replace(/\s+/g, " ").trim();
+      if (!label || label.length > 80) continue;
+      const key = label.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ label, el: node });
+      if (out.length >= 24) return out;
+    }
+  }
+  return out;
 }
 
 type NamedFrameWindow = Window & { TargetContent?: Window };

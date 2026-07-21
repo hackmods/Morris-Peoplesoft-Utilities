@@ -123,8 +123,24 @@ export interface MpuSettings {
   /** Phase 2 origins e.g. https://hr.example.edu */
   hostAllowlist: string[];
   quietEnvPrompt: YesNo;
+  /**
+   * SP-02: when Yes, Options shows first-run checklist.
+   * Existing installs default No via load merge; first install sets Yes in service worker.
+   */
+  showOnboarding: YesNo;
+  /** SP-07: preferred locked-field copy format */
+  fieldCopyFormat: FieldCopyFormat;
   schemaVersion: number;
 }
+
+/** PeopleCode / clipboard formats for locked Field Inspector copy (SP-07). */
+export type FieldCopyFormat = "record.field" | "ampersand" | "getfield";
+
+export const FIELD_COPY_FORMATS: Array<{ id: FieldCopyFormat; label: string; example: string }> = [
+  { id: "record.field", label: "RECORD.FIELD", example: "JOB.EMPLID" },
+  { id: "ampersand", label: "&Record.FIELD", example: "&Job.EMPLID" },
+  { id: "getfield", label: "GetField(Field.FIELD)", example: "GetField(Field.EMPLID)" },
+];
 
 export const SCHEMA_VERSION = 1;
 
@@ -181,6 +197,8 @@ export function createDefaultSettings(): MpuSettings {
     featureUiScopes: { ...DEFAULT_FEATURE_UI_SCOPES },
     hostAllowlist: [],
     quietEnvPrompt: "No",
+    showOnboarding: "No",
+    fieldCopyFormat: "record.field",
     schemaVersion: SCHEMA_VERSION,
   };
 }

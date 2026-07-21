@@ -83,6 +83,8 @@ describe("field inspector", () => {
     expect(parsed.workRecord).toBe(true);
     expect(parsed.pageLabel).toBe("Empl ID");
     expect(formatRecFieldCopy(parsed)).toBe("DERIVED_HR.EMPLID");
+    expect(formatRecFieldCopy(parsed, "ampersand")).toBe("&DERIVED_HR.EMPLID");
+    expect(formatRecFieldCopy(parsed, "getfield")).toBe("GetField(Field.EMPLID)");
   });
 
   it("toggles active state and exits on Escape", () => {

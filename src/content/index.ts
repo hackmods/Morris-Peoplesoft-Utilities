@@ -1,4 +1,4 @@
-import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta, formatFavoriteDescriptionTemplate } from "../adapters/ps-page";
+import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta, formatFavoriteDescriptionTemplate, formatPageInfoPlain } from "../adapters/ps-page";
 import { loadSettings, originAllowed, updateSettings } from "../storage/settings";
 import { featureAllowedForUi, isYes, pushRecentComponent, type MpuSettings } from "../storage/schema";
 import {
@@ -6,6 +6,7 @@ import {
   removeBar,
   showPageInfoDialog,
   showGoToComponentDialog,
+  showPageTabsDialog,
   announce,
 } from "../features/bar";
 import {
@@ -17,6 +18,7 @@ import {
   reinjectFieldInspector,
   copyLockedField,
 } from "../features/field-inspector";
+import type { FieldCopyFormat } from "../storage/schema";
 import { toggleTrace } from "../features/trace";
 import { runSearchOptions } from "../features/search";
 import "../content/content.css";
@@ -293,11 +295,12 @@ async function refresh(): Promise<void> {
       toggleFieldInspector(document);
       syncFieldInspectorChrome(document);
     },
-    onCopyLockedField: () => {
-      void copyLockedField(document);
+    onCopyLockedField: (format?: FieldCopyFormat) => {
+      void copyLockedField(document, format || settings.fieldCopyFormat || "record.field");
     },
     onNewWindow: () => openNewWindow(parsed),
     onGoToComponent: () => showGoToComponentDialog(document, parsed),
+    onPageTabs: () => showPageTabsDialog(document),
     onAddFavorite: () => void addFavorite(settings, parsed),
   });
 
@@ -336,15 +339,26 @@ function onMpuShortcut(e: KeyboardEvent): void {
     showGoToComponentDialog(document, parsePsUrl(location.href));
     return;
   }
-  void copyLockedField(document);
+  void (async () => {
+    const s = await loadSettings();
+    const sel = document.getElementById("mpu-copy-format") as HTMLSelectElement | null;
+    const format = (sel?.value || s.fieldCopyFormat || "record.field") as FieldCopyFormat;
+    await copyLockedField(document, format);
+  })();
 }
 
-chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }) => {
+chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }, _sender, sendResponse) => {
   if (msg.type === "mpu-refresh" || msg.command === "refresh") {
     void refresh();
   }
   if (msg.type === "mpu-trace-sync") {
     void refresh();
+  }
+  if (msg.type === "mpu-page-info-snapshot") {
+    const parsed = parsePsUrl(location.href);
+    const text = formatPageInfoPlain(collectPageMeta(document), parsed, getLockedFieldName());
+    sendResponse({ text });
+    return true;
   }
 });
 

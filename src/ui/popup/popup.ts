@@ -23,6 +23,11 @@ optionsLink.addEventListener("click", (e) => {
   chrome.runtime.openOptionsPage();
 });
 
+document.getElementById("open-sidepanel")?.addEventListener("click", () => {
+  chrome.runtime.sendMessage({ type: "mpu-open-side-panel" }, (resp) => {
+    status.textContent = resp?.ok ? "Side panel opened" : "Unable to open side panel";
+  });
+});
 function broadcastRefresh(): void {
   chrome.runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
 }

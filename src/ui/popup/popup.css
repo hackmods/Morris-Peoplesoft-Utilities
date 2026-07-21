@@ -83,6 +83,17 @@ a:focus-visible {
   font-size: 0.85rem;
 }
 
+button.linkish {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 a {
   color: var(--accent);
 }

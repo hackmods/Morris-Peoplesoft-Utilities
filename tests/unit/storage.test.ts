@@ -19,7 +19,19 @@ describe("storage load/save/update", () => {
     expect(s.schemaVersion).toBe(1);
     expect(s.features.hostAllowlistEnabled).toBe("No");
     expect(s.features.traceOption).toBe("No");
+    expect(s.showOnboarding).toBe("No");
+    expect(s.fieldCopyFormat).toBe("record.field");
     expect(getChromeStorageSnapshot().mpuSettings).toBeTruthy();
+  });
+
+  it("persists onboarding flag and PeopleCode copy format", async () => {
+    const s = createDefaultSettings();
+    s.showOnboarding = "Yes";
+    s.fieldCopyFormat = "getfield";
+    await saveSettings(s);
+    const loaded = await loadSettings();
+    expect(loaded.showOnboarding).toBe("Yes");
+    expect(loaded.fieldCopyFormat).toBe("getfield");
   });
 
   it("round-trips settings", async () => {

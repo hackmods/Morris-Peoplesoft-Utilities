@@ -32,6 +32,8 @@ MPU may make requests **only to the PeopleSoft site you are already using** (sam
 ## Permissions
 
 - **storage** — save preferences locally
+- **sidePanel** — optional Side Panel UI for Favorites and Page Info (opened from the popup)
+- **tabs** — open Favorites in the active PeopleSoft tab and request a Page Info snapshot from the MPU content script (same tab; no third-party hosts)
 
 Content scripts run only on PeopleSoft URL patterns (`psp` / `psc` servlet paths).
 

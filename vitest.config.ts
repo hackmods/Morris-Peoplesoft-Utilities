@@ -23,6 +23,7 @@ export default defineConfig({
         "src/content/index.ts",
         "src/ui/popup/popup.ts",
         "src/ui/options/options.ts",
+        "src/ui/sidepanel/sidepanel.ts",
       ],
       thresholds: {
         lines: 80,
