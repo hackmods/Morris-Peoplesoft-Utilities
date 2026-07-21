@@ -41,10 +41,19 @@ export interface ParsedRecField {
   field?: string;
   /** Occurrence / row index after $ */
   occurrence?: string;
+  /** Nearby page label text when found */
+  pageLabel?: string;
+  /** Work/derived record heuristic */
+  workRecord?: boolean;
 }
 
 export function fieldNameFromId(id: string): string {
   return id.split("$")[0] || id;
+}
+
+export function isWorkRecordName(record: string | undefined): boolean {
+  if (!record) return false;
+  return /^(DERIVED_|WRK_|WORK_|INSTALLATION$)/i.test(record);
 }
 
 /**
@@ -78,24 +87,71 @@ export function inferRecordName(base: string, peers: string[] = []): string | un
   return prefix;
 }
 
-export function parseRecField(id: string, peers: string[] = peerFieldBases): ParsedRecField {
+/** Find a nearby PeopleSoft / HTML label for BA readability (FI-02). */
+export function nearbyPageLabel(el: Element): string | undefined {
+  const doc = el.ownerDocument;
+  if (!doc) return undefined;
+  const id = (el as HTMLElement).id;
+  if (id) {
+    try {
+      const byFor = doc.querySelector(`label[for="${CSS.escape(id)}"]`);
+      const t = byFor?.textContent?.replace(/\s+/g, " ").trim();
+      if (t) return t;
+    } catch {
+      /* ignore bad id */
+    }
+  }
+
+  const scope =
+    el.closest("tr, .ps_box-group, .ps_box-control, .ps_box-widget, td, th, .ps-field") ||
+    el.parentElement;
+  if (!scope) return undefined;
+
+  const label =
+    scope.querySelector(
+      "label, .PSEDITBOXLABEL, .PSDROPDOWNLABEL, .PSlabel, .ps_box-label, .ps-label, span.PSQRYFIELDLABEL",
+    ) || scope.previousElementSibling;
+  if (label && label !== el) {
+    const t = label.textContent?.replace(/\s+/g, " ").trim();
+    if (t && t.length < 120) return t;
+  }
+  return undefined;
+}
+
+export function parseRecField(
+  id: string,
+  peers: string[] = peerFieldBases,
+  fieldEl?: Element | null,
+): ParsedRecField {
   const dollar = id.indexOf("$");
   const base = dollar >= 0 ? id.slice(0, dollar) : id;
   const occurrence = dollar >= 0 ? id.slice(dollar + 1) || undefined : undefined;
   const record = inferRecordName(base, peers);
   const field =
     record && base.startsWith(`${record}_`) ? base.slice(record.length + 1) || undefined : undefined;
-  return { raw: id, base, record, field, occurrence };
+  const pageLabel = fieldEl ? nearbyPageLabel(fieldEl) : undefined;
+  return {
+    raw: id,
+    base,
+    record,
+    field,
+    occurrence,
+    pageLabel,
+    workRecord: Boolean(isWorkRecordName(record) || /^(DERIVED_|WRK_|WORK_)/i.test(base)),
+  };
+}
+
+/** Clipboard / announce form — prefers RECORD.FIELD without row suffix for App Designer paste. */
+export function formatRecFieldCopy(parsed: ParsedRecField): string {
+  if (parsed.record && parsed.field) return `${parsed.record}.${parsed.field}`;
+  return parsed.base;
 }
 
 /** Human-readable label for announcements / plain-text copy. */
 export function formatRecFieldPlain(parsed: ParsedRecField): string {
-  if (parsed.record && parsed.field) {
-    const occ = parsed.occurrence != null && parsed.occurrence !== "" ? ` (row ${parsed.occurrence})` : "";
-    return `${parsed.record}.${parsed.field}${occ}`;
-  }
-  const occ = parsed.occurrence != null && parsed.occurrence !== "" ? `$${parsed.occurrence}` : "";
-  return `${parsed.base}${occ}`;
+  const core = formatRecFieldCopy(parsed);
+  const occ = parsed.occurrence != null && parsed.occurrence !== "" ? ` (row ${parsed.occurrence})` : "";
+  return `${core}${occ}`;
 }
 
 export function isFieldInspectorActive(): boolean {
@@ -105,6 +161,27 @@ export function isFieldInspectorActive(): boolean {
 export function getLockedFieldName(): string | null {
   if (!lockedId) return null;
   return formatRecFieldPlain(parseRecField(lockedId));
+}
+
+export function getLockedFieldCopyText(): string | null {
+  if (!lockedId) return null;
+  return formatRecFieldCopy(parseRecField(lockedId));
+}
+
+export async function copyLockedField(doc: Document = document): Promise<boolean> {
+  const text = getLockedFieldCopyText();
+  if (!text) {
+    announce(doc, "No locked field to copy — Inspect and click a field icon first");
+    return false;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    announce(doc, `Copied ${text}`);
+    return true;
+  } catch {
+    announce(doc, "Unable to copy field name");
+    return false;
+  }
 }
 
 /** Real SVG nodes — PeopleSoft CSP often blocks chrome-extension:// and data: img sources. */
@@ -178,8 +255,21 @@ function ensureTargetStyles(doc: Document): void {
   (doc.head || doc.documentElement).appendChild(style);
 }
 
+function resolveFieldElement(id: string): Element | null {
+  for (const doc of collectDocs(targetDocRef)) {
+    try {
+      const el = doc.getElementById(id) || doc.querySelector(`#${CSS.escape(id)}`);
+      if (el) return el;
+    } catch {
+      /* ignore */
+    }
+  }
+  return null;
+}
+
 function setNamePanel(id: string | null): void {
   const panel = topDocRef.getElementById("mpu-recfield-name");
+  const copyBtn = topDocRef.getElementById("mpu-copy-field") as HTMLButtonElement | null;
   if (!panel) return;
   panel.hidden = false;
 
@@ -187,11 +277,13 @@ function setNamePanel(id: string | null): void {
     panel.textContent = "";
     panel.removeAttribute("title");
     panel.setAttribute("data-mpu-empty", "true");
+    if (copyBtn) copyBtn.hidden = true;
     return;
   }
 
   panel.removeAttribute("data-mpu-empty");
-  const parsed = parseRecField(id);
+  const fieldEl = resolveFieldElement(id);
+  const parsed = parseRecField(id, peerFieldBases, fieldEl);
   panel.title = formatRecFieldPlain(parsed);
   panel.replaceChildren();
 
@@ -208,6 +300,12 @@ function setNamePanel(id: string | null): void {
     panel.appendChild(part);
   };
 
+  if (parsed.workRecord) {
+    addPart("mpu-rf-work", "Type", "Work");
+  }
+  if (parsed.pageLabel) {
+    addPart("mpu-rf-label", "Label", parsed.pageLabel);
+  }
   if (parsed.record && parsed.field) {
     addPart("mpu-rf-rec", "Rec", parsed.record);
     addPart("mpu-rf-fld", "Fld", parsed.field);
@@ -217,6 +315,8 @@ function setNamePanel(id: string | null): void {
   if (parsed.occurrence != null && parsed.occurrence !== "") {
     addPart("mpu-rf-occ", "Row", parsed.occurrence);
   }
+
+  if (copyBtn) copyBtn.hidden = !lockedId;
 }
 
 function isHtmlElement(node: EventTarget | Node | null | undefined): node is HTMLElement {
@@ -375,7 +475,18 @@ function onIconClick(e: MouseEvent): void {
     (icon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
   }
   setNamePanel(fieldId);
-  announce(topDocRef, `Locked field ${formatRecFieldPlain(parseRecField(fieldId))}`);
+  const parsed = parseRecField(fieldId, peerFieldBases, resolveFieldElement(fieldId));
+  const plain = formatRecFieldPlain(parsed);
+  const copyText = formatRecFieldCopy(parsed);
+  void (async () => {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("no clipboard");
+      await navigator.clipboard.writeText(copyText);
+      announce(topDocRef, `Locked and copied ${copyText}`);
+    } catch {
+      announce(topDocRef, `Locked field ${plain}`);
+    }
+  })();
 }
 
 function onKey(e: KeyboardEvent): void {
@@ -623,6 +734,7 @@ export function toggleFieldInspector(doc: Document = document): boolean {
 export function syncFieldInspectorChrome(doc: Document = document): void {
   const btn = doc.getElementById("mpu-field");
   const panel = doc.getElementById("mpu-recfield-name");
+  const copyBtn = doc.getElementById("mpu-copy-field") as HTMLButtonElement | null;
   if (btn) {
     const on = active;
     btn.textContent = on ? "Inspect ON" : "Inspect";
@@ -639,5 +751,8 @@ export function syncFieldInspectorChrome(doc: Document = document): void {
     } else {
       setNamePanel(null);
     }
+  }
+  if (copyBtn) {
+    copyBtn.hidden = !active || !lockedId;
   }
 }

@@ -12,6 +12,7 @@ import {
   inferRecordName,
   parseRecField,
   formatRecFieldPlain,
+  formatRecFieldCopy,
 } from "@/features/field-inspector";
 
 describe("field inspector", () => {
@@ -59,7 +60,25 @@ describe("field inspector", () => {
   it("falls back to full id when peers do not share a record", () => {
     const parsed = parseRecField("JOB_EMPLID$0", ["NAMES_NAME_DISPLAY"]);
     expect(parsed.record).toBeUndefined();
-    expect(formatRecFieldPlain(parsed)).toBe("JOB_EMPLID$0");
+    expect(formatRecFieldPlain(parsed)).toBe("JOB_EMPLID (row 0)");
+  });
+
+  it("flags DERIVED_ work records and finds nearby labels", () => {
+    document.body.innerHTML = `
+      <div class="ps-field">
+        <label class="PSEDITBOXLABEL" for="DERIVED_HR_EMPLID$0">Empl ID</label>
+        <input id="DERIVED_HR_EMPLID$0" />
+      </div>
+      <div class="ps-field"><input id="DERIVED_HR_NAME$0" /></div>
+    `;
+    const peers = ["DERIVED_HR_EMPLID", "DERIVED_HR_NAME"];
+    const el = document.getElementById("DERIVED_HR_EMPLID$0")!;
+    const parsed = parseRecField("DERIVED_HR_EMPLID$0", peers, el);
+    expect(parsed.record).toBe("DERIVED_HR");
+    expect(parsed.field).toBe("EMPLID");
+    expect(parsed.workRecord).toBe(true);
+    expect(parsed.pageLabel).toBe("Empl ID");
+    expect(formatRecFieldCopy(parsed)).toBe("DERIVED_HR.EMPLID");
   });
 
   it("toggles active state and exits on Escape", () => {
@@ -87,10 +106,16 @@ describe("field inspector", () => {
   });
 
   it("shows broken-out Rec/Fld labels on hover and lock", () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
     document.body.innerHTML = `
       <div id="mpu-bar">
         <button type="button" id="mpu-field">Inspect</button>
         <span id="mpu-recfield-name" class="mpu-recfield-name" hidden></span>
+        <button type="button" id="mpu-copy-field" hidden>Copy field</button>
       </div>
       <div class="ps-field"><input id="NC_REHIRE_ELIG_TO_DATE$0" value="01/01/2050" /></div>
       <div class="ps-field"><input id="NC_REHIRE_ELIG_FROM_DATE$0" value="01/01/2000" /></div>
@@ -114,6 +139,7 @@ describe("field inspector", () => {
     icon.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(getLockedFieldName()).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
     expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#5DA027");
+    expect(writeText).toHaveBeenCalledWith("NC_REHIRE_ELIG.TO_DATE");
 
     stopFieldInspector(document);
     syncFieldInspectorChrome(document);

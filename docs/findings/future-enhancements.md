@@ -22,9 +22,9 @@
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| FI-01 | One-click **copy** `RECORD.FIELD` (and row) to clipboard on lock | BA, Dev | Paste into tickets, App Designer search, PeopleCode | Use existing Rec/Fld/Row parse; announce via `aria-live` |
-| FI-02 | Show **page label** text next to technical name when a `<label>` / `PSlabel` is nearby | BA | Maps UI wording → record.field | Classic grids + Fluid `ps_box-label` |
-| FI-03 | **DERIVED_** / work-record badge in readout | Dev | Spot work fields vs persistent data | Heuristic on record name prefix |
+| ~~FI-01~~ | ~~One-click **copy** `RECORD.FIELD` (and row) to clipboard on lock~~ | BA, Dev | Done in 1.0.9 | Also Copy field button + Alt+Shift+C |
+| ~~FI-02~~ | ~~Show **page label** text next to technical name when a `<label>` / `PSlabel` is nearby~~ | BA | Done in 1.0.9 | |
+| ~~FI-03~~ | ~~**DERIVED_** / work-record badge in readout~~ | Dev | Done in 1.0.9 | Type: Work |
 | FI-04 | **Fluid** field selectors (`ps_box-control`, data attrs) parity | BA, Dev | Customers mix Classic portal + Fluid pages | Keep Classic iframe path; add Fluid adapter branch |
 | FI-05 | Large-grid performance: only decorate **visible** rows / debounce MutationObserver | Dev | Big scroll grids get sluggish with full wrap | IntersectionObserver or throttle |
 
@@ -32,26 +32,26 @@
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| PI-01 | Richer Page Info: **DB name**, **DB type**, **Mode** (Classic/Fluid), app release when present in connection comment / `#pt_pageinfo` | BA, Dev | Match CTRL+J usefulness without navigation | Extend `parseConnectionComment`; never phone home |
-| PI-02 | **Copy as Markdown** / Jira snippet (Menu, Component, Page, ToolsRel, Rec.Fld if locked) | BA | Faster defect write-ups | Build from `collectPageMeta` + locked field |
-| PI-03 | Toolbar **UI mode badge** (Classic / Fluid / Nav collection) | BA, Dev | Avoid “wrong page type” confusion | Reuse `detectUiModel` |
+| ~~PI-01~~ | ~~Richer Page Info: **DB name**, **DB type**, **Mode** (Classic/Fluid), app release when present in connection comment / `#pt_pageinfo`~~ | BA, Dev | Done in 1.0.9 | |
+| ~~PI-02~~ | ~~**Copy as Markdown** / Jira snippet (Menu, Component, Page, ToolsRel, Rec.Fld if locked)~~ | BA | Done in 1.0.9 | |
+| ~~PI-03~~ | ~~Toolbar **UI mode badge** (Classic / Fluid / Nav collection)~~ | BA, Dev | Done in 1.0.9 | |
 | PI-04 | Persist last N **recent components** (local only) for quick re-open | BA | Complements Favorites without taxonomy | Cap list; no server sync |
 
 ### Favorites & navigation
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| FV-01 | **Categories / subcategories** UI (legacy parity) | BA | Large favorite lists become usable | Storage already has Category/SubCategory fields |
-| FV-02 | Favorites **filter/search** in bar dropdown | BA | Faster than scrolling | Client-side only |
+| ~~FV-01~~ | ~~**Categories / subcategories** UI (legacy parity)~~ | BA | Done in 1.0.9 (optgroups + subcategory in label) | Options table still flat |
+| ~~FV-02~~ | ~~Favorites **filter/search** in bar dropdown~~ | BA | Done in 1.0.9 | |
 | FV-03 | Open favorite in **new window** option | Dev | Parallel compare in two envs | Combine with New Win site rules |
-| FV-04 | Warn on export that favorites may contain **business keys** in Parameters | BA | Compliance | UI + wiki (partially noted already) |
+| ~~FV-04~~ | ~~Warn on export that favorites may contain **business keys** in Parameters~~ | BA | Done in 1.0.9 | Options confirm + hint |
 
 ### Trace & developer tooling
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | TR-01 | Trace Options UI: show **which flags** are on; named **presets** (SQL only, PeopleCode only, etc.) | Dev | Less tribal knowledge | Keep delivered UTILITIES POST protocol |
-| TR-02 | Clearer **Trace 🔒** help when security blocks components | Dev | Self-serve triage | Link to wiki FAQ |
+| ~~TR-02~~ | ~~Clearer **Trace 🔒** help when security blocks components~~ | Dev | Done in 1.0.9 | |
 | TR-03 | Optional **ICSID / page token present?** indicator (boolean only, never display full token) | Dev | Debug postback / session issues | Do not copy secrets into clipboard by default |
 
 ### Search page helpers
@@ -67,12 +67,12 @@
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| UX-01 | Keyboard shortcuts: Page Info, Inspect toggle, copy locked field | BA, Dev | Power-user speed | Avoid stealing CTRL+J; document in wiki |
+| ~~UX-01~~ | ~~Keyboard shortcuts: Page Info, Inspect toggle, copy locked field~~ | BA, Dev | Done in 1.0.9 (Alt+Shift+P/I/C) | |
 | UX-02 | In-bar **component URL builder** (Menu.Component.Market + optional params) | Dev | Jump without Favorites | Validate against current site/portal/node |
 | UX-03 | Environment **color strip** / stronger env affordance beyond underline | BA | Reduce wrong-env mistakes | AODA contrast check |
 | UX-04 | Favorites **notes** field (local) | BA | “Use this for payroll calc test” | Export includes notes → warn |
 | UX-05 | Field Inspector: show **input type / maxlength / disabled** chips | Dev | Quick HTML property check | From DOM attrs only |
-| UX-06 | Page Info: include **portal / node / site** from parsed URL | BA, Dev | Full orientation | Already in `parsePsUrl` |
+| ~~UX-06~~ | ~~Page Info: include **portal / node / site** from parsed URL~~ | BA, Dev | Done in 1.0.9 | |
 | UX-07 | **Compare** current Page Info to clipboard buffer (diff Menu/Component/ToolsRel) | BA | Cross-env checklist | Local string compare |
 | UX-08 | Nav collection / nested iframe Field Inspector polish | Dev | Campus / content collections | Already partial via `.ps_target-iframe` |
 | UX-09 | Options: per-feature **Classic vs Fluid** enablement | BA | Turn off noisy features on Fluid homepages | Schema + popup |
@@ -107,10 +107,10 @@
 
 ## Suggested sequencing (post Store)
 
-1. **FI-01, PI-02, PI-01** — documentation speed for BAs filing tickets  
-2. **FV-01, FV-02** — favorites scale  
+1. ~~**FI-01, PI-02, PI-01** — documentation speed for BAs filing tickets~~ (shipped 1.0.9)
+2. ~~**FV-01, FV-02** — favorites scale~~ (shipped 1.0.9)
 3. **FI-04, SR-01** — Fluid / search reliability  
-4. **TR-01, UX-01, UX-02** — developer daily drivers  
+4. **TR-01, UX-02** — developer daily drivers  
 5. P3 items only with ADR if they add permissions or major UI surface  
 
 ---
@@ -120,3 +120,4 @@
 | Date | Note |
 |---|---|
 | 2026-07-21 | Initial backlog from Classic Inspect/Page Info work, legacy PS Utilities audit, BA/tech use cases, and PeopleTools 8.61 Classic+Fluid field reality |
+| 2026-07-21 | Wave 1 implemented in v1.0.9 (FI-01..03, PI-01..03, FV-01/02/04, TR-02, UX-01/06) — plan: `.cursor/plans/implement-p1-wave1.md` |

@@ -284,6 +284,10 @@ async function init(): Promise<void> {
   });
 
   document.getElementById("export-fav")!.addEventListener("click", async () => {
+    const ok = window.confirm(
+      "Favorites export may include business keys in Parameters or descriptions. Continue?",
+    );
+    if (!ok) return;
     const s = await loadSettings();
     download("mpu-favorites.csv", favoritesToCsv(s.favorites), "text/csv");
   });

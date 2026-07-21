@@ -1,6 +1,12 @@
-import type { MpuSettings } from "../storage/schema";
+import type { Favorite, MpuSettings } from "../storage/schema";
 import type { ParsedPsUrl } from "../adapters/ps-page";
-import { collectPageMeta, findHeaderMount } from "../adapters/ps-page";
+import {
+  collectPageMeta,
+  detectUiModel,
+  findHeaderMount,
+  formatPageInfoMarkdown,
+  formatPageInfoPlain,
+} from "../adapters/ps-page";
 import { isYes } from "../storage/schema";
 
 export interface BarContext {
@@ -12,12 +18,52 @@ export interface BarContext {
   onFieldInspector: () => void;
   onNewWindow: () => void;
   onAddFavorite: () => void;
+  onCopyLockedField?: () => void;
   fieldInspectorActive: boolean;
   lockedFieldName?: string | null;
   traceRunning: boolean;
   traceLocked: boolean;
   /** Classic login/logout: greeting (+ help) only */
   loginMode?: boolean;
+}
+
+/** Group favorites for optgroups (FV-01). Empty category → Uncategorized. */
+export function groupFavoritesByCategory(
+  favorites: Favorite[],
+): Array<{ category: string; entries: Array<{ index: number; fav: Favorite }> }> {
+  const map = new Map<string, Array<{ index: number; fav: Favorite }>>();
+  favorites.forEach((fav, index) => {
+    const category = (fav.Category || "").trim() || "Uncategorized";
+    const list = map.get(category) || [];
+    list.push({ index, fav });
+    map.set(category, list);
+  });
+  const cats = [...map.keys()].sort((a, b) => {
+    if (a === "Uncategorized") return 1;
+    if (b === "Uncategorized") return -1;
+    return a.localeCompare(b);
+  });
+  return cats.map((category) => ({
+    category,
+    entries: (map.get(category) || []).sort((a, b) =>
+      (a.fav.Description || a.fav.Component).localeCompare(b.fav.Description || b.fav.Component),
+    ),
+  }));
+}
+
+function favoriteLabel(fav: Favorite): string {
+  const base = fav.Description || `${fav.Menu}.${fav.Component}.${fav.Market}`;
+  const sub = (fav.SubCategory || "").trim();
+  return sub ? `${sub} — ${base}` : base;
+}
+
+function uiModeLabel(doc: Document): string {
+  const mode = detectUiModel(doc);
+  if (doc.querySelector("#ptifrmtgtframe, #ptifrmtarget")) return "Classic";
+  if (mode === "fluid") return "Fluid";
+  if (mode === "navCollection") return "Nav";
+  if (mode === "classic") return "Classic";
+  return "PS";
 }
 
 function btn(
@@ -71,6 +117,15 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
 
   bar.appendChild(brand);
 
+  if (!loginOnly) {
+    const mode = document.createElement("span");
+    mode.className = "mpu-mode";
+    mode.id = "mpu-ui-mode";
+    mode.textContent = uiModeLabel(doc);
+    mode.title = "PeopleSoft UI model (Classic / Fluid / Nav collection)";
+    bar.appendChild(mode);
+  }
+
   if (isYes(f.greetingOption)) {
     const env = document.createElement("span");
     env.className = "mpu-env";
@@ -96,47 +151,89 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(fav);
 
     if (ctx.settings.favorites.length) {
+      const wrap = document.createElement("span");
+      wrap.className = "mpu-fav-wrap";
+
+      const filter = document.createElement("input");
+      filter.type = "search";
+      filter.id = "mpu-fav-filter";
+      filter.className = "mpu-fav-filter";
+      filter.placeholder = "Filter…";
+      filter.setAttribute("aria-label", "Filter favorites");
+      filter.autocomplete = "off";
+
       const select = document.createElement("select");
       select.id = "mpu-fav-select";
       select.className = "mpu-select";
       select.setAttribute("aria-label", "Open favorite");
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = "Favorites…";
-      select.appendChild(placeholder);
-      for (const [i, favItem] of ctx.settings.favorites.entries()) {
-        const opt = document.createElement("option");
-        opt.value = String(i);
-        opt.textContent =
-          favItem.Description ||
-          `${favItem.Menu}.${favItem.Component}.${favItem.Market}`;
-        select.appendChild(opt);
-      }
+
+      const rebuildOptions = (query: string) => {
+        const q = query.trim().toLowerCase();
+        select.replaceChildren();
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Favorites…";
+        select.appendChild(placeholder);
+
+        for (const group of groupFavoritesByCategory(ctx.settings.favorites)) {
+          const matching = group.entries.filter(({ fav: item }) => {
+            if (!q) return true;
+            const hay = [
+              item.Description,
+              item.Menu,
+              item.Component,
+              item.Market,
+              item.Category,
+              item.SubCategory,
+            ]
+              .join(" ")
+              .toLowerCase();
+            return hay.includes(q);
+          });
+          if (!matching.length) continue;
+          const og = document.createElement("optgroup");
+          og.label = group.category;
+          for (const { index, fav: item } of matching) {
+            const opt = document.createElement("option");
+            opt.value = String(index);
+            opt.textContent = favoriteLabel(item);
+            og.appendChild(opt);
+          }
+          select.appendChild(og);
+        }
+      };
+
+      rebuildOptions("");
+      filter.addEventListener("input", () => rebuildOptions(filter.value));
       select.addEventListener("change", () => {
         const idx = Number(select.value);
         if (Number.isNaN(idx)) return;
         const item = ctx.settings.favorites[idx];
         if (!item || !ctx.parsed.baseURL) return;
         injectClearBcs(doc);
-        // Use window-specific site (e.g. ps_2), matching classic PS Utilities
         const site = ctx.parsed.site || ctx.parsed.siteNormalized;
         const url = `${ctx.parsed.baseURL}/${item.Servlet}/${site}/${ctx.parsed.portal}/${ctx.parsed.node}/c/${item.Menu}.${item.Component}.${item.Market}${item.Parameters || ""}`;
         window.location.href = url;
       });
-      bar.appendChild(select);
+
+      wrap.append(filter, select);
+      bar.appendChild(wrap);
     }
   }
 
   if (!loginOnly && isYes(f.traceOption)) {
     const label = ctx.traceLocked ? "Trace 🔒" : ctx.traceRunning ? "Trace ON" : "Trace OFF";
-    const t = btn("mpu-trace", label, "Toggle PeopleCode/SQL trace", ctx.traceRunning);
+    const title = ctx.traceLocked
+      ? "Trace locked — your user likely lacks access to UTILITIES PeopleCode/SQL Trace components (see FAQ)"
+      : "Toggle PeopleCode/SQL trace";
+    const t = btn("mpu-trace", label, title, ctx.traceRunning);
     if (ctx.traceLocked) t.disabled = true;
     t.addEventListener("click", () => ctx.onTraceToggle());
     bar.appendChild(t);
   }
 
   if (!loginOnly && isYes(f.pageInfoOption)) {
-    const p = btn("mpu-pageinfo", "Page Info", "Show page information");
+    const p = btn("mpu-pageinfo", "Page Info", "Show page information (Alt+Shift+P)");
     p.addEventListener("click", () => ctx.onPageInfo());
     bar.appendChild(p);
   }
@@ -145,7 +242,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     const fi = btn(
       "mpu-field",
       ctx.fieldInspectorActive ? "Inspect ON" : "Inspect",
-      "Toggle field inspector — orange icons appear beside fields",
+      "Toggle field inspector (Alt+Shift+I) — orange icons beside fields",
       ctx.fieldInspectorActive,
     );
     fi.addEventListener("click", () => ctx.onFieldInspector());
@@ -158,10 +255,19 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     name.setAttribute("aria-live", "polite");
     if (!ctx.fieldInspectorActive) {
       name.hidden = true;
-    } else {
-      name.textContent = ctx.lockedFieldName ?? "";
+    } else if (ctx.lockedFieldName) {
+      name.textContent = ctx.lockedFieldName;
     }
     bar.appendChild(name);
+
+    const copyField = btn(
+      "mpu-copy-field",
+      "Copy field",
+      "Copy locked RECORD.FIELD to clipboard (Alt+Shift+C)",
+    );
+    copyField.hidden = !ctx.fieldInspectorActive || !ctx.lockedFieldName;
+    copyField.addEventListener("click", () => ctx.onCopyLockedField?.());
+    bar.appendChild(copyField);
   }
 
   if (!loginOnly && isYes(f.newWindowOption) && ctx.parsed.kind === "component") {
@@ -215,8 +321,9 @@ function showHelpDialog(doc: Document): void {
     <ul>
       <li><strong>Favorites</strong> — jump to components</li>
       <li><strong>Page Info</strong> — menu/component/page without CTRL+J</li>
-      <li><strong>Field Inspector</strong> — orange icons beside fields; hover for name; click to lock; Esc to exit</li>
+      <li><strong>Field Inspector</strong> — orange icons; hover/lock for Rec/Fld/Row; copy on lock (Alt+Shift+C)</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
+      <li><strong>Shortcuts</strong> — Alt+Shift+P Page Info · Alt+Shift+I Inspect · Alt+Shift+C copy field</li>
     </ul>
     <p>Maintained by <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>. Inspired by PS Utilities.</p>
     <button type="button" class="mpu-btn" id="mpu-dialog-close">Close</button>
@@ -240,18 +347,14 @@ function showHelpDialog(doc: Document): void {
   (dialog.querySelector("#mpu-dialog-close") as HTMLButtonElement)?.focus();
 }
 
-export function showPageInfoDialog(doc: Document, parsed: ParsedPsUrl): void {
+export function showPageInfoDialog(
+  doc: Document,
+  parsed: ParsedPsUrl,
+  lockedField?: string | null,
+): void {
   const meta = collectPageMeta(doc);
-  const lines = [
-    `Menu: ${meta.menu ?? parsed.menu ?? "—"}`,
-    `Component: ${meta.component ?? parsed.component ?? "—"}`,
-    `Page: ${meta.page ?? "—"}`,
-    `Market: ${parsed.market ?? "—"}`,
-    `User: ${meta.userId ?? "—"}`,
-    `ToolsRel: ${meta.toolsRel ?? "—"}`,
-    `App Server: ${meta.appServer ?? "—"}`,
-  ];
-  const text = lines.join("\n");
+  const text = formatPageInfoPlain(meta, parsed, lockedField);
+  const markdown = formatPageInfoMarkdown(meta, parsed, lockedField);
 
   const existing = doc.getElementById("mpu-dialog");
   existing?.remove();
@@ -270,6 +373,7 @@ export function showPageInfoDialog(doc: Document, parsed: ParsedPsUrl): void {
     <pre class="mpu-pre" id="mpu-pi-body"></pre>
     <div class="mpu-dialog-actions">
       <button type="button" class="mpu-btn" id="mpu-pi-copy">Copy</button>
+      <button type="button" class="mpu-btn" id="mpu-pi-copy-md">Copy Markdown</button>
       <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
     </div>
   `;
@@ -283,6 +387,14 @@ export function showPageInfoDialog(doc: Document, parsed: ParsedPsUrl): void {
     try {
       await navigator.clipboard.writeText(text);
       announce(doc, "Page information copied");
+    } catch {
+      announce(doc, "Unable to copy — select text manually");
+    }
+  });
+  dialog.querySelector("#mpu-pi-copy-md")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(markdown);
+      announce(doc, "Markdown page info copied");
     } catch {
       announce(doc, "Unable to copy — select text manually");
     }

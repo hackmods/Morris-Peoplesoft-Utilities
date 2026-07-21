@@ -16,11 +16,13 @@ Grow Morris PeopleSoft Utilities into the daily driver for **business analysts**
 
 ## Near-term bets (implement next when asked)
 
-1. **Copy RECORD.FIELD** on Field Inspector lock (+ optional Markdown Page Info pack for tickets)  
-2. **Richer Page Info** (DB name/type, UI mode) from connection comment  
-3. **Favorites categories + filter** (storage fields already exist)  
+1. ~~**Copy RECORD.FIELD** on Field Inspector lock (+ optional Markdown Page Info pack for tickets)~~ → **v1.0.9**
+2. ~~**Richer Page Info** (DB name/type, UI mode) from connection comment~~ → **v1.0.9**
+3. ~~**Favorites categories + filter** (storage fields already exist)~~ → **v1.0.9**
 4. **Fluid Field Inspector** selectors  
 5. **Trace preset clarity** in Options  
+
+Wave 1 plan: `.cursor/plans/implement-p1-wave1.md`
 
 ## Guardrails for agents
 
