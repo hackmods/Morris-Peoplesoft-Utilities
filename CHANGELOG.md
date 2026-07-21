@@ -2,6 +2,13 @@
 
 All notable changes to Morris PeopleSoft Utilities are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Release readiness doc with blocking vs nice-to-have Store submit items (`docs/release-readiness.md`)
+- Expanded Store submission checklist aligned to pre-submit blockers
+
 ## [1.0.0] — 2026-07-21
 
 ### Added

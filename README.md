@@ -26,7 +26,12 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 
 ### Chrome Web Store (recommended)
 
-Store listing is in progress. See [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md). When published, this section will link the Store URL.
+Store listing is in progress. See:
+
+- [`docs/release-readiness.md`](docs/release-readiness.md) — blocking vs nice-to-have before submit
+- [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md) — dashboard upload checklist
+
+When published, this section will link the Store URL.
 
 ### Load unpacked (developers)
 
