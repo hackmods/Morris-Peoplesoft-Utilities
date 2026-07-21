@@ -109,6 +109,37 @@ describe("field inspector", () => {
     expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
   });
 
+  it("toggle off returns false when already active", () => {
+    expect(toggleFieldInspector(document)).toBe(true);
+    expect(toggleFieldInspector(document)).toBe(false);
+    expect(isFieldInspectorActive()).toBe(false);
+  });
+
+  it("polls until Classic iframe content appears", async () => {
+    vi.useFakeTimers();
+    stopFieldInspector(document);
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+    `;
+    const iframe = document.getElementById("ptifrmtgtframe") as HTMLIFrameElement;
+    // Empty target body initially
+    iframe.contentDocument!.open();
+    iframe.contentDocument!.write(`<!doctype html><html><body></body></html>`);
+    iframe.contentDocument!.close();
+
+    startFieldInspector(document);
+    expect(iframe.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
+
+    iframe.contentDocument!.body.innerHTML = `<div><input id="JOB_EMPLID$0" /></div>`;
+    await vi.advanceTimersByTimeAsync(300);
+    expect(iframe.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(1);
+    stopFieldInspector(document);
+  });
+
   it("injects into Classic TargetContent iframe document", () => {
     stopFieldInspector(document);
     document.body.innerHTML = `
