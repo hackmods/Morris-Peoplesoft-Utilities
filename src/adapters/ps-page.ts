@@ -51,7 +51,7 @@ export function parsePsUrl(href: string): ParsedPsUrl {
     kind: "unknown",
   };
 
-  let origin = "";
+  let origin: string;
   try {
     origin = new URL(href).origin;
   } catch {
