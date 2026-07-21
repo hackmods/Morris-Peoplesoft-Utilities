@@ -4,6 +4,24 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.5] — 2026-07-21
+
+### Fixed
+
+- Classic tools audit remediation:
+  - **Trace:** use delivered `psc/{site}_newwin` UTILITIES components with ICSID/`#ICSave` checkbox POSTs (was a fabricated mask POST that falsely reported success)
+  - **Favorites clear-BCS:** restore `isMenuCrefNav` / `setStoredData` contract
+  - **Bar mount:** prefer `#ptifrmtarget` above Classic content and call `ptIframe.resizeAll`
+  - **User ID / search:** refresh when `#ptifrmtgtframe` loads; search injects require `PSSRCHPAGE`
+  - **Correct History:** prefer `getElementsByName("PTS_CFG_CL_WRK_PTS_ACCESS_MODE_C")`
+  - **New Window:** resolve Menu.Component from target iframe; show only on components
+  - **Login bar:** greeting (+ help) only
+  - **Favorites URL:** keep window-specific site (`ps_2`) when navigating
+
+### Added
+
+- Classic tools audit write-up (`docs/findings/classic-tools-audit.md`)
+
 ## [1.0.4] — 2026-07-21
 
 ### Fixed

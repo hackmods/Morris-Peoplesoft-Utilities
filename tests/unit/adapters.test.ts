@@ -62,6 +62,14 @@ describe("header mount and UI model", () => {
     document.body.innerHTML = "";
   });
 
+  it("prefers Classic #ptifrmtarget over Fluid headers", () => {
+    document.body.innerHTML = `
+      <div id="pthdr2container"></div>
+      <div id="ptifrmtarget"><iframe id="ptifrmtgtframe"></iframe></div>
+    `;
+    expect(findHeaderMount(document)?.id).toBe("ptifrmtarget");
+  });
+
   it("prefers Fluid header containers", () => {
     document.body.innerHTML = `<div id="pthdr2container"></div>`;
     expect(findHeaderMount(document)?.id).toBe("pthdr2container");

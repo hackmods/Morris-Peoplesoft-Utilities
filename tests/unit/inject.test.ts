@@ -11,33 +11,30 @@ describe("page-context inject scripts", () => {
     document.body.innerHTML = "";
   });
 
-  it("adv-search source targets PTS_MORE_LESS and clicks collapsed control", () => {
-    expect(loadInject("adv-search.ts")).toContain("PTS_MORE_LESS");
-    document.body.innerHTML = `<a id="PTS_MORE_LESS_OPT" aria-expanded="false"></a>`;
-    const el = document.getElementById("PTS_MORE_LESS_OPT")!;
-    let clicked = false;
-    el.addEventListener("click", () => {
-      clicked = true;
-    });
-    document.querySelector<HTMLElement>('#PTS_MORE_LESS_OPT[aria-expanded="false"]')?.click();
-    expect(clicked).toBe(true);
+  it("adv-search targets Classic PSSRCHPAGE / PTS_MORE_LESS", () => {
+    const src = loadInject("adv-search.ts");
+    expect(src).toContain("PSSRCHPAGE");
+    expect(src).toContain("PTS_MORE_LESS_OPT");
+    expect(src).toContain("ptifrmtgtframe");
   });
 
-  it("corr-hist source targets access mode control", () => {
-    expect(loadInject("corr-hist.ts")).toContain("PTS_ACCESS_MODE");
-    document.body.innerHTML = `<button id="PTS_CFG_CL_WRK_PTS_ACCESS_MODE_C"></button>`;
-    const el = document.getElementById("PTS_CFG_CL_WRK_PTS_ACCESS_MODE_C")!;
-    let clicked = false;
-    el.addEventListener("click", () => {
-      clicked = true;
-    });
-    el.click();
-    expect(clicked).toBe(true);
+  it("corr-hist uses getElementsByName for access mode", () => {
+    const src = loadInject("corr-hist.ts");
+    expect(src).toContain("getElementsByName");
+    expect(src).toContain("PTS_CFG_CL_WRK_PTS_ACCESS_MODE_C");
+    expect(src).toContain("PSSRCHPAGE");
   });
 
-  it("clear-bcs references breadcrumb helpers", () => {
+  it("clear-bcs sets isMenuCrefNav like classic PS Utilities", () => {
     const src = loadInject("clear-bcs.ts");
     expect(src).toContain("bcUpdater");
     expect(src).toContain("pthNav");
+    expect(src).toContain("isMenuCrefNav");
+    expect(src).toContain('setStoredData');
+    expect(src).not.toContain("clearBC");
+  });
+
+  it("resize-frame calls ptIframe.resizeAll", () => {
+    expect(loadInject("resize-frame.ts")).toContain("resizeAll");
   });
 });
