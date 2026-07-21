@@ -5,9 +5,10 @@ This repository is a **Chrome Manifest V3 extension** for PeopleSoft productivit
 ## Read first
 
 - Plan intent: official Chrome Web Store listing, BA + tech parity, AODA, no credentials/telemetry
+- **Future enhancements (BA + developers):** `docs/findings/future-enhancements.md` · Cursor plan: `.cursor/plans/future-enhancements.md`
 - ADRs: `docs/adr/`
-- Findings: `docs/findings/legacy-ps-utilities-audit.md`
-- Cursor rules: `.cursor/rules/`
+- Findings: `docs/findings/legacy-ps-utilities-audit.md`, `docs/findings/classic-tools-audit.md`
+- Cursor rules: `.cursor/rules/` (includes `product-roadmap.mdc`)
 - Legacy oracle (local only, gitignored): `.reference/PS-Utilities`
 
 ## Commands
@@ -23,6 +24,6 @@ npm run release:check
 
 ## Do not
 
-- Edit the plan file under `.cursor/plans` unless asked
+- Edit plan files under `.cursor/plans` unless asked (roadmap plan is maintained when enhancing the backlog)
 - Commit `.reference/` or private keys
 - Add analytics or password features

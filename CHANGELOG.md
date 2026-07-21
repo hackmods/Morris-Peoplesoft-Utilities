@@ -4,6 +4,10 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- BA + PeopleSoft developer **future enhancements** backlog (`docs/findings/future-enhancements.md`), Cursor plan (`.cursor/plans/future-enhancements.md`), and `product-roadmap` Cursor rule for agents
+
 ## [1.0.8] — 2026-07-21
 
 ### Changed

@@ -1,0 +1,14 @@
+---
+description: Product backlog & enhancement priorities for MPU agents
+alwaysApply: true
+---
+
+# MPU — future enhancements knowledge
+
+When planning or implementing new features for Morris PeopleSoft Utilities:
+
+1. Read **`docs/findings/future-enhancements.md`** (canonical BA + developer backlog).
+2. Prefer **P1** items (Field Inspector copy, richer Page Info, Favorites categories/filter, Fluid inspect, Trace presets) unless the user specifies otherwise.
+3. Agent plan stub: **`.cursor/plans/future-enhancements.md`**.
+4. Still obey compliance rules: no credentials/Quick Logins, no telemetry, `chrome.storage.local` only, opt-in host allowlist.
+5. After shipping a backlog item, mark it done in the findings doc Capture log / strike through the ID row, and mention it in CHANGELOG + wiki use cases when user-visible.
