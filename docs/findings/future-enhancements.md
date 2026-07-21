@@ -26,7 +26,7 @@
 | ~~FI-02~~ | ~~Show **page label** text next to technical name when a `<label>` / `PSlabel` is nearby~~ | BA | Done in 1.0.9 | |
 | ~~FI-03~~ | ~~**DERIVED_** / work-record badge in readout~~ | Dev | Done in 1.0.9 | Type: Work |
 | ~~FI-04~~ | ~~**Fluid** field selectors (`ps_box-control`, data attrs) parity~~ | BA, Dev | Done in 1.0.10 | Classic iframe path retained |
-| FI-05 | Large-grid performance: only decorate **visible** rows / debounce MutationObserver | Dev | Big scroll grids get sluggish with full wrap | IntersectionObserver or throttle |
+| ~~FI-05~~ | ~~Large-grid performance: only decorate **visible** rows / debounce MutationObserver~~ | Dev | Done in 1.0.11 | Viewport + scroll reinject; full-page peer scan |
 
 ### Page Info / environment awareness
 
@@ -35,7 +35,7 @@
 | ~~PI-01~~ | ~~Richer Page Info: **DB name**, **DB type**, **Mode** (Classic/Fluid), app release when present in connection comment / `#pt_pageinfo`~~ | BA, Dev | Done in 1.0.9 | |
 | ~~PI-02~~ | ~~**Copy as Markdown** / Jira snippet (Menu, Component, Page, ToolsRel, Rec.Fld if locked)~~ | BA | Done in 1.0.9 | |
 | ~~PI-03~~ | ~~Toolbar **UI mode badge** (Classic / Fluid / Nav collection)~~ | BA, Dev | Done in 1.0.9 | |
-| PI-04 | Persist last N **recent components** (local only) for quick re-open | BA | Complements Favorites without taxonomy | Cap list; no server sync |
+| ~~PI-04~~ | ~~Persist last N **recent components** (local only) for quick re-open~~ | BA | Done in 1.0.11 | Cap 12; no server sync |
 
 ### Favorites & navigation
 
@@ -43,7 +43,7 @@
 |---|---|---|---|---|
 | ~~FV-01~~ | ~~**Categories / subcategories** UI (legacy parity)~~ | BA | Done in 1.0.9 (optgroups + subcategory in label) | Options table still flat |
 | ~~FV-02~~ | ~~Favorites **filter/search** in bar dropdown~~ | BA | Done in 1.0.9 | |
-| FV-03 | Open favorite in **new window** option | Dev | Parallel compare in two envs | Combine with New Win site rules |
+| ~~FV-03~~ | ~~Open favorite in **new window** option~~ | Dev | Done in 1.0.11 | Bar “New win” checkbox + `_newwin` |
 | ~~FV-04~~ | ~~Warn on export that favorites may contain **business keys** in Parameters~~ | BA | Done in 1.0.9 | Options confirm + hint |
 
 ### Trace & developer tooling
@@ -52,7 +52,7 @@
 |---|---|---|---|---|
 | ~~TR-01~~ | ~~Trace Options UI: show **which flags** are on; named **presets** (SQL only, PeopleCode only, etc.)~~ | Dev | Done in 1.0.10 | Keep delivered UTILITIES POST protocol |
 | ~~TR-02~~ | ~~Clearer **Trace 🔒** help when security blocks components~~ | Dev | Done in 1.0.9 | |
-| TR-03 | Optional **ICSID / page token present?** indicator (boolean only, never display full token) | Dev | Debug postback / session issues | Do not copy secrets into clipboard by default |
+| ~~TR-03~~ | ~~Optional **ICSID / page token present?** indicator (boolean only, never display full token)~~ | Dev | Done in 1.0.11 | Page Info line only |
 
 ### Search page helpers
 
@@ -69,9 +69,9 @@
 |---|---|---|---|---|
 | ~~UX-01~~ | ~~Keyboard shortcuts: Page Info, Inspect toggle, copy locked field~~ | BA, Dev | Done in 1.0.9 (Alt+Shift+P/I/C) | |
 | ~~UX-02~~ | ~~In-bar **component URL builder** (Menu.Component.Market + optional params)~~ | Dev | Done in 1.0.10 (Go to · Alt+Shift+G) | |
-| UX-03 | Environment **color strip** / stronger env affordance beyond underline | BA | Reduce wrong-env mistakes | AODA contrast check |
+| ~~UX-03~~ | ~~Environment **color strip** / stronger env affordance beyond underline~~ | BA | Done in 1.0.11 | Left strip + tint via `--mpu-env-color` |
 | UX-04 | Favorites **notes** field (local) | BA | “Use this for payroll calc test” | Export includes notes → warn |
-| UX-05 | Field Inspector: show **input type / maxlength / disabled** chips | Dev | Quick HTML property check | From DOM attrs only |
+| ~~UX-05~~ | ~~Field Inspector: show **input type / maxlength / disabled** chips~~ | Dev | Done in 1.0.11 | From DOM attrs only |
 | ~~UX-06~~ | ~~Page Info: include **portal / node / site** from parsed URL~~ | BA, Dev | Done in 1.0.9 | |
 | UX-07 | **Compare** current Page Info to clipboard buffer (diff Menu/Component/ToolsRel) | BA | Cross-env checklist | Local string compare |
 | UX-08 | Nav collection / nested iframe Field Inspector polish | Dev | Campus / content collections | Already partial via `.ps_target-iframe` |
@@ -111,7 +111,8 @@
 2. ~~**FV-01, FV-02** — favorites scale~~ (shipped 1.0.9)
 3. ~~**FI-04, SR-01** — Fluid / search reliability~~ (shipped 1.0.10)
 4. ~~**TR-01, UX-02** — developer daily drivers~~ (shipped 1.0.10)
-5. P3 items only with ADR if they add permissions or major UI surface  
+5. ~~**FI-05, PI-04, FV-03, TR-03, UX-03, UX-05** — remaining P1 + key P2~~ (shipped 1.0.11)
+6. P3 items only with ADR if they add permissions or major UI surface  
 
 ---
 
@@ -122,3 +123,4 @@
 | 2026-07-21 | Initial backlog from Classic Inspect/Page Info work, legacy PS Utilities audit, BA/tech use cases, and PeopleTools 8.61 Classic+Fluid field reality |
 | 2026-07-21 | Wave 1 implemented in v1.0.9 (FI-01..03, PI-01..03, FV-01/02/04, TR-02, UX-01/06) — plan: `.cursor/plans/implement-p1-wave1.md` |
 | 2026-07-21 | Wave 2 implemented in v1.0.10 (FI-04, SR-01/02, TR-01, UX-02) — plan: `.cursor/plans/implement-wave2.md` |
+| 2026-07-21 | Wave 3 implemented in v1.0.11 (FI-05, PI-04, FV-03, TR-03, UX-03, UX-05) — plan: `.cursor/plans/implement-wave3.md` |

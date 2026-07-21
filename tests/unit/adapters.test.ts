@@ -10,6 +10,7 @@ import {
   parseConnectionComment,
   parsePsUrl,
   buildComponentUrl,
+  detectPageTokenPresent,
 } from "@/adapters/ps-page";
 
 describe("parsePsUrl edge cases", () => {
@@ -218,17 +219,30 @@ describe("extractPageMeta", () => {
       toolsRel: "8.61",
       dbName: "CSDEV",
       uiMode: "classic",
+      pageTokenPresent: true,
     };
     const parsed = parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL");
     const plain = formatPageInfoPlain(meta, parsed, "JOB.EMPLID");
     expect(plain).toContain("DB Name: CSDEV");
+    expect(plain).toContain("Page token: present");
     expect(plain).toContain("Locked field: JOB.EMPLID");
+    expect(plain).not.toMatch(/ICSID\s*=/);
     const md = formatPageInfoMarkdown(meta, parsed, "JOB.EMPLID");
     expect(md).toContain("### PeopleSoft page info");
     expect(md).toContain("| ToolsRel | 8.61 |");
+    expect(md).toContain("| Page token | present |");
+  });
+
+  it("detects page token presence without exposing value", () => {
+    document.body.innerHTML = `<input type="hidden" id="ICSID" value="SECRET_TOKEN_VALUE" />`;
+    expect(detectPageTokenPresent(document)).toBe(true);
+    const meta = extractPageMeta(document);
+    expect(meta.pageTokenPresent).toBe(true);
+    const plain = formatPageInfoPlain(meta, parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL"));
+    expect(plain).toContain("Page token: present");
+    expect(plain).not.toContain("SECRET_TOKEN_VALUE");
   });
 });
-
 describe("header mount and UI model", () => {
   beforeEach(() => {
     document.body.innerHTML = "";

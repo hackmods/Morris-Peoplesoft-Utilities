@@ -29,6 +29,40 @@ export interface Favorite {
   pinned?: boolean;
 }
 
+/** Recently visited components (PI-04) — local only, capped. */
+export interface RecentComponent {
+  Servlet: "psp" | "psc";
+  Menu: string;
+  Component: string;
+  Market: string;
+  Portal: string;
+  Node: string;
+  Site: string;
+  visitedAt: number;
+}
+
+export const RECENT_COMPONENT_LIMIT = 12;
+
+export function recentComponentKey(r: {
+  Menu: string;
+  Component: string;
+  Market: string;
+  Site?: string;
+}): string {
+  return `${r.Menu}.${r.Component}.${r.Market || "GBL"}@${r.Site || ""}`;
+}
+
+/** Prepend a visit, de-dupe by Menu.Component.Market@Site, cap list. */
+export function pushRecentComponent(
+  list: RecentComponent[],
+  entry: RecentComponent,
+  limit = RECENT_COMPONENT_LIMIT,
+): RecentComponent[] {
+  const key = recentComponentKey(entry);
+  const rest = list.filter((r) => recentComponentKey(r) !== key);
+  return [entry, ...rest].slice(0, limit);
+}
+
 export interface Environment {
   label: string;
   active: YesNo;
@@ -68,6 +102,8 @@ export interface TraceSettings {
 export interface MpuSettings {
   features: FeatureFlags;
   favorites: Favorite[];
+  /** PI-04: last N components visited in this browser */
+  recentComponents: RecentComponent[];
   environments: Environment[];
   urlSites: UrlSiteMap;
   traceSettings: TraceSettings;
@@ -119,6 +155,7 @@ export function createDefaultSettings(): MpuSettings {
   return {
     features: { ...DEFAULT_FEATURES },
     favorites: [],
+    recentComponents: [],
     environments: [],
     urlSites: {},
     traceSettings: { ...DEFAULT_TRACE },

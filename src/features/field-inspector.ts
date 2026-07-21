@@ -33,6 +33,9 @@ let frameLoadHandler: (() => void) | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let mutationObserver: MutationObserver | null = null;
 let reinjectTimer: ReturnType<typeof setTimeout> | null = null;
+let viewportBound = false;
+let viewportScrollHandler: ((e: Event) => void) | null = null;
+let viewportResizeHandler: ((e: Event) => void) | null = null;
 let applying = false;
 /** Base ids (no $occ) seen on the current page — used to split RECORD vs FIELD. */
 let peerFieldBases: string[] = [];
@@ -50,6 +53,12 @@ export interface ParsedRecField {
   pageLabel?: string;
   /** Work/derived record heuristic */
   workRecord?: boolean;
+  /** HTML input type when applicable (UX-05) */
+  inputType?: string;
+  /** maxlength attribute when > 0 (UX-05) */
+  maxLength?: number;
+  /** disabled / aria-disabled (UX-05) */
+  disabled?: boolean;
 }
 
 export function fieldNameFromId(id: string): string {
@@ -136,6 +145,42 @@ export function nearbyPageLabel(el: Element): string | undefined {
   return undefined;
 }
 
+/** DOM attribute chips for Field Inspector readout (UX-05). */
+export function fieldDomAttrs(el: Element | null | undefined): {
+  inputType?: string;
+  maxLength?: number;
+  disabled?: boolean;
+} {
+  if (!el) return {};
+  const html = el as HTMLElement;
+  const tag = html.tagName?.toLowerCase();
+  let inputType: string | undefined;
+  let maxLength: number | undefined;
+  let disabled =
+    (html as HTMLInputElement).disabled === true ||
+    html.getAttribute("aria-disabled") === "true" ||
+    html.hasAttribute("disabled");
+
+  if (tag === "input") {
+    inputType = (html as HTMLInputElement).type || html.getAttribute("type") || "text";
+    const ml = (html as HTMLInputElement).maxLength;
+    if (typeof ml === "number" && ml > 0 && ml < 100000) maxLength = ml;
+  } else if (tag === "textarea") {
+    inputType = "textarea";
+    const ml = (html as HTMLTextAreaElement).maxLength;
+    if (typeof ml === "number" && ml > 0 && ml < 100000) maxLength = ml;
+  } else if (tag === "select") {
+    inputType = "select";
+  } else if (tag === "a") {
+    inputType = "link";
+  } else if (tag === "span") {
+    inputType = "display";
+    disabled = true;
+  }
+
+  return { inputType, maxLength, disabled: disabled || undefined };
+}
+
 export function parseRecField(
   id: string,
   peers: string[] = peerFieldBases,
@@ -148,6 +193,7 @@ export function parseRecField(
   const field =
     record && base.startsWith(`${record}_`) ? base.slice(record.length + 1) || undefined : undefined;
   const pageLabel = fieldEl ? nearbyPageLabel(fieldEl) : undefined;
+  const attrs = fieldDomAttrs(fieldEl);
   return {
     raw: id,
     base,
@@ -156,6 +202,7 @@ export function parseRecField(
     occurrence,
     pageLabel,
     workRecord: Boolean(isWorkRecordName(record) || /^(DERIVED_|WRK_|WORK_)/i.test(base)),
+    ...attrs,
   };
 }
 
@@ -324,6 +371,15 @@ function setNamePanel(id: string | null): void {
   if (parsed.pageLabel) {
     addPart("mpu-rf-label", "Label", parsed.pageLabel);
   }
+  if (parsed.inputType) {
+    addPart("mpu-rf-itype", "HTML", parsed.inputType);
+  }
+  if (parsed.maxLength != null) {
+    addPart("mpu-rf-maxlen", "Max", String(parsed.maxLength));
+  }
+  if (parsed.disabled) {
+    addPart("mpu-rf-dis", "State", "disabled");
+  }
   if (parsed.record && parsed.field) {
     addPart("mpu-rf-rec", "Rec", parsed.record);
     addPart("mpu-rf-fld", "Fld", parsed.field);
@@ -383,6 +439,38 @@ export function preferredFluidBoxHost(node: Element): Element | null {
   );
 }
 
+/**
+ * FI-05: only decorate fields near the viewport (plus locked field).
+ * Margin keeps a small buffer for partial rows.
+ * Zero-size rects (jsdom / not laid out) are treated as visible so Classic tests still decorate.
+ */
+export function isFieldInViewport(el: Element, marginPx = 200): boolean {
+  const host =
+    preferredFluidBoxHost(el) ||
+    el.closest("tr, .ps_grid-row, .ps_box-group, .ps_box-control") ||
+    el;
+  const rect = host.getBoundingClientRect();
+  if (!rect || (rect.width === 0 && rect.height === 0)) {
+    return true;
+  }
+  const view = el.ownerDocument?.defaultView || window;
+  const top = -marginPx;
+  const bottom = view.innerHeight + marginPx;
+  const left = -marginPx;
+  const right = view.innerWidth + marginPx;
+  return rect.bottom >= top && rect.top <= bottom && rect.right >= left && rect.left <= right;
+}
+
+function shouldDecorateField(node: Element): boolean {
+  if (lockedId) {
+    const id = (node as HTMLElement).id;
+    if (id && (id === lockedId || fieldNameFromId(id) === fieldNameFromId(lockedId))) {
+      return true;
+    }
+  }
+  return isFieldInViewport(node);
+}
+
 function injectIcons(target: Document): number {
   applying = true;
   try {
@@ -400,6 +488,11 @@ function injectIcons(target: Document): number {
         if (!node.id || !node.id.includes("_")) continue;
         if (node.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
         if (node.closest(`.${AREA}`)) continue;
+
+        // Always collect peer bases from the full page for RECORD/FIELD inference
+        bases.push(fieldNameFromId(node.id));
+
+        if (!shouldDecorateField(node)) continue;
 
         const fluidHost = preferredFluidBoxHost(node);
         const parent = fluidHost?.parentElement || node.parentElement;
@@ -427,7 +520,6 @@ function injectIcons(target: Document): number {
 
         const field = findFieldElement(area) || (isHtmlElement(node) ? node : null);
         const fieldId = field?.id ?? node.id;
-        bases.push(fieldNameFromId(fieldId));
 
         const icon = createIcon(doc, ORANGE, fieldId);
         area.insertBefore(icon, area.firstChild);
@@ -576,7 +668,34 @@ function scheduleReinject(doc: Document): void {
     reinjectTimer = null;
     if (!active || applying) return;
     applyToTarget(doc);
-  }, 150);
+  }, 200);
+}
+
+function onViewportChange(): void {
+  if (!active || applying) return;
+  scheduleReinject(topDocRef);
+}
+
+function detachViewportListeners(): void {
+  if (!viewportBound) return;
+  viewportBound = false;
+  if (viewportScrollHandler) {
+    window.removeEventListener("scroll", viewportScrollHandler, true);
+  }
+  if (viewportResizeHandler) {
+    window.removeEventListener("resize", viewportResizeHandler);
+  }
+  viewportScrollHandler = null;
+  viewportResizeHandler = null;
+}
+
+function attachViewportListeners(): void {
+  detachViewportListeners();
+  viewportScrollHandler = onViewportChange;
+  viewportResizeHandler = onViewportChange;
+  window.addEventListener("scroll", viewportScrollHandler, true);
+  window.addEventListener("resize", viewportResizeHandler);
+  viewportBound = true;
 }
 
 function detachMutations(): void {
@@ -618,6 +737,7 @@ function applyToTarget(doc: Document): number {
   bindTarget(targetDocRef);
   const n = injectIcons(targetDocRef);
   attachMutations(targetDocRef, doc);
+  attachViewportListeners();
   return n;
 }
 
@@ -737,6 +857,7 @@ export function stopFieldInspector(doc: Document = document): void {
   topDocRef = doc;
   clearPoll();
   detachMutations();
+  detachViewportListeners();
   const target = targetDocRef;
   doc.removeEventListener("keydown", onKey, true);
   try {

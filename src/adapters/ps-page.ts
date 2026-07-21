@@ -195,6 +195,11 @@ export interface PageMeta {
   page?: string;
   /** classic | fluid | navCollection | unknown */
   uiMode?: string;
+  /**
+   * True when an ICSID (or equivalent page state token input) is present.
+   * Boolean only — never store or display the token value (TR-03).
+   */
+  pageTokenPresent?: boolean;
 }
 
 /** Pull connection keys from a PeopleSoft HTML comment (parity with PS Utilities). */
@@ -294,7 +299,18 @@ function mergePageMeta(into: PageMeta, from: PageMeta): PageMeta {
     component: into.component || from.component,
     page: into.page || from.page,
     uiMode: into.uiMode || from.uiMode,
+    pageTokenPresent: Boolean(into.pageTokenPresent || from.pageTokenPresent),
   };
+}
+
+/** Detect presence of page state token without reading/copying its value. */
+export function detectPageTokenPresent(doc: Document): boolean {
+  const el =
+    doc.getElementById("ICSID") ||
+    doc.querySelector<HTMLInputElement>('input[name="ICSID"], input#ICSID');
+  if (!el) return false;
+  const value = (el as HTMLInputElement).value;
+  return typeof value === "string" ? value.length > 0 : true;
 }
 
 export function extractPageMeta(doc: Document = document): PageMeta {
@@ -347,6 +363,7 @@ export function extractPageMeta(doc: Document = document): PageMeta {
     meta.uiMode = detectUiModel(doc);
   }
 
+  meta.pageTokenPresent = detectPageTokenPresent(doc);
   return meta;
 }
 
@@ -394,6 +411,7 @@ export function formatPageInfoPlain(
     `DB Name: ${meta.dbName ?? "—"}`,
     `DB Type: ${meta.dbType ?? "—"}`,
     `App Server: ${meta.appServer ?? "—"}`,
+    `Page token: ${meta.pageTokenPresent ? "present" : "not detected"}`,
   ];
   if (lockedField) lines.push(`Locked field: ${lockedField}`);
   return lines.join("\n");
@@ -428,6 +446,7 @@ export function formatPageInfoMarkdown(
     ["DB Name", meta.dbName ?? "—"],
     ["DB Type", meta.dbType ?? "—"],
     ["App Server", meta.appServer ?? "—"],
+    ["Page token", meta.pageTokenPresent ? "present" : "not detected"],
   ];
   if (lockedField) rows.push(["Locked field", lockedField]);
   const body = rows.map(([k, v]) => `| ${k} | ${v} |`).join("\n");

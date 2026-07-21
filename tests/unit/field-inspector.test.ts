@@ -15,6 +15,8 @@ import {
   formatRecFieldCopy,
   preferredFluidBoxHost,
   nearbyPageLabel,
+  fieldDomAttrs,
+  isFieldInViewport,
 } from "@/features/field-inspector";
 
 describe("field inspector", () => {
@@ -234,6 +236,38 @@ describe("field inspector", () => {
     expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
     stopFieldInspector(document);
     expect(iframe.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
+  });
+
+  it("exposes HTML type/maxlength/disabled chips", () => {
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" class="mpu-recfield-name" hidden></span>
+      </div>
+      <div class="ps-field">
+        <input id="JOB_EMPLID$0" type="text" maxlength="11" disabled />
+      </div>
+      <div class="ps-field"><input id="JOB_EMPL_RCD$0" type="number" /></div>
+    `;
+    const el = document.getElementById("JOB_EMPLID$0")!;
+    expect(fieldDomAttrs(el)).toEqual({ inputType: "text", maxLength: 11, disabled: true });
+    startFieldInspector(document);
+    syncFieldInspectorChrome(document);
+    const icon = document.querySelector(
+      '.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID$0"]',
+    ) as SVGElement;
+    icon.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    const panel = document.getElementById("mpu-recfield-name")!;
+    expect(panel.querySelector(".mpu-rf-itype .mpu-rf-val")?.textContent).toBe("text");
+    expect(panel.querySelector(".mpu-rf-maxlen .mpu-rf-val")?.textContent).toBe("11");
+    expect(panel.querySelector(".mpu-rf-dis .mpu-rf-val")?.textContent).toBe("disabled");
+    stopFieldInspector(document);
+  });
+
+  it("treats zero-size rects as in-viewport for jsdom / pre-layout", () => {
+    document.body.innerHTML = `<input id="JOB_EMPLID$0" />`;
+    const el = document.getElementById("JOB_EMPLID$0")!;
+    expect(isFieldInViewport(el)).toBe(true);
   });
 
   it("wraps Fluid ps_box hosts without swallowing the whole group", () => {
