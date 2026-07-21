@@ -4,6 +4,20 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.13] — 2026-07-21
+
+### Added
+
+- **Wave 5 P3 remainder** (see `docs/findings/future-enhancements.md`):
+  - First-install **onboarding** checklist in Options (`showOnboarding`) (SP-02)
+  - Favorites import **append / replace** + imported count (SP-03)
+  - ToolsRel / UI-mode **tips** in Page Info and Help (SP-04)
+  - Optional Chrome **Side Panel** (Favorites + Page Info) + ADR 0008; `sidePanel` + `tabs` permissions documented (SP-05)
+  - High-contrast / forced-colors Field Inspector borders + reduced-motion notes (SP-06)
+  - PeopleCode **copy formats**: `RECORD.FIELD`, `&Record.FIELD`, `GetField(Field.FIELD)` (SP-07)
+  - Login bar mounts **above** the password form — never reads values (SP-08)
+  - CSP-safe **Page Tabs** dialog from delivered tab links (SP-01)
+
 ## [1.0.12] — 2026-07-21
 
 ### Added

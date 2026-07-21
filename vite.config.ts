@@ -33,7 +33,7 @@ function writeManifest() {
     short_name: "MPU",
     version: pkg.version,
     description: pkg.description,
-    permissions: ["storage"],
+    permissions: ["storage", "sidePanel", "tabs"],
     action: {
       default_popup: "popup.html",
       default_title: "Morris PeopleSoft Utilities",
@@ -45,6 +45,9 @@ function writeManifest() {
       },
     },
     options_page: "options.html",
+    side_panel: {
+      default_path: "sidepanel.html",
+    },
     background: {
       service_worker: "background.js",
       type: "module",
@@ -110,6 +113,7 @@ export default defineConfig({
         content: resolve(root, "src/content/index.ts"),
         popup: resolve(root, "src/ui/popup/popup.html"),
         options: resolve(root, "src/ui/options/options.html"),
+        sidepanel: resolve(root, "src/ui/sidepanel/sidepanel.html"),
         "inject/adv-search": resolve(root, "src/inject/adv-search.ts"),
         "inject/corr-hist": resolve(root, "src/inject/corr-hist.ts"),
         "inject/corr-hist-and-adv-search": resolve(root, "src/inject/corr-hist-and-adv-search.ts"),
@@ -154,6 +158,7 @@ export default defineConfig({
 
         flattenHtml(resolve(outDir, "src/ui/popup/popup.html"), "popup.html");
         flattenHtml(resolve(outDir, "src/ui/options/options.html"), "options.html");
+        flattenHtml(resolve(outDir, "src/ui/sidepanel/sidepanel.html"), "sidepanel.html");
         await bundleContentScriptAsIife();
         writeManifest();
       },

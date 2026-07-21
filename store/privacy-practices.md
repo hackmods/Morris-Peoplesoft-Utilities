@@ -37,6 +37,8 @@ MPU does not request or store passwords. Favorites may include PeopleSoft menu/c
 ## Permissions justification
 
 - **storage** — save feature flags, favorites, environments, and optional allowlist locally.
+- **sidePanel** — optional Side Panel for Favorites browsing and Page Info (opened from the popup).
+- **tabs** — navigate the active PeopleSoft tab to a Favorite and request a Page Info snapshot from the content script on that same tab.
 
 ## Host access
 

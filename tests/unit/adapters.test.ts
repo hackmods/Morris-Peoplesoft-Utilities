@@ -13,6 +13,8 @@ import {
   detectPageTokenPresent,
   comparePageInfoToBuffer,
   formatFavoriteDescriptionTemplate,
+  toolsRelTips,
+  collectPageTabs,
 } from "@/adapters/ps-page";
 
 describe("parsePsUrl edge cases", () => {
@@ -294,6 +296,45 @@ describe("header mount and UI model", () => {
 
   it("falls back to body for mount", () => {
     expect(findHeaderMount(document)).toBe(document.body);
+  });
+
+  it("loginMode mounts above the password form without reading values", () => {
+    document.body.innerHTML = `
+      <div id="wrap">
+        <form id="login">
+          <input type="text" name="userid" value="secret-user" />
+          <input type="password" name="pwd" value="secret-pass" />
+        </form>
+      </div>
+    `;
+    const mount = findHeaderMount(document, { loginMode: true });
+    expect(mount?.id).toBe("login");
+    const pwd = document.querySelector('input[type="password"]') as HTMLInputElement;
+    expect(pwd.value).toBe("secret-pass");
+  });
+
+  it("toolsRelTips are context-sensitive for Classic / Fluid / missing ToolsRel", () => {
+    const classic = toolsRelTips("8.61.15", "classic");
+    expect(classic.some((t) => /ptifrmtgtframe/i.test(t))).toBe(true);
+    expect(classic.some((t) => /ToolsRel 8\.61/.test(t))).toBe(true);
+
+    const fluid = toolsRelTips("8.60", "fluid");
+    expect(fluid.some((t) => /Fluid/i.test(t))).toBe(true);
+
+    const missing = toolsRelTips(undefined, "classic");
+    expect(missing.some((t) => /not detected/i.test(t))).toBe(true);
+  });
+
+  it("collectPageTabs de-dupes delivered tab labels", () => {
+    document.body.innerHTML = `
+      <div id="pstabs">
+        <a href="#1">General</a>
+        <a href="#2">General</a>
+        <a href="#3">Job Data</a>
+      </div>
+    `;
+    const tabs = collectPageTabs(document);
+    expect(tabs.map((t) => t.label)).toEqual(["General", "Job Data"]);
   });
 
   it("getTargetDocument returns same doc without frames", () => {

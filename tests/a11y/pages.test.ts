@@ -49,4 +49,18 @@ describe("AODA / axe audits for extension pages", () => {
     );
     expect(serious).toEqual([]);
   });
+
+  it("side panel markup has no serious axe violations", async () => {
+    loadHtml("src/ui/sidepanel/sidepanel.html", "MPU Side Panel");
+    const results = await axe.run(document, {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa"] },
+      rules: {
+        "color-contrast": { enabled: false },
+      },
+    });
+    const serious = results.violations.filter((v) =>
+      ["serious", "critical"].includes(v.impact || ""),
+    );
+    expect(serious).toEqual([]);
+  });
 });

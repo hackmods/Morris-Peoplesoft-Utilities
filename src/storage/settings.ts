@@ -86,6 +86,13 @@ export async function loadSettings(): Promise<MpuSettings> {
         ...createDefaultSettings().featureUiScopes,
         ...(s.featureUiScopes || {}),
       },
+      showOnboarding: s.showOnboarding === "Yes" || s.showOnboarding === "No" ? s.showOnboarding : "No",
+      fieldCopyFormat:
+        s.fieldCopyFormat === "ampersand" ||
+        s.fieldCopyFormat === "getfield" ||
+        s.fieldCopyFormat === "record.field"
+          ? s.fieldCopyFormat
+          : "record.field",
     };
   }
 

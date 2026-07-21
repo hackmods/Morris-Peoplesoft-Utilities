@@ -229,6 +229,23 @@
   border: 1px solid #c4a035;
 }
 
+.mpu-page-tabs-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mpu-page-tabs-list .mpu-btn {
+  width: 100%;
+  text-align: left;
+}
+
+.mpu-copy-format {
+  max-width: 9rem;
+}
+
 .mpu-recfield-name {
   display: inline-flex;
   align-items: center;

@@ -23,10 +23,25 @@
     <main id="main">
       <section id="panel-features" class="panel" data-panel="features" role="tabpanel" aria-labelledby="tab-features">
         <h2>Features</h2>
+        <div id="onboarding" class="onboarding" hidden>
+          <h3>Welcome — quick checklist</h3>
+          <ol>
+            <li>Open a PeopleSoft Classic or Fluid page</li>
+            <li>Confirm the MPU bar appears (Environment / Page Info / Inspect)</li>
+            <li>Add a Favorite with ★ (optional Page Info template + notes)</li>
+            <li>Optional: set Trace presets if you have UTILITIES security</li>
+            <li>Optional: open the Side Panel from the extension popup</li>
+          </ol>
+          <button type="button" class="primary" id="dismiss-onboarding">Got it — dismiss</button>
+        </div>
         <div id="feature-toggles"></div>
         <h3>Classic / Fluid scope</h3>
         <p class="hint">Limit noisy helpers to Classic portal, Fluid, or both (UX-09).</p>
         <div id="feature-ui-scopes"></div>
+        <h3>Field copy format</h3>
+        <label class="row" for="fieldCopyFormat">PeopleCode copy format
+          <select id="fieldCopyFormat" aria-label="PeopleCode copy format"></select>
+        </label>
         <label class="row">
           <input type="checkbox" id="quietEnvPrompt" />
           Quiet mode — don’t prompt to name new environments
@@ -41,6 +56,10 @@
         <div class="row-actions">
           <button type="button" id="export-fav">Export CSV</button>
           <label class="file-btn">Import CSV <input type="file" id="import-fav" accept=".csv,text/csv" /></label>
+          <label class="row inline">
+            <input type="checkbox" id="import-replace" />
+            Replace existing favorites on import
+          </label>
           <button type="button" id="export-json">Backup JSON</button>
           <label class="file-btn">Restore JSON <input type="file" id="import-json" accept=".json,application/json" /></label>
         </div>

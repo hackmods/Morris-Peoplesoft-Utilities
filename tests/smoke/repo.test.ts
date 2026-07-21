@@ -69,10 +69,13 @@ describe("built extension smoke (when dist present)", () => {
     };
     expect(manifest.manifest_version).toBe(3);
     expect(manifest.key).toBeUndefined();
-    expect(manifest.permissions).toEqual(["storage"]);
+    expect(manifest.permissions).toEqual(["storage", "sidePanel", "tabs"]);
     expect(existsSync(resolve("dist", manifest.background.service_worker))).toBe(true);
     expect(existsSync(resolve("dist", manifest.action.default_popup))).toBe(true);
     expect(existsSync(resolve("dist", manifest.options_page))).toBe(true);
+    expect(
+      existsSync(resolve("dist", (manifest as { side_panel?: { default_path: string } }).side_panel?.default_path || "")),
+    ).toBe(true);
     expect(existsSync(resolve("dist", manifest.content_scripts[0].js[0]))).toBe(true);
     for (const entry of manifest.web_accessible_resources) {
       for (const pattern of entry.matches) {

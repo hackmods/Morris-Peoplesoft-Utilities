@@ -1,15 +1,17 @@
-import type { Favorite, MpuSettings, RecentComponent } from "../storage/schema";
+import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent } from "../storage/schema";
+import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { ParsedPsUrl } from "../adapters/ps-page";
 import {
   collectPageMeta,
+  collectPageTabs,
   detectUiModel,
   findHeaderMount,
   formatPageInfoMarkdown,
   formatPageInfoPlain,
   buildComponentUrl,
   comparePageInfoToBuffer,
+  toolsRelTips,
 } from "../adapters/ps-page";
-import { isYes } from "../storage/schema";
 
 export interface BarContext {
   settings: MpuSettings;
@@ -21,7 +23,8 @@ export interface BarContext {
   onNewWindow: () => void;
   onAddFavorite: () => void;
   onGoToComponent?: () => void;
-  onCopyLockedField?: () => void;
+  onCopyLockedField?: (format?: FieldCopyFormat) => void;
+  onPageTabs?: () => void;
   fieldInspectorActive: boolean;
   lockedFieldName?: string | null;
   traceRunning: boolean;
@@ -98,11 +101,11 @@ export function removeBar(doc: Document = document): void {
 export function mountBar(ctx: BarContext, doc: Document = document): void {
   removeBar(doc);
   const f = ctx.settings.features;
-  const mount = findHeaderMount(doc);
+  const loginOnly = Boolean(ctx.loginMode);
+  const mount = findHeaderMount(doc, { loginMode: loginOnly });
   if (!mount) return;
 
   const classicTarget = mount.id === "ptifrmtarget" ? mount : null;
-  const loginOnly = Boolean(ctx.loginMode);
 
   const bar = document.createElement("div");
   bar.id = "mpu-bar";
@@ -357,14 +360,39 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     }
     bar.appendChild(name);
 
+    const copyFmt = document.createElement("select");
+    copyFmt.id = "mpu-copy-format";
+    copyFmt.className = "mpu-select mpu-copy-format";
+    copyFmt.setAttribute("aria-label", "PeopleCode copy format");
+    copyFmt.hidden = !ctx.fieldInspectorActive || !ctx.lockedFieldName;
+    const preferred = ctx.settings.fieldCopyFormat || "record.field";
+    for (const fmt of FIELD_COPY_FORMATS) {
+      const opt = document.createElement("option");
+      opt.value = fmt.id;
+      opt.textContent = fmt.label;
+      opt.title = fmt.example;
+      if (fmt.id === preferred) opt.selected = true;
+      copyFmt.appendChild(opt);
+    }
+    bar.appendChild(copyFmt);
+
     const copyField = btn(
       "mpu-copy-field",
       "Copy field",
-      "Copy locked RECORD.FIELD to clipboard (Alt+Shift+C)",
+      "Copy locked field using selected PeopleCode format (Alt+Shift+C)",
     );
     copyField.hidden = !ctx.fieldInspectorActive || !ctx.lockedFieldName;
-    copyField.addEventListener("click", () => ctx.onCopyLockedField?.());
+    copyField.addEventListener("click", () => {
+      const format = (copyFmt.value || preferred) as FieldCopyFormat;
+      ctx.onCopyLockedField?.(format);
+    });
     bar.appendChild(copyField);
+  }
+
+  if (!loginOnly && isYes(f.pageInfoOption) && ctx.onPageTabs) {
+    const tabs = btn("mpu-pagetabs", "Page Tabs", "List delivered page/tab links on this component");
+    tabs.addEventListener("click", () => ctx.onPageTabs?.());
+    bar.appendChild(tabs);
   }
 
   if (!loginOnly && isYes(f.newWindowOption) && ctx.parsed.kind === "component") {
@@ -395,6 +423,9 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     if (!ctx.fieldInspectorActive) {
       injectResizeFrame(doc);
     }
+  } else if (loginOnly && mount !== doc.body && mount.parentElement) {
+    // SP-08: insert above password form container, not inside it
+    mount.parentElement.insertBefore(bar, mount);
   } else if (mount === doc.body) {
     mount.insertBefore(bar, mount.firstChild);
   } else {
@@ -413,6 +444,12 @@ function showHelpDialog(doc: Document): void {
   const existing = doc.getElementById("mpu-dialog");
   existing?.remove();
 
+  const meta = collectPageMeta(doc);
+  const tips = toolsRelTips(meta.toolsRel, meta.uiMode || detectUiModel(doc));
+  const tipHtml = tips.length
+    ? `<h3>Tips for this page</h3><ul>${tips.map(() => `<li></li>`).join("")}</ul>`
+    : "";
+
   const backdrop = document.createElement("div");
   backdrop.id = "mpu-dialog";
   backdrop.className = "mpu-dialog-backdrop";
@@ -428,16 +465,25 @@ function showHelpDialog(doc: Document): void {
     <h2 id="mpu-dialog-title">Morris PeopleSoft Utilities</h2>
     <p>Productivity overlay for PeopleSoft Classic and Fluid. Settings stay on this device. No passwords. No telemetry.</p>
     <ul>
-      <li><strong>Favorites</strong> — jump to components</li>
-      <li><strong>Page Info</strong> — menu/component/page without CTRL+J</li>
-      <li><strong>Field Inspector</strong> — orange icons; hover/lock for Rec/Fld/Row; copy on lock (Alt+Shift+C)</li>
+      <li><strong>Favorites</strong> — jump to components (optional Notes)</li>
+      <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs</li>
+      <li><strong>Page Tabs</strong> — delivered multi-page links when present</li>
+      <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
       <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
-      <li><strong>Shortcuts</strong> — Alt+Shift+P Page Info · Alt+Shift+I Inspect · Alt+Shift+C copy field · Alt+Shift+G Go to</li>
+      <li><strong>Shortcuts</strong> — Alt+Shift+P/I/C/G</li>
     </ul>
+    ${tipHtml}
     <p>Maintained by <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>. Inspired by PS Utilities.</p>
     <button type="button" class="mpu-btn" id="mpu-dialog-close">Close</button>
   `;
+
+  if (tips.length) {
+    const lis = dialog.querySelectorAll("h3 + ul li");
+    tips.forEach((tip, i) => {
+      if (lis[i]) lis[i].textContent = tip;
+    });
+  }
 
   backdrop.appendChild(dialog);
   doc.body.appendChild(backdrop);
@@ -455,6 +501,63 @@ function showHelpDialog(doc: Document): void {
     { once: true },
   );
   (dialog.querySelector("#mpu-dialog-close") as HTMLButtonElement)?.focus();
+}
+
+/** CSP-safe Page Tabs list from delivered links (SP-01). */
+export function showPageTabsDialog(doc: Document): void {
+  const tabs = collectPageTabs(doc);
+  const existing = doc.getElementById("mpu-dialog");
+  existing?.remove();
+
+  const backdrop = doc.createElement("div");
+  backdrop.id = "mpu-dialog";
+  backdrop.className = "mpu-dialog-backdrop";
+
+  const dialog = doc.createElement("div");
+  dialog.className = "mpu-dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "mpu-tabs-title");
+
+  const list = tabs.length
+    ? `<ul class="mpu-page-tabs-list" id="mpu-tabs-list"></ul>`
+    : `<p>No delivered page/tab links found on this page.</p>`;
+
+  dialog.innerHTML = `
+    <h2 id="mpu-tabs-title">Page Tabs</h2>
+    <p class="mpu-dialog-hint">Clicks the same PeopleSoft tab controls already on the page (inline UI only).</p>
+    ${list}
+    <div class="mpu-dialog-actions">
+      <button type="button" class="mpu-btn" id="mpu-tabs-close">Close</button>
+    </div>
+  `;
+
+  const ul = dialog.querySelector("#mpu-tabs-list");
+  if (ul) {
+    for (const tab of tabs) {
+      const li = doc.createElement("li");
+      const b = doc.createElement("button");
+      b.type = "button";
+      b.className = "mpu-btn";
+      b.textContent = tab.label;
+      b.addEventListener("click", () => {
+        tab.el.click();
+        announce(doc, `Activated tab ${tab.label}`);
+        backdrop.remove();
+      });
+      li.appendChild(b);
+      ul.appendChild(li);
+    }
+  }
+
+  backdrop.appendChild(dialog);
+  doc.body.appendChild(backdrop);
+  const close = () => backdrop.remove();
+  dialog.querySelector("#mpu-tabs-close")?.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  (dialog.querySelector("#mpu-tabs-close") as HTMLButtonElement)?.focus();
 }
 
 export function showPageInfoDialog(

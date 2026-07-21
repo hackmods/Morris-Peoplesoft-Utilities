@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MPU Side Panel</title>
+    <link rel="stylesheet" href="./sidepanel.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <h1>Morris PeopleSoft Utilities</h1>
+      <p>Favorites and Page Info — data stays on this device.</p>
+    </header>
+    <main id="main">
+      <section aria-labelledby="fav-heading">
+        <h2 id="fav-heading">Favorites</h2>
+        <input type="search" id="fav-filter" placeholder="Filter…" aria-label="Filter favorites" autocomplete="off" />
+        <ul id="fav-list"></ul>
+        <p id="fav-empty" class="hint" hidden>No favorites yet — add from the bar ★ on a component page.</p>
+      </section>
+      <section aria-labelledby="pi-heading">
+        <h2 id="pi-heading">Page Info</h2>
+        <p class="hint">Open a PeopleSoft tab with MPU active, then refresh.</p>
+        <pre id="page-info" class="pre" aria-live="polite">—</pre>
+        <button type="button" id="refresh-pi">Refresh from active tab</button>
+      </section>
+      <p class="links">
+        <a href="#" id="open-options">Options</a>
+      </p>
+    </main>
+    <div id="toast" class="sr-only" aria-live="polite"></div>
+    <script type="module" src="./sidepanel.ts"></script>
+  </body>
+</html>

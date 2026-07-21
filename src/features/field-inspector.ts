@@ -1,5 +1,6 @@
 import { announce } from "./bar";
 import { getTargetDocument } from "../adapters/ps-page";
+import type { FieldCopyFormat } from "../storage/schema";
 
 const AREA = "mpu-recfield-area";
 const ICON = "mpu-recfield-icon";
@@ -207,8 +208,19 @@ export function parseRecField(
 }
 
 /** Clipboard / announce form — prefers RECORD.FIELD without row suffix for App Designer paste. */
-export function formatRecFieldCopy(parsed: ParsedRecField): string {
-  if (parsed.record && parsed.field) return `${parsed.record}.${parsed.field}`;
+export function formatRecFieldCopy(
+  parsed: ParsedRecField,
+  format: FieldCopyFormat = "record.field",
+): string {
+  const record = parsed.record;
+  const field = parsed.field;
+  if (format === "ampersand" && record && field) {
+    return `&${record}.${field}`;
+  }
+  if (format === "getfield" && field) {
+    return `GetField(Field.${field})`;
+  }
+  if (record && field) return `${record}.${field}`;
   return parsed.base;
 }
 
@@ -228,13 +240,16 @@ export function getLockedFieldName(): string | null {
   return formatRecFieldPlain(parseRecField(lockedId));
 }
 
-export function getLockedFieldCopyText(): string | null {
+export function getLockedFieldCopyText(format: FieldCopyFormat = "record.field"): string | null {
   if (!lockedId) return null;
-  return formatRecFieldCopy(parseRecField(lockedId));
+  return formatRecFieldCopy(parseRecField(lockedId), format);
 }
 
-export async function copyLockedField(doc: Document = document): Promise<boolean> {
-  const text = getLockedFieldCopyText();
+export async function copyLockedField(
+  doc: Document = document,
+  format: FieldCopyFormat = "record.field",
+): Promise<boolean> {
+  const text = getLockedFieldCopyText(format);
   if (!text) {
     announce(doc, "No locked field to copy — Inspect and click a field icon first");
     return false;
@@ -308,6 +323,9 @@ function ensureTargetStyles(doc: Document): void {
       vertical-align: middle;
       box-sizing: border-box;
     }
+    .${AREA}[data-mpu-locked="true"] {
+      border: ${LOCKED_BORDER};
+    }
     .${ICON} {
       width: 12px !important;
       height: 12px !important;
@@ -315,6 +333,24 @@ function ensureTargetStyles(doc: Document): void {
       vertical-align: top;
       cursor: pointer;
       display: inline-block;
+    }
+    @media (prefers-contrast: more), (forced-colors: active) {
+      .${AREA} {
+        border-width: 3px !important;
+        outline: 2px solid CanvasText;
+        outline-offset: 1px;
+      }
+      .${AREA}[data-mpu-locked="true"] {
+        outline-color: Highlight;
+      }
+      .${ICON} {
+        forced-color-adjust: none;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .${AREA}, .${ICON} {
+        transition: none !important;
+      }
     }
   `;
   (doc.head || doc.documentElement).appendChild(style);
@@ -409,6 +445,7 @@ function clearLocks(target: Document): void {
     });
     doc.querySelectorAll(`.${AREA}`).forEach((node) => {
       (node as HTMLElement).style.border = ACTIVE_BORDER;
+      (node as HTMLElement).removeAttribute("data-mpu-locked");
     });
   }
 }
@@ -538,6 +575,7 @@ function injectIcons(target: Document): number {
           setIconStroke(lockedIcon, GREEN);
           if (lockedIcon.parentElement) {
             (lockedIcon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
+            lockedIcon.parentElement.setAttribute("data-mpu-locked", "true");
           }
           setNamePanel(lockedId);
           break;
@@ -606,6 +644,7 @@ function onIconClick(e: MouseEvent): void {
   setIconStroke(icon, GREEN);
   if (icon.parentElement) {
     (icon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
+    icon.parentElement.setAttribute("data-mpu-locked", "true");
   }
   setNamePanel(fieldId);
   const parsed = parseRecField(fieldId, peerFieldBases, resolveFieldElement(fieldId));
@@ -910,6 +949,7 @@ export function syncFieldInspectorChrome(doc: Document = document): void {
   const btn = doc.getElementById("mpu-field");
   const panel = doc.getElementById("mpu-recfield-name");
   const copyBtn = doc.getElementById("mpu-copy-field") as HTMLButtonElement | null;
+  const copyFmt = doc.getElementById("mpu-copy-format") as HTMLSelectElement | null;
   if (btn) {
     const on = active;
     btn.textContent = on ? "Inspect ON" : "Inspect";
@@ -929,5 +969,8 @@ export function syncFieldInspectorChrome(doc: Document = document): void {
   }
   if (copyBtn) {
     copyBtn.hidden = !active || !lockedId;
+  }
+  if (copyFmt) {
+    copyFmt.hidden = !active || !lockedId;
   }
 }

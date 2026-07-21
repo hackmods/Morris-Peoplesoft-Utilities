@@ -84,14 +84,14 @@
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| SP-01 | CSP-safe **Page Tabs** revival (legacy dropped under MV3) | BA | Multi-page components | No `chrome-extension://` imgs in page; inline UI only |
-| SP-02 | Lightweight **onboarding** checklist on first install | BA | Reduce support questions | Local flag; no telemetry |
-| SP-03 | Shared team favorites via **file sync** only (import/export), never cloud account | BA | Collaboration without backend | Already CSV/JSON path — polish UX |
-| SP-04 | PeopleTools **version tips** (“Inspect on 8.61 Classic iframes…”) | Dev | Context-sensitive help | From ToolsRel already parsed |
-| SP-05 | Optional **side panel** (Chrome sidePanel API) for Favorites + Page Info | BA, Dev | More space than thin bar | New permission → privacy docs |
-| SP-06 | Accessibility: high-contrast inspector borders / reduced motion already partial | BA | AODA | axe + manual |
-| SP-07 | “Copy PeopleCode reference” formats: `&Record.FIELD`, `GetField(Field.FIELD)` snippets | Dev | Faster coding | User picks template |
-| SP-08 | Detect login page password fields only to **place bar safely** — never read values | — | Layout only | Compliance-critical |
+| ~~SP-01~~ | ~~CSP-safe **Page Tabs** revival~~ | BA | Multi-page components | **Done in 1.0.13** — dialog from delivered tab links |
+| ~~SP-02~~ | ~~Lightweight **onboarding** checklist on first install~~ | BA | Reduce support questions | **Done in 1.0.13** — Options checklist + local flag |
+| ~~SP-03~~ | ~~Shared team favorites via **file sync** only (import/export), never cloud account~~ | BA | Collaboration without backend | **Done in 1.0.13** — append/replace + import count |
+| ~~SP-04~~ | ~~PeopleTools **version tips**~~ | Dev | Context-sensitive help | **Done in 1.0.13** — Page Info / Help from ToolsRel |
+| ~~SP-05~~ | ~~Optional **side panel** (Chrome sidePanel API)~~ | BA, Dev | More space than thin bar | **Done in 1.0.13** — ADR 0008 + privacy |
+| ~~SP-06~~ | ~~Accessibility: high-contrast inspector borders / reduced motion~~ | BA | AODA | **Done in 1.0.13** |
+| ~~SP-07~~ | ~~“Copy PeopleCode reference” formats~~ | Dev | Faster coding | **Done in 1.0.13** — Options + bar select |
+| ~~SP-08~~ | ~~Detect login page password fields only to **place bar safely**~~ | — | Layout only | **Done in 1.0.13** — never reads values |
 
 ---
 
