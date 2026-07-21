@@ -129,25 +129,26 @@
   font: 500 13px/1.4 ui-monospace, Consolas, monospace;
 }
 
-.mpu-field-highlight {
-  outline: 2px solid #d97706 !important;
-  outline-offset: 1px;
+.mpu-recfield-name {
+  display: inline-block;
+  min-width: 10rem;
+  max-width: 28rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid #decc00;
+  border-radius: 2px;
+  background: #decc00;
+  color: #2f3c45;
+  font: 700 13px/1.2 ui-monospace, Consolas, monospace;
+  padding: 0.15rem 0.4rem;
+  vertical-align: middle;
+  user-select: text;
+  cursor: text;
 }
 
-.mpu-field-locked {
-  outline: 2px solid #15803d !important;
-}
-
-.mpu-field-tip {
-  position: fixed;
-  z-index: 2147483001;
-  background: #111827;
-  color: #f9fafb;
-  padding: 0.25rem 0.5rem;
-  border-radius: 3px;
-  font: 600 12px/1.3 ui-monospace, Consolas, monospace;
-  pointer-events: none;
-  border: 1px solid #fbbf24;
+.mpu-recfield-name:empty {
+  min-width: 8rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

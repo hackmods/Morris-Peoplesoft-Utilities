@@ -13,6 +13,7 @@ export interface BarContext {
   onNewWindow: () => void;
   onAddFavorite: () => void;
   fieldInspectorActive: boolean;
+  lockedFieldName?: string | null;
   traceRunning: boolean;
   traceLocked: boolean;
 }
@@ -138,11 +139,23 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     const fi = btn(
       "mpu-field",
       ctx.fieldInspectorActive ? "Inspect ON" : "Inspect",
-      "Toggle field inspector",
+      "Toggle field inspector — orange icons appear beside fields",
       ctx.fieldInspectorActive,
     );
     fi.addEventListener("click", () => ctx.onFieldInspector());
     bar.appendChild(fi);
+
+    const name = document.createElement("span");
+    name.id = "mpu-recfield-name";
+    name.className = "mpu-recfield-name";
+    name.title = "Record.field name (hover or lock via Field Inspector)";
+    name.setAttribute("aria-live", "polite");
+    if (!ctx.fieldInspectorActive) {
+      name.hidden = true;
+    } else {
+      name.textContent = ctx.lockedFieldName ?? "";
+    }
+    bar.appendChild(name);
   }
 
   if (isYes(f.newWindowOption)) {
@@ -190,7 +203,7 @@ function showHelpDialog(doc: Document): void {
     <ul>
       <li><strong>Favorites</strong> — jump to components</li>
       <li><strong>Page Info</strong> — menu/component/page without CTRL+J</li>
-      <li><strong>Field Inspector</strong> — hover RECORD.FIELD (Esc to exit)</li>
+      <li><strong>Field Inspector</strong> — orange icons beside fields; hover for name; click to lock; Esc to exit</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
     </ul>
     <p>Maintained by <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>. Inspired by PS Utilities.</p>

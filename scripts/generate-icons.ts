@@ -103,6 +103,47 @@ function makeIcon(size: number): Buffer {
   return PNG.sync.write(png);
 }
 
+/** Small magnifying-glass glyph for Field Inspector (12–16px display). */
+function makeInspectorIcon(color: [number, number, number]): Buffer {
+  const size = 16;
+  const png = new PNG({ width: size, height: size });
+  // Transparent background
+  for (let i = 0; i < png.data.length; i += 4) {
+    png.data[i] = 0;
+    png.data[i + 1] = 0;
+    png.data[i + 2] = 0;
+    png.data[i + 3] = 0;
+  }
+
+  const setRgba = (x: number, y: number, a = 255) => {
+    if (x < 0 || y < 0 || x >= size || y >= size) return;
+    const i = (size * y + x) << 2;
+    png.data[i] = color[0];
+    png.data[i + 1] = color[1];
+    png.data[i + 2] = color[2];
+    png.data[i + 3] = a;
+  };
+
+  const cx = 6;
+  const cy = 6;
+  const rOuter = 4;
+  const rInner = 2;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const d = Math.hypot(x - cx, y - cy);
+      if (d <= rOuter + 0.6 && d >= rInner - 0.2) setRgba(x, y);
+    }
+  }
+  // Handle
+  for (let i = 0; i < 5; i++) {
+    setRgba(9 + i, 9 + i);
+    setRgba(10 + i, 9 + i);
+    setRgba(9 + i, 10 + i);
+  }
+
+  return PNG.sync.write(png);
+}
+
 const out = resolve("public/icons");
 mkdirSync(out, { recursive: true });
 
@@ -116,5 +157,12 @@ for (const size of [16, 32, 48, 128]) {
     writeFileSync(dest, makeIcon(size));
   }
 }
+
+const ORANGE: [number, number, number] = [227, 107, 34];
+const GREEN: [number, number, number] = [93, 160, 39];
+const YELLOW: [number, number, number] = [222, 204, 0];
+writeFileSync(resolve(out, "field-inspector-orange.png"), makeInspectorIcon(ORANGE));
+writeFileSync(resolve(out, "field-inspector-green.png"), makeInspectorIcon(GREEN));
+writeFileSync(resolve(out, "field-inspector-yellow.png"), makeInspectorIcon(YELLOW));
 
 console.log("Generated icons in public/icons");

@@ -11,6 +11,7 @@ import {
   isFieldInspectorActive,
   toggleFieldInspector,
   stopFieldInspector,
+  getLockedFieldName,
 } from "../features/field-inspector";
 import { toggleTrace } from "../features/trace";
 import { runSearchOptions } from "../features/search";
@@ -131,6 +132,7 @@ async function refresh(): Promise<void> {
     parsed,
     envLabel: label,
     fieldInspectorActive: isFieldInspectorActive(),
+    lockedFieldName: getLockedFieldName(),
     traceRunning,
     traceLocked,
     onTraceToggle: async () => {
