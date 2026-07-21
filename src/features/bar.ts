@@ -16,6 +16,8 @@ export interface BarContext {
   lockedFieldName?: string | null;
   traceRunning: boolean;
   traceLocked: boolean;
+  /** Classic login/logout: greeting (+ help) only */
+  loginMode?: boolean;
 }
 
 function btn(
@@ -48,9 +50,12 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   const mount = findHeaderMount(doc);
   if (!mount) return;
 
+  const classicTarget = mount.id === "ptifrmtarget" ? mount : null;
+  const loginOnly = Boolean(ctx.loginMode);
+
   const bar = document.createElement("div");
   bar.id = "mpu-bar";
-  bar.className = "mpu-bar";
+  bar.className = classicTarget ? "mpu-bar mpu-bar-classic" : "mpu-bar";
   bar.setAttribute("role", "toolbar");
   bar.setAttribute("aria-label", "Morris PeopleSoft Utilities");
 
@@ -76,7 +81,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(env);
   }
 
-  if (isYes(f.userIdOption)) {
+  if (!loginOnly && isYes(f.userIdOption)) {
     const meta = extractPageMeta(getTargetDocument(doc));
     const user = document.createElement("span");
     user.className = "mpu-user";
@@ -85,7 +90,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(user);
   }
 
-  if (isYes(f.shortcutsOption)) {
+  if (!loginOnly && isYes(f.shortcutsOption)) {
     const fav = btn("mpu-fav", "★", "Favorites — add current page");
     fav.addEventListener("click", () => ctx.onAddFavorite());
     bar.appendChild(fav);
@@ -113,7 +118,8 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
         const item = ctx.settings.favorites[idx];
         if (!item || !ctx.parsed.baseURL) return;
         injectClearBcs(doc);
-        const site = ctx.parsed.siteNormalized;
+        // Use window-specific site (e.g. ps_2), matching classic PS Utilities
+        const site = ctx.parsed.site || ctx.parsed.siteNormalized;
         const url = `${ctx.parsed.baseURL}/${item.Servlet}/${site}/${ctx.parsed.portal}/${ctx.parsed.node}/c/${item.Menu}.${item.Component}.${item.Market}${item.Parameters || ""}`;
         window.location.href = url;
       });
@@ -121,7 +127,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     }
   }
 
-  if (isYes(f.traceOption)) {
+  if (!loginOnly && isYes(f.traceOption)) {
     const label = ctx.traceLocked ? "Trace 🔒" : ctx.traceRunning ? "Trace ON" : "Trace OFF";
     const t = btn("mpu-trace", label, "Toggle PeopleCode/SQL trace", ctx.traceRunning);
     if (ctx.traceLocked) t.disabled = true;
@@ -129,13 +135,13 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(t);
   }
 
-  if (isYes(f.pageInfoOption)) {
+  if (!loginOnly && isYes(f.pageInfoOption)) {
     const p = btn("mpu-pageinfo", "Page Info", "Show page information");
     p.addEventListener("click", () => ctx.onPageInfo());
     bar.appendChild(p);
   }
 
-  if (isYes(f.recFieldInfoOption)) {
+  if (!loginOnly && isYes(f.recFieldInfoOption)) {
     const fi = btn(
       "mpu-field",
       ctx.fieldInspectorActive ? "Inspect ON" : "Inspect",
@@ -158,7 +164,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(name);
   }
 
-  if (isYes(f.newWindowOption)) {
+  if (!loginOnly && isYes(f.newWindowOption) && ctx.parsed.kind === "component") {
     const nw = btn("mpu-newwin", "New Win", "Open component in new window");
     nw.addEventListener("click", () => ctx.onNewWindow());
     bar.appendChild(nw);
@@ -168,7 +174,10 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   help.addEventListener("click", () => showHelpDialog(doc));
   bar.appendChild(help);
 
-  if (mount === doc.body) {
+  if (classicTarget?.parentElement) {
+    classicTarget.parentElement.insertBefore(bar, classicTarget);
+    injectResizeFrame(doc);
+  } else if (mount === doc.body) {
     mount.insertBefore(bar, mount.firstChild);
   } else {
     mount.appendChild(bar);
@@ -283,6 +292,14 @@ export function showPageInfoDialog(doc: Document, parsed: ParsedPsUrl): void {
 
 function injectClearBcs(doc: Document): void {
   const url = chrome.runtime.getURL("inject/clear-bcs.js");
+  const s = doc.createElement("script");
+  s.src = url;
+  s.onload = () => s.remove();
+  (doc.head || doc.documentElement).appendChild(s);
+}
+
+function injectResizeFrame(doc: Document): void {
+  const url = chrome.runtime.getURL("inject/resize-frame.js");
   const s = doc.createElement("script");
   s.src = url;
   s.onload = () => s.remove();

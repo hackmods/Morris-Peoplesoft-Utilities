@@ -1,4 +1,4 @@
-import { detectUiModel, parsePsUrl } from "../adapters/ps-page";
+import { detectUiModel, getTargetDocument, parsePsUrl, extractPageMeta } from "../adapters/ps-page";
 import { loadSettings, originAllowed, updateSettings } from "../storage/settings";
 import { isYes, type MpuSettings } from "../storage/schema";
 import {
@@ -54,13 +54,34 @@ async function ensureEnvRegistration(settings: MpuSettings, href: string): Promi
 }
 
 function openNewWindow(parsed: ReturnType<typeof parsePsUrl>): void {
-  if (!parsed.baseURL || !parsed.servlet) return;
-  const site = `${parsed.siteNormalized}_newwin`;
-  let path = parsed.href.replace(`/${parsed.site}/`, `/${site}/`);
-  if (path === parsed.href && parsed.site) {
-    path = parsed.href.replace(parsed.site, site);
+  if (parsed.kind !== "component" || !parsed.baseURL || !parsed.servlet) {
+    announce(document, "New Window is only available on component pages");
+    return;
   }
-  window.open(path, "_blank");
+
+  let menu = parsed.menu;
+  let component = parsed.component;
+  let market = parsed.market || "GBL";
+  try {
+    const path = getTargetDocument(document).location?.pathname || "";
+    const leaf = path.split("/").pop() || "";
+    const parts = leaf.split(".");
+    if (parts.length >= 2 && parts[0] && parts[1]) {
+      menu = parts[0];
+      component = parts[1];
+      market = parts[2] || market;
+    }
+  } catch {
+    /* iframe may be mid-navigation */
+  }
+  if (!menu || !component) {
+    announce(document, "Unable to resolve component for New Window");
+    return;
+  }
+
+  const site = `${parsed.siteNormalized}_newwin`;
+  const url = `${parsed.baseURL}/${parsed.servlet}/${site}/${parsed.portal}/${parsed.node}/c/${menu}.${component}.${market}`;
+  window.open(url, "_blank");
 }
 
 async function addFavorite(settings: MpuSettings, parsed: ReturnType<typeof parsePsUrl>) {
@@ -92,6 +113,34 @@ async function addFavorite(settings: MpuSettings, parsed: ReturnType<typeof pars
 }
 
 let traceLocked = false;
+let frameLoadEl: HTMLIFrameElement | null = null;
+let frameLoadHandler: (() => void) | null = null;
+let lastSearchSettings: MpuSettings | null = null;
+
+function onTargetFrameReady(): void {
+  const user = document.querySelector(".mpu-user");
+  if (user) {
+    const meta = extractPageMeta(getTargetDocument(document));
+    user.textContent = meta.userId ? `User: ${meta.userId}` : "User: —";
+  }
+  if (lastSearchSettings) {
+    runSearchOptions(lastSearchSettings);
+  }
+}
+
+function bindTargetFrameLoad(): void {
+  const frame = document.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null;
+  if (frameLoadEl && frameLoadHandler) {
+    frameLoadEl.removeEventListener("load", frameLoadHandler);
+  }
+  frameLoadEl = frame;
+  frameLoadHandler = onTargetFrameReady;
+  if (!frame) return;
+  frame.addEventListener("load", onTargetFrameReady);
+  if (frame.contentDocument?.body) {
+    onTargetFrameReady();
+  }
+}
 
 async function refresh(): Promise<void> {
   let settings = await loadSettings();
@@ -115,11 +164,10 @@ async function refresh(): Promise<void> {
     return;
   }
 
-  if (parsed.kind === "login" || parsed.kind === "logout") {
-    if (!isYes(settings.features.loginPageOption)) {
-      removeBar();
-      return;
-    }
+  const loginMode = parsed.kind === "login" || parsed.kind === "logout";
+  if (loginMode && !isYes(settings.features.loginPageOption)) {
+    removeBar();
+    return;
   }
 
   settings = await ensureEnvRegistration(settings, location.href);
@@ -135,6 +183,7 @@ async function refresh(): Promise<void> {
     lockedFieldName: getLockedFieldName(),
     traceRunning,
     traceLocked,
+    loginMode,
     onTraceToggle: async () => {
       const result = await toggleTrace(settings, parsed, index, !traceRunning);
       traceLocked = result.locked;
@@ -149,7 +198,15 @@ async function refresh(): Promise<void> {
     onAddFavorite: () => void addFavorite(settings, parsed),
   });
 
-  runSearchOptions(settings);
+  // Search injects + User ID refresh when Classic target iframe is ready
+  if (!loginMode) {
+    lastSearchSettings = settings;
+    runSearchOptions(settings);
+    bindTargetFrameLoad();
+  } else {
+    lastSearchSettings = null;
+  }
+
   void detectUiModel();
 }
 

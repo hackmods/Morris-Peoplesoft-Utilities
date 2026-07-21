@@ -186,6 +186,10 @@ export function extractPageMeta(doc: Document = document): PageMeta {
 }
 
 export function findHeaderMount(doc: Document = document): Element | null {
+  // Classic portal: bar sits immediately above the content iframe container
+  if (doc.querySelector("#ptifrmtarget")) {
+    return doc.querySelector("#ptifrmtarget");
+  }
   return (
     doc.querySelector("#pthdr2container") ||
     doc.querySelector("#PT_HEADER") ||
