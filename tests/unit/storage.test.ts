@@ -6,7 +6,11 @@ import {
   originAllowed,
   migrateFromLegacy,
 } from "@/storage/settings";
-import { createDefaultSettings, pushRecentComponent } from "@/storage/schema";
+import {
+  createDefaultSettings,
+  featureAllowedForUi,
+  pushRecentComponent,
+} from "@/storage/schema";
 import { getChromeStorageSnapshot, resetChromeStorage } from "../setup/chrome-mock";
 
 describe("storage load/save/update", () => {
@@ -81,6 +85,14 @@ describe("storage load/save/update", () => {
     });
     expect(list.map((r) => r.Component)).toEqual(["C1", "C2"]);
     expect(list[0].visitedAt).toBe(3);
+  });
+
+  it("featureAllowedForUi respects Classic/Fluid scopes", () => {
+    expect(featureAllowedForUi("both", "fluid")).toBe(true);
+    expect(featureAllowedForUi("classic", "fluid")).toBe(false);
+    expect(featureAllowedForUi("fluid", "fluid")).toBe(true);
+    expect(featureAllowedForUi("classic", "navCollection")).toBe(true);
+    expect(featureAllowedForUi("fluid", "navCollection")).toBe(false);
   });
 
   it("updateSettings applies patches", async () => {

@@ -7,6 +7,7 @@ import {
   formatPageInfoMarkdown,
   formatPageInfoPlain,
   buildComponentUrl,
+  comparePageInfoToBuffer,
 } from "../adapters/ps-page";
 import { isYes } from "../storage/schema";
 
@@ -56,7 +57,9 @@ export function groupFavoritesByCategory(
 function favoriteLabel(fav: Favorite): string {
   const base = fav.Description || `${fav.Menu}.${fav.Component}.${fav.Market}`;
   const sub = (fav.SubCategory || "").trim();
-  return sub ? `${sub} — ${base}` : base;
+  const withSub = sub ? `${sub} — ${base}` : base;
+  const notes = (fav.Notes || "").trim();
+  return notes ? `${withSub} ※` : withSub;
 }
 
 function uiModeLabel(doc: Document): string {
@@ -204,6 +207,10 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
             const opt = document.createElement("option");
             opt.value = String(index);
             opt.textContent = favoriteLabel(item);
+            const note = (item.Notes || "").trim();
+            opt.title = note
+              ? `${item.Menu}.${item.Component} — ${note}`
+              : `${item.Menu}.${item.Component}.${item.Market}`;
             og.appendChild(opt);
           }
           select.appendChild(og);
@@ -474,9 +481,11 @@ export function showPageInfoDialog(
   dialog.innerHTML = `
     <h2 id="mpu-pi-title">Page Information</h2>
     <pre class="mpu-pre" id="mpu-pi-body"></pre>
+    <pre class="mpu-pre mpu-pre-diff" id="mpu-pi-diff" hidden></pre>
     <div class="mpu-dialog-actions">
       <button type="button" class="mpu-btn" id="mpu-pi-copy">Copy</button>
       <button type="button" class="mpu-btn" id="mpu-pi-copy-md">Copy Markdown</button>
+      <button type="button" class="mpu-btn" id="mpu-pi-compare">Compare clipboard</button>
       <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
     </div>
   `;
@@ -500,6 +509,30 @@ export function showPageInfoDialog(
       announce(doc, "Markdown page info copied");
     } catch {
       announce(doc, "Unable to copy — select text manually");
+    }
+  });
+  dialog.querySelector("#mpu-pi-compare")?.addEventListener("click", async () => {
+    const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;
+    try {
+      const clip = await navigator.clipboard.readText();
+      if (!clip.trim()) {
+        announce(doc, "Clipboard is empty — copy Page Info from another env first");
+        return;
+      }
+      const { lines, changedCount } = comparePageInfoToBuffer(text, clip);
+      const out = lines
+        .map((l) => `${l.changed ? "≠" : "="} ${l.key}: ${l.other} → ${l.current}`)
+        .join("\n");
+      diffEl.hidden = false;
+      diffEl.textContent = `Compare vs clipboard (${changedCount} differ)\n${out}`;
+      announce(
+        doc,
+        changedCount === 0
+          ? "Page Info matches clipboard"
+          : `${changedCount} Page Info field(s) differ from clipboard`,
+      );
+    } catch {
+      announce(doc, "Unable to read clipboard for compare");
     }
   });
   backdrop.addEventListener("click", (e) => {

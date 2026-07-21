@@ -1,8 +1,11 @@
 import { loadSettings, saveSettings } from "../../storage/settings";
 import {
+  DEFAULT_FEATURE_UI_SCOPES,
   DEFAULT_TRACE,
   type Favorite,
   type FeatureFlags,
+  type FeatureUiScope,
+  type FeatureUiScopes,
   type MpuSettings,
   type TraceSettings,
   type YesNo,
@@ -35,6 +38,12 @@ const FEATURE_LABELS: Array<{ key: keyof FeatureFlags; label: string }> = [
   { key: "advSearchOption", label: "Auto-expand Advanced Search" },
   { key: "correctHistoryOption", label: "Auto-select Correct History" },
   { key: "loginPageOption", label: "Show bar on login page" },
+];
+
+const SCOPE_LABELS: Array<{ key: keyof FeatureUiScopes; label: string }> = [
+  { key: "recFieldInfoOption", label: "Field Inspector UI scope" },
+  { key: "advSearchOption", label: "Advanced Search UI scope" },
+  { key: "correctHistoryOption", label: "Correct History UI scope" },
 ];
 
 const TRACE_LABELS: Array<{ key: keyof TraceSettings; label: string }> = [
@@ -90,6 +99,33 @@ function renderFeatures(settings: MpuSettings): void {
   }
   (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked =
     settings.quietEnvPrompt === "Yes";
+
+  const scopesRoot = document.getElementById("feature-ui-scopes");
+  if (scopesRoot) {
+    scopesRoot.replaceChildren();
+    const scopes = { ...DEFAULT_FEATURE_UI_SCOPES, ...settings.featureUiScopes };
+    for (const f of SCOPE_LABELS) {
+      const label = document.createElement("label");
+      label.className = "row";
+      label.append(document.createTextNode(`${f.label} `));
+      const select = document.createElement("select");
+      select.id = `scope-${f.key}`;
+      select.setAttribute("aria-label", f.label);
+      for (const opt of [
+        { value: "both", text: "Classic + Fluid" },
+        { value: "classic", text: "Classic only" },
+        { value: "fluid", text: "Fluid only" },
+      ]) {
+        const o = document.createElement("option");
+        o.value = opt.value;
+        o.textContent = opt.text;
+        if (scopes[f.key] === opt.value) o.selected = true;
+        select.appendChild(o);
+      }
+      label.appendChild(select);
+      scopesRoot.appendChild(label);
+    }
+  }
 }
 
 function renderTrace(settings: MpuSettings): void {
@@ -152,12 +188,26 @@ function renderFavorites(settings: MpuSettings): void {
   tbody.replaceChildren();
   settings.favorites.forEach((fav, index) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
+    tr.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td>`;
     const cells = tr.querySelectorAll("td");
     cells[0].textContent = fav.Description;
     cells[1].textContent = fav.Menu;
     cells[2].textContent = fav.Component;
     cells[3].textContent = fav.Market;
+    const notesInput = document.createElement("input");
+    notesInput.value = fav.Notes || "";
+    notesInput.setAttribute("aria-label", `Notes for ${fav.Description || fav.Component}`);
+    notesInput.addEventListener("change", async () => {
+      const s = await loadSettings();
+      if (!s.favorites[index]) return;
+      const notes = notesInput.value.trim();
+      if (notes) s.favorites[index].Notes = notes;
+      else delete s.favorites[index].Notes;
+      await saveSettings(s);
+      broadcast();
+      say("Notes saved");
+    });
+    cells[4].appendChild(notesInput);
     const del = document.createElement("button");
     del.type = "button";
     del.textContent = "Delete";
@@ -169,7 +219,7 @@ function renderFavorites(settings: MpuSettings): void {
       broadcast();
       say("Favorite deleted");
     });
-    cells[4].appendChild(del);
+    cells[5].appendChild(del);
     tbody.appendChild(tr);
   });
 }
@@ -231,9 +281,19 @@ function renderAllowlist(settings: MpuSettings): void {
 
 function favoritesToCsv(favs: Favorite[]): string {
   const header =
-    "Servlet,Menu,Component,Market,Parameters,Category,SubCategory,Description";
+    "Servlet,Menu,Component,Market,Parameters,Category,SubCategory,Description,Notes";
   const rows = favs.map((f) =>
-    [f.Servlet, f.Menu, f.Component, f.Market, f.Parameters, f.Category, f.SubCategory, f.Description]
+    [
+      f.Servlet,
+      f.Menu,
+      f.Component,
+      f.Market,
+      f.Parameters,
+      f.Category,
+      f.SubCategory,
+      f.Description,
+      f.Notes || "",
+    ]
       .map((c) => `"${String(c).replace(/"/g, '""')}"`)
       .join(","),
   );
@@ -244,9 +304,9 @@ function parseCsv(text: string): Favorite[] {
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
   return lines.slice(1).map((line) => {
-    const cols = line.match(/("([^"]|"")*"|[^,]*)/g)?.map((c) =>
-      c.replace(/^"|"$/g, "").replace(/""/g, '"'),
-    ) ?? [];
+    const cols =
+      line.match(/("([^"]|"")*"|[^,]*)/g)?.map((c) => c.replace(/^"|"$/g, "").replace(/""/g, '"')) ??
+      [];
     return {
       Servlet: (cols[0] === "psc" ? "psc" : "psp") as "psp" | "psc",
       Menu: cols[1] || "",
@@ -256,6 +316,7 @@ function parseCsv(text: string): Favorite[] {
       Category: cols[5] || "",
       SubCategory: cols[6] || "",
       Description: cols[7] || "",
+      ...(cols[8]?.trim() ? { Notes: cols[8].trim() } : {}),
     };
   });
 }
@@ -284,10 +345,16 @@ async function init(): Promise<void> {
       const el = document.getElementById(f.key) as HTMLInputElement;
       s.features[f.key] = (el.checked ? "Yes" : "No") as YesNo;
     }
-    s.quietEnvPrompt = (document.getElementById("quietEnvPrompt") as HTMLInputElement)
-      .checked
+    s.quietEnvPrompt = (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked
       ? "Yes"
       : "No";
+    const scopes = { ...DEFAULT_FEATURE_UI_SCOPES };
+    for (const f of SCOPE_LABELS) {
+      const el = document.getElementById(`scope-${f.key}`) as HTMLSelectElement | null;
+      const v = (el?.value || "both") as FeatureUiScope;
+      scopes[f.key] = v === "classic" || v === "fluid" || v === "both" ? v : "both";
+    }
+    s.featureUiScopes = scopes;
     await saveSettings(s);
     broadcast();
     say("Features saved");
@@ -318,14 +385,18 @@ async function init(): Promise<void> {
 
   document.getElementById("add-env")!.addEventListener("click", async () => {
     const s = await loadSettings();
-    s.environments.push({ label: `Env ${s.environments.length + 1}`, active: "Yes", trcProfRunning: "No" });
+    s.environments.push({
+      label: `Env ${s.environments.length + 1}`,
+      active: "Yes",
+      trcProfRunning: "No",
+    });
     await saveSettings(s);
     renderEnvs(s);
   });
 
   document.getElementById("export-fav")!.addEventListener("click", async () => {
     const ok = window.confirm(
-      "Favorites export may include business keys in Parameters or descriptions. Continue?",
+      "Favorites export may include business keys in Parameters, descriptions, or Notes. Continue?",
     );
     if (!ok) return;
     const s = await loadSettings();

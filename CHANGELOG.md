@@ -4,6 +4,17 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.12] — 2026-07-21
+
+### Added
+
+- **Wave 4 remaining P2 UX** (see `docs/findings/future-enhancements.md`):
+  - Favorites **Notes** field (Options + CSV/JSON; export warn) (UX-04)
+  - Page Info **Compare clipboard** diff (UX-07)
+  - Nav collection / nested iframe Field Inspector bind (UX-08)
+  - Options **Classic / Fluid / Both** scope for Inspect + search helpers (UX-09)
+  - Add Favorite optional **Page Info description template** + notes prompt (UX-10)
+
 ## [1.0.11] — 2026-07-21
 
 ### Added

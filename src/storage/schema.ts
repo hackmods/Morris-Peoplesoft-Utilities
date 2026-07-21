@@ -26,7 +26,18 @@ export interface Favorite {
   Category: string;
   SubCategory: string;
   Description: string;
+  /** Optional local note (UX-04) — may contain business context */
+  Notes?: string;
   pinned?: boolean;
+}
+
+/** Where a feature runs: Classic portal, Fluid, or both (UX-09). */
+export type FeatureUiScope = "both" | "classic" | "fluid";
+
+export interface FeatureUiScopes {
+  recFieldInfoOption: FeatureUiScope;
+  advSearchOption: FeatureUiScope;
+  correctHistoryOption: FeatureUiScope;
 }
 
 /** Recently visited components (PI-04) — local only, capped. */
@@ -107,6 +118,8 @@ export interface MpuSettings {
   environments: Environment[];
   urlSites: UrlSiteMap;
   traceSettings: TraceSettings;
+  /** UX-09: Classic vs Fluid enablement for noisy features */
+  featureUiScopes: FeatureUiScopes;
   /** Phase 2 origins e.g. https://hr.example.edu */
   hostAllowlist: string[];
   quietEnvPrompt: YesNo;
@@ -151,6 +164,12 @@ export const DEFAULT_TRACE: TraceSettings = {
   SQL4096: "No",
 };
 
+export const DEFAULT_FEATURE_UI_SCOPES: FeatureUiScopes = {
+  recFieldInfoOption: "both",
+  advSearchOption: "both",
+  correctHistoryOption: "both",
+};
+
 export function createDefaultSettings(): MpuSettings {
   return {
     features: { ...DEFAULT_FEATURES },
@@ -159,6 +178,7 @@ export function createDefaultSettings(): MpuSettings {
     environments: [],
     urlSites: {},
     traceSettings: { ...DEFAULT_TRACE },
+    featureUiScopes: { ...DEFAULT_FEATURE_UI_SCOPES },
     hostAllowlist: [],
     quietEnvPrompt: "No",
     schemaVersion: SCHEMA_VERSION,
@@ -167,4 +187,18 @@ export function createDefaultSettings(): MpuSettings {
 
 export function isYes(v: YesNo | undefined): boolean {
   return v === "Yes";
+}
+
+/** Whether a feature should run for the detected UI model. */
+export function featureAllowedForUi(
+  scope: FeatureUiScope | undefined,
+  uiMode: "classic" | "fluid" | "navCollection" | "unknown",
+): boolean {
+  const s = scope || "both";
+  if (s === "both") return true;
+  if (uiMode === "navCollection" || uiMode === "unknown") {
+    // Nav collections are Classic-like content hosts; treat as classic unless Fluid-only
+    return s === "classic";
+  }
+  return s === uiMode;
 }

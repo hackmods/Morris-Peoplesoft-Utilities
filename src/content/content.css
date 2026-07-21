@@ -223,6 +223,12 @@
   font: 500 13px/1.4 ui-monospace, Consolas, monospace;
 }
 
+.mpu-pre-diff {
+  margin-top: 0.5rem;
+  background: #f7f1d8;
+  border: 1px solid #c4a035;
+}
+
 .mpu-recfield-name {
   display: inline-flex;
   align-items: center;

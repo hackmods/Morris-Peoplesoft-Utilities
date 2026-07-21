@@ -1,6 +1,6 @@
-import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta } from "../adapters/ps-page";
+import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta, formatFavoriteDescriptionTemplate } from "../adapters/ps-page";
 import { loadSettings, originAllowed, updateSettings } from "../storage/settings";
-import { isYes, pushRecentComponent, type MpuSettings } from "../storage/schema";
+import { featureAllowedForUi, isYes, pushRecentComponent, type MpuSettings } from "../storage/schema";
 import {
   mountBar,
   removeBar,
@@ -93,9 +93,17 @@ async function addFavorite(settings: MpuSettings, parsed: ReturnType<typeof pars
     announce(document, "Favorites can only be added from a component page");
     return;
   }
-  const description =
-    window.prompt("Favorite description", `${parsed.menu}.${parsed.component}`) ||
-    `${parsed.menu}.${parsed.component}`;
+  const meta = collectPageMeta(document);
+  const template = formatFavoriteDescriptionTemplate(meta, parsed, getLockedFieldName());
+  const useTemplate = window.confirm(
+    `Use Page Info template for the favorite description?\n\n${template}\n\nOK = template · Cancel = type your own`,
+  );
+  const description = useTemplate
+    ? template
+    : window.prompt("Favorite description", `${parsed.menu}.${parsed.component}`) ||
+      `${parsed.menu}.${parsed.component}`;
+  const notes =
+    window.prompt("Optional notes for this favorite (Cancel to skip)", "") || "";
   await updateSettings((s) => ({
     ...s,
     favorites: [
@@ -109,10 +117,11 @@ async function addFavorite(settings: MpuSettings, parsed: ReturnType<typeof pars
         Category: "",
         SubCategory: "",
         Description: description,
+        ...(notes.trim() ? { Notes: notes.trim() } : {}),
       },
     ],
   }));
-  announce(document, "Favorite added");
+  announce(document, notes.trim() ? "Favorite added with notes" : "Favorite added");
   await refresh();
 }
 
@@ -137,7 +146,9 @@ function onTargetFrameReady(): void {
 }
 
 function bindTargetFrameLoad(): void {
-  const frame = document.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null;
+  const frame =
+    (document.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (document.querySelector(".ps_target-iframe") as HTMLIFrameElement | null);
   if (frameLoadEl && frameLoadHandler) {
     frameLoadEl.removeEventListener("load", frameLoadHandler);
   }
@@ -147,6 +158,11 @@ function bindTargetFrameLoad(): void {
   frame.addEventListener("load", onTargetFrameReady);
   if (frame.contentDocument?.body) {
     onTargetFrameReady();
+    // Nested nav-collection iframe may load after outer TargetContent
+    const nested = frame.contentDocument.querySelector(
+      ".ps_target-iframe",
+    ) as HTMLIFrameElement | null;
+    nested?.addEventListener("load", onTargetFrameReady);
   }
 }
 
@@ -183,6 +199,30 @@ async function refresh(): Promise<void> {
   const traceRunning =
     index >= 0 && isYes(settings.environments[index]?.trcProfRunning);
 
+  const uiMode = detectUiModel(document);
+  const scopes = settings.featureUiScopes || {};
+  const effective: MpuSettings = {
+    ...settings,
+    features: {
+      ...settings.features,
+      recFieldInfoOption:
+        isYes(settings.features.recFieldInfoOption) &&
+        featureAllowedForUi(scopes.recFieldInfoOption, uiMode)
+          ? settings.features.recFieldInfoOption
+          : "No",
+      advSearchOption:
+        isYes(settings.features.advSearchOption) &&
+        featureAllowedForUi(scopes.advSearchOption, uiMode)
+          ? settings.features.advSearchOption
+          : "No",
+      correctHistoryOption:
+        isYes(settings.features.correctHistoryOption) &&
+        featureAllowedForUi(scopes.correctHistoryOption, uiMode)
+          ? settings.features.correctHistoryOption
+          : "No",
+    },
+  };
+
   // PI-04: record component visits locally (skip if already top to avoid churn)
   if (
     !loginMode &&
@@ -215,11 +255,17 @@ async function refresh(): Promise<void> {
         ...s,
         recentComponents: pushRecentComponent(s.recentComponents || [], entry),
       }));
+      effective.recentComponents = settings.recentComponents;
     }
   }
 
+  // If Inspect is out of scope for this UI, stop an active session
+  if (!isYes(effective.features.recFieldInfoOption) && isFieldInspectorActive()) {
+    stopFieldInspector(document);
+  }
+
   mountBar({
-    settings,
+    settings: effective,
     parsed,
     envLabel: label,
     fieldInspectorActive: isFieldInspectorActive(),
@@ -240,7 +286,10 @@ async function refresh(): Promise<void> {
     },
     onPageInfo: () => showPageInfoDialog(document, parsed, getLockedFieldName()),
     onFieldInspector: () => {
-      // Avoid full remount/resizeAll here — it wipes iframe Field Inspector icons.
+      if (!isYes(effective.features.recFieldInfoOption)) {
+        announce(document, "Field Inspector disabled for this UI mode in Options");
+        return;
+      }
       toggleFieldInspector(document);
       syncFieldInspectorChrome(document);
     },
@@ -254,19 +303,17 @@ async function refresh(): Promise<void> {
 
   // Search injects + User ID refresh when Classic target iframe is ready
   if (!loginMode) {
-    lastSearchSettings = settings;
-    runSearchOptions(settings);
+    lastSearchSettings = effective;
+    runSearchOptions(effective);
     bindTargetFrameLoad();
   } else {
     lastSearchSettings = null;
   }
 
-  if (isFieldInspectorActive()) {
+  if (isFieldInspectorActive() && isYes(effective.features.recFieldInfoOption)) {
     reinjectFieldInspector(document);
     syncFieldInspectorChrome(document);
   }
-
-  void detectUiModel();
 }
 
 /** Alt+Shift shortcuts — avoid stealing CTRL+J (PeopleSoft System Information). */

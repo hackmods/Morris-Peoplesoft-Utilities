@@ -70,13 +70,13 @@
 | ~~UX-01~~ | ~~Keyboard shortcuts: Page Info, Inspect toggle, copy locked field~~ | BA, Dev | Done in 1.0.9 (Alt+Shift+P/I/C) | |
 | ~~UX-02~~ | ~~In-bar **component URL builder** (Menu.Component.Market + optional params)~~ | Dev | Done in 1.0.10 (Go to · Alt+Shift+G) | |
 | ~~UX-03~~ | ~~Environment **color strip** / stronger env affordance beyond underline~~ | BA | Done in 1.0.11 | Left strip + tint via `--mpu-env-color` |
-| UX-04 | Favorites **notes** field (local) | BA | “Use this for payroll calc test” | Export includes notes → warn |
+| ~~UX-04~~ | ~~Favorites **notes** field (local)~~ | BA | Done in 1.0.12 | Export warns |
 | ~~UX-05~~ | ~~Field Inspector: show **input type / maxlength / disabled** chips~~ | Dev | Done in 1.0.11 | From DOM attrs only |
 | ~~UX-06~~ | ~~Page Info: include **portal / node / site** from parsed URL~~ | BA, Dev | Done in 1.0.9 | |
-| UX-07 | **Compare** current Page Info to clipboard buffer (diff Menu/Component/ToolsRel) | BA | Cross-env checklist | Local string compare |
-| UX-08 | Nav collection / nested iframe Field Inspector polish | Dev | Campus / content collections | Already partial via `.ps_target-iframe` |
-| UX-09 | Options: per-feature **Classic vs Fluid** enablement | BA | Turn off noisy features on Fluid homepages | Schema + popup |
-| UX-10 | Export **Page Info + locked field** into Favorites description template | BA | One-click documentation | |
+| ~~UX-07~~ | ~~**Compare** current Page Info to clipboard buffer (diff Menu/Component/ToolsRel)~~ | BA | Done in 1.0.12 | Local string compare |
+| ~~UX-08~~ | ~~Nav collection / nested iframe Field Inspector polish~~ | Dev | Done in 1.0.12 | Deep `.ps_target-iframe` resolve |
+| ~~UX-09~~ | ~~Options: per-feature **Classic vs Fluid** enablement~~ | BA | Done in 1.0.12 | Inspect + search scopes |
+| ~~UX-10~~ | ~~Export **Page Info + locked field** into Favorites description template~~ | BA | Done in 1.0.12 | Confirm on add |
 
 ---
 
@@ -112,7 +112,8 @@
 3. ~~**FI-04, SR-01** — Fluid / search reliability~~ (shipped 1.0.10)
 4. ~~**TR-01, UX-02** — developer daily drivers~~ (shipped 1.0.10)
 5. ~~**FI-05, PI-04, FV-03, TR-03, UX-03, UX-05** — remaining P1 + key P2~~ (shipped 1.0.11)
-6. P3 items only with ADR if they add permissions or major UI surface  
+6. ~~**UX-04, UX-07..10** — remaining P2 UX~~ (shipped 1.0.12)
+7. P3 items only with ADR if they add permissions or major UI surface  
 
 ---
 
@@ -124,3 +125,4 @@
 | 2026-07-21 | Wave 1 implemented in v1.0.9 (FI-01..03, PI-01..03, FV-01/02/04, TR-02, UX-01/06) — plan: `.cursor/plans/implement-p1-wave1.md` |
 | 2026-07-21 | Wave 2 implemented in v1.0.10 (FI-04, SR-01/02, TR-01, UX-02) — plan: `.cursor/plans/implement-wave2.md` |
 | 2026-07-21 | Wave 3 implemented in v1.0.11 (FI-05, PI-04, FV-03, TR-03, UX-03, UX-05) — plan: `.cursor/plans/implement-wave3.md` |
+| 2026-07-21 | Wave 4 implemented in v1.0.12 (UX-04, UX-07..10) — plan: `.cursor/plans/implement-wave4.md` |

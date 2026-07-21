@@ -11,6 +11,8 @@ import {
   parsePsUrl,
   buildComponentUrl,
   detectPageTokenPresent,
+  comparePageInfoToBuffer,
+  formatFavoriteDescriptionTemplate,
 } from "@/adapters/ps-page";
 
 describe("parsePsUrl edge cases", () => {
@@ -233,12 +235,35 @@ describe("extractPageMeta", () => {
     expect(md).toContain("| Page token | present |");
   });
 
+  it("compares page info buffers and builds favorite templates", () => {
+    const current = formatPageInfoPlain(
+      { menu: "M", component: "C", toolsRel: "8.61", uiMode: "classic" },
+      parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL"),
+    );
+    const other = current.replace("ToolsRel: 8.61", "ToolsRel: 8.60").replace("Component: C", "Component: OTHER");
+    const { lines, changedCount } = comparePageInfoToBuffer(current, other);
+    expect(changedCount).toBeGreaterThanOrEqual(2);
+    expect(lines.find((l) => l.key === "ToolsRel")?.changed).toBe(true);
+
+    const template = formatFavoriteDescriptionTemplate(
+      { menu: "M", component: "C", page: "P", toolsRel: "8.61", dbName: "CSDEV" },
+      parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL"),
+      "JOB.EMPLID",
+    );
+    expect(template).toContain("M.C.GBL");
+    expect(template).toContain("ToolsRel 8.61");
+    expect(template).toContain("Field JOB.EMPLID");
+  });
+
   it("detects page token presence without exposing value", () => {
     document.body.innerHTML = `<input type="hidden" id="ICSID" value="SECRET_TOKEN_VALUE" />`;
     expect(detectPageTokenPresent(document)).toBe(true);
     const meta = extractPageMeta(document);
     expect(meta.pageTokenPresent).toBe(true);
-    const plain = formatPageInfoPlain(meta, parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL"));
+    const plain = formatPageInfoPlain(
+      meta,
+      parsePsUrl("https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/M.C.GBL"),
+    );
     expect(plain).toContain("Page token: present");
     expect(plain).not.toContain("SECRET_TOKEN_VALUE");
   });
