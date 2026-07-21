@@ -21,7 +21,7 @@ jobs:
       - run: npm run generate:store-assets
       - run: npm run release:check
       - name: Upload release asset
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: morris-peoplesoft-utilities-v*.zip
           body: |
