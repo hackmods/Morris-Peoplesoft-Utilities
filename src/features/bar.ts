@@ -92,20 +92,82 @@ export function groupFavoritesByCategory(
 }
 
 let menuDismissAbort: AbortController | null = null;
+/** Scroll/resize listeners that keep an open root flyout aligned to its button. */
+let flyoutPositionAbort: AbortController | null = null;
 
 function endMenuDismiss(): void {
   menuDismissAbort?.abort();
   menuDismissAbort = null;
 }
 
+function endFlyoutPosition(): void {
+  flyoutPositionAbort?.abort();
+  flyoutPositionAbort = null;
+}
+
 function closeAllFlyouts(doc: Document): void {
   endMenuDismiss();
+  endFlyoutPosition();
   doc.querySelectorAll('.mpu-menu-root [aria-expanded="true"]').forEach((el) => {
     el.setAttribute("aria-expanded", "false");
   });
   doc.querySelectorAll(".mpu-flyout").forEach((el) => {
     (el as HTMLElement).hidden = true;
   });
+}
+
+/**
+ * Pin root flyouts with position:fixed under the trigger.
+ * Fluid/Classic headers often use overflow:hidden, which clips absolute menus.
+ */
+function placeAnchoredFlyout(anchor: HTMLElement, flyout: HTMLElement): void {
+  const view = anchor.ownerDocument.defaultView;
+  const vw = view?.innerWidth ?? 1200;
+  const vh = view?.innerHeight ?? 800;
+  const rect = anchor.getBoundingClientRect();
+  const maxH = Math.min(Math.floor(vh * 0.72), 420);
+  const width = Math.min(Math.max(flyout.offsetWidth || 224, 224), Math.min(384, vw - 8));
+
+  flyout.style.position = "fixed";
+  flyout.style.zIndex = "2147482000";
+  flyout.style.maxHeight = `${maxH}px`;
+  flyout.style.width = `${width}px`;
+  flyout.style.right = "auto";
+  flyout.style.bottom = "auto";
+  flyout.style.margin = "0";
+
+  // First pass with current size; second pass after layout uses real height
+  const height = Math.min(flyout.offsetHeight || 160, maxH);
+  let left = rect.left;
+  if (left + width > vw - 4) left = Math.max(4, vw - width - 4);
+  if (left < 4) left = 4;
+
+  let top = rect.bottom + 2;
+  if (top + height > vh - 4) {
+    const above = rect.top - 2 - height;
+    top = above >= 4 ? above : Math.max(4, vh - height - 4);
+  }
+
+  flyout.style.top = `${Math.round(top)}px`;
+  flyout.style.left = `${Math.round(left)}px`;
+}
+
+function bindFlyoutPosition(anchor: HTMLElement, flyout: HTMLElement): void {
+  endFlyoutPosition();
+  const ac = new AbortController();
+  flyoutPositionAbort = ac;
+  const place = (): void => {
+    if (flyout.hidden) return;
+    placeAnchoredFlyout(anchor, flyout);
+  };
+  place();
+  const view = anchor.ownerDocument.defaultView;
+  view?.requestAnimationFrame(() => {
+    place();
+    view.requestAnimationFrame(place);
+  });
+  view?.addEventListener("scroll", place, { capture: true, signal: ac.signal });
+  view?.addEventListener("resize", place, { signal: ac.signal });
 }
 
 function bindMenuDismiss(doc: Document, root: HTMLElement, close: () => void): void {
@@ -980,6 +1042,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     const closeShortcuts = (): void => {
       flyout.hidden = true;
       shortcutsBtn.setAttribute("aria-expanded", "false");
+      endFlyoutPosition();
       endMenuDismiss();
     };
 
@@ -988,12 +1051,14 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       buildShortcutsFlyoutBody(doc, menuBody, ctx, filter.value, closeShortcuts);
       flyout.hidden = false;
       shortcutsBtn.setAttribute("aria-expanded", "true");
+      bindFlyoutPosition(shortcutsBtn, flyout);
       bindMenuDismiss(doc, menuRoot, closeShortcuts);
       filter.focus();
     };
 
     filter.addEventListener("input", () => {
       buildShortcutsFlyoutBody(doc, menuBody, ctx, filter.value, closeShortcuts);
+      if (!flyout.hidden) bindFlyoutPosition(shortcutsBtn, flyout);
     });
     filter.addEventListener("click", (e) => e.stopPropagation());
 
@@ -1160,6 +1225,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     const closeAdmin = (): void => {
       adminFlyout.hidden = true;
       adminBtn.setAttribute("aria-expanded", "false");
+      endFlyoutPosition();
       endMenuDismiss();
     };
 
@@ -1168,6 +1234,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       buildAdminFlyoutBody(doc, adminFlyout, ctx, closeAdmin);
       adminFlyout.hidden = false;
       adminBtn.setAttribute("aria-expanded", "true");
+      bindFlyoutPosition(adminBtn, adminFlyout);
       bindMenuDismiss(doc, adminRoot, closeAdmin);
       const first = adminFlyout.querySelector<HTMLElement>('button[role="menuitem"]');
       first?.focus();
@@ -1259,6 +1326,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     const closePages = (): void => {
       pagesFlyout.hidden = true;
       pagesBtn.setAttribute("aria-expanded", "false");
+      endFlyoutPosition();
       endMenuDismiss();
     };
 
@@ -1267,6 +1335,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       populatePagesMenu(doc, pagesFlyout, closePages);
       pagesFlyout.hidden = false;
       pagesBtn.setAttribute("aria-expanded", "true");
+      bindFlyoutPosition(pagesBtn, pagesFlyout);
       bindMenuDismiss(doc, pagesRoot, closePages);
       const first = pagesFlyout.querySelector<HTMLElement>(
         'button[role="menuitem"]:not(:disabled)',

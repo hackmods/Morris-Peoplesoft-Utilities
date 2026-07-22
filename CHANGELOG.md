@@ -4,6 +4,10 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Shortcuts / Admin / Pages menus:** root flyouts use fixed positioning so PeopleSoft header `overflow` no longer clips menu content
+
 ## [1.0.20] — 2026-07-22
 
 ### Changed

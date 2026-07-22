@@ -385,6 +385,46 @@ describe("utilities bar", () => {
     expect(env.style.getPropertyValue("--mpu-env-color")).toBe("#2288aa");
   });
 
+  it("pins root Shortcuts flyout fixed so header overflow cannot clip it", () => {
+    document.body.innerHTML = `
+      <div id="PT_HEADER" style="overflow:hidden;height:48px;position:relative;"></div>
+    `;
+    const settings = createDefaultSettings();
+    settings.favorites = [
+      {
+        Servlet: "psp",
+        Menu: "M",
+        Component: "C",
+        Market: "GBL",
+        Parameters: "",
+        Category: "Campus",
+        SubCategory: "",
+        Description: "Rehire",
+      },
+    ];
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    document.getElementById("mpu-fav")?.click();
+    const flyout = document.querySelector('.mpu-flyout[aria-label="Shortcuts"]') as HTMLElement;
+    expect(flyout.hidden).toBe(false);
+    expect(flyout.style.position).toBe("fixed");
+    expect(flyout.style.top).toMatch(/px$/);
+    expect(flyout.style.left).toMatch(/px$/);
+  });
+
   it("opens nested Shortcuts submenu without immediate close on leave bridge", async () => {
     vi.useFakeTimers();
     const settings = createDefaultSettings();

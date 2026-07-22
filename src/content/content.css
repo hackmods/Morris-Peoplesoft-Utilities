@@ -331,8 +331,8 @@
   z-index: 2147482000;
   min-width: 14rem;
   max-width: min(24rem, 80vw);
-  max-height: min(24rem, 70vh);
-  /* Scroll the panel; nested .mpu-flyout-sub uses position:fixed so it is not clipped */
+  max-height: min(26rem, 72vh);
+  /* JS sets position:fixed on open so Fluid/Classic header overflow cannot clip the menu */
   overflow-x: hidden;
   overflow-y: auto;
   padding: 0.35rem 0;
