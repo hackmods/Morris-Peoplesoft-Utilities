@@ -104,7 +104,7 @@ See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 Tagged versions (`v*`) publish a Chrome Web Store zip via GitHub Actions. Prefer installing from the Store once live; use Release artifacts for review builds.
 
-Latest: [v1.0.18](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.18)
+Latest: [v1.0.19](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.19)
 
 ## Credits
 

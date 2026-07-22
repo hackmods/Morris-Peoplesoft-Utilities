@@ -4,6 +4,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.19] — 2026-07-22
+
 ### Fixed
 
 - **Shortcuts / Admin flyouts:** nested Category » / SubCategory » panels were clipped by parent `overflow` and closed when the pointer crossed the gap — submenus now use fixed positioning with overlap + a short hide delay

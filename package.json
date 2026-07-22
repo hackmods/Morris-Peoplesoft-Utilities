@@ -1,6 +1,6 @@
 {
   "name": "morris-peoplesoft-utilities",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "private": true,
   "description": "Morris PeopleSoft Utilities — Chrome extension for PeopleSoft Classic and Fluid productivity",
   "type": "module",

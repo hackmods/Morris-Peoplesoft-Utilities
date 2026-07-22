@@ -5,6 +5,6 @@ MPU is built for official Chrome Web Store distribution.
 - Listing copy & assets: repository `store/`
 - Submission checklist: `store/SUBMISSION_CHECKLIST.md`
 - Release readiness: `docs/release-readiness.md`
-- Latest GitHub Release zip: [v1.0.18](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.18) (upload via Developer Dashboard)
+- Latest GitHub Release zip: [v1.0.19](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.19) (upload via Developer Dashboard)
 
 After publication, this page should link the live Store URL.

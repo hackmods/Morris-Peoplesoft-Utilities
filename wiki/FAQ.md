@@ -12,6 +12,9 @@ MPU reinjects after Classic TargetContent loads and looks for Fluid search marke
 **Field Inspector noisy**  
 Press Escape to exit; turn off in popup toggles. On large grids, expect many orange outlines while Inspect is on — that is intentional; lock turns one field green. Fluid pages wrap tight `ps_box-edit` / single-field control hosts (not shared multi-field containers). Classic pages inside Fluid menus are decorated via nested iframe walk — if icons are missing, wait for TargetContent to finish loading and toggle Inspect again.
 
+**Shortcuts / Admin nested menu closes or never appears**  
+Upgrade to **v1.0.19+**. Nested Category » panels use fixed positioning so parent scroll no longer clips them.
+
 **Only one big orange box / wrong container**  
 Upgrade to **v1.0.18+**. Shared Fluid `.ps_box-control` and Classic multi-field table cells are wrapped per field; Fluid shells that embed Classic pages decorate nested content documents.
 
