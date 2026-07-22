@@ -3,11 +3,15 @@ import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import type { Archiver } from "archiver";
 
-const require = createRequire(import.meta.url);
-const archiver = require("archiver") as (
+type ArchiverFactory = (
   format: string,
   options?: { zlib?: { level: number } },
 ) => Archiver;
+
+const require = createRequire(import.meta.url);
+const archiverMod = require("archiver") as ArchiverFactory | { default: ArchiverFactory };
+const archiver: ArchiverFactory =
+  typeof archiverMod === "function" ? archiverMod : archiverMod.default;
 
 const pkg = JSON.parse(readFileSync(resolve("package.json"), "utf8")) as { version: string };
 const dist = resolve("dist");
