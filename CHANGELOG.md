@@ -4,6 +4,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.20] — 2026-07-22
+
 ### Changed
 
 - **Options Features tab:** grouped toggles (Utilities bar / Page helpers / Optional·careful) with hints; clearer Preferences card for UI scope, field copy format, and quiet prompts; visual QOL refresh
