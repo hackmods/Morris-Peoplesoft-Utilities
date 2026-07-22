@@ -9,8 +9,12 @@
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="top">
-      <h1>Morris PeopleSoft Utilities</h1>
-      <p>Configure features for business analysts and technical staff. Data stays on this device.</p>
+      <p class="brand">Morris PeopleSoft Utilities</p>
+      <h1>Options</h1>
+      <p class="lede">
+        Tune the utilities bar for Classic and Fluid. Everything stays in
+        <code>chrome.storage.local</code> on this device — no passwords, no telemetry.
+      </p>
     </header>
     <nav class="tabs" role="tablist" aria-label="Options sections">
       <button type="button" class="tab" role="tab" data-tab="features" aria-selected="true" id="tab-features" aria-controls="panel-features">Features</button>
@@ -23,36 +27,66 @@
     </nav>
     <main id="main">
       <section id="panel-features" class="panel" data-panel="features" role="tabpanel" aria-labelledby="tab-features">
-        <h2>Features</h2>
+        <header class="panel-head">
+          <h2>Features</h2>
+          <p class="panel-lede">
+            Essentials and page helpers are on by default. Optional / careful items stay off until you need them.
+          </p>
+        </header>
+
         <div id="onboarding" class="onboarding" hidden>
           <h3>Welcome — quick checklist</h3>
           <ol>
             <li>Open a PeopleSoft Classic or Fluid page</li>
             <li>Confirm the MPU bar appears (Environment / Page Info / Inspect)</li>
-            <li>Add a Favorite with ★ (optional Page Info template + notes)</li>
+            <li>Add a Shortcut with ★ (optional notes)</li>
             <li>Optional: set Trace presets if you have UTILITIES security</li>
             <li>Optional: open the Side Panel from the extension popup</li>
           </ol>
           <button type="button" class="primary" id="dismiss-onboarding">Got it — dismiss</button>
         </div>
-        <div id="feature-toggles"></div>
-        <h3>Classic / Fluid scope</h3>
-        <p class="hint">Limit noisy helpers to Classic portal, Fluid, or both (UX-09).</p>
-        <div id="feature-ui-scopes"></div>
-        <h3>Field copy format</h3>
-        <label class="row" for="fieldCopyFormat">PeopleCode copy format
-          <select id="fieldCopyFormat" aria-label="PeopleCode copy format"></select>
-        </label>
-        <label class="row">
-          <input type="checkbox" id="quietEnvPrompt" />
-          Quiet mode — don’t prompt to name new environments
-        </label>
-        <button type="button" class="primary" id="save-features">Save features</button>
+
+        <div id="feature-toggles" class="feature-groups" role="group" aria-label="Feature toggles"></div>
+
+        <section class="pref-card" aria-labelledby="prefs-heading">
+          <h3 id="prefs-heading">Preferences</h3>
+          <p class="hint">These refine how helpers behave; they are not on/off bar features.</p>
+
+          <div class="pref-block">
+            <h4>Classic / Fluid scope</h4>
+            <p class="hint">Limit Inspect and search helpers to Classic, Fluid, or both.</p>
+            <div id="feature-ui-scopes" class="pref-stack"></div>
+          </div>
+
+          <div class="pref-block">
+            <h4>Field copy format</h4>
+            <label class="pref-field" for="fieldCopyFormat">
+              <span class="pref-field-label">PeopleCode clipboard format</span>
+              <select id="fieldCopyFormat" aria-label="PeopleCode copy format"></select>
+            </label>
+          </div>
+
+          <div class="pref-block">
+            <label class="toggle-row" for="quietEnvPrompt">
+              <span class="toggle-copy">
+                <span class="toggle-title">Quiet environment prompts</span>
+                <span class="toggle-hint">Don’t ask to name new sites when the bar first loads</span>
+              </span>
+              <input type="checkbox" id="quietEnvPrompt" class="toggle-input" />
+            </label>
+          </div>
+        </section>
+
+        <div class="panel-actions">
+          <button type="button" class="primary" id="save-features">Save features</button>
+        </div>
       </section>
 
       <section id="panel-favorites" class="panel hidden" data-panel="favorites" role="tabpanel" aria-labelledby="tab-favorites" hidden>
-        <h2>Favorites</h2>
-        <p>Import/export CSV with columns: Servlet, Menu, Component, Market, Parameters, Category, SubCategory, Description, Notes</p>
+        <header class="panel-head">
+          <h2>Favorites</h2>
+          <p class="panel-lede">Import/export CSV with columns: Servlet, Menu, Component, Market, Parameters, Category, SubCategory, Description, Notes</p>
+        </header>
         <p class="help warn" role="note">
           Exports may include menu/component business keys for your PeopleSoft sites. Treat CSV and JSON backups as sensitive and share only as needed.
         </p>
@@ -85,11 +119,13 @@
       </section>
 
       <section id="panel-upgrade" class="panel hidden" data-panel="upgrade" role="tabpanel" aria-labelledby="tab-upgrade" hidden>
-        <h2>Customization upgrade watch</h2>
-        <p class="help" role="note">
-          Compares page tabs, structure hosts, and field ids vs a baseline you capture before upgrade.
-          Does <strong>not</strong> detect PeopleCode-only overrides — use App Designer Compare Report for that.
-        </p>
+        <header class="panel-head">
+          <h2>Customization upgrade watch</h2>
+          <p class="panel-lede">
+            Compares page tabs, structure hosts, and field ids vs a baseline you capture before upgrade.
+            Does <strong>not</strong> detect PeopleCode-only overrides — use App Designer Compare Report for that.
+          </p>
+        </header>
         <div class="row-actions">
           <button type="button" id="export-watches">Export JSON</button>
           <label class="file-btn">Import JSON <input type="file" id="import-watches" accept=".json,application/json" /></label>
@@ -117,8 +153,10 @@
       </section>
 
       <section id="panel-tracing" class="panel hidden" data-panel="tracing" role="tabpanel" aria-labelledby="tab-tracing" hidden>
-        <h2>Tracing profiles</h2>
-        <p>Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+        <header class="panel-head">
+          <h2>Tracing profiles</h2>
+          <p class="panel-lede">Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+        </header>
         <p class="help">
           <strong>When to use which flags:</strong>
           Start with <strong>SQL Statement + Bind</strong> when a page feels slow or returns wrong data — binds show the literal values sent to the database.
@@ -131,33 +169,51 @@
         </div>
         <p id="trace-summary" class="hint" aria-live="polite"></p>
         <div id="trace-flags" class="grid-2"></div>
-        <button type="button" class="primary" id="save-trace">Save trace settings</button>
+        <div class="panel-actions">
+          <button type="button" class="primary" id="save-trace">Save trace settings</button>
+        </div>
       </section>
 
       <section id="panel-environments" class="panel hidden" data-panel="environments" role="tabpanel" aria-labelledby="tab-environments" hidden>
-        <h2>Environments</h2>
+        <header class="panel-head">
+          <h2>Environments</h2>
+          <p class="panel-lede">Labels and accent colors for the bar environment indicator.</p>
+        </header>
         <div id="env-list"></div>
-        <button type="button" id="add-env">Add environment</button>
+        <div class="panel-actions">
+          <button type="button" id="add-env">Add environment</button>
+        </div>
       </section>
 
       <section id="panel-allowlist" class="panel hidden" data-panel="allowlist" role="tabpanel" aria-labelledby="tab-allowlist" hidden>
-        <h2>Host allowlist (optional)</h2>
-        <p>
-          Default: MPU runs on any host matching PeopleSoft <code>psp</code>/<code>psc</code> URL patterns
-          (equal access to classic PS Utilities). Enable this toggle to restrict to org origins only.
-        </p>
-        <label class="row">
-          <input type="checkbox" id="hostAllowlistEnabled" />
-          Enable host allowlist (opt-in)
+        <header class="panel-head">
+          <h2>Host allowlist (optional)</h2>
+          <p class="panel-lede">
+            Default: MPU runs on any host matching PeopleSoft <code>psp</code>/<code>psc</code> URL patterns.
+            Enable this only if your organization wants a tighter origin list.
+          </p>
+        </header>
+        <label class="toggle-row" for="hostAllowlistEnabled">
+          <span class="toggle-copy">
+            <span class="toggle-title">Enable host allowlist</span>
+            <span class="toggle-hint">Opt-in — empty list blocks all pages while enabled</span>
+          </span>
+          <input type="checkbox" id="hostAllowlistEnabled" class="toggle-input" />
         </label>
-        <label for="hostAllowlist">Origins (one per line), e.g. https://hr.college.edu</label>
-        <textarea id="hostAllowlist" rows="6" aria-describedby="allowlist-help"></textarea>
+        <label class="pref-field" for="hostAllowlist">
+          <span class="pref-field-label">Origins (one per line)</span>
+          <textarea id="hostAllowlist" rows="6" aria-describedby="allowlist-help" placeholder="https://hr.college.edu"></textarea>
+        </label>
         <p id="allowlist-help" class="help">When enabled with an empty list, MPU will not inject on any page.</p>
-        <button type="button" class="primary" id="save-allowlist">Save allowlist</button>
+        <div class="panel-actions">
+          <button type="button" class="primary" id="save-allowlist">Save allowlist</button>
+        </div>
       </section>
 
       <section id="panel-about" class="panel hidden" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>
-        <h2>About</h2>
+        <header class="panel-head">
+          <h2>About</h2>
+        </header>
         <p>
           <strong>Morris PeopleSoft Utilities</strong> is maintained by
           <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>
@@ -168,7 +224,7 @@
           This is a greenfield Manifest V3 rewrite for Chrome Web Store standards, PeopleSoft Fluid,
           and AODA / WCAG 2.1 AA.
         </p>
-        <ul>
+        <ul class="about-list">
           <li>No password storage</li>
           <li>No telemetry or analytics</li>
           <li>Settings stored only in <code>chrome.storage.local</code></li>

@@ -181,16 +181,20 @@ export const FIELD_COPY_FORMATS: Array<{ id: FieldCopyFormat; label: string; exa
 export const SCHEMA_VERSION = 1;
 
 export const DEFAULT_FEATURES: FeatureFlags = {
+  // Utilities bar essentials — on
   userIdOption: "Yes",
   greetingOption: "Yes",
   shortcutsOption: "Yes",
-  traceOption: "No",
   pageInfoOption: "Yes",
-  recFieldInfoOption: "Yes",
   newWindowOption: "Yes",
-  correctHistoryOption: "No",
+  // Page helpers — on
+  recFieldInfoOption: "Yes",
   advSearchOption: "Yes",
   loginPageOption: "Yes",
+  // Optional / careful — off
+  traceOption: "No",
+  correctHistoryOption: "No",
+  // Compliance — allowlist opt-in off
   hostAllowlistEnabled: "No",
 };
 

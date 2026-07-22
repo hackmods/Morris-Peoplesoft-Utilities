@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { FEATURE_LABELS, FEATURE_TOGGLE_GROUPS } from "@/storage/feature-labels";
 import { createDefaultSettings } from "@/storage/schema";
 import { remapUrlSitesAfterDelete, removeEnvironmentAt } from "@/storage/env-map";
 import {
@@ -6,7 +7,6 @@ import {
   isSettingsBackup,
   parseFavoritesCsv,
 } from "@/storage/favorites-io";
-import { FEATURE_LABELS } from "@/storage/feature-labels";
 
 describe("removeEnvironmentAt", () => {
   it("remaps urlSites indexes and drops deleted mappings", () => {
@@ -82,9 +82,25 @@ describe("isSettingsBackup", () => {
   });
 });
 
-describe("FEATURE_LABELS", () => {
-  it("covers the popup/options toggle set", () => {
+describe("FEATURE_LABELS / groups", () => {
+  it("covers the popup/options toggle set once each", () => {
     expect(FEATURE_LABELS.map((f) => f.key)).toContain("advSearchOption");
     expect(FEATURE_LABELS).toHaveLength(10);
+    const keys = FEATURE_LABELS.map((f) => f.key);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("groups essentials on and careful features off by default", () => {
+    const f = createDefaultSettings().features;
+    const essential = FEATURE_TOGGLE_GROUPS.find((g) => g.id === "bar")!.items.map((i) => i.key);
+    const helpers = FEATURE_TOGGLE_GROUPS.find((g) => g.id === "helpers")!.items.map((i) => i.key);
+    const careful = FEATURE_TOGGLE_GROUPS.find((g) => g.id === "careful")!.items.map((i) => i.key);
+    for (const key of [...essential, ...helpers]) {
+      expect(f[key]).toBe("Yes");
+    }
+    for (const key of careful) {
+      expect(f[key]).toBe("No");
+    }
+    expect(f.hostAllowlistEnabled).toBe("No");
   });
 });

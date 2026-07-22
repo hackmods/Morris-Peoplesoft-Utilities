@@ -1,5 +1,6 @@
 import { loadSettings, saveSettings } from "../../storage/settings";
-import { FEATURE_LABELS } from "../../storage/feature-labels";
+import { FEATURE_LABELS, FEATURE_TOGGLE_GROUPS } from "../../storage/feature-labels";
+import type { FeatureToggleKey } from "../../storage/feature-labels";
 import { removeEnvironmentAt } from "../../storage/env-map";
 import {
   favoritesToCsv,
@@ -11,7 +12,6 @@ import {
   DEFAULT_TRACE,
   FIELD_COPY_FORMATS,
   type CustomizationWatch,
-  type FeatureFlags,
   type FeatureUiScope,
   type FeatureUiScopes,
   type FieldCopyFormat,
@@ -113,16 +113,59 @@ function wireTabs(): void {
 function renderFeatures(settings: MpuSettings): void {
   const root = document.getElementById("feature-toggles")!;
   root.replaceChildren();
-  for (const f of FEATURE_LABELS) {
-    const label = document.createElement("label");
-    label.className = "row";
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.id = f.key;
-    input.checked = settings.features[f.key] === "Yes";
-    label.append(input, document.createTextNode(f.label));
-    root.appendChild(label);
+
+  for (const group of FEATURE_TOGGLE_GROUPS) {
+    const section = document.createElement("section");
+    section.className = "feature-group";
+    section.dataset.tone = group.tone;
+    section.setAttribute("aria-labelledby", `feature-group-${group.id}`);
+
+    const head = document.createElement("div");
+    head.className = "feature-group-head";
+    const title = document.createElement("h3");
+    title.className = "feature-group-title";
+    title.id = `feature-group-${group.id}`;
+    title.textContent = group.title;
+    const desc = document.createElement("p");
+    desc.className = "feature-group-desc";
+    desc.textContent = group.description;
+    head.append(title, desc);
+
+    const body = document.createElement("div");
+    body.className = "feature-group-body";
+
+    for (const item of group.items) {
+      const row = document.createElement("label");
+      row.className = "toggle-row";
+      row.htmlFor = item.key;
+
+      const copy = document.createElement("span");
+      copy.className = "toggle-copy";
+      const name = document.createElement("span");
+      name.className = "toggle-title";
+      name.textContent = item.label;
+      copy.appendChild(name);
+      if (item.hint) {
+        const hint = document.createElement("span");
+        hint.className = "toggle-hint";
+        hint.textContent = item.hint;
+        copy.appendChild(hint);
+      }
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.id = item.key;
+      input.className = "toggle-input";
+      input.checked = settings.features[item.key] === "Yes";
+
+      row.append(copy, input);
+      body.appendChild(row);
+    }
+
+    section.append(head, body);
+    root.appendChild(section);
   }
+
   (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked =
     settings.quietEnvPrompt === "Yes";
 
@@ -149,8 +192,11 @@ function renderFeatures(settings: MpuSettings): void {
     const scopes = { ...DEFAULT_FEATURE_UI_SCOPES, ...settings.featureUiScopes };
     for (const f of SCOPE_LABELS) {
       const label = document.createElement("label");
-      label.className = "row";
-      label.append(document.createTextNode(`${f.label} `));
+      label.className = "pref-field";
+      label.htmlFor = `scope-${f.key}`;
+      const span = document.createElement("span");
+      span.className = "pref-field-label";
+      span.textContent = f.label;
       const select = document.createElement("select");
       select.id = `scope-${f.key}`;
       select.setAttribute("aria-label", f.label);
@@ -165,7 +211,7 @@ function renderFeatures(settings: MpuSettings): void {
         if (scopes[f.key] === opt.value) o.selected = true;
         select.appendChild(o);
       }
-      label.appendChild(select);
+      label.append(span, select);
       scopesRoot.appendChild(label);
     }
   }
@@ -445,7 +491,7 @@ async function init(): Promise<void> {
     const s = await loadSettings();
     for (const f of FEATURE_LABELS) {
       const el = document.getElementById(f.key) as HTMLInputElement;
-      s.features[f.key as keyof FeatureFlags] = (el.checked ? "Yes" : "No") as YesNo;
+      s.features[f.key as FeatureToggleKey] = (el.checked ? "Yes" : "No") as YesNo;
     }
     s.quietEnvPrompt = (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked
       ? "Yes"

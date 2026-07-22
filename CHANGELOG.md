@@ -6,6 +6,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ### Changed
 
+- **Options Features tab:** grouped toggles (Utilities bar / Page helpers / Optional·careful) with hints; clearer Preferences card for UI scope, field copy format, and quiet prompts; visual QOL refresh
 - **PCode dialog:** clearer copy — these are App Designer paste starters (not live PeopleCode); lock a field with Inspect first so RECORD.FIELD is filled in
 
 ## [1.0.19] — 2026-07-22
