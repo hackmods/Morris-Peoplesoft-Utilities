@@ -145,18 +145,27 @@ function closeAllFlyouts(doc: Document): void {
 }
 
 /**
- * Pin root flyouts with position:fixed under the trigger, portaled to document.body
- * so Fluid/Classic header overflow AND transform containing blocks cannot clip them.
+ * Hang root flyouts from the MPU bar (top chrome), portaled to document.body.
+ * Dropdowns will overlay page content below the bar — that is intentional —
+ * but they stay attached to the bar band instead of floating mid-page.
  */
 function placeAnchoredFlyout(anchor: HTMLElement, flyout: HTMLElement): void {
   portalFlyoutToBody(flyout);
-  const view = anchor.ownerDocument.defaultView;
+  const doc = anchor.ownerDocument;
+  const view = doc.defaultView;
   const vw = view?.innerWidth ?? 1200;
   const vh = view?.innerHeight ?? 800;
-  const rect = anchor.getBoundingClientRect();
-  const maxH = Math.min(Math.floor(vh * 0.75), 480);
+  const bar = doc.getElementById("mpu-bar");
+  const barRect = bar?.getBoundingClientRect();
+  const btnRect = anchor.getBoundingClientRect();
+
+  // Prefer the full bar bottom edge so the menu reads as top chrome
+  const bandBottom = barRect && barRect.height > 0 ? barRect.bottom : btnRect.bottom;
+  const roomBelow = Math.max(80, vh - bandBottom - 8);
+  const maxH = Math.min(Math.floor(roomBelow), 480);
   const width = Math.min(Math.max(flyout.offsetWidth || 240, 240), Math.min(400, vw - 8));
 
+  flyout.classList.add("mpu-flyout-top");
   flyout.style.position = "fixed";
   flyout.style.zIndex = "2147482500";
   flyout.style.maxHeight = `${maxH}px`;
@@ -167,14 +176,22 @@ function placeAnchoredFlyout(anchor: HTMLElement, flyout: HTMLElement): void {
   flyout.style.transform = "none";
 
   const height = Math.min(flyout.offsetHeight || 160, maxH);
-  let left = rect.left;
+
+  // Align under the button, but keep the panel within the viewport
+  let left = btnRect.left;
+  if (barRect && barRect.width > 0) {
+    // Prefer staying under the bar strip when possible
+    left = Math.min(Math.max(btnRect.left, barRect.left), Math.max(4, barRect.right - width));
+  }
   if (left + width > vw - 4) left = Math.max(4, vw - width - 4);
   if (left < 4) left = 4;
 
-  let top = rect.bottom + 2;
-  if (top + height > vh - 4) {
-    const above = rect.top - 2 - height;
-    top = above >= 4 ? above : Math.max(4, vh - height - 4);
+  // Always open downward from the bar first (up-top chrome). Flip above only if
+  // there is almost no room below (e.g. bar wrapped near the bottom of the viewport).
+  let top = bandBottom + 2;
+  if (roomBelow < Math.min(height, 140) && barRect) {
+    const above = barRect.top - 2 - height;
+    if (above >= 4) top = above;
   }
 
   flyout.style.top = `${Math.round(top)}px`;

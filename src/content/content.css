@@ -374,6 +374,12 @@
   max-height: min(24rem, 70vh);
 }
 
+.mpu-flyout-top {
+  /* Root menus hang from the MPU bar band (top chrome) */
+  border-top: 2px solid #c4a035;
+  border-radius: 0 0 3px 3px;
+}
+
 .mpu-flyout-filter {
   display: block;
   width: calc(100% - 0.7rem);

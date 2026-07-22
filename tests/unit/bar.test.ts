@@ -419,10 +419,14 @@ describe("utilities bar", () => {
 
     document.getElementById("mpu-fav")?.click();
     const flyout = document.querySelector('.mpu-flyout[aria-label="Shortcuts"]') as HTMLElement;
+    const bar = document.getElementById("mpu-bar")!;
     expect(flyout.hidden).toBe(false);
     expect(flyout.style.position).toBe("fixed");
     expect(flyout.parentElement).toBe(document.body);
-    expect(flyout.style.top).toMatch(/px$/);
+    expect(flyout.classList.contains("mpu-flyout-top")).toBe(true);
+    const top = Number.parseFloat(flyout.style.top);
+    // Hang from the bar bottom (allow small gap)
+    expect(top).toBeGreaterThanOrEqual(bar.getBoundingClientRect().bottom - 1);
     expect(flyout.style.left).toMatch(/px$/);
   });
 
