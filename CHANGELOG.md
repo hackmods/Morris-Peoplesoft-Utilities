@@ -4,6 +4,10 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- **PCode dialog:** clearer copy — these are App Designer paste starters (not live PeopleCode); lock a field with Inspect first so RECORD.FIELD is filled in
+
 ## [1.0.19] — 2026-07-22
 
 ### Fixed

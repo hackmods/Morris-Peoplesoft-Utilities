@@ -686,6 +686,7 @@ function buildAdminFlyoutBody(
 export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
   const meta = collectPageMeta(doc);
   const locked = getLockedParsedRecField();
+  const hasField = Boolean(locked?.record && locked?.field);
   const stubs = buildPeopleCodeStubs({
     record: locked?.record,
     field: locked?.field,
@@ -701,15 +702,50 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
     build: (dialog, close) => {
       const heading = doc.createElement("h2");
       heading.id = "mpu-pcode-title";
-      heading.textContent = "PeopleCode stubs";
+      heading.textContent = "PeopleCode starters";
       dialog.appendChild(heading);
 
       const hint = doc.createElement("p");
       hint.className = "mpu-dialog-hint";
-      hint.textContent = locked
-        ? "Templates from the locked field and current page context."
-        : "Component-level stubs — lock a field in Inspect for RECORD.FIELD specifics.";
+      if (hasField) {
+        hint.textContent = `Ready to paste into App Designer for ${locked!.record}.${locked!.field}. These are starter snippets only — MPU does not read or edit PeopleCode on the server.`;
+      } else {
+        hint.textContent =
+          "Copy starter snippets into App Designer. Tip: Inspect → click a field icon to lock it, then open PCode again so RECORD.FIELD is filled in. Until then, stubs use placeholders (RECORD / FIELD).";
+      }
       dialog.appendChild(hint);
+
+      if (hasField) {
+        const lockedLine = doc.createElement("p");
+        lockedLine.className = "mpu-dialog-hint";
+        const lockedLabel = doc.createElement("strong");
+        lockedLabel.textContent = "Locked field: ";
+        lockedLine.append(
+          lockedLabel,
+          doc.createTextNode(
+            `${locked!.record}.${locked!.field}${
+              locked!.occurrence != null && locked!.occurrence !== ""
+                ? ` (row ${locked!.occurrence})`
+                : ""
+            }`,
+          ),
+        );
+        dialog.appendChild(lockedLine);
+      }
+
+      const how = doc.createElement("ol");
+      how.className = "mpu-dialog-hint mpu-pcode-steps";
+      how.style.cssText = "margin: 0.5rem 0 0.75rem 1.25rem; padding: 0;";
+      for (const step of [
+        "Pick an event below and Copy",
+        "Paste into App Designer on that event",
+        "Replace any placeholders and finish the logic yourself",
+      ]) {
+        const li = doc.createElement("li");
+        li.textContent = step;
+        how.appendChild(li);
+      }
+      dialog.appendChild(how);
 
       const list = doc.createElement("ul");
       list.className = "mpu-pcode-list";
@@ -724,15 +760,18 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
 
         const label = doc.createElement("strong");
         label.textContent = stub.label;
-        stubRow.appendChild(label);
+        const scope = doc.createElement("span");
+        scope.className = "mpu-dialog-hint";
+        scope.textContent = ` · ${stub.scope}`;
+        stubRow.append(label, scope);
 
         const copyOne = doc.createElement("button");
         copyOne.type = "button";
         copyOne.className = "mpu-btn mpu-pcode-copy";
         copyOne.textContent = "Copy";
-        copyOne.setAttribute("aria-label", `Copy ${stub.label} stub`);
+        copyOne.setAttribute("aria-label", `Copy ${stub.label} starter`);
         copyOne.addEventListener("click", () => {
-          void copyText(doc, stub.stub, `Copied ${stub.label} stub`);
+          void copyText(doc, stub.stub, `Copied ${stub.label} starter`);
         });
         stubRow.appendChild(copyOne);
         li.appendChild(stubRow);
@@ -747,14 +786,14 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
 
       const msgHits = scanMessageKeys(doc);
       const msgsHeading = doc.createElement("h3");
-      msgsHeading.textContent = "Message / translate keys";
+      msgsHeading.textContent = "Message keys on this page";
       dialog.appendChild(msgsHeading);
 
       const msgsHint = doc.createElement("p");
       msgsHint.className = "mpu-dialog-hint";
       msgsHint.textContent = msgHits.length
-        ? "Keys found in visible DOM only — never invented."
-        : "No Message Catalog or translate keys detected in visible page DOM.";
+        ? "Optional: MsgGet / translate hints found in the visible page HTML (not from App Designer)."
+        : "No MsgGet / message-set text found in the visible page HTML.";
       dialog.appendChild(msgsHint);
 
       if (msgHits.length) {
@@ -790,10 +829,10 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
       copyAll.type = "button";
       copyAll.className = "mpu-btn";
       copyAll.id = "mpu-pcode-copy-all";
-      copyAll.textContent = "Copy all stubs";
+      copyAll.textContent = "Copy all starters";
       copyAll.addEventListener("click", () => {
         const all = stubs.map((s) => s.stub).join("\n\n");
-        void copyText(doc, all, "Copied all PeopleCode stubs");
+        void copyText(doc, all, "Copied all PeopleCode starters");
       });
 
       const copyMsgs = doc.createElement("button");
@@ -1064,7 +1103,11 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     !loginOnly &&
     (isYes(f.pageInfoOption) || isYes(f.recFieldInfoOption))
   ) {
-    const pcode = btn("mpu-pcode", "PCode", "PeopleCode event stubs from locked field / page");
+    const pcode = btn(
+      "mpu-pcode",
+      "PCode",
+      "Copy PeopleCode starters for App Designer (lock a field with Inspect first)",
+    );
     pcode.addEventListener("click", () => showPeopleCodeDialog(doc, ctx.parsed));
     bar.appendChild(pcode);
   }
@@ -1350,7 +1393,7 @@ function showHelpDialog(doc: Document): void {
       <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs; <strong>Upgrade watch</strong> compares UI fingerprints after PS upgrades (not PeopleCode)</li>
       <li><strong>Pages</strong> — delivered multi-page links when present (flyout or full list)</li>
       <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
-      <li><strong>PCode / Structure / Admin</strong> — event stubs, page structure tree, setup component jumps</li>
+      <li><strong>PCode / Structure / Admin</strong> — App Designer starters, page structure tree, setup jumps</li>
       <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
       <li><strong>Shortcuts</strong> — Alt+Shift+P/I/C/G</li>
