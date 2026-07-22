@@ -565,13 +565,34 @@ function collectDocs(root: Document, out: Document[] = []): Document[] {
 /** Prefer Fluid box hosts so we wrap a control, not a large group/page container. */
 export function preferredFluidBoxHost(node: Element): Element | null {
   if ((node as HTMLElement).matches?.("span.ps_box-value")) return node;
-  return (
-    node.closest(".ps_box-edit") ||
-    node.closest(".ps_box-select") ||
-    node.closest(".ps_box-dropdown") ||
-    node.closest(".ps_box-control") ||
-    node.closest("span.ps_box-value")
-  );
+
+  // Innermost → outermost. Reject hosts that contain multiple PS fields (shared
+  // `.ps_box-control` / group wrappers) — those produced one mega orange border
+  // around the whole container and skipped sibling fields inside the AREA.
+  const candidates = [
+    node.closest(".ps_box-edit"),
+    node.closest(".ps_box-select"),
+    node.closest(".ps_box-dropdown"),
+    node.closest(".ps_box-control"),
+  ];
+
+  for (const host of candidates) {
+    if (host && isTightSingleFieldHost(host, node)) return host;
+  }
+  return null;
+}
+
+/** True when host is a single-field control (or only contains this field). */
+export function isTightSingleFieldHost(host: Element, _field: Element): boolean {
+  const fields = Array.from(host.querySelectorAll(FIELD_SELECTOR)).filter((el) => {
+    if (!isHtmlElement(el) || !el.id || !el.id.includes("_")) return false;
+    // Ignore MPU chrome / nested areas
+    if (el.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop")) return false;
+    return true;
+  });
+  if (fields.length <= 1) return true;
+  // Multiple PS fields share this host — too wide to wrap
+  return false;
 }
 
 /**
@@ -642,28 +663,25 @@ function injectIcons(target: Document): number {
         if (!shouldDecorateField(node)) continue;
 
         const fluidHost = preferredFluidBoxHost(node);
-        const parent = fluidHost?.parentElement || node.parentElement;
+        const wrapTarget = fluidHost || node;
+        const parent = wrapTarget.parentElement;
         if (!parent) continue;
 
-        // Fluid: wrap only the box host. Classic: wrap all siblings under the parent (legacy).
-        const hostKey = fluidHost || parent;
-        if (wrappedHosts.has(hostKey)) continue;
-        if (parent.classList.contains(AREA) || parent.querySelector(`:scope > .${AREA}`)) continue;
-        wrappedHosts.add(hostKey);
+        // One AREA per field host — never re-wrap the same target twice.
+        if (wrappedHosts.has(wrapTarget)) continue;
+        // Already inside an AREA (processed via a prior host wrap)
+        if (wrapTarget.closest(`.${AREA}`)) continue;
+        if (parent.classList.contains(AREA)) continue;
+        wrappedHosts.add(wrapTarget);
 
         const area = doc.createElement("span");
         area.className = AREA;
         area.style.cssText = `border: ${ACTIVE_BORDER}; white-space: nowrap; margin: 1px; padding: 1px; display: inline-block; vertical-align: middle; box-sizing: border-box;`;
 
-        if (fluidHost) {
-          parent.insertBefore(area, fluidHost);
-          area.appendChild(fluidHost);
-        } else {
-          while (parent.firstChild) {
-            area.appendChild(parent.firstChild);
-          }
-          parent.appendChild(area);
-        }
+        // Always wrap the tight host/field only — never scoop all parent siblings
+        // (that highlighted entire Classic TDs / Fluid containers as one block).
+        parent.insertBefore(area, wrapTarget);
+        area.appendChild(wrapTarget);
 
         const field = findFieldElement(area) || (isHtmlElement(node) ? node : null);
         const fieldId = field?.id ?? node.id;

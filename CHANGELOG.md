@@ -4,6 +4,10 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Field Inspector:** stop wrapping shared Fluid `.ps_box-control` / Classic multi-field parents as one mega highlight — each field gets its own orange border/icon again (Classic + Fluid)
+
 ## [1.0.17] — 2026-07-22
 
 ### Added

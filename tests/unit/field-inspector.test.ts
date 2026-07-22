@@ -457,4 +457,52 @@ describe("field inspector", () => {
     expect(nearbyPageLabel(el)).toBe("Emplid");
     stopFieldInspector(document);
   });
+
+  it("does not wrap a shared Fluid ps_box-control that holds multiple fields", () => {
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div class="ps_box-control" id="shared-control">
+        <input id="JOB_EMPLID$0" />
+        <input id="JOB_EMPL_RCD$0" />
+      </div>
+    `;
+    const a = document.getElementById("JOB_EMPLID$0")!;
+    expect(preferredFluidBoxHost(a)).toBeNull();
+
+    startFieldInspector(document);
+    expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
+    // Shared control itself must not become the AREA — each input is wrapped tightly
+    expect(document.getElementById("shared-control")?.classList.contains("mpu-recfield-area")).toBe(
+      false,
+    );
+    expect(document.getElementById("JOB_EMPLID$0")?.closest(".mpu-recfield-area")).toBeTruthy();
+    expect(document.getElementById("JOB_EMPL_RCD$0")?.closest(".mpu-recfield-area")).toBeTruthy();
+    expect(document.querySelectorAll("#shared-control > .mpu-recfield-area").length).toBe(2);
+    stopFieldInspector(document);
+  });
+
+  it("Classic: wraps each field tightly when multiple inputs share a TD", () => {
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <table>
+        <tr>
+          <td id="cell">
+            <input id="JOB_EMPLID$0" />
+            <input id="JOB_EMPL_RCD$0" />
+          </td>
+        </tr>
+      </table>
+    `;
+    startFieldInspector(document);
+    expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
+    expect(document.querySelector("#cell > .mpu-recfield-area input#JOB_EMPLID\\$0")).toBeTruthy();
+    expect(document.querySelectorAll("#cell > .mpu-recfield-area").length).toBe(2);
+    stopFieldInspector(document);
+  });
 });
