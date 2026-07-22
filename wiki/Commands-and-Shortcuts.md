@@ -10,7 +10,7 @@
 | Page Tabs | Bar → Page Tabs (when delivered multi-page links exist) |
 | Copy Page Info Markdown | Page Info dialog → Copy Markdown |
 | Compare Page Info | Page Info dialog → Compare clipboard |
-| Toggle Field Inspector | Bar → Inspect · **Alt+Shift+I** (orange icons); hover Rec/Fld/Row; click to lock; **Escape** exits |
+| Toggle Field Inspector | Bar → Inspect · **Alt+Shift+I** (per-field orange icons on Classic/Fluid/Classic-in-Fluid); hover Rec/Fld/Row; click to lock; **Escape** exits |
 | Copy locked field | Bar → Copy field · **Alt+Shift+C** (format: `RECORD.FIELD` / `&Record.FIELD` / `GetField` — Options or bar) |
 | Toggle Trace | Bar → Trace ON/OFF (🔒 = missing UTILITIES security) |
 | Trace presets | Options → Tracing → Off / Default / SQL / PeopleCode / Verbose |

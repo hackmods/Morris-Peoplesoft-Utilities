@@ -20,8 +20,8 @@ Use before tagging a release or uploading to the Chrome Web Store.
 - [ ] Pages menu lists all tabs; current page highlighted
 - [ ] Page Info dialog + copy
 - [ ] Customization upgrade watch — capture baseline + check drift (Page Info + Options → Upgrade)
-- [ ] Field Inspector on/off + Escape
-- [ ] New Window opens `_newwin` style URL
+- [ ] Field Inspector on/off + Escape (Classic, Fluid, and Classic page inside Fluid menu/nav)
+- [ ] Field Inspector: each field has its own orange border (not one mega container)- [ ] New Window opens `_newwin` style URL
 - [ ] Advanced Search expand (where control exists)
 - [ ] Correct History select (where control exists; enable in Options)
 - [ ] Trace on/off (user with access) and locked state (without access)

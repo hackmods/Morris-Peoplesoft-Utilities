@@ -17,9 +17,9 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 | Business analysts | Technical staff |
 |---|---|
 | Environment labels | PeopleCode / SQL trace toggle |
-| Favorites with CSV import/export | Field inspector (keyboard + Esc) |
-| Page information (copy path) | New window / deep links |
-| Advanced Search & Correct History helpers | Trace profiles in Options |
+| Favorites with CSV import/export | Field Inspector (Classic, Fluid, Classic-in-Fluid) |
+| Page information + upgrade watch | New window / deep links / Admin jumps |
+| Advanced Search & Correct History helpers | Trace profiles + PCode stubs |
 | Quiet mode for env prompts | Settings JSON backup |
 
 ## Install
@@ -104,7 +104,7 @@ See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 Tagged versions (`v*`) publish a Chrome Web Store zip via GitHub Actions. Prefer installing from the Store once live; use Release artifacts for review builds.
 
-Latest: [v1.0.1](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.1)
+Latest: [v1.0.18](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.18)
 
 ## Credits
 

@@ -2,9 +2,9 @@
 
 Status for shipping Morris PeopleSoft Utilities as an official Chrome extension.
 
-**As of:** 2026-07-21  
+**As of:** 2026-07-22  
 **Repo:** https://github.com/hackmods/Morris-Peoplesoft-Utilities  
-**Latest tagged zip:** [v1.0.1](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.1)
+**Latest tagged zip:** [v1.0.18](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.18)
 
 Code, CI, audits, privacy docs, Store asset pack, and GitHub product surface are in place. Remaining work is mostly QA and Developer Dashboard steps.
 
@@ -15,7 +15,7 @@ Code, CI, audits, privacy docs, Store asset pack, and GitHub product surface are
 These must be done before uploading / submitting for review:
 
 1. **Manual PeopleSoft parity**  
-   Complete [`docs/testing/manual-parity-checklist.md`](testing/manual-parity-checklist.md) on real Classic and Fluid environments (bar, favorites, search helpers, trace, field inspector, allowlist off/on).
+   Complete [`docs/testing/manual-parity-checklist.md`](testing/manual-parity-checklist.md) on real Classic and Fluid environments (bar, favorites, search helpers, trace, field inspector including Classic pages hosted inside Fluid menus/nav collections, allowlist off/on).
 
 2. **Replace mock screenshots**  
    Files under [`store/assets/screenshots/`](../store/assets/screenshots/) are placeholders. Capture real MPU UI on PeopleSoft (blur sensitive IDs) before Store upload. Prefer five 1280×800 shots.
@@ -31,7 +31,7 @@ These must be done before uploading / submitting for review:
    - Upload extension zip and submit for review  
 
 4. **Refresh the upload zip from current `main`**  
-   Prefer the latest Release zip (currently v1.0.1). Before Store submit either:  
+   Prefer the latest Release zip (currently v1.0.18). Before Store submit either:  
    - Run `npm run release:check` / `npm run package` locally and upload that zip, **or**  
    - Tag the next patch so GitHub Actions publishes a fresh Release artifact.
 
@@ -57,4 +57,5 @@ Operational checklist: [`store/SUBMISSION_CHECKLIST.md`](../store/SUBMISSION_CHE
 - Store listing copy, privacy questionnaire answers, icons/promo placeholders  
 - GitHub Release pipeline and community health files  
 - Credits to [hackmods](https://github.com/hackmods) and upstream PS Utilities authors  
-- Opt-in host allowlist (default off)
+- Opt-in host allowlist (default off)  
+- Field Inspector per-field highlighting on Classic, Fluid, and Classic-in-Fluid nested frames (v1.0.18)

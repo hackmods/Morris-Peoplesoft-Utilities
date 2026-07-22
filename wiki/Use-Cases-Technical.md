@@ -1,7 +1,7 @@
 # Use cases — Technical
 
 - **Trace:** Configure PeopleCode/SQL flags (or named presets: Off / Default / SQL / PeopleCode / Verbose) in Options → Tracing, then toggle Trace on the bar. The bar shows the active preset or flag count (e.g. `Trace ON · SQL`). Options includes a short guide on when to use SQL binds vs PeopleCode vs Verbose. Requires security access to delivered trace components. Cross-tab sync updates other tabs. 🔒 means UTILITIES access is missing.
-- **Field Inspector:** Orange icons beside fields on Classic and Fluid (`ps_box-*`), including nav-collection nested iframes; viewport-scoped on large grids; Rec/Fld/Row (+ Label / Work / **Ctx** chips for Prompt, Display, Deferred / HTML type chips); high-contrast borders under forced-colors; click locks and copies PeopleCode formats (`RECORD.FIELD` / `&Record.FIELD` / `GetField` / `GetRowset…GetField`); Escape exits; Alt+Shift+C copies again.
+- **Field Inspector:** Orange icons beside fields on Classic and Fluid (`ps_box-*`), including Fluid menus/nav collections that host Classic pages in nested iframes; each field is wrapped tightly (not a shared container); viewport-scoped on large grids; Rec/Fld/Row (+ Label / Work / **Ctx** chips for Prompt, Display, Deferred / HTML type chips); high-contrast borders under forced-colors; click locks and copies PeopleCode formats (`RECORD.FIELD` / `&Record.FIELD` / `GetField` / `GetRowset…GetField`); Escape exits; Alt+Shift+C copies again.
 - **Page Info / Page Tabs / Tips:** ToolsRel, DB, portal/node/site, UI mode, **CREF path**, **theme**, page-token present (boolean only); ToolsRel context tips; Markdown copy; **object pack** (plain + Markdown) with **Compare object pack**; Compare clipboard; **Copy process pack** on Process Monitor pages; IB breadcrumb line when on Integration Broker pages; Page Tabs from delivered multi-page links; **Customization upgrade watch** — capture UI fingerprint before upgrade and **Check upgrade drift** after (tabs, structure hosts, field ids — not PeopleCode).
 - **PCode stubs:** Bar **PCode** button opens event stub checklist (FieldChange, RowInit, GetRowset, etc.) from locked field + page context; **Message / translate keys** section scans visible DOM for MsgGet / XLAT hints; copy one or all.
 - **Structure:** Bar **Structure** button lists Fluid/Classic group boxes, scroll areas, grids, and related hosts plus CREF path / theme metadata when present (read-only).
@@ -21,6 +21,6 @@
 
 ## Planned enhancements
 
-P3 Wave 5 items (SP-01…SP-08) shipped in **1.0.13**. Wave 6 (PC-01…03, FL-01, AD-01) shipped in **1.0.15**. Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05) shipped in **1.0.16**. Wave 7 UG-01 (customization upgrade watch) shipped in **1.0.17**. Further ideas:
+P3 Wave 5 items (SP-01…SP-08) shipped in **1.0.13**. Wave 6 (PC-01…03, FL-01, AD-01) shipped in **1.0.15**. Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05) shipped in **1.0.16**. Wave 7 UG-01 (customization upgrade watch) shipped in **1.0.17**. Field Inspector Classic/Fluid/Classic-in-Fluid highlight fixes shipped in **1.0.18**. Further ideas:
 
 - [`docs/findings/future-enhancements.md`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/findings/future-enhancements.md)

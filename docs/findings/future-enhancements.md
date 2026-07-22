@@ -203,3 +203,4 @@
 | 2026-07-22 | Wave 6 first slice shipped in **v1.0.15** (PC-01..03, FL-01, AD-01) — plan: `.cursor/plans/implement-wave6.md` |
 | 2026-07-22 | **Wave 6.1** shipped in **v1.0.16** (PC-04/05, FL-02/03, AD-02..04, TR-04/05) — plan: `.cursor/plans/implement-wave6.1.md` |
 | 2026-07-22 | **P5 / Wave 7 (UG-01)** shipped in **v1.0.17** — customization upgrade watch (UI fingerprint baseline + drift) |
+| 2026-07-22 | **v1.0.18** — Field Inspector per-field wraps (Classic + Fluid) + Classic pages inside Fluid menus/nav collections |

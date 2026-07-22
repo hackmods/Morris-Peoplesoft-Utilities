@@ -548,10 +548,14 @@ export function toolsRelTips(toolsRel?: string, uiMode?: string): string[] {
     }
   }
   if (uiMode === "fluid") {
-    tips.push("Fluid: Inspect wraps ps_box-edit/control hosts; use Recents or Go to for component jumps.");
+    tips.push(
+      "Fluid: Inspect wraps tight ps_box hosts; Classic pages inside Fluid menus are found via nested content iframes.",
+    );
   }
   if (uiMode === "navCollection") {
-    tips.push("Nav collection: Inspect walks nested .ps_target-iframe documents when same-origin.");
+    tips.push(
+      "Nav collection: Inspect walks nested .ps_target-iframe / TargetContent documents when same-origin.",
+    );
   }
   if (!rel) {
     tips.push("ToolsRel not detected yet — open a component page or wait for the content frame, then reopen Page Info.");

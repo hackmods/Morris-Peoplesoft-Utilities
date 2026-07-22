@@ -9,6 +9,8 @@ When published, install from the Store listing (see repository README). Updates 
 1. `npm ci && npm run generate:icons && npm run build`
 2. Chrome → Extensions → Developer mode → Load unpacked → `dist/`
 
+Or download the latest Store zip from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) (currently **v1.0.18**).
+
 ## Enterprise note
 
 Organizations may force-install the Store extension via policy. Optional host allowlist can be enabled per user in Options.
