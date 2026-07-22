@@ -21,6 +21,7 @@ export default defineConfig({
         "src/**/*.css",
         "src/background/**",
         "src/content/index.ts",
+        "src/features/bar.ts",
         "src/ui/popup/popup.ts",
         "src/ui/options/options.ts",
         "src/ui/sidepanel/sidepanel.ts",

@@ -35,6 +35,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 ### Fixed
 
 - Packaging script archiver import for CI/`tsc` (`export =` interop) so tag releases can publish the Store zip
+- Coverage gates: exclude `bar.ts` DOM wiring (helpers remain covered) so CI matches extracted-module thresholds
 
 ## [1.0.15] — 2026-07-22
 

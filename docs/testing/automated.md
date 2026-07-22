@@ -27,6 +27,7 @@ Vitest intentionally excludes browser-entry surfaces that need a real Chrome ext
 - `src/inject/**`
 - `src/background/**`
 - `src/content/index.ts`
+- `src/features/bar.ts` (DOM toolbar wiring; pure helpers live under `src/features/*` and stay covered)
 - `src/ui/popup/popup.ts`
 - `src/ui/options/options.ts`
 - `src/ui/sidepanel/sidepanel.ts`
