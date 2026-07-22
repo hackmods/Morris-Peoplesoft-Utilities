@@ -5,8 +5,10 @@ import {
   announce,
   showPageInfoDialog,
   showGoToComponentDialog,
+  showPageTabsDialog,
   groupFavoritesByCategory,
 } from "@/features/bar";
+import { buildFavoriteTree, showAddFavoriteDialog } from "@/features/favorites-ui";
 import { createDefaultSettings } from "@/storage/schema";
 import type { ParsedPsUrl } from "@/adapters/ps-page";
 
@@ -230,7 +232,7 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-dialog")).toBeNull();
   });
 
-  it("mounts UI mode badge and favorites filter", () => {
+  it("mounts UI mode badge and shortcuts flyout", () => {
     const settings = createDefaultSettings();
     settings.favorites = [
       {
@@ -240,7 +242,7 @@ describe("utilities bar", () => {
         Market: "GBL",
         Parameters: "",
         Category: "Campus",
-        SubCategory: "",
+        SubCategory: "Admissions",
         Description: "Rehire",
       },
     ];
@@ -271,12 +273,125 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
     });
     expect(document.getElementById("mpu-ui-mode")?.textContent).toBeTruthy();
+    const shortcutsBtn = document.getElementById("mpu-fav");
+    expect(shortcutsBtn?.textContent).toBe("Shortcuts");
+    expect(shortcutsBtn?.getAttribute("aria-haspopup")).toBe("menu");
+    shortcutsBtn?.click();
+    expect(shortcutsBtn?.getAttribute("aria-expanded")).toBe("true");
+    expect(document.querySelector(".mpu-flyout")).toBeTruthy();
     expect(document.getElementById("mpu-fav-filter")).toBeTruthy();
-    expect(document.querySelector("#mpu-fav-select optgroup")?.getAttribute("label")).toBe("Campus");
+    expect(document.querySelector('.mpu-menu-action')?.textContent).toBe("Add to Shortcuts");
+    expect(document.getElementById("mpu-fav-select")).toBeNull();
     expect(document.getElementById("mpu-fav-newwin")).toBeTruthy();
     expect(document.getElementById("mpu-recent-select")).toBeTruthy();
     const env = document.querySelector(".mpu-env") as HTMLElement;
     expect(env.style.getPropertyValue("--mpu-env-color")).toBe("#2288aa");
+  });
+
+  it("buildFavoriteTree groups category and subcategory", () => {
+    const tree = buildFavoriteTree([
+      {
+        Servlet: "psp",
+        Menu: "A",
+        Component: "C1",
+        Market: "GBL",
+        Parameters: "",
+        Category: "HR",
+        SubCategory: "",
+        Description: "One",
+      },
+      {
+        Servlet: "psp",
+        Menu: "B",
+        Component: "C2",
+        Market: "GBL",
+        Parameters: "",
+        Category: "HR",
+        SubCategory: "Payroll",
+        Description: "Two",
+      },
+    ]);
+    expect(tree).toHaveLength(1);
+    expect(tree[0]?.category).toBe("HR");
+    expect(tree[0]?.leaves).toHaveLength(1);
+    expect(tree[0]?.subgroups).toHaveLength(1);
+    expect(tree[0]?.subgroups[0]?.subcategory).toBe("Payroll");
+  });
+
+  it("pages flyout and dialog mark the current tab", () => {
+    document.body.innerHTML = `
+      <div id="PT_HEADER"></div>
+      <div id="pstabs">
+        <a href="#1" class="PSACTIVETAB">General</a>
+        <a href="#2">Job Data</a>
+      </div>
+    `;
+
+    mountBar({
+      settings: createDefaultSettings(),
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    document.getElementById("mpu-pagetabs")?.click();
+    const flyoutCurrent = document.querySelector(
+      '.mpu-flyout[aria-label="Pages"] .mpu-menu-current',
+    );
+    expect(flyoutCurrent?.textContent).toBe("General");
+    expect(flyoutCurrent?.getAttribute("aria-current")).toBe("page");
+
+    showPageTabsDialog(document);
+    const dialogCurrent = document.querySelector("#mpu-tabs-list .mpu-menu-current");
+    expect(dialogCurrent?.textContent).toBe("General");
+    expect(dialogCurrent?.hasAttribute("disabled")).toBe(true);
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(document.getElementById("mpu-dialog")).toBeNull();
+  });
+
+  it("showAddFavoriteDialog submits category, subcategory, and parameters", () => {
+    const onSubmit = vi.fn();
+    showAddFavoriteDialog(document, {
+      defaultDescription: "MENU.COMP — Page",
+      existingFavorites: [
+        {
+          Servlet: "psp",
+          Menu: "X",
+          Component: "Y",
+          Market: "GBL",
+          Parameters: "",
+          Category: "Campus",
+          SubCategory: "HR",
+          Description: "Existing",
+        },
+      ],
+      onSubmit,
+    });
+
+    (document.getElementById("mpu-sc-desc") as HTMLInputElement).value = "My shortcut";
+    (document.getElementById("mpu-sc-cat") as HTMLInputElement).value = "Campus";
+    (document.getElementById("mpu-sc-sub") as HTMLInputElement).value = "Admissions";
+    document.getElementById("mpu-sc-params-toggle")?.click();
+    (document.getElementById("mpu-sc-params") as HTMLInputElement).value = "ICACTION=EDIT";
+    document
+      .getElementById("mpu-sc-form")
+      ?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      Description: "My shortcut",
+      Category: "Campus",
+      SubCategory: "Admissions",
+      Parameters: "?ICACTION=EDIT",
+      Notes: "",
+    });
+    expect(document.getElementById("mpu-dialog")).toBeNull();
   });
 
   it("shows Go to dialog and builds navigation URL", () => {

@@ -584,12 +584,43 @@ export function findHeaderMount(
   );
 }
 
-/** Discover delivered PeopleSoft page/tab links for CSP-safe Page Tabs dialog (SP-01). */
-export function collectPageTabs(doc: Document = document): Array<{ label: string; el: HTMLElement }> {
+export interface PageTabLink {
+  label: string;
+  el: HTMLElement;
+  /** True when this tab matches the active page name / selected tab control. */
+  current: boolean;
+}
+
+function isActiveTabControl(el: HTMLElement): boolean {
+  const role = el.getAttribute("role");
+  if (role === "tab" && el.getAttribute("aria-selected") === "true") return true;
+  if (el.classList.contains("PSACTIVETAB") || el.classList.contains("ps_box-tab-selected")) {
+    return true;
+  }
+  const parent = el.closest(
+    "li, .ps_box-tab, .PSTAB, .ps_tabs_item, [role='presentation']",
+  );
+  if (
+    parent &&
+    (parent.classList.contains("PSACTIVETAB") ||
+      parent.classList.contains("ps_box-tab-selected") ||
+      parent.getAttribute("aria-selected") === "true" ||
+      parent.classList.contains("ui-tabs-active"))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/** Discover delivered PeopleSoft page/tab links for Pages menu (SP-01 / legacy parity). */
+export function collectPageTabs(doc: Document = document): PageTabLink[] {
   const target = getTargetDocument(doc);
-  const out: Array<{ label: string; el: HTMLElement }> = [];
+  const meta = collectPageMeta(doc);
+  const currentPage = (meta.page || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const out: PageTabLink[] = [];
   const seen = new Set<string>();
   const selectors = [
+    "[id$='divPSPANELTABLINKS'] a",
     "#pstabs a",
     ".PSLEVEL1NAV a",
     ".PSLEVEL2NAVORIZONTAL a",
@@ -606,8 +637,12 @@ export function collectPageTabs(doc: Document = document): Array<{ label: string
       const key = label.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push({ label, el: node });
-      if (out.length >= 24) return out;
+      const current =
+        isActiveTabControl(node) ||
+        (currentPage !== "" &&
+          (key === currentPage || key.includes(currentPage) || currentPage.includes(key)));
+      out.push({ label, el: node, current });
+      if (out.length >= 40) return out;
     }
   }
   return out;

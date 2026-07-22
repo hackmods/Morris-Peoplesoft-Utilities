@@ -269,6 +269,141 @@
   display: none;
 }
 
+.mpu-menu-root {
+  display: inline-block;
+  position: relative;
+}
+
+.mpu-flyout {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 2147482000;
+  min-width: 14rem;
+  max-width: min(24rem, 80vw);
+  max-height: min(24rem, 70vh);
+  overflow: auto;
+  padding: 0.35rem 0;
+  background: linear-gradient(180deg, #1f3a4d 0%, #173041 100%);
+  color: #f4f7fa;
+  border: 1px solid #8aa0b0;
+  border-radius: 3px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.mpu-flyout-sub {
+  top: 0;
+  left: 100%;
+  margin-left: 2px;
+}
+
+.mpu-flyout-filter {
+  display: block;
+  width: calc(100% - 0.7rem);
+  margin: 0 0.35rem 0.35rem;
+  box-sizing: border-box;
+}
+
+.mpu-flyout-body {
+  display: block;
+}
+
+.mpu-menu-item {
+  display: block;
+  position: relative;
+}
+
+.mpu-menu-has-sub {
+  position: relative;
+}
+
+.mpu-menu-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+}
+
+.mpu-menu-open,
+.mpu-menu-subtrigger,
+.mpu-menu-action {
+  flex: 1 1 auto;
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #f4f7fa;
+  font: inherit;
+  text-align: left;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+
+.mpu-menu-subtrigger {
+  width: 100%;
+}
+
+.mpu-menu-newwin {
+  flex: 0 0 auto;
+  border: 0;
+  border-left: 1px solid #4a6275;
+  background: transparent;
+  color: #f0d56a;
+  font: inherit;
+  padding: 0.35rem 0.45rem;
+  cursor: pointer;
+}
+
+.mpu-menu-open:hover,
+.mpu-menu-open:focus-visible,
+.mpu-menu-subtrigger:hover,
+.mpu-menu-subtrigger:focus-visible,
+.mpu-menu-action:hover,
+.mpu-menu-action:focus-visible,
+.mpu-menu-newwin:hover,
+.mpu-menu-newwin:focus-visible {
+  outline: none;
+  background: #2d5168;
+}
+
+.mpu-menu-current,
+.mpu-menu-open:disabled {
+  background: #c4a035;
+  color: #1a1a1a;
+  cursor: default;
+}
+
+.mpu-menu-empty {
+  margin: 0.25rem 0.65rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.mpu-linkish {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #1f5f99;
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mpu-dialog .mpu-linkish {
+  color: #1f5f99;
+}
+
+.mpu-page-tabs-list .mpu-menu-current:disabled {
+  opacity: 1;
+}
+
 .mpu-rf-part {
   display: inline-flex;
   align-items: baseline;
@@ -299,7 +434,9 @@
 @media (prefers-reduced-motion: reduce) {
   .mpu-bar,
   .mpu-btn,
-  .mpu-dialog-backdrop {
+  .mpu-dialog-backdrop,
+  .mpu-flyout,
+  .mpu-flyout-sub {
     transition: none !important;
   }
 }

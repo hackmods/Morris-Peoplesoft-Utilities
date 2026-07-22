@@ -1,6 +1,6 @@
 import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent } from "../storage/schema";
 import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
-import type { ParsedPsUrl } from "../adapters/ps-page";
+import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
 import {
   collectPageMeta,
   collectPageTabs,
@@ -12,6 +12,12 @@ import {
   comparePageInfoToBuffer,
   toolsRelTips,
 } from "../adapters/ps-page";
+import {
+  buildFavoriteTree,
+  favoriteDisplayLabel,
+  type FavoriteEntry,
+  type FavoriteTreeGroup,
+} from "./favorites-ui";
 
 export interface BarContext {
   settings: MpuSettings;
@@ -57,12 +63,344 @@ export function groupFavoritesByCategory(
   }));
 }
 
-function favoriteLabel(fav: Favorite): string {
-  const base = fav.Description || `${fav.Menu}.${fav.Component}.${fav.Market}`;
-  const sub = (fav.SubCategory || "").trim();
-  const withSub = sub ? `${sub} — ${base}` : base;
-  const notes = (fav.Notes || "").trim();
-  return notes ? `${withSub} ※` : withSub;
+let menuDismissAbort: AbortController | null = null;
+
+function endMenuDismiss(): void {
+  menuDismissAbort?.abort();
+  menuDismissAbort = null;
+}
+
+function closeAllFlyouts(doc: Document): void {
+  endMenuDismiss();
+  doc.querySelectorAll('.mpu-menu-root [aria-expanded="true"]').forEach((el) => {
+    el.setAttribute("aria-expanded", "false");
+  });
+  doc.querySelectorAll(".mpu-flyout").forEach((el) => {
+    (el as HTMLElement).hidden = true;
+  });
+}
+
+function bindMenuDismiss(doc: Document, root: HTMLElement, close: () => void): void {
+  endMenuDismiss();
+  const ac = new AbortController();
+  menuDismissAbort = ac;
+  const { signal } = ac;
+  doc.addEventListener(
+    "click",
+    (e) => {
+      if (!root.contains(e.target as Node)) close();
+    },
+    { signal },
+  );
+  doc.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      }
+    },
+    { signal },
+  );
+}
+
+function favoriteMatchesQuery(fav: Favorite, query: string): boolean {
+  if (!query) return true;
+  const hay = [
+    fav.Description,
+    fav.Menu,
+    fav.Component,
+    fav.Market,
+    fav.Category,
+    fav.SubCategory,
+    fav.Notes,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return hay.includes(query);
+}
+
+function filterFavoriteTree(
+  tree: FavoriteTreeGroup[],
+  query: string,
+): FavoriteTreeGroup[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return tree;
+  return tree
+    .map((group) => {
+      const leaves = group.leaves.filter(({ fav }) => favoriteMatchesQuery(fav, q));
+      const subgroups = group.subgroups
+        .map((sg) => ({
+          ...sg,
+          entries: sg.entries.filter(({ fav }) => favoriteMatchesQuery(fav, q)),
+        }))
+        .filter((sg) => sg.entries.length > 0);
+      return { ...group, leaves, subgroups };
+    })
+    .filter((group) => group.leaves.length > 0 || group.subgroups.length > 0);
+}
+
+function openFavoriteShortcut(
+  doc: Document,
+  ctx: BarContext,
+  item: Favorite,
+  newWin: boolean,
+  onDone?: () => void,
+): void {
+  if (!ctx.parsed.baseURL) return;
+  injectClearBcs(doc);
+  const url = buildComponentUrl({
+    baseURL: ctx.parsed.baseURL,
+    servlet: item.Servlet,
+    site: ctx.parsed.site || ctx.parsed.siteNormalized,
+    portal: ctx.parsed.portal,
+    node: ctx.parsed.node,
+    menu: item.Menu,
+    component: item.Component,
+    market: item.Market,
+    parameters: item.Parameters || "",
+    newWin,
+  });
+  if (!url) return;
+  onDone?.();
+  if (newWin) {
+    window.open(url, "_blank");
+    return;
+  }
+  window.location.href = url;
+}
+
+function favoriteLeafTitle(fav: Favorite): string {
+  const note = (fav.Notes || "").trim();
+  return note
+    ? `${fav.Menu}.${fav.Component} — ${note}`
+    : `${fav.Menu}.${fav.Component}.${fav.Market}`;
+}
+
+function appendFavoriteLeaf(
+  doc: Document,
+  container: HTMLElement,
+  entry: FavoriteEntry,
+  ctx: BarContext,
+  newWindowOption: boolean,
+  onNavigate: () => void,
+): void {
+  const item = doc.createElement("div");
+  item.className = "mpu-menu-item";
+  item.setAttribute("role", "none");
+
+  const row = doc.createElement("div");
+  row.className = "mpu-menu-row";
+
+  const openBtn = doc.createElement("button");
+  openBtn.type = "button";
+  openBtn.className = "mpu-menu-open";
+  openBtn.setAttribute("role", "menuitem");
+  openBtn.textContent = favoriteDisplayLabel(entry.fav);
+  openBtn.title = favoriteLeafTitle(entry.fav);
+  openBtn.addEventListener("click", () => {
+    openFavoriteShortcut(doc, ctx, entry.fav, false, onNavigate);
+  });
+  row.appendChild(openBtn);
+
+  if (newWindowOption) {
+    const nw = doc.createElement("button");
+    nw.type = "button";
+    nw.className = "mpu-menu-newwin";
+    nw.textContent = "↗";
+    nw.title = "Open in new window";
+    nw.setAttribute("aria-label", "Open in new window");
+    nw.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openFavoriteShortcut(doc, ctx, entry.fav, true, onNavigate);
+    });
+    row.appendChild(nw);
+  }
+
+  item.appendChild(row);
+  container.appendChild(item);
+}
+
+function wireSubmenuHover(item: HTMLElement, sub: HTMLElement): void {
+  const show = (): void => {
+    sub.hidden = false;
+  };
+  const hide = (): void => {
+    sub.hidden = true;
+  };
+  item.addEventListener("mouseenter", show);
+  item.addEventListener("mouseleave", hide);
+  item.addEventListener("focusin", show);
+  item.addEventListener("focusout", (e) => {
+    if (!item.contains(e.relatedTarget as Node)) hide();
+  });
+}
+
+function appendFavoriteSubgroup(
+  doc: Document,
+  parent: HTMLElement,
+  subgroup: { subcategory: string; entries: FavoriteEntry[] },
+  ctx: BarContext,
+  newWindowOption: boolean,
+  onNavigate: () => void,
+): void {
+  const item = doc.createElement("div");
+  item.className = "mpu-menu-item mpu-menu-has-sub";
+  item.setAttribute("role", "none");
+
+  const trigger = doc.createElement("button");
+  trigger.type = "button";
+  trigger.className = "mpu-menu-row mpu-menu-subtrigger";
+  trigger.setAttribute("role", "menuitem");
+  trigger.setAttribute("aria-haspopup", "true");
+  trigger.textContent = `${subgroup.subcategory} »`;
+
+  const sub = doc.createElement("div");
+  sub.className = "mpu-flyout mpu-flyout-sub";
+  sub.setAttribute("role", "menu");
+  sub.hidden = true;
+
+  for (const entry of subgroup.entries) {
+    appendFavoriteLeaf(doc, sub, entry, ctx, newWindowOption, onNavigate);
+  }
+
+  item.append(trigger, sub);
+  parent.appendChild(item);
+  wireSubmenuHover(item, sub);
+}
+
+function appendFavoriteCategory(
+  doc: Document,
+  parent: HTMLElement,
+  group: FavoriteTreeGroup,
+  ctx: BarContext,
+  newWindowOption: boolean,
+  onNavigate: () => void,
+): void {
+  const hasSubmenu = group.subgroups.length > 0 || group.leaves.length > 0;
+  if (!hasSubmenu) return;
+
+  const onlyLeaves = group.subgroups.length === 0;
+  if (onlyLeaves && group.leaves.length === 1 && parent.classList.contains("mpu-flyout")) {
+    appendFavoriteLeaf(doc, parent, group.leaves[0]!, ctx, newWindowOption, onNavigate);
+    return;
+  }
+
+  const item = doc.createElement("div");
+  item.className = "mpu-menu-item mpu-menu-has-sub";
+  item.setAttribute("role", "none");
+
+  const trigger = doc.createElement("button");
+  trigger.type = "button";
+  trigger.className = "mpu-menu-row mpu-menu-subtrigger";
+  trigger.setAttribute("role", "menuitem");
+  trigger.setAttribute("aria-haspopup", "true");
+  trigger.textContent = `${group.category} »`;
+
+  const sub = doc.createElement("div");
+  sub.className = "mpu-flyout mpu-flyout-sub";
+  sub.setAttribute("role", "menu");
+  sub.hidden = true;
+
+  for (const entry of group.leaves) {
+    appendFavoriteLeaf(doc, sub, entry, ctx, newWindowOption, onNavigate);
+  }
+  for (const subgroup of group.subgroups) {
+    appendFavoriteSubgroup(doc, sub, subgroup, ctx, newWindowOption, onNavigate);
+  }
+
+  item.append(trigger, sub);
+  parent.appendChild(item);
+  wireSubmenuHover(item, sub);
+}
+
+function buildShortcutsFlyoutBody(
+  doc: Document,
+  flyout: HTMLElement,
+  ctx: BarContext,
+  query: string,
+  onNavigate: () => void,
+): void {
+  const f = ctx.settings.features;
+  const newWin = isYes(f.newWindowOption);
+  flyout.replaceChildren();
+
+  const addItem = doc.createElement("div");
+  addItem.className = "mpu-menu-item";
+  addItem.setAttribute("role", "none");
+  const addBtn = doc.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "mpu-menu-row mpu-menu-action";
+  addBtn.setAttribute("role", "menuitem");
+  addBtn.textContent = "Add to Shortcuts";
+  addBtn.addEventListener("click", () => {
+    onNavigate();
+    ctx.onAddFavorite();
+  });
+  addItem.appendChild(addBtn);
+  flyout.appendChild(addItem);
+
+  const tree = filterFavoriteTree(buildFavoriteTree(ctx.settings.favorites), query);
+  if (!tree.length && ctx.settings.favorites.length) {
+    const empty = doc.createElement("p");
+    empty.className = "mpu-menu-empty";
+    empty.textContent = "No shortcuts match your filter.";
+    flyout.appendChild(empty);
+    return;
+  }
+
+  for (const group of tree) {
+    appendFavoriteCategory(doc, flyout, group, ctx, newWin, onNavigate);
+  }
+}
+
+function appendPageTabMenuItem(
+  doc: Document,
+  container: HTMLElement,
+  tab: PageTabLink,
+  onActivate?: () => void,
+): void {
+  const item = doc.createElement("div");
+  item.className = "mpu-menu-item";
+  item.setAttribute("role", "none");
+
+  const btn = doc.createElement("button");
+  btn.type = "button";
+  btn.className = "mpu-menu-open";
+  btn.setAttribute("role", "menuitem");
+  btn.textContent = tab.label;
+  if (tab.current) {
+    btn.classList.add("mpu-menu-current");
+    btn.setAttribute("aria-current", "page");
+    btn.disabled = true;
+  } else {
+    btn.addEventListener("click", () => {
+      tab.el.click();
+      announce(doc, `Activated tab ${tab.label}`);
+      onActivate?.();
+    });
+  }
+  item.appendChild(btn);
+  container.appendChild(item);
+}
+
+function populatePagesMenu(
+  doc: Document,
+  container: HTMLElement,
+  onActivate?: () => void,
+): void {
+  const tabs = collectPageTabs(doc);
+  container.replaceChildren();
+  if (!tabs.length) {
+    const empty = doc.createElement("p");
+    empty.className = "mpu-menu-empty";
+    empty.textContent = "No delivered page/tab links found on this page.";
+    container.appendChild(empty);
+    return;
+  }
+  for (const tab of tabs) {
+    appendPageTabMenuItem(doc, container, tab, onActivate);
+  }
 }
 
 function uiModeLabel(doc: Document): string {
@@ -157,122 +495,81 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   }
 
   if (!loginOnly && isYes(f.shortcutsOption)) {
-    const fav = btn("mpu-fav", "★", "Add current page to favorites");
-    fav.addEventListener("click", () => ctx.onAddFavorite());
-    bar.appendChild(fav);
+    const menuRoot = document.createElement("span");
+    menuRoot.className = "mpu-menu-root";
 
-    const wrap = document.createElement("span");
-    wrap.className = "mpu-fav-wrap";
-    let wrapUsed = false;
+    const shortcutsBtn = btn("mpu-fav", "Shortcuts", "Open shortcuts menu");
+    shortcutsBtn.setAttribute("aria-haspopup", "menu");
+    shortcutsBtn.setAttribute("aria-expanded", "false");
 
-    if (ctx.settings.favorites.length) {
-      wrapUsed = true;
-      const filter = document.createElement("input");
-      filter.type = "search";
-      filter.id = "mpu-fav-filter";
-      filter.className = "mpu-fav-filter";
-      filter.placeholder = "Filter…";
-      filter.setAttribute("aria-label", "Filter favorites");
-      filter.autocomplete = "off";
+    const flyout = document.createElement("div");
+    flyout.className = "mpu-flyout";
+    flyout.setAttribute("role", "menu");
+    flyout.setAttribute("aria-label", "Shortcuts");
+    flyout.hidden = true;
 
-      const select = document.createElement("select");
-      select.id = "mpu-fav-select";
-      select.className = "mpu-select";
-      select.setAttribute("aria-label", "Open favorite");
+    const filter = document.createElement("input");
+    filter.type = "search";
+    filter.id = "mpu-fav-filter";
+    filter.className = "mpu-fav-filter mpu-flyout-filter";
+    filter.placeholder = "Filter…";
+    filter.setAttribute("aria-label", "Filter shortcuts");
+    filter.autocomplete = "off";
 
-      const rebuildOptions = (query: string) => {
-        const q = query.trim().toLowerCase();
-        select.replaceChildren();
-        const placeholder = document.createElement("option");
-        placeholder.value = "";
-        placeholder.textContent = "Open favorite…";
-        select.appendChild(placeholder);
+    const menuBody = document.createElement("div");
+    menuBody.className = "mpu-flyout-body";
 
-        for (const group of groupFavoritesByCategory(ctx.settings.favorites)) {
-          const matching = group.entries.filter(({ fav: item }) => {
-            if (!q) return true;
-            const hay = [
-              item.Description,
-              item.Menu,
-              item.Component,
-              item.Market,
-              item.Category,
-              item.SubCategory,
-            ]
-              .join(" ")
-              .toLowerCase();
-            return hay.includes(q);
-          });
-          if (!matching.length) continue;
-          const og = document.createElement("optgroup");
-          og.label = group.category;
-          for (const { index, fav: item } of matching) {
-            const opt = document.createElement("option");
-            opt.value = String(index);
-            opt.textContent = favoriteLabel(item);
-            const note = (item.Notes || "").trim();
-            opt.title = note
-              ? `${item.Menu}.${item.Component} — ${note}`
-              : `${item.Menu}.${item.Component}.${item.Market}`;
-            og.appendChild(opt);
-          }
-          select.appendChild(og);
-        }
-      };
+    const closeShortcuts = (): void => {
+      flyout.hidden = true;
+      shortcutsBtn.setAttribute("aria-expanded", "false");
+      endMenuDismiss();
+    };
 
-      rebuildOptions("");
-      filter.addEventListener("input", () => rebuildOptions(filter.value));
-      select.addEventListener("change", () => {
-        const idx = Number(select.value);
-        if (Number.isNaN(idx)) return;
-        const item = ctx.settings.favorites[idx];
-        if (!item || !ctx.parsed.baseURL) return;
-        const newWin =
-          isYes(f.newWindowOption) &&
-          (doc.getElementById("mpu-fav-newwin") as HTMLInputElement | null)?.checked === true;
-        injectClearBcs(doc);
-        const url = buildComponentUrl({
-          baseURL: ctx.parsed.baseURL,
-          servlet: item.Servlet,
-          site: ctx.parsed.site || ctx.parsed.siteNormalized,
-          portal: ctx.parsed.portal,
-          node: ctx.parsed.node,
-          menu: item.Menu,
-          component: item.Component,
-          market: item.Market,
-          parameters: item.Parameters || "",
-          newWin,
-        });
-        if (!url) return;
-        if (newWin) {
-          window.open(url, "_blank");
-          select.value = "";
-          return;
-        }
-        window.location.href = url;
-      });
+    const openShortcuts = (): void => {
+      closeAllFlyouts(doc);
+      buildShortcutsFlyoutBody(doc, menuBody, ctx, filter.value, closeShortcuts);
+      flyout.hidden = false;
+      shortcutsBtn.setAttribute("aria-expanded", "true");
+      bindMenuDismiss(doc, menuRoot, closeShortcuts);
+      filter.focus();
+    };
 
-      wrap.append(filter, select);
-    }
+    filter.addEventListener("input", () => {
+      buildShortcutsFlyoutBody(doc, menuBody, ctx, filter.value, closeShortcuts);
+    });
+    filter.addEventListener("click", (e) => e.stopPropagation());
 
-    if (
-      isYes(f.newWindowOption) &&
-      (ctx.settings.favorites.length > 0 || (ctx.settings.recentComponents || []).length > 0)
-    ) {
-      wrapUsed = true;
-      const lab = document.createElement("label");
-      lab.className = "mpu-fav-newwin";
-      lab.title = "Open selected favorite or recent component in a new window";
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.id = "mpu-fav-newwin";
-      lab.append(cb, document.createTextNode(" New win"));
-      wrap.appendChild(lab);
-    }
+    flyout.append(filter, menuBody);
+    buildShortcutsFlyoutBody(doc, menuBody, ctx, "", closeShortcuts);
+
+    shortcutsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!flyout.hidden) {
+        closeShortcuts();
+        return;
+      }
+      openShortcuts();
+    });
+
+    menuRoot.append(shortcutsBtn, flyout);
+    bar.appendChild(menuRoot);
 
     const recent = ctx.settings.recentComponents || [];
     if (recent.length) {
-      wrapUsed = true;
+      const wrap = document.createElement("span");
+      wrap.className = "mpu-fav-wrap";
+
+      if (isYes(f.newWindowOption)) {
+        const lab = document.createElement("label");
+        lab.className = "mpu-fav-newwin";
+        lab.title = "Open selected recent component in a new window";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.id = "mpu-fav-newwin";
+        lab.append(cb, document.createTextNode(" New win"));
+        wrap.appendChild(lab);
+      }
+
       const recentSelect = document.createElement("select");
       recentSelect.id = "mpu-recent-select";
       recentSelect.className = "mpu-select";
@@ -316,9 +613,8 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
         window.location.href = url;
       });
       wrap.appendChild(recentSelect);
+      bar.appendChild(wrap);
     }
-
-    if (wrapUsed) bar.appendChild(wrap);
   }
 
   if (!loginOnly && isYes(f.traceOption)) {
@@ -389,10 +685,53 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(copyField);
   }
 
-  if (!loginOnly && isYes(f.pageInfoOption) && ctx.onPageTabs) {
-    const tabs = btn("mpu-pagetabs", "Page Tabs", "List delivered page/tab links on this component");
-    tabs.addEventListener("click", () => ctx.onPageTabs?.());
-    bar.appendChild(tabs);
+  if (!loginOnly && isYes(f.pageInfoOption)) {
+    const pagesRoot = document.createElement("span");
+    pagesRoot.className = "mpu-menu-root";
+
+    const pagesBtn = btn(
+      "mpu-pagetabs",
+      "Pages",
+      "List all component pages and tabs on this component",
+    );
+    pagesBtn.setAttribute("aria-haspopup", "menu");
+    pagesBtn.setAttribute("aria-expanded", "false");
+
+    const pagesFlyout = document.createElement("div");
+    pagesFlyout.className = "mpu-flyout";
+    pagesFlyout.setAttribute("role", "menu");
+    pagesFlyout.setAttribute("aria-label", "Pages");
+    pagesFlyout.hidden = true;
+
+    const closePages = (): void => {
+      pagesFlyout.hidden = true;
+      pagesBtn.setAttribute("aria-expanded", "false");
+      endMenuDismiss();
+    };
+
+    const openPages = (): void => {
+      closeAllFlyouts(doc);
+      populatePagesMenu(doc, pagesFlyout, closePages);
+      pagesFlyout.hidden = false;
+      pagesBtn.setAttribute("aria-expanded", "true");
+      bindMenuDismiss(doc, pagesRoot, closePages);
+      const first = pagesFlyout.querySelector<HTMLElement>(
+        'button[role="menuitem"]:not(:disabled)',
+      );
+      first?.focus();
+    };
+
+    pagesBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!pagesFlyout.hidden) {
+        closePages();
+        return;
+      }
+      openPages();
+    });
+
+    pagesRoot.append(pagesBtn, pagesFlyout);
+    bar.appendChild(pagesRoot);
   }
 
   if (!loginOnly && isYes(f.newWindowOption) && ctx.parsed.kind === "component") {
@@ -497,9 +836,9 @@ function showHelpDialog(doc: Document): void {
     <h2 id="mpu-dialog-title">Morris PeopleSoft Utilities</h2>
     <p>Productivity overlay for PeopleSoft Classic and Fluid. Settings stay on this device. No passwords. No telemetry.</p>
     <ul>
-      <li><strong>Favorites</strong> — ★ adds the current component; use the dropdown to open one</li>
+      <li><strong>Shortcuts</strong> — hierarchical menu by category; Add to Shortcuts from the flyout</li>
       <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs</li>
-      <li><strong>Page Tabs</strong> — delivered multi-page links when present</li>
+      <li><strong>Pages</strong> — delivered multi-page links when present (flyout or full list)</li>
       <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
       <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
@@ -522,28 +861,19 @@ function showHelpDialog(doc: Document): void {
   });
 }
 
-/** CSP-safe Page Tabs list from delivered links (SP-01). */
+/** CSP-safe Pages list from delivered links (SP-01). */
 export function showPageTabsDialog(doc: Document): void {
-  const tabs = collectPageTabs(doc);
-  const existing = doc.getElementById("mpu-dialog");
-  existing?.remove();
+  openModalDialog(doc, {
+    labelledBy: "mpu-tabs-title",
+    initialFocus: "#mpu-tabs-close",
+    build: (dialog, close) => {
+      const tabs = collectPageTabs(doc);
+      const list = tabs.length
+        ? `<ul class="mpu-page-tabs-list" id="mpu-tabs-list" role="menu" aria-label="Pages"></ul>`
+        : `<p>No delivered page/tab links found on this page.</p>`;
 
-  const backdrop = doc.createElement("div");
-  backdrop.id = "mpu-dialog";
-  backdrop.className = "mpu-dialog-backdrop";
-
-  const dialog = doc.createElement("div");
-  dialog.className = "mpu-dialog";
-  dialog.setAttribute("role", "dialog");
-  dialog.setAttribute("aria-modal", "true");
-  dialog.setAttribute("aria-labelledby", "mpu-tabs-title");
-
-  const list = tabs.length
-    ? `<ul class="mpu-page-tabs-list" id="mpu-tabs-list"></ul>`
-    : `<p>No delivered page/tab links found on this page.</p>`;
-
-  dialog.innerHTML = `
-    <h2 id="mpu-tabs-title">Page Tabs</h2>
+      dialog.innerHTML = `
+    <h2 id="mpu-tabs-title">Pages</h2>
     <p class="mpu-dialog-hint">Clicks the same PeopleSoft tab controls already on the page (inline UI only).</p>
     ${list}
     <div class="mpu-dialog-actions">
@@ -551,32 +881,35 @@ export function showPageTabsDialog(doc: Document): void {
     </div>
   `;
 
-  const ul = dialog.querySelector("#mpu-tabs-list");
-  if (ul) {
-    for (const tab of tabs) {
-      const li = doc.createElement("li");
-      const b = doc.createElement("button");
-      b.type = "button";
-      b.className = "mpu-btn";
-      b.textContent = tab.label;
-      b.addEventListener("click", () => {
-        tab.el.click();
-        announce(doc, `Activated tab ${tab.label}`);
-        backdrop.remove();
-      });
-      li.appendChild(b);
-      ul.appendChild(li);
-    }
-  }
+      const ul = dialog.querySelector("#mpu-tabs-list");
+      if (ul) {
+        for (const tab of tabs) {
+          const li = doc.createElement("li");
+          li.setAttribute("role", "none");
+          const b = doc.createElement("button");
+          b.type = "button";
+          b.className = "mpu-btn mpu-menu-open";
+          b.setAttribute("role", "menuitem");
+          b.textContent = tab.label;
+          if (tab.current) {
+            b.classList.add("mpu-menu-current");
+            b.setAttribute("aria-current", "page");
+            b.disabled = true;
+          } else {
+            b.addEventListener("click", () => {
+              tab.el.click();
+              announce(doc, `Activated tab ${tab.label}`);
+              close();
+            });
+          }
+          li.appendChild(b);
+          ul.appendChild(li);
+        }
+      }
 
-  backdrop.appendChild(dialog);
-  doc.body.appendChild(backdrop);
-  const close = () => backdrop.remove();
-  dialog.querySelector("#mpu-tabs-close")?.addEventListener("click", close);
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) close();
+      dialog.querySelector("#mpu-tabs-close")?.addEventListener("click", close);
+    },
   });
-  (dialog.querySelector("#mpu-tabs-close") as HTMLButtonElement)?.focus();
 }
 
 export function showPageInfoDialog(

@@ -4,7 +4,7 @@ import type { FeatureFlags } from "./schema";
 export const FEATURE_LABELS: Array<{ key: keyof FeatureFlags; label: string }> = [
   { key: "userIdOption", label: "Show User ID" },
   { key: "greetingOption", label: "Environment indicator" },
-  { key: "shortcutsOption", label: "Favorites" },
+  { key: "shortcutsOption", label: "Shortcuts" },
   { key: "traceOption", label: "Tracing" },
   { key: "pageInfoOption", label: "Page Information" },
   { key: "recFieldInfoOption", label: "Field Inspector" },

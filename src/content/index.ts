@@ -9,6 +9,7 @@ import {
   showPageTabsDialog,
   announce,
 } from "../features/bar";
+import { showAddFavoriteDialog } from "../features/favorites-ui";
 import {
   isFieldInspectorActive,
   toggleFieldInspector,
@@ -96,35 +97,40 @@ async function addFavorite(settings: MpuSettings, parsed: ReturnType<typeof pars
     return;
   }
   const meta = collectPageMeta(document);
-  const template = formatFavoriteDescriptionTemplate(meta, parsed, getLockedFieldName());
-  const useTemplate = window.confirm(
-    `Use Page Info template for the favorite description?\n\n${template}\n\nOK = template · Cancel = type your own`,
+  const defaultDescription = formatFavoriteDescriptionTemplate(
+    meta,
+    parsed,
+    getLockedFieldName(),
   );
-  const description = useTemplate
-    ? template
-    : window.prompt("Favorite description", `${parsed.menu}.${parsed.component}`) ||
-      `${parsed.menu}.${parsed.component}`;
-  const notes =
-    window.prompt("Optional notes for this favorite (Cancel to skip)", "") || "";
-  await updateSettings((s) => ({
-    ...s,
-    favorites: [
-      ...s.favorites,
-      {
-        Servlet: parsed.servlet || "psp",
-        Menu: parsed.menu!,
-        Component: parsed.component!,
-        Market: parsed.market || "GBL",
-        Parameters: "",
-        Category: "",
-        SubCategory: "",
-        Description: description,
-        ...(notes.trim() ? { Notes: notes.trim() } : {}),
-      },
-    ],
-  }));
-  announce(document, notes.trim() ? "Favorite added with notes" : "Favorite added");
-  await refresh();
+
+  showAddFavoriteDialog(document, {
+    defaultDescription,
+    existingFavorites: settings.favorites,
+    onSubmit: async (draft) => {
+      await updateSettings((s) => ({
+        ...s,
+        favorites: [
+          ...s.favorites,
+          {
+            Servlet: parsed.servlet || "psp",
+            Menu: parsed.menu!,
+            Component: parsed.component!,
+            Market: parsed.market || "GBL",
+            Parameters: draft.Parameters || "",
+            Category: draft.Category || "",
+            SubCategory: draft.SubCategory || "",
+            Description: draft.Description,
+            ...(draft.Notes.trim() ? { Notes: draft.Notes.trim() } : {}),
+          },
+        ],
+      }));
+      announce(
+        document,
+        draft.Notes.trim() ? "Shortcut added with notes" : "Shortcut added",
+      );
+      await refresh();
+    },
+  });
 }
 
 let traceLocked = false;

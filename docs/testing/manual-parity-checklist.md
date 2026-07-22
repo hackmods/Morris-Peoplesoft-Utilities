@@ -13,13 +13,16 @@ Use before tagging a release or uploading to the Chrome Web Store.
 
 - [ ] User ID displays when comment/meta present
 - [ ] Environment label resolves from Options mapping
-- [ ] Add favorite + open from dropdown
-- [ ] Favorites CSV import/export
+- [ ] Shortcuts flyout — hierarchical Category » SubCategory » items
+- [ ] Add to Shortcuts dialog (Description, Category/SubCategory select-or-new, Parameters)
+- [ ] Open shortcut same window and new-window control
+- [ ] Favorites CSV import/export (Category/SubCategory preserved)
+- [ ] Pages menu lists all tabs; current page highlighted
 - [ ] Page Info dialog + copy
 - [ ] Field Inspector on/off + Escape
 - [ ] New Window opens `_newwin` style URL
 - [ ] Advanced Search expand (where control exists)
-- [ ] Correct History select (where control exists)
+- [ ] Correct History select (where control exists; enable in Options)
 - [ ] Trace on/off (user with access) and locked state (without access)
 
 ## Accessibility
