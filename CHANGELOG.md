@@ -4,6 +4,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.22] — 2026-07-22
+
 ### Changed
 
 - **Shortcuts / Admin / Pages:** menus hang from the MPU bar (top chrome) instead of floating mid-page; still overlay page content below the bar by design
