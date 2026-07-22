@@ -134,12 +134,17 @@ export interface MpuSettings {
 }
 
 /** PeopleCode / clipboard formats for locked Field Inspector copy (SP-07). */
-export type FieldCopyFormat = "record.field" | "ampersand" | "getfield";
+export type FieldCopyFormat = "record.field" | "ampersand" | "getfield" | "getrowset";
 
 export const FIELD_COPY_FORMATS: Array<{ id: FieldCopyFormat; label: string; example: string }> = [
   { id: "record.field", label: "RECORD.FIELD", example: "JOB.EMPLID" },
   { id: "ampersand", label: "&Record.FIELD", example: "&Job.EMPLID" },
   { id: "getfield", label: "GetField(Field.FIELD)", example: "GetField(Field.EMPLID)" },
+  {
+    id: "getrowset",
+    label: "GetRowset…GetField",
+    example: "GetLevel0().GetRow(1).GetRecord(Record.JOB).GetField(Field.EMPLID)",
+  },
 ];
 
 export const SCHEMA_VERSION = 1;

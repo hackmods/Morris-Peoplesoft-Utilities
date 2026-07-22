@@ -18,6 +18,14 @@ import {
   type FavoriteEntry,
   type FavoriteTreeGroup,
 } from "./favorites-ui";
+import {
+  buildPeopleCodeStubs,
+  formatObjectPackMarkdown,
+  formatObjectPackPlain,
+} from "./peoplecode-aids";
+import { collectFluidStructure, formatFluidStructurePlain } from "./fluid-structure";
+import { groupAdminJumps, type AdminJump } from "./admin-jumps";
+import { getLockedParsedRecField } from "./field-inspector";
 
 export interface BarContext {
   settings: MpuSettings;
@@ -431,6 +439,232 @@ function btn(
   return b;
 }
 
+async function copyText(doc: Document, text: string, successMessage: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+    announce(doc, successMessage);
+  } catch {
+    announce(doc, "Unable to copy — select text manually");
+  }
+}
+
+function navigateAdminJump(
+  doc: Document,
+  ctx: BarContext,
+  jump: AdminJump,
+  newWin: boolean,
+  onDone?: () => void,
+): void {
+  if (!ctx.parsed.baseURL || !ctx.parsed.portal || !ctx.parsed.node) {
+    announce(doc, "Cannot build admin URL on this page");
+    return;
+  }
+  injectClearBcs(doc);
+  const url = buildComponentUrl({
+    baseURL: ctx.parsed.baseURL,
+    servlet: ctx.parsed.servlet || "psp",
+    site: ctx.parsed.site || ctx.parsed.siteNormalized,
+    portal: ctx.parsed.portal,
+    node: ctx.parsed.node,
+    menu: jump.menu,
+    component: jump.component,
+    market: jump.market || "GBL",
+    newWin,
+  });
+  if (!url) {
+    announce(doc, `Unable to open ${jump.label}`);
+    return;
+  }
+  onDone?.();
+  if (newWin) {
+    window.open(url, "_blank");
+    return;
+  }
+  window.location.href = url;
+}
+
+function buildAdminFlyoutBody(
+  doc: Document,
+  flyout: HTMLElement,
+  ctx: BarContext,
+  onNavigate: () => void,
+): void {
+  const newWin = isYes(ctx.settings.features.newWindowOption);
+  flyout.replaceChildren();
+  for (const group of groupAdminJumps()) {
+    const item = doc.createElement("div");
+    item.className = "mpu-menu-item mpu-menu-has-sub";
+    item.setAttribute("role", "none");
+
+    const trigger = doc.createElement("button");
+    trigger.type = "button";
+    trigger.className = "mpu-menu-row mpu-menu-subtrigger";
+    trigger.setAttribute("role", "menuitem");
+    trigger.setAttribute("aria-haspopup", "true");
+    trigger.textContent = `${group.category} »`;
+
+    const sub = doc.createElement("div");
+    sub.className = "mpu-flyout mpu-flyout-sub";
+    sub.setAttribute("role", "menu");
+    sub.hidden = true;
+
+    for (const jump of group.items) {
+      const leaf = doc.createElement("div");
+      leaf.className = "mpu-menu-item";
+      leaf.setAttribute("role", "none");
+
+      const row = doc.createElement("div");
+      row.className = "mpu-menu-row";
+
+      const openBtn = doc.createElement("button");
+      openBtn.type = "button";
+      openBtn.className = "mpu-menu-open";
+      openBtn.setAttribute("role", "menuitem");
+      openBtn.textContent = jump.label;
+      openBtn.title = `${jump.menu}.${jump.component}`;
+      openBtn.addEventListener("click", () => {
+        navigateAdminJump(doc, ctx, jump, false, onNavigate);
+      });
+      row.appendChild(openBtn);
+
+      if (newWin) {
+        const nw = doc.createElement("button");
+        nw.type = "button";
+        nw.className = "mpu-menu-newwin";
+        nw.textContent = "↗";
+        nw.title = "Open in new window";
+        nw.setAttribute("aria-label", `Open ${jump.label} in new window`);
+        nw.addEventListener("click", (e) => {
+          e.stopPropagation();
+          navigateAdminJump(doc, ctx, jump, true, onNavigate);
+        });
+        row.appendChild(nw);
+      }
+
+      leaf.appendChild(row);
+      sub.appendChild(leaf);
+    }
+
+    item.append(trigger, sub);
+    flyout.appendChild(item);
+    wireSubmenuHover(item, sub);
+  }
+}
+
+export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
+  const meta = collectPageMeta(doc);
+  const locked = getLockedParsedRecField();
+  const stubs = buildPeopleCodeStubs({
+    record: locked?.record,
+    field: locked?.field,
+    occurrence: locked?.occurrence,
+    menu: meta.menu ?? parsed.menu,
+    component: meta.component ?? parsed.component,
+    page: meta.page,
+  });
+
+  openModalDialog(doc, {
+    labelledBy: "mpu-pcode-title",
+    initialFocus: "#mpu-pcode-close",
+    build: (dialog, close) => {
+      const heading = doc.createElement("h2");
+      heading.id = "mpu-pcode-title";
+      heading.textContent = "PeopleCode stubs";
+      dialog.appendChild(heading);
+
+      const hint = doc.createElement("p");
+      hint.className = "mpu-dialog-hint";
+      hint.textContent = locked
+        ? "Templates from the locked field and current page context."
+        : "Component-level stubs — lock a field in Inspect for RECORD.FIELD specifics.";
+      dialog.appendChild(hint);
+
+      const list = doc.createElement("ul");
+      list.className = "mpu-pcode-list";
+      list.id = "mpu-pcode-list";
+
+      for (const stub of stubs) {
+        const li = doc.createElement("li");
+        li.className = "mpu-pcode-item";
+
+        const row = doc.createElement("div");
+        row.className = "mpu-pcode-row";
+
+        const label = doc.createElement("strong");
+        label.textContent = stub.label;
+        row.appendChild(label);
+
+        const copyOne = doc.createElement("button");
+        copyOne.type = "button";
+        copyOne.className = "mpu-btn mpu-pcode-copy";
+        copyOne.textContent = "Copy";
+        copyOne.setAttribute("aria-label", `Copy ${stub.label} stub`);
+        copyOne.addEventListener("click", () => {
+          void copyText(doc, stub.stub, `Copied ${stub.label} stub`);
+        });
+        row.appendChild(copyOne);
+        li.appendChild(row);
+
+        const pre = doc.createElement("pre");
+        pre.className = "mpu-pre mpu-pcode-stub";
+        pre.textContent = stub.stub;
+        li.appendChild(pre);
+        list.appendChild(li);
+      }
+      dialog.appendChild(list);
+
+      const actions = doc.createElement("div");
+      actions.className = "mpu-dialog-actions";
+
+      const copyAll = doc.createElement("button");
+      copyAll.type = "button";
+      copyAll.className = "mpu-btn";
+      copyAll.id = "mpu-pcode-copy-all";
+      copyAll.textContent = "Copy all stubs";
+      copyAll.addEventListener("click", () => {
+        const all = stubs.map((s) => s.stub).join("\n\n");
+        void copyText(doc, all, "Copied all PeopleCode stubs");
+      });
+
+      const closeBtn = doc.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "mpu-btn";
+      closeBtn.id = "mpu-pcode-close";
+      closeBtn.textContent = "Close";
+      closeBtn.addEventListener("click", close);
+
+      actions.append(copyAll, closeBtn);
+      dialog.appendChild(actions);
+    },
+  });
+}
+
+export function showStructureDialog(doc: Document): void {
+  const nodes = collectFluidStructure(doc);
+  const text = formatFluidStructurePlain(nodes);
+
+  openModalDialog(doc, {
+    labelledBy: "mpu-structure-title",
+    initialFocus: "#mpu-structure-close",
+    build: (dialog, close) => {
+      dialog.innerHTML = `
+    <h2 id="mpu-structure-title">Page structure</h2>
+    <p class="mpu-dialog-hint">Read-only inventory of group boxes, scroll areas, grids, and related hosts.</p>
+    <pre class="mpu-pre" id="mpu-structure-body"></pre>
+    <div class="mpu-dialog-actions">
+      <button type="button" class="mpu-btn" id="mpu-structure-copy">Copy</button>
+      <button type="button" class="mpu-btn" id="mpu-structure-close">Close</button>
+    </div>
+  `;
+      (dialog.querySelector("#mpu-structure-body") as HTMLElement).textContent = text;
+      dialog.querySelector("#mpu-structure-close")?.addEventListener("click", close);
+      dialog.querySelector("#mpu-structure-copy")?.addEventListener("click", () => {
+        void copyText(doc, text, "Page structure copied");
+      });
+    },
+  });
+}
+
 export function removeBar(doc: Document = document): void {
   doc.getElementById("mpu-bar")?.remove();
   doc.getElementById("mpu-live")?.remove();
@@ -632,6 +866,71 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     const p = btn("mpu-pageinfo", "Page Info", "Show page information (Alt+Shift+P)");
     p.addEventListener("click", () => ctx.onPageInfo());
     bar.appendChild(p);
+  }
+
+  if (
+    !loginOnly &&
+    (isYes(f.pageInfoOption) || isYes(f.recFieldInfoOption))
+  ) {
+    const pcode = btn("mpu-pcode", "PCode", "PeopleCode event stubs from locked field / page");
+    pcode.addEventListener("click", () => showPeopleCodeDialog(doc, ctx.parsed));
+    bar.appendChild(pcode);
+  }
+
+  if (!loginOnly && isYes(f.pageInfoOption)) {
+    const structure = btn("mpu-structure", "Structure", "Fluid / Classic page structure inventory");
+    structure.addEventListener("click", () => showStructureDialog(doc));
+    bar.appendChild(structure);
+  }
+
+  if (
+    !loginOnly &&
+    isYes(f.pageInfoOption) &&
+    ctx.parsed.baseURL &&
+    ctx.parsed.portal &&
+    ctx.parsed.node
+  ) {
+    const adminRoot = document.createElement("span");
+    adminRoot.className = "mpu-menu-root";
+
+    const adminBtn = btn("mpu-admin", "Admin", "Jump to common setup components");
+    adminBtn.setAttribute("aria-haspopup", "menu");
+    adminBtn.setAttribute("aria-expanded", "false");
+
+    const adminFlyout = document.createElement("div");
+    adminFlyout.className = "mpu-flyout";
+    adminFlyout.setAttribute("role", "menu");
+    adminFlyout.setAttribute("aria-label", "Admin jumps");
+    adminFlyout.hidden = true;
+
+    const closeAdmin = (): void => {
+      adminFlyout.hidden = true;
+      adminBtn.setAttribute("aria-expanded", "false");
+      endMenuDismiss();
+    };
+
+    const openAdmin = (): void => {
+      closeAllFlyouts(doc);
+      buildAdminFlyoutBody(doc, adminFlyout, ctx, closeAdmin);
+      adminFlyout.hidden = false;
+      adminBtn.setAttribute("aria-expanded", "true");
+      bindMenuDismiss(doc, adminRoot, closeAdmin);
+      const first = adminFlyout.querySelector<HTMLElement>('button[role="menuitem"]');
+      first?.focus();
+    };
+
+    adminBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!adminFlyout.hidden) {
+        closeAdmin();
+        return;
+      }
+      openAdmin();
+    });
+
+    buildAdminFlyoutBody(doc, adminFlyout, ctx, closeAdmin);
+    adminRoot.append(adminBtn, adminFlyout);
+    bar.appendChild(adminRoot);
   }
 
   if (!loginOnly && isYes(f.recFieldInfoOption)) {
@@ -840,6 +1139,7 @@ function showHelpDialog(doc: Document): void {
       <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs</li>
       <li><strong>Pages</strong> — delivered multi-page links when present (flyout or full list)</li>
       <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
+      <li><strong>PCode / Structure / Admin</strong> — event stubs, page structure tree, setup component jumps</li>
       <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
       <li><strong>Shortcuts</strong> — Alt+Shift+P/I/C/G</li>
@@ -920,6 +1220,8 @@ export function showPageInfoDialog(
   const meta = collectPageMeta(doc);
   const text = formatPageInfoPlain(meta, parsed, lockedField);
   const markdown = formatPageInfoMarkdown(meta, parsed, lockedField);
+  const objectPack = formatObjectPackPlain({ parsed, meta, lockedField });
+  const objectPackMd = formatObjectPackMarkdown({ parsed, meta, lockedField });
 
   openModalDialog(doc, {
     labelledBy: "mpu-pi-title",
@@ -932,27 +1234,25 @@ export function showPageInfoDialog(
     <div class="mpu-dialog-actions">
       <button type="button" class="mpu-btn" id="mpu-pi-copy">Copy</button>
       <button type="button" class="mpu-btn" id="mpu-pi-copy-md">Copy Markdown</button>
+      <button type="button" class="mpu-btn" id="mpu-pi-copy-pack">Copy object pack</button>
+      <button type="button" class="mpu-btn" id="mpu-pi-copy-pack-md">Copy pack MD</button>
       <button type="button" class="mpu-btn" id="mpu-pi-compare">Compare clipboard</button>
       <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
     </div>
   `;
       (dialog.querySelector("#mpu-pi-body") as HTMLElement).textContent = text;
       dialog.querySelector("#mpu-pi-close")?.addEventListener("click", close);
-      dialog.querySelector("#mpu-pi-copy")?.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          announce(doc, "Page information copied");
-        } catch {
-          announce(doc, "Unable to copy — select text manually");
-        }
+      dialog.querySelector("#mpu-pi-copy")?.addEventListener("click", () => {
+        void copyText(doc, text, "Page information copied");
       });
-      dialog.querySelector("#mpu-pi-copy-md")?.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(markdown);
-          announce(doc, "Markdown page info copied");
-        } catch {
-          announce(doc, "Unable to copy — select text manually");
-        }
+      dialog.querySelector("#mpu-pi-copy-md")?.addEventListener("click", () => {
+        void copyText(doc, markdown, "Markdown page info copied");
+      });
+      dialog.querySelector("#mpu-pi-copy-pack")?.addEventListener("click", () => {
+        void copyText(doc, objectPack, "Object pack copied");
+      });
+      dialog.querySelector("#mpu-pi-copy-pack-md")?.addEventListener("click", () => {
+        void copyText(doc, objectPackMd, "Object pack Markdown copied");
       });
       dialog.querySelector("#mpu-pi-compare")?.addEventListener("click", async () => {
         const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;

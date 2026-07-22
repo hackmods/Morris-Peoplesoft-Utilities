@@ -7,12 +7,14 @@ import {
   toggleFieldInspector,
   fieldNameFromId,
   getLockedFieldName,
+  getLockedParsedRecField,
   syncFieldInspectorChrome,
   reinjectFieldInspector,
   inferRecordName,
   parseRecField,
   formatRecFieldPlain,
   formatRecFieldCopy,
+  formatGetRowsetCopy,
   preferredFluidBoxHost,
   nearbyPageLabel,
   fieldDomAttrs,
@@ -85,6 +87,9 @@ describe("field inspector", () => {
     expect(formatRecFieldCopy(parsed)).toBe("DERIVED_HR.EMPLID");
     expect(formatRecFieldCopy(parsed, "ampersand")).toBe("&DERIVED_HR.EMPLID");
     expect(formatRecFieldCopy(parsed, "getfield")).toBe("GetField(Field.EMPLID)");
+    expect(formatGetRowsetCopy(parsed)).toBe(
+      "GetLevel0().GetRow(0).GetRecord(Record.DERIVED_HR).GetField(Field.EMPLID)",
+    );
   });
 
   it("toggles active state and exits on Escape", () => {
@@ -144,6 +149,8 @@ describe("field inspector", () => {
 
     icon.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(getLockedFieldName()).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
+    expect(getLockedParsedRecField()?.record).toBe("NC_REHIRE_ELIG");
+    expect(getLockedParsedRecField()?.field).toBe("TO_DATE");
     expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#5DA027");
     expect(writeText).toHaveBeenCalledWith("NC_REHIRE_ELIG.TO_DATE");
 

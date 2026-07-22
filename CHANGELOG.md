@@ -4,6 +4,17 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.15] — 2026-07-22
+
+### Added
+
+- **Wave 6 PeopleCode / Fluid / Admin** (see `docs/findings/future-enhancements.md`):
+  - **PCode** dialog — FieldChange, FieldEdit, RowInit, SavePreChange, Component Pre/PostBuild, GetRowset stubs with per-stub and copy-all actions (PC-01)
+  - **Page Info object pack** — plain + Markdown clipboard for Menu.Component.Page, portal/node/site, ToolsRel, UI mode, locked field (PC-02)
+  - **GetRowset copy format** — `GetLevel0().GetRow(n).GetRecord().GetField()` when row occurrence is known (PC-03)
+  - **Structure** dialog — read-only Fluid/Classic group, scroll, grid, and related host inventory (FL-01)
+  - **Admin** flyout — grouped jumps to Permission Lists, Roles, User Profiles, Portal Structure, Message Catalog, IB monitors, Process Monitor, Web Profile, Query Manager (AD-01)
+
 ## [1.0.14] — 2026-07-21
 
 ### Fixed

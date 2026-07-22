@@ -59,6 +59,70 @@ describe("utilities bar", () => {
     expect(onPageInfo).toHaveBeenCalledOnce();
   });
 
+  it("mounts wave 6 PCode, Structure, and Admin buttons when page info is on", () => {
+    const settings = createDefaultSettings();
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+    expect(document.getElementById("mpu-pcode")).toBeTruthy();
+    expect(document.getElementById("mpu-structure")).toBeTruthy();
+    expect(document.getElementById("mpu-admin")).toBeTruthy();
+  });
+
+  it("hides wave 6 buttons when page info and inspect are off", () => {
+    const settings = createDefaultSettings();
+    settings.features.pageInfoOption = "No";
+    settings.features.recFieldInfoOption = "No";
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+    expect(document.getElementById("mpu-pcode")).toBeNull();
+    expect(document.getElementById("mpu-structure")).toBeNull();
+    expect(document.getElementById("mpu-admin")).toBeNull();
+  });
+
+  it("shows PCode when only field inspector is enabled", () => {
+    const settings = createDefaultSettings();
+    settings.features.pageInfoOption = "No";
+    settings.features.recFieldInfoOption = "Yes";
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+    expect(document.getElementById("mpu-pcode")).toBeTruthy();
+    expect(document.getElementById("mpu-structure")).toBeNull();
+    expect(document.getElementById("mpu-admin")).toBeNull();
+  });
+
   it("hides disabled features", () => {
     const settings = createDefaultSettings();
     settings.features.traceOption = "No";

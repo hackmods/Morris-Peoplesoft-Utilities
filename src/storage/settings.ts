@@ -90,6 +90,7 @@ export async function loadSettings(): Promise<MpuSettings> {
       fieldCopyFormat:
         s.fieldCopyFormat === "ampersand" ||
         s.fieldCopyFormat === "getfield" ||
+        s.fieldCopyFormat === "getrowset" ||
         s.fieldCopyFormat === "record.field"
           ? s.fieldCopyFormat
           : "record.field",

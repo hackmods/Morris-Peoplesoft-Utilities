@@ -95,6 +95,56 @@
 
 ---
 
+## P4 — Wave 6: PeopleCode, Fluid structure, admin setup
+
+**Goal:** Expose PeopleCode-oriented and Fluid/setup navigation that helps programmers and PS administrators without App Designer APIs, credentials, or PII scraping.  
+**Constraints:** DOM/session local only; soft-fail on missing security; opt-in toggles where noisy; export warnings for business keys.  
+**Plan:** [`.cursor/plans/implement-wave6.md`](../../.cursor/plans/implement-wave6.md)  
+**Status:** First slice shipped in **1.0.15** (PC-01..03, FL-01, AD-01). Remainder deferred to Wave 6.1+.
+
+### PeopleCode aids
+
+| ID | Idea | Who | Why | Notes |
+|---|---|---|---|---|
+| PC-01 | ~~**PeopleCode stub pack**~~ — **Done (1.0.15)** | Dev | Faster coding from page context | Pure local templates from `RECORD.FIELD` + Page Info; no server |
+| PC-02 | ~~**Object clipboard pack**~~ — **Done (1.0.15)** | BA, Dev | Ticket/handoff speed | Extend Page Info actions; never include tokens/secrets |
+| PC-03 | ~~**Grid / rowset copy formats**~~ — **Done (1.0.15)** | Dev | Scroll/grid PeopleCode | Extend `FieldCopyFormat` + inspector lock |
+| PC-04 | Deeper **prompt / display-only / deferred** chips from DOM | Dev | FieldEdit context | DOM/ARIA only; follow-up after PC-01..03 |
+| PC-05 | **Message Catalog / translate** key detect + copy when present in DOM | Dev, Admin | MsgGet / XLAT hunting | Only when keys already visible; no scraping |
+
+### Fluid / page structure
+
+| ID | Idea | Who | Why | Notes |
+|---|---|---|---|---|
+| FL-01 | ~~**Fluid structure tree**~~ — **Done (1.0.15)** | Dev, BA | Layout debugging without App Designer | Read-only overlay/dialog; Classic best-effort |
+| FL-02 | Portal / **CREF path** copy when Fluid nav exposes it | Admin | Registry troubleshooting | Metadata only |
+| FL-03 | Theme / branding **clue** (id/family if in DOM) | Admin | Env visual diffs | Boolean/id only; no asset download |
+
+### Admin / setup navigation
+
+| ID | Idea | Who | Why | Notes |
+|---|---|---|---|---|
+| AD-01 | ~~**Admin jump panel**~~ — **Done (1.0.15)** | Admin, Dev | Daily setup hops | Soft-fail / Trace-style 🔒 if unauthorized; uses existing session |
+| AD-02 | **IB breadcrumb** — Service Op / Queue / Node names when on IB pages | Admin | Integration support | Copy + optional Shortcut; DOM-visible only |
+| AD-03 | Process Monitor **ticket pack** (Process Instance, type, run control from visible cells) | Admin | Ops handoffs | Visible cells only |
+| AD-04 | Multi-env **object/field diff** (clipboard packs between tabs) | BA, Dev | DEV vs QA vs PRD | Local string compare; extend Page Info Compare |
+
+### Trace companion (optional follow-on)
+
+| ID | Idea | Who | Why | Notes |
+|---|---|---|---|---|
+| TR-04 | Bar summary of **which trace flags are on** + last toggle hint | Dev | Avoid surprise verbose traces | Local settings only |
+| TR-05 | Short **flag chooser guide** (FieldChange vs SQL binds) | Dev | Education | Docs + Options help text |
+
+### Wave 6 suggested slice (implement first)
+
+1. **PC-01, PC-02, PC-03** — PeopleCode stubs + object pack + rowset formats  
+2. **FL-01** — Fluid structure tree (read-only)  
+3. **AD-01** — Admin jump panel (permission soft-fail)  
+4. Defer PC-04/05, FL-02/03, AD-02..04, TR-04/05 to Wave 6.1+
+
+---
+
 ## Explicitly out of scope
 
 - Password vaults, Quick Logins, storing PS credentials  
@@ -102,6 +152,7 @@
 - Server-side sync of settings/favorites  
 - Scraping or exfiltrating employee/student PII beyond what the user already sees  
 - Shipping `.reference/PS-Utilities` or private keys  
+- App Designer / PSIDE remote APIs  
 
 ---
 
@@ -113,7 +164,8 @@
 4. ~~**TR-01, UX-02** — developer daily drivers~~ (shipped 1.0.10)
 5. ~~**FI-05, PI-04, FV-03, TR-03, UX-03, UX-05** — remaining P1 + key P2~~ (shipped 1.0.11)
 6. ~~**UX-04, UX-07..10** — remaining P2 UX~~ (shipped 1.0.12)
-7. P3 items only with ADR if they add permissions or major UI surface  
+7. ~~P3 items only with ADR if they add permissions or major UI surface~~ (shipped 1.0.13)
+8. ~~**Wave 6 (PC-01..03, FL-01, AD-01)** — PeopleCode / Fluid / admin setup aids~~ (shipped 1.0.15)
 
 ---
 
@@ -126,3 +178,6 @@
 | 2026-07-21 | Wave 2 implemented in v1.0.10 (FI-04, SR-01/02, TR-01, UX-02) — plan: `.cursor/plans/implement-wave2.md` |
 | 2026-07-21 | Wave 3 implemented in v1.0.11 (FI-05, PI-04, FV-03, TR-03, UX-03, UX-05) — plan: `.cursor/plans/implement-wave3.md` |
 | 2026-07-21 | Wave 4 implemented in v1.0.12 (UX-04, UX-07..10) — plan: `.cursor/plans/implement-wave4.md` |
+| 2026-07-22 | Hierarchical Shortcuts + Pages flyout parity vs legacy screenshots |
+| 2026-07-22 | **P4 / Wave 6 backlog** logged (PeopleCode stubs, object pack, Fluid structure, admin jumps) |
+| 2026-07-22 | Wave 6 first slice shipped in **v1.0.15** (PC-01..03, FL-01, AD-01) — plan: `.cursor/plans/implement-wave6.md` |

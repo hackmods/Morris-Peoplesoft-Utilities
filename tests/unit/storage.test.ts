@@ -34,6 +34,14 @@ describe("storage load/save/update", () => {
     expect(loaded.fieldCopyFormat).toBe("getfield");
   });
 
+  it("persists getrowset copy format", async () => {
+    const s = createDefaultSettings();
+    s.fieldCopyFormat = "getrowset";
+    await saveSettings(s);
+    const loaded = await loadSettings();
+    expect(loaded.fieldCopyFormat).toBe("getrowset");
+  });
+
   it("round-trips settings", async () => {
     const s = createDefaultSettings();
     s.favorites.push({

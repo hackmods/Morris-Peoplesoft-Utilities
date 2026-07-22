@@ -242,6 +242,30 @@
   text-align: left;
 }
 
+.mpu-pcode-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+  max-height: min(50vh, 24rem);
+  overflow: auto;
+}
+
+.mpu-pcode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.mpu-pcode-stub {
+  margin: 0.35rem 0 0;
+  max-height: 6rem;
+  overflow: auto;
+  font-size: 0.78rem;
+}
+
 .mpu-copy-format {
   max-width: 9rem;
 }

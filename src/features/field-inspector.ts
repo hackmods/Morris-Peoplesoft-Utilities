@@ -226,6 +226,15 @@ export function formatRecFieldCopy(
   return parsed.base;
 }
 
+/** PC-03: row-aware PeopleCode reference when occurrence is known. */
+export function formatGetRowsetCopy(parsed: ParsedRecField): string {
+  const record = parsed.record || "RECORD";
+  const field = parsed.field || parsed.base || "FIELD";
+  const row =
+    parsed.occurrence != null && parsed.occurrence !== "" ? parsed.occurrence : "CurrentRowNumber()";
+  return `GetLevel0().GetRow(${row}).GetRecord(Record.${record}).GetField(Field.${field})`;
+}
+
 /** Human-readable label for announcements / plain-text copy. */
 export function formatRecFieldPlain(parsed: ParsedRecField): string {
   const core = formatRecFieldCopy(parsed);
@@ -239,12 +248,19 @@ export function isFieldInspectorActive(): boolean {
 
 export function getLockedFieldName(): string | null {
   if (!lockedId) return null;
-  return formatRecFieldPlain(parseRecField(lockedId));
+  return formatRecFieldPlain(parseRecField(lockedId, peerFieldBases, resolveFieldElement(lockedId)));
+}
+
+export function getLockedParsedRecField(): ParsedRecField | null {
+  if (!lockedId) return null;
+  return parseRecField(lockedId, peerFieldBases, resolveFieldElement(lockedId));
 }
 
 export function getLockedFieldCopyText(format: FieldCopyFormat = "record.field"): string | null {
-  if (!lockedId) return null;
-  return formatRecFieldCopy(parseRecField(lockedId), format);
+  const parsed = getLockedParsedRecField();
+  if (!parsed) return null;
+  if (format === "getrowset") return formatGetRowsetCopy(parsed);
+  return formatRecFieldCopy(parsed, format);
 }
 
 export async function copyLockedField(
