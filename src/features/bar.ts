@@ -94,6 +94,8 @@ export function groupFavoritesByCategory(
 let menuDismissAbort: AbortController | null = null;
 /** Scroll/resize listeners that keep an open root flyout aligned to its button. */
 let flyoutPositionAbort: AbortController | null = null;
+/** Where a portaled root flyout should return when closed. */
+const flyoutHomes = new WeakMap<HTMLElement, { parent: Node; next: ChildNode | null }>();
 
 function endMenuDismiss(): void {
   menuDismissAbort?.abort();
@@ -105,6 +107,30 @@ function endFlyoutPosition(): void {
   flyoutPositionAbort = null;
 }
 
+function restorePortaledFlyout(flyout: HTMLElement): void {
+  const home = flyoutHomes.get(flyout);
+  if (!home?.parent?.isConnected) {
+    flyoutHomes.delete(flyout);
+    return;
+  }
+  if (flyout.parentNode === home.parent) return;
+  if (home.next && home.next.parentNode === home.parent) {
+    home.parent.insertBefore(flyout, home.next);
+  } else {
+    home.parent.appendChild(flyout);
+  }
+  flyoutHomes.delete(flyout);
+}
+
+function portalFlyoutToBody(flyout: HTMLElement): void {
+  const doc = flyout.ownerDocument;
+  if (!doc.body || flyout.parentElement === doc.body) return;
+  if (!flyoutHomes.has(flyout)) {
+    flyoutHomes.set(flyout, { parent: flyout.parentNode!, next: flyout.nextSibling });
+  }
+  doc.body.appendChild(flyout);
+}
+
 function closeAllFlyouts(doc: Document): void {
   endMenuDismiss();
   endFlyoutPosition();
@@ -112,31 +138,34 @@ function closeAllFlyouts(doc: Document): void {
     el.setAttribute("aria-expanded", "false");
   });
   doc.querySelectorAll(".mpu-flyout").forEach((el) => {
-    (el as HTMLElement).hidden = true;
+    const flyout = el as HTMLElement;
+    flyout.hidden = true;
+    restorePortaledFlyout(flyout);
   });
 }
 
 /**
- * Pin root flyouts with position:fixed under the trigger.
- * Fluid/Classic headers often use overflow:hidden, which clips absolute menus.
+ * Pin root flyouts with position:fixed under the trigger, portaled to document.body
+ * so Fluid/Classic header overflow AND transform containing blocks cannot clip them.
  */
 function placeAnchoredFlyout(anchor: HTMLElement, flyout: HTMLElement): void {
+  portalFlyoutToBody(flyout);
   const view = anchor.ownerDocument.defaultView;
   const vw = view?.innerWidth ?? 1200;
   const vh = view?.innerHeight ?? 800;
   const rect = anchor.getBoundingClientRect();
-  const maxH = Math.min(Math.floor(vh * 0.72), 420);
-  const width = Math.min(Math.max(flyout.offsetWidth || 224, 224), Math.min(384, vw - 8));
+  const maxH = Math.min(Math.floor(vh * 0.75), 480);
+  const width = Math.min(Math.max(flyout.offsetWidth || 240, 240), Math.min(400, vw - 8));
 
   flyout.style.position = "fixed";
-  flyout.style.zIndex = "2147482000";
+  flyout.style.zIndex = "2147482500";
   flyout.style.maxHeight = `${maxH}px`;
   flyout.style.width = `${width}px`;
   flyout.style.right = "auto";
   flyout.style.bottom = "auto";
   flyout.style.margin = "0";
+  flyout.style.transform = "none";
 
-  // First pass with current size; second pass after layout uses real height
   const height = Math.min(flyout.offsetHeight || 160, maxH);
   let left = rect.left;
   if (left + width > vw - 4) left = Math.max(4, vw - width - 4);
@@ -170,7 +199,12 @@ function bindFlyoutPosition(anchor: HTMLElement, flyout: HTMLElement): void {
   view?.addEventListener("resize", place, { signal: ac.signal });
 }
 
-function bindMenuDismiss(doc: Document, root: HTMLElement, close: () => void): void {
+function bindMenuDismiss(
+  doc: Document,
+  root: HTMLElement,
+  close: () => void,
+  flyout?: HTMLElement,
+): void {
   endMenuDismiss();
   const ac = new AbortController();
   menuDismissAbort = ac;
@@ -178,7 +212,9 @@ function bindMenuDismiss(doc: Document, root: HTMLElement, close: () => void): v
   doc.addEventListener(
     "click",
     (e) => {
-      if (!root.contains(e.target as Node)) close();
+      const t = e.target as Node;
+      if (root.contains(t) || (flyout && flyout.contains(t))) return;
+      close();
     },
     { signal },
   );
@@ -952,8 +988,11 @@ export function showStructureDialog(doc: Document): void {
 }
 
 export function removeBar(doc: Document = document): void {
+  closeAllFlyouts(doc);
   doc.getElementById("mpu-bar")?.remove();
   doc.getElementById("mpu-live")?.remove();
+  // Orphaned portaled menus (if any) after bar tear-down
+  doc.querySelectorAll("body > .mpu-flyout").forEach((el) => el.remove());
 }
 
 export function mountBar(ctx: BarContext, doc: Document = document): void {
@@ -1043,6 +1082,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       flyout.hidden = true;
       shortcutsBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
+      restorePortaledFlyout(flyout);
       endMenuDismiss();
     };
 
@@ -1052,7 +1092,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       flyout.hidden = false;
       shortcutsBtn.setAttribute("aria-expanded", "true");
       bindFlyoutPosition(shortcutsBtn, flyout);
-      bindMenuDismiss(doc, menuRoot, closeShortcuts);
+      bindMenuDismiss(doc, menuRoot, closeShortcuts, flyout);
       filter.focus();
     };
 
@@ -1226,6 +1266,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       adminFlyout.hidden = true;
       adminBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
+      restorePortaledFlyout(adminFlyout);
       endMenuDismiss();
     };
 
@@ -1235,7 +1276,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       adminFlyout.hidden = false;
       adminBtn.setAttribute("aria-expanded", "true");
       bindFlyoutPosition(adminBtn, adminFlyout);
-      bindMenuDismiss(doc, adminRoot, closeAdmin);
+      bindMenuDismiss(doc, adminRoot, closeAdmin, adminFlyout);
       const first = adminFlyout.querySelector<HTMLElement>('button[role="menuitem"]');
       first?.focus();
     };
@@ -1327,6 +1368,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       pagesFlyout.hidden = true;
       pagesBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
+      restorePortaledFlyout(pagesFlyout);
       endMenuDismiss();
     };
 
@@ -1336,7 +1378,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       pagesFlyout.hidden = false;
       pagesBtn.setAttribute("aria-expanded", "true");
       bindFlyoutPosition(pagesBtn, pagesFlyout);
-      bindMenuDismiss(doc, pagesRoot, closePages);
+      bindMenuDismiss(doc, pagesRoot, closePages, pagesFlyout);
       const first = pagesFlyout.querySelector<HTMLElement>(
         'button[role="menuitem"]:not(:disabled)',
       );
@@ -1566,15 +1608,21 @@ export function showPageInfoDialog(
         <button type="button" class="mpu-btn" id="mpu-pi-check-drift">Check upgrade drift</button>
       </div>
     </div>
-    <div class="mpu-dialog-actions">
-      <button type="button" class="mpu-btn" id="mpu-pi-copy">Copy</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-copy-md">Copy Markdown</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-copy-pack">Copy object pack</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-copy-pack-md">Copy pack MD</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-compare">Compare clipboard</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-compare-pack">Compare object pack</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-copy-process" hidden>Copy process pack</button>
-      <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
+    <div class="mpu-dialog-actions mpu-dialog-actions-stack">
+      <div class="mpu-action-group" role="group" aria-label="Copy page info">
+        <button type="button" class="mpu-btn" id="mpu-pi-copy">Copy</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-copy-md">Copy Markdown</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-copy-pack">Copy object pack</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-copy-pack-md">Copy pack MD</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-copy-process" hidden>Copy process pack</button>
+      </div>
+      <div class="mpu-action-group" role="group" aria-label="Compare">
+        <button type="button" class="mpu-btn" id="mpu-pi-compare">Compare clipboard</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-compare-pack">Compare object pack</button>
+      </div>
+      <div class="mpu-action-group mpu-action-group-end">
+        <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
+      </div>
     </div>
   `;
       (dialog.querySelector("#mpu-pi-body") as HTMLElement).textContent = text;

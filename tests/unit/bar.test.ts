@@ -421,6 +421,7 @@ describe("utilities bar", () => {
     const flyout = document.querySelector('.mpu-flyout[aria-label="Shortcuts"]') as HTMLElement;
     expect(flyout.hidden).toBe(false);
     expect(flyout.style.position).toBe("fixed");
+    expect(flyout.parentElement).toBe(document.body);
     expect(flyout.style.top).toMatch(/px$/);
     expect(flyout.style.left).toMatch(/px$/);
   });

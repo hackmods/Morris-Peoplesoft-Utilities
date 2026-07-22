@@ -156,8 +156,10 @@
 .mpu-dialog {
   background: #f7f9fb;
   color: #15202b;
-  max-width: 32rem;
+  max-width: min(40rem, 96vw);
+  max-height: min(90vh, 52rem);
   width: 100%;
+  overflow: auto;
   border-radius: 6px;
   padding: 1rem 1.25rem;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
@@ -171,8 +173,27 @@
 
 .mpu-dialog-actions {
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-top: 0.75rem;
+  align-items: center;
+}
+
+.mpu-dialog-actions-stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.mpu-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.mpu-action-group-end {
+  margin-left: auto;
 }
 
 .mpu-dialog-hint {
@@ -239,6 +260,7 @@
 .mpu-dialog .mpu-btn {
   background: #1f3a4d;
   color: #fff;
+  white-space: nowrap;
 }
 
 .mpu-pre {

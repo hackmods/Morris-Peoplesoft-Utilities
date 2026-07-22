@@ -6,7 +6,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ### Fixed
 
-- **Shortcuts / Admin / Pages menus:** root flyouts use fixed positioning so PeopleSoft header `overflow` no longer clips menu content
+- **Shortcuts / Admin / Pages menus:** portal open menus to `document.body` (escapes Fluid header overflow *and* transform clipping); restore on close
+- **Page Info dialog:** wrap/group action buttons (Copy / Compare / Close) so they no longer overflow a single row
 
 ## [1.0.20] — 2026-07-22
 
