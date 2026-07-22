@@ -167,6 +167,25 @@
 7. ~~P3 items only with ADR if they add permissions or major UI surface~~ (shipped 1.0.13)
 8. ~~**Wave 6 (PC-01..03, FL-01, AD-01)** — PeopleCode / Fluid / admin setup aids~~ (shipped 1.0.15)
 9. ~~**Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05)** — PeopleCode / Fluid / admin remainder~~ (shipped 1.0.16)
+10. ~~**Wave 7 / UG-01** — Customization upgrade watch (UI fingerprint baseline + drift)~~ (shipped 1.0.17)
+
+---
+
+## P5 — Wave 7: Customization upgrade watch
+
+**Goal:** Help BAs and developers spot UI/DOM drift on customized components after PeopleTools upgrades without App Designer APIs.  
+**Constraints:** Local fingerprints only; no PeopleCode compare in-browser; export/import via JSON; credit PS Utilities lineage.  
+**Status:** UG-01 shipped in **1.0.17**.
+
+### Upgrade watch
+
+| ID | Idea | Who | Why | Notes |
+|---|---|---|---|---|
+| UG-01 | ~~**Customization upgrade watch**~~ — capture UI fingerprint (tabs, structure hosts, field ids) + post-upgrade drift check | BA, Dev, Admin | Faster regression triage after upgrades | Page Info + Options → Upgrade; not PeopleCode |
+| UG-02 | **Change Assistant handoff export** — structured notes from drift report for CA project docs | Admin | Ops workflow | Deferred — file/export only |
+| UG-03 | **PeopleCode compare integration** | Dev | Full override detection | **N/A in browser** — use App Designer Compare Report |
+| UG-04 | **Multi-baseline history** per object (last N captures) | Dev | Track drift across envs | Deferred |
+| UG-05 | **Bar Upgrade chip** when watch exists for current component | BA | Faster re-check | Nice-to-have; Page Info buttons sufficient |
 
 ---
 
@@ -183,3 +202,4 @@
 | 2026-07-22 | **P4 / Wave 6 backlog** logged (PeopleCode stubs, object pack, Fluid structure, admin jumps) |
 | 2026-07-22 | Wave 6 first slice shipped in **v1.0.15** (PC-01..03, FL-01, AD-01) — plan: `.cursor/plans/implement-wave6.md` |
 | 2026-07-22 | **Wave 6.1** shipped in **v1.0.16** (PC-04/05, FL-02/03, AD-02..04, TR-04/05) — plan: `.cursor/plans/implement-wave6.1.md` |
+| 2026-07-22 | **P5 / Wave 7 (UG-01)** shipped in **v1.0.17** — customization upgrade watch (UI fingerprint baseline + drift) |

@@ -110,11 +110,42 @@ export interface TraceSettings {
   SQL4096: YesNo;
 }
 
+/** UG-01: DOM/UI fingerprint for post-upgrade customization drift checks. */
+export interface PageFingerprint {
+  menu: string;
+  component: string;
+  market: string;
+  page: string;
+  toolsRel: string;
+  uiMode: string;
+  tabLabels: string[];
+  structureLabels: string[];
+  fieldIds: string[];
+}
+
+/** User-marked customized object with a baseline fingerprint (local only). */
+export interface CustomizationWatch {
+  id: string;
+  label: string;
+  notes: string;
+  menu: string;
+  component: string;
+  market: string;
+  baseline: PageFingerprint;
+  capturedAt: number;
+  envLabel: string;
+}
+
 export interface MpuSettings {
   features: FeatureFlags;
   favorites: Favorite[];
   /** PI-04: last N components visited in this browser */
   recentComponents: RecentComponent[];
+  /**
+   * UG-01: customization upgrade watchlist — UI/DOM fingerprints for post-upgrade drift checks.
+   * Not a substitute for App Designer Compare Report (PeopleCode).
+   */
+  customizationWatches: CustomizationWatch[];
   environments: Environment[];
   urlSites: UrlSiteMap;
   traceSettings: TraceSettings;
@@ -196,6 +227,7 @@ export function createDefaultSettings(): MpuSettings {
     features: { ...DEFAULT_FEATURES },
     favorites: [],
     recentComponents: [],
+    customizationWatches: [],
     environments: [],
     urlSites: {},
     traceSettings: { ...DEFAULT_TRACE },

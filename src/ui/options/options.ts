@@ -10,6 +10,7 @@ import {
   DEFAULT_FEATURE_UI_SCOPES,
   DEFAULT_TRACE,
   FIELD_COPY_FORMATS,
+  type CustomizationWatch,
   type FeatureFlags,
   type FeatureUiScope,
   type FeatureUiScopes,
@@ -24,6 +25,7 @@ import {
   summarizeActiveTraceFlags,
   type TracePresetId,
 } from "../../features/trace-presets";
+import { upsertWatch } from "../../features/upgrade-watch";
 
 const toast = document.getElementById("toast")!;
 let toastTimer = 0;
@@ -231,6 +233,87 @@ function emptyState(text: string): HTMLParagraphElement {
   return p;
 }
 
+function isCustomizationWatch(value: unknown): value is CustomizationWatch {
+  if (!value || typeof value !== "object") return false;
+  const w = value as CustomizationWatch;
+  return (
+    typeof w.id === "string" &&
+    typeof w.menu === "string" &&
+    typeof w.component === "string" &&
+    typeof w.market === "string" &&
+    typeof w.capturedAt === "number" &&
+    w.baseline !== null &&
+    typeof w.baseline === "object" &&
+    Array.isArray((w.baseline as CustomizationWatch["baseline"]).fieldIds)
+  );
+}
+
+function parseCustomizationWatchesImport(data: unknown): CustomizationWatch[] | null {
+  if (Array.isArray(data)) {
+    return data.every(isCustomizationWatch) ? data : null;
+  }
+  if (data && typeof data === "object" && Array.isArray((data as { customizationWatches?: unknown }).customizationWatches)) {
+    const list = (data as { customizationWatches: unknown[] }).customizationWatches;
+    return list.every(isCustomizationWatch) ? (list as CustomizationWatch[]) : null;
+  }
+  return null;
+}
+
+function mergeCustomizationWatches(
+  current: CustomizationWatch[],
+  imported: CustomizationWatch[],
+  replace: boolean,
+): CustomizationWatch[] {
+  if (replace) return imported.slice(0, 50);
+  let next = [...current];
+  for (const watch of imported) {
+    next = upsertWatch(next, watch);
+  }
+  return next;
+}
+
+function formatWatchDate(ms: number): string {
+  try {
+    return new Date(ms).toLocaleString();
+  } catch {
+    return String(ms);
+  }
+}
+
+function renderUpgradeWatches(settings: MpuSettings): void {
+  const tbody = document.querySelector("#watch-table tbody")!;
+  const empty = document.getElementById("watch-empty")!;
+  tbody.replaceChildren();
+  if (!settings.customizationWatches.length) {
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+  settings.customizationWatches.forEach((watch, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td>`;
+    const cells = tr.querySelectorAll("td");
+    cells[0].textContent = watch.label;
+    cells[1].textContent = `${watch.menu}.${watch.component}.${watch.market}`;
+    cells[2].textContent = formatWatchDate(watch.capturedAt);
+    cells[3].textContent = watch.baseline.toolsRel || "—";
+    cells[4].textContent = String(watch.baseline.fieldIds.length);
+    const del = document.createElement("button");
+    del.type = "button";
+    del.textContent = "Delete";
+    del.addEventListener("click", async () => {
+      const s = await loadSettings();
+      s.customizationWatches.splice(index, 1);
+      await saveSettings(s);
+      renderUpgradeWatches(s);
+      broadcast();
+      say("Watch deleted");
+    });
+    cells[5].appendChild(del);
+    tbody.appendChild(tr);
+  });
+}
+
 function renderFavorites(settings: MpuSettings): void {
   const tbody = document.querySelector("#fav-table tbody")!;
   const empty = document.getElementById("fav-empty")!;
@@ -354,6 +437,7 @@ async function init(): Promise<void> {
   renderFeatures(settings);
   renderTrace(settings);
   renderFavorites(settings);
+  renderUpgradeWatches(settings);
   renderEnvs(settings);
   renderAllowlist(settings);
 
@@ -465,6 +549,49 @@ async function init(): Promise<void> {
     }
   });
 
+  document.getElementById("export-watches")!.addEventListener("click", async () => {
+    const s = await loadSettings();
+    download(
+      "mpu-customization-watches.json",
+      JSON.stringify(s.customizationWatches, null, 2),
+      "application/json",
+    );
+    say("Watches exported");
+  });
+
+  document.getElementById("import-watches")!.addEventListener("change", async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      const imported = parseCustomizationWatchesImport(parsed);
+      if (!imported?.length) {
+        say("No valid watches found in JSON");
+        return;
+      }
+      const replace = (document.getElementById("import-watches-replace") as HTMLInputElement | null)
+        ?.checked;
+      const s = await loadSettings();
+      s.customizationWatches = mergeCustomizationWatches(
+        s.customizationWatches,
+        imported,
+        Boolean(replace),
+      );
+      await saveSettings(s);
+      renderUpgradeWatches(s);
+      broadcast();
+      say(
+        replace
+          ? `Replaced with ${imported.length} watch(es)`
+          : `Imported ${imported.length} watch(es)`,
+      );
+    } catch {
+      say("Could not import watches — check the file format");
+    } finally {
+      (e.target as HTMLInputElement).value = "";
+    }
+  });
+
   document.getElementById("export-json")!.addEventListener("click", async () => {
     const s = await loadSettings();
     download("mpu-settings-backup.json", JSON.stringify(s, null, 2), "application/json");
@@ -485,6 +612,7 @@ async function init(): Promise<void> {
       renderFeatures(s);
       renderTrace(s);
       renderFavorites(s);
+      renderUpgradeWatches(s);
       renderEnvs(s);
       renderAllowlist(s);
       broadcast();

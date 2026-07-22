@@ -4,6 +4,15 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.17] — 2026-07-22
+
+### Added
+
+- **Wave 7 / UG-01 — Customization upgrade watch** (see `docs/findings/future-enhancements.md`):
+  - **Page Info** — Watch customization (capture UI fingerprint with optional notes + env label) and Check upgrade drift vs saved baseline
+  - **Options → Upgrade** — list watches, delete, export/import JSON
+  - Compares tabs, structure hosts, and field ids — does **not** detect PeopleCode-only overrides
+
 ## [1.0.16] — 2026-07-22
 
 ### Added

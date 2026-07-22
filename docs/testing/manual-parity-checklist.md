@@ -19,6 +19,7 @@ Use before tagging a release or uploading to the Chrome Web Store.
 - [ ] Favorites CSV import/export (Category/SubCategory preserved)
 - [ ] Pages menu lists all tabs; current page highlighted
 - [ ] Page Info dialog + copy
+- [ ] Customization upgrade watch — capture baseline + check drift (Page Info + Options → Upgrade)
 - [ ] Field Inspector on/off + Escape
 - [ ] New Window opens `_newwin` style URL
 - [ ] Advanced Search expand (where control exists)

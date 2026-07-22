@@ -181,6 +181,32 @@
   opacity: 0.9;
 }
 
+.mpu-dialog-section {
+  margin: 0.75rem 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--mpu-bar-fg, #14202b) 12%, transparent);
+}
+
+.mpu-dialog-section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.mpu-dialog-label {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mpu-dialog-input {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c5d0d8;
+  border-radius: 4px;
+}
+
 .mpu-goto-form {
   display: grid;
   gap: 0.55rem;

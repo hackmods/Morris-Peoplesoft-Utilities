@@ -36,6 +36,15 @@ import {
   formatProcessPackPlain,
 } from "./process-pack";
 import { formatTraceBarHint, summarizeActiveTraceFlags } from "./trace-presets";
+import { loadSettings, saveSettings } from "../storage/settings";
+import {
+  capturePageFingerprint,
+  compareFingerprints,
+  createWatchFromFingerprint,
+  findWatchForParsed,
+  formatDriftReportPlain,
+  upsertWatch,
+} from "./upgrade-watch";
 
 export interface BarContext {
   settings: MpuSettings;
@@ -1226,7 +1235,7 @@ function showHelpDialog(doc: Document): void {
     <p>Productivity overlay for PeopleSoft Classic and Fluid. Settings stay on this device. No passwords. No telemetry.</p>
     <ul>
       <li><strong>Shortcuts</strong> — hierarchical menu by category; Add to Shortcuts from the flyout</li>
-      <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs</li>
+      <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs; <strong>Upgrade watch</strong> compares UI fingerprints after PS upgrades (not PeopleCode)</li>
       <li><strong>Pages</strong> — delivered multi-page links when present (flyout or full list)</li>
       <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
       <li><strong>PCode / Structure / Admin</strong> — event stubs, page structure tree, setup component jumps</li>
@@ -1306,6 +1315,7 @@ export function showPageInfoDialog(
   doc: Document,
   parsed: ParsedPsUrl,
   lockedField?: string | null,
+  envLabel?: string,
 ): void {
   const meta = collectPageMeta(doc);
   const text = formatPageInfoPlain(meta, parsed, lockedField);
@@ -1321,6 +1331,17 @@ export function showPageInfoDialog(
     <h2 id="mpu-pi-title">Page Information</h2>
     <pre class="mpu-pre" id="mpu-pi-body"></pre>
     <pre class="mpu-pre mpu-pre-diff" id="mpu-pi-diff" hidden></pre>
+    <div class="mpu-dialog-section" id="mpu-pi-watch-section">
+      <h3>Customization upgrade watch</h3>
+      <p class="mpu-dialog-hint">Capture a UI fingerprint before a PeopleTools upgrade; check again after to spot tab, structure, or field-id drift. Does not detect PeopleCode-only overrides.</p>
+      <label class="mpu-dialog-label">Notes (optional)
+        <input type="text" class="mpu-dialog-input" id="mpu-pi-watch-notes" autocomplete="off" />
+      </label>
+      <div class="mpu-dialog-actions">
+        <button type="button" class="mpu-btn" id="mpu-pi-watch-save">Watch customization</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-check-drift">Check upgrade drift</button>
+      </div>
+    </div>
     <div class="mpu-dialog-actions">
       <button type="button" class="mpu-btn" id="mpu-pi-copy">Copy</button>
       <button type="button" class="mpu-btn" id="mpu-pi-copy-md">Copy Markdown</button>
@@ -1411,6 +1432,54 @@ export function showPageInfoDialog(
         } catch {
           announce(doc, "Unable to read clipboard for object pack compare");
         }
+      });
+
+      dialog.querySelector("#mpu-pi-watch-save")?.addEventListener("click", async () => {
+        if (!parsed.menu || !parsed.component) {
+          announce(doc, "Open a component page to watch customization");
+          return;
+        }
+        const notes =
+          (dialog.querySelector("#mpu-pi-watch-notes") as HTMLInputElement | null)?.value.trim() ||
+          "";
+        const fingerprint = capturePageFingerprint(doc, parsed, meta);
+        const watch = createWatchFromFingerprint({
+          fingerprint,
+          notes,
+          envLabel,
+        });
+        const settings = await loadSettings();
+        settings.customizationWatches = upsertWatch(settings.customizationWatches, watch);
+        await saveSettings(settings);
+        announce(
+          doc,
+          `Watching ${watch.menu}.${watch.component}.${watch.market} — baseline saved`,
+        );
+      });
+
+      dialog.querySelector("#mpu-pi-check-drift")?.addEventListener("click", async () => {
+        const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;
+        const settings = await loadSettings();
+        const watch = findWatchForParsed(settings.customizationWatches, parsed);
+        if (!watch) {
+          announce(
+            doc,
+            "No upgrade watch for this component — use Watch customization first",
+          );
+          return;
+        }
+        const current = capturePageFingerprint(doc, parsed, meta);
+        const report = compareFingerprints(watch.baseline, current);
+        const out = formatDriftReportPlain(watch, report);
+        diffEl.hidden = false;
+        diffEl.textContent = out;
+        const severityMsg =
+          report.severity === "clean"
+            ? "No UI drift detected"
+            : report.severity === "tools-only"
+              ? "Tools release changed only — review findings"
+              : "UI drift detected — review findings";
+        announce(doc, `Upgrade watch: ${severityMsg} (${report.severity})`);
       });
     },
   });

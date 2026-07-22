@@ -15,6 +15,7 @@
     <nav class="tabs" role="tablist" aria-label="Options sections">
       <button type="button" class="tab" role="tab" data-tab="features" aria-selected="true" id="tab-features" aria-controls="panel-features">Features</button>
       <button type="button" class="tab" role="tab" data-tab="favorites" aria-selected="false" id="tab-favorites" aria-controls="panel-favorites">Favorites</button>
+      <button type="button" class="tab" role="tab" data-tab="upgrade" aria-selected="false" id="tab-upgrade" aria-controls="panel-upgrade">Upgrade</button>
       <button type="button" class="tab" role="tab" data-tab="tracing" aria-selected="false" id="tab-tracing" aria-controls="panel-tracing">Tracing</button>
       <button type="button" class="tab" role="tab" data-tab="environments" aria-selected="false" id="tab-environments" aria-controls="panel-environments">Environments</button>
       <button type="button" class="tab" role="tab" data-tab="allowlist" aria-selected="false" id="tab-allowlist" aria-controls="panel-allowlist">Host allowlist</button>
@@ -75,6 +76,38 @@
                 <th>Component</th>
                 <th>Market</th>
                 <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="panel-upgrade" class="panel hidden" data-panel="upgrade" role="tabpanel" aria-labelledby="tab-upgrade" hidden>
+        <h2>Customization upgrade watch</h2>
+        <p class="help" role="note">
+          Compares page tabs, structure hosts, and field ids vs a baseline you capture before upgrade.
+          Does <strong>not</strong> detect PeopleCode-only overrides — use App Designer Compare Report for that.
+        </p>
+        <div class="row-actions">
+          <button type="button" id="export-watches">Export JSON</button>
+          <label class="file-btn">Import JSON <input type="file" id="import-watches" accept=".json,application/json" /></label>
+          <label class="row inline">
+            <input type="checkbox" id="import-watches-replace" />
+            Replace existing watches on import
+          </label>
+        </div>
+        <p id="watch-empty" class="empty-state" hidden>No watches yet — open Page Info on a component and choose Watch customization.</p>
+        <div class="table-wrap">
+          <table id="watch-table">
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Object</th>
+                <th>Captured</th>
+                <th>ToolsRel</th>
+                <th>Fields</th>
                 <th></th>
               </tr>
             </thead>

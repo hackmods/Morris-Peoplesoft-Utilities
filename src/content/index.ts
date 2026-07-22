@@ -293,7 +293,7 @@ async function refresh(): Promise<void> {
       }
       await refresh();
     },
-    onPageInfo: () => showPageInfoDialog(document, parsed, getLockedFieldName()),
+    onPageInfo: () => showPageInfoDialog(document, parsed, getLockedFieldName(), label),
     onFieldInspector: () => {
       if (!isYes(effective.features.recFieldInfoOption)) {
         announce(document, "Field Inspector disabled for this UI mode in Options");
@@ -334,7 +334,11 @@ function onMpuShortcut(e: KeyboardEvent): void {
   e.preventDefault();
   if (key === "p") {
     const parsed = parsePsUrl(location.href);
-    showPageInfoDialog(document, parsed, getLockedFieldName());
+    void (async () => {
+      const s = await loadSettings();
+      const { label: envLabel } = resolveEnv(s, location.href);
+      showPageInfoDialog(document, parsed, getLockedFieldName(), envLabel);
+    })();
     return;
   }
   if (key === "i") {
