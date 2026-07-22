@@ -4,6 +4,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.21] — 2026-07-22
+
 ### Fixed
 
 - **Shortcuts / Admin / Pages menus:** portal open menus to `document.body` (escapes Fluid header overflow *and* transform clipping); restore on close
