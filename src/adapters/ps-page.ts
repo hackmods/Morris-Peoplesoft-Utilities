@@ -746,44 +746,82 @@ function docFromFrameWindow(frameWin: Window | null | undefined): Document | nul
   }
 }
 
+/** True when the document already exposes PeopleSoft-style field ids. */
+export function documentHasPsFields(d: Document): boolean {
+  try {
+    return Boolean(
+      d.querySelector(
+        'input[id*="_"],select[id*="_"],textarea[id*="_"],span.PSEDITBOX_DISPONLY[id],span.ps_box-value[id]',
+      ),
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Portal / Fluid content iframe element (Classic TargetContent, Fluid nav collection,
+ * or Classic page hosted inside a Fluid shell).
+ */
+export function findContentFrameElement(doc: Document): HTMLIFrameElement | null {
+  return (
+    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (doc.querySelector('iframe[name="TargetContent"], frame[name="TargetContent"]') as
+      | HTMLIFrameElement
+      | null) ||
+    (doc.querySelector(".ps_target-iframe") as HTMLIFrameElement | null)
+  );
+}
+
+/**
+ * Prefer deepest same-origin nav-collection / content iframe (UX-08),
+ * but never abandon a Classic page that already has PeopleSoft fields for an
+ * empty nested iframe (e.g. unrelated .ps_target-iframe / lookup shells).
+ */
+export function resolveNestedContentDocument(contentDoc: Document): Document {
+  let current = contentDoc;
+  for (let depth = 0; depth < 4; depth += 1) {
+    const nested =
+      (current.querySelector(".ps_target-iframe") as HTMLIFrameElement | null) ||
+      (current.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+      (current.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
+    if (!nested?.contentDocument?.body) break;
+    const next = nested.contentDocument;
+    if (documentHasPsFields(next)) {
+      current = next;
+      continue;
+    }
+    if (!documentHasPsFields(current)) {
+      current = next;
+      continue;
+    }
+    break;
+  }
+  return current;
+}
+
+/**
+ * Outermost same-origin content frame document for Field Inspector (and similar).
+ * Fluid menus / Activity Guides often wrap Classic pages in nested iframes — start
+ * here and walk all nested docs so Classic fields inside Fluid shells are decorated.
+ */
+export function getInspectorContentRoot(doc: Document = document): Document {
+  const frameEl = findContentFrameElement(doc);
+  if (frameEl?.contentDocument?.body) return frameEl.contentDocument;
+
+  const win = doc.defaultView as NamedFrameWindow | null;
+  try {
+    const tcDoc = docFromFrameWindow(win?.TargetContent ?? null);
+    if (tcDoc && tcDoc !== doc) return tcDoc;
+  } catch {
+    /* cross-origin */
+  }
+
+  return doc;
+}
+
 export function getTargetDocument(doc: Document = document): Document {
   const win = doc.defaultView as NamedFrameWindow | null;
-
-  const resolveNested = (contentDoc: Document): Document => {
-    // Prefer deepest same-origin nav-collection / content iframe (UX-08),
-    // but never abandon a Classic page that already has PeopleSoft fields for an
-    // empty nested iframe (e.g. unrelated .ps_target-iframe / lookup shells).
-    const hasPsFields = (d: Document): boolean => {
-      try {
-        return Boolean(
-          d.querySelector(
-            'input[id*="_"],select[id*="_"],textarea[id*="_"],span.PSEDITBOX_DISPONLY[id],span.ps_box-value[id]',
-          ),
-        );
-      } catch {
-        return false;
-      }
-    };
-
-    let current = contentDoc;
-    for (let depth = 0; depth < 4; depth += 1) {
-      const nested =
-        (current.querySelector(".ps_target-iframe") as HTMLIFrameElement | null) ||
-        (current.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
-      if (!nested?.contentDocument?.body) break;
-      const next = nested.contentDocument;
-      if (hasPsFields(next)) {
-        current = next;
-        continue;
-      }
-      if (!hasPsFields(current)) {
-        current = next;
-        continue;
-      }
-      break;
-    }
-    return current;
-  };
 
   // Prefer Classic iframe elements first — named window.TargetContent is unreliable
   // in some hosts/test environments (can resolve to the parent window itself).
@@ -793,13 +831,13 @@ export function getTargetDocument(doc: Document = document): Document {
       | HTMLIFrameElement
       | null);
   if (frameEl?.contentDocument?.body) {
-    return resolveNested(frameEl.contentDocument);
+    return resolveNestedContentDocument(frameEl.contentDocument);
   }
 
   // Classic portal: named TargetContent frame (PS Utilities uses parent.TargetContent)
   try {
     const tcDoc = docFromFrameWindow(win?.TargetContent ?? null);
-    if (tcDoc && tcDoc !== doc) return resolveNested(tcDoc);
+    if (tcDoc && tcDoc !== doc) return resolveNestedContentDocument(tcDoc);
   } catch {
     /* cross-origin or unavailable */
   }
@@ -813,13 +851,16 @@ export function getTargetDocument(doc: Document = document): Document {
       frames?.TargetContent ??
       null;
     const tcDoc = docFromFrameWindow(byName);
-    if (tcDoc && tcDoc !== doc) return resolveNested(tcDoc);
+    if (tcDoc && tcDoc !== doc) return resolveNestedContentDocument(tcDoc);
   } catch {
     /* ignore */
   }
 
+  // Fluid / nav collection: Classic pages often live inside .ps_target-iframe chains
   const nav = doc.querySelector(".ps_target-iframe") as HTMLIFrameElement | null;
-  if (nav?.contentDocument?.body) return nav.contentDocument;
+  if (nav?.contentDocument?.body) {
+    return resolveNestedContentDocument(nav.contentDocument);
+  }
 
   return doc;
 }

@@ -7,6 +7,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 ### Fixed
 
 - **Field Inspector:** stop wrapping shared Fluid `.ps_box-control` / Classic multi-field parents as one mega highlight — each field gets its own orange border/icon again (Classic + Fluid)
+- **Field Inspector:** Fluid menus / nav collections that host Classic pages in nested iframes — decorate from the outer content root, resolve nested Classic docs, and recover on late nested frame loads
 
 ## [1.0.17] — 2026-07-22
 

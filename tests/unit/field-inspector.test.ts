@@ -21,6 +21,7 @@ import {
   detectFieldContextChips,
   isFieldInViewport,
 } from "@/features/field-inspector";
+import { getInspectorContentRoot } from "@/adapters/ps-page";
 
 describe("field inspector", () => {
   beforeEach(() => {
@@ -503,6 +504,75 @@ describe("field inspector", () => {
     expect(document.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
     expect(document.querySelector("#cell > .mpu-recfield-area input#JOB_EMPLID\\$0")).toBeTruthy();
     expect(document.querySelectorAll("#cell > .mpu-recfield-area").length).toBe(2);
+    stopFieldInspector(document);
+  });
+
+  it("Fluid menu shell: decorates Classic fields in nested TargetContent iframe", () => {
+    stopFieldInspector(document);
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div id="PT_HEADER"></div>
+      <iframe class="ps_target-iframe"></iframe>
+    `;
+    const shell = document.querySelector(".ps_target-iframe") as HTMLIFrameElement;
+    const shellDoc = shell.contentDocument!;
+    shellDoc.open();
+    shellDoc.write(`<!doctype html><html><body>
+      <div class="ps_box-group">
+        <div class="ps_box-edit"><input id="DERIVED_FLUID_SEARCH$0" /></div>
+      </div>
+      <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+    </body></html>`);
+    shellDoc.close();
+
+    const classic = shellDoc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement;
+    const classicDoc = classic.contentDocument!;
+    classicDoc.open();
+    classicDoc.write(`<!doctype html><html><body>
+      <table><tr><td id="cell">
+        <input id="JOB_EMPLID$0" />
+        <input id="JOB_EMPL_RCD$0" />
+      </td></tr></table>
+    </body></html>`);
+    classicDoc.close();
+
+    expect(getInspectorContentRoot(document)).toBe(shellDoc);
+    expect(getTargetDocument(document).getElementById("JOB_EMPLID$0")).toBeTruthy();
+
+    startFieldInspector(document);
+    // Fluid shell field + both Classic fields (tight wraps, not one container)
+    expect(shellDoc.querySelectorAll(".mpu-recfield-icon").length).toBe(1);
+    expect(classicDoc.querySelectorAll(".mpu-recfield-icon").length).toBe(2);
+    expect(classicDoc.querySelectorAll("#cell > .mpu-recfield-area").length).toBe(2);
+    stopFieldInspector(document);
+    expect(classicDoc.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
+  });
+
+  it("polls until Classic page appears inside Fluid nav iframe", async () => {
+    vi.useFakeTimers();
+    stopFieldInspector(document);
+    document.body.innerHTML = `
+      <div id="mpu-bar">
+        <button type="button" id="mpu-field">Inspect</button>
+        <span id="mpu-recfield-name" hidden></span>
+      </div>
+      <div id="PT_HEADER"></div>
+      <iframe class="ps_target-iframe"></iframe>
+    `;
+    const shell = document.querySelector(".ps_target-iframe") as HTMLIFrameElement;
+    shell.contentDocument!.open();
+    shell.contentDocument!.write(`<!doctype html><html><body></body></html>`);
+    shell.contentDocument!.close();
+
+    startFieldInspector(document);
+    expect(shell.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(0);
+
+    shell.contentDocument!.body.innerHTML = `<div><input id="JOB_EMPLID$0" /></div>`;
+    await vi.advanceTimersByTimeAsync(300);
+    expect(shell.contentDocument!.querySelectorAll(".mpu-recfield-icon").length).toBe(1);
     stopFieldInspector(document);
   });
 });

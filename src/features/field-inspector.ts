@@ -1,5 +1,8 @@
 import { announce } from "./bar";
-import { getTargetDocument } from "../adapters/ps-page";
+import {
+  findContentFrameElement,
+  getInspectorContentRoot,
+} from "../adapters/ps-page";
 import type { FieldCopyFormat } from "../storage/schema";
 
 const AREA = "mpu-recfield-area";
@@ -31,6 +34,8 @@ let lockedId: string | null = null;
 let topDocRef: Document = document;
 let targetDocRef: Document = document;
 let frameLoadHandler: (() => void) | null = null;
+/** Content iframes (portal + nested Fluid→Classic) we attached load listeners to. */
+let frameLoadEls: HTMLIFrameElement[] = [];
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let mutationObserver: MutationObserver | null = null;
 let reinjectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -42,6 +47,8 @@ let viewportWindows: Window[] = [];
 let applying = false;
 /** Base ids (no $occ) seen on the current page — used to split RECORD vs FIELD. */
 let peerFieldBases: string[] = [];
+/** Avoid re-entrant frame rebinding while handling a nested load. */
+let rebindingFrames = false;
 
 export interface ParsedRecField {
   /** Full element id */
@@ -928,9 +935,11 @@ function attachMutations(target: Document, portalDoc: Document): void {
   }
 }
 
-function applyToTarget(doc: Document): number {
+function applyToTarget(doc: Document, opts?: { rebindFrames?: boolean }): number {
   const prev = targetDocRef;
-  targetDocRef = getTargetDocument(doc);
+  // Outer content root + collectDocs — covers Fluid shells that embed Classic pages
+  // in nested iframes (menus / Activity Guides / nav collections).
+  targetDocRef = getInspectorContentRoot(doc);
   if (prev !== targetDocRef && prev !== doc) {
     try {
       unbindTarget(prev);
@@ -942,48 +951,79 @@ function applyToTarget(doc: Document): number {
   const n = injectIcons(targetDocRef);
   attachMutations(targetDocRef, doc);
   attachViewportListeners();
+  if (opts?.rebindFrames !== false) {
+    attachFrameReload(doc);
+  }
   return n;
 }
 
-function attachFrameReload(doc: Document): void {
-  detachFrameReload(doc);
-  const frame =
-    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
-    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null) ||
-    (doc.querySelector(".ps_target-iframe") as HTMLIFrameElement | null);
-  if (!frame) return;
-  frameLoadHandler = () => {
-    if (!active) return;
-    // Also listen for nested nav-collection loads after outer frame paints
+/** Collect portal + nested content iframes (Fluid menu → Classic page). */
+function collectContentFrames(root: Document, out: HTMLIFrameElement[] = [], depth = 0): HTMLIFrameElement[] {
+  if (depth > 5) return out;
+  const seen = new Set(out);
+  const direct = findContentFrameElement(root);
+  const frames = [
+    ...(direct ? [direct] : []),
+    ...Array.from(
+      root.querySelectorAll<HTMLIFrameElement>(
+        "#ptifrmtgtframe, iframe[name='TargetContent'], .ps_target-iframe",
+      ),
+    ),
+  ];
+  for (const frame of frames) {
+    if (seen.has(frame)) continue;
+    seen.add(frame);
+    out.push(frame);
     try {
-      const nested = frame.contentDocument?.querySelector(
-        ".ps_target-iframe",
-      ) as HTMLIFrameElement | null;
-      nested?.addEventListener("load", () => {
-        if (!active) return;
-        applyToTarget(doc);
-      });
+      const child = frame.contentDocument;
+      if (child?.body) collectContentFrames(child, out, depth + 1);
     } catch {
-      /* ignore */
+      /* cross-origin */
     }
-    const n = applyToTarget(doc);
-    announce(
-      doc,
-      n > 0
-        ? `Field inspector on — ${n} fields`
-        : "Field inspector on — no fields found yet",
-    );
-  };
-  frame.addEventListener("load", frameLoadHandler);
+  }
+  return out;
 }
 
-function detachFrameReload(doc: Document): void {
-  if (!frameLoadHandler) return;
-  const frame =
-    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
-    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
-  frame?.removeEventListener("load", frameLoadHandler);
+function attachFrameReload(doc: Document): void {
+  if (rebindingFrames) return;
+  rebindingFrames = true;
+  try {
+    detachFrameReload();
+    frameLoadHandler = () => {
+      if (!active) return;
+      const n = applyToTarget(doc, { rebindFrames: true });
+      announce(
+        doc,
+        n > 0
+          ? `Field inspector on — ${n} fields`
+          : "Field inspector on — no fields found yet",
+      );
+    };
+    frameLoadEls = collectContentFrames(doc);
+    for (const frame of frameLoadEls) {
+      try {
+        frame.addEventListener("load", frameLoadHandler);
+      } catch {
+        /* ignore */
+      }
+    }
+  } finally {
+    rebindingFrames = false;
+  }
+}
+
+function detachFrameReload(): void {
+  if (frameLoadHandler) {
+    for (const frame of frameLoadEls) {
+      try {
+        frame.removeEventListener("load", frameLoadHandler);
+      } catch {
+        /* frame gone */
+      }
+    }
+  }
   frameLoadHandler = null;
+  frameLoadEls = [];
 }
 
 /** Re-apply icons after bar remount / iframe navigation while inspector stays on. */
@@ -995,16 +1035,12 @@ export function reinjectFieldInspector(doc: Document = document): number {
 
 function countCandidateFields(doc: Document): number {
   return Array.from(
-    collectDocs(getTargetDocument(doc)).flatMap((d) => Array.from(d.querySelectorAll(FIELD_SELECTOR))),
+    collectDocs(getInspectorContentRoot(doc)).flatMap((d) => Array.from(d.querySelectorAll(FIELD_SELECTOR))),
   ).filter((el) => isHtmlElement(el) && el.id?.includes("_")).length;
 }
 
-/** Light poll: Classic AJAX / Soft Refresh can wipe icons without a frame load event. */
+/** Light poll: Classic AJAX / Soft Refresh / late Fluid→Classic iframe loads can wipe icons. */
 function startRecoveryPoll(doc: Document): void {
-  const frame =
-    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
-    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
-  if (!frame) return;
   clearPoll();
   let quiet = 0;
   pollTimer = setInterval(() => {
@@ -1013,7 +1049,10 @@ function startRecoveryPoll(doc: Document): void {
       return;
     }
     if (applying) return;
-    const existing = targetDocRef.querySelectorAll(`.${ICON}`).length;
+    const existing = Array.from(collectDocs(targetDocRef)).reduce(
+      (n, d) => n + d.querySelectorAll(`.${ICON}`).length,
+      0,
+    );
     const fields = countCandidateFields(doc);
     if (fields > 0 && existing === 0) {
       applyToTarget(doc);
@@ -1031,14 +1070,10 @@ export function startFieldInspector(doc: Document = document): void {
   lockedId = null;
   topDocRef = doc;
   doc.addEventListener("keydown", onKey, true);
-  attachFrameReload(doc);
 
-  const frame =
-    (doc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
-    (doc.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
   let n = applyToTarget(doc);
 
-  // Classic portal: content iframe may still be loading or mid-AJAX
+  // Classic portal / Fluid→Classic: content iframe may still be loading or mid-AJAX
   if (n === 0) {
     announce(doc, "Field inspector waiting for page content…");
     clearPoll();
@@ -1058,7 +1093,7 @@ export function startFieldInspector(doc: Document = document): void {
             ? `Field inspector on — ${n} fields. Hover icons; click to lock; Esc exits.`
             : "Field inspector on — no PeopleSoft fields found on this page.",
         );
-        if (frame) startRecoveryPoll(doc);
+        startRecoveryPoll(doc);
       }
     }, 250);
   } else {
@@ -1066,7 +1101,7 @@ export function startFieldInspector(doc: Document = document): void {
       doc,
       `Field inspector on — ${n} fields. Hover icons; click to lock; Esc exits.`,
     );
-    if (frame) startRecoveryPoll(doc);
+    startRecoveryPoll(doc);
   }
 
   const panel = doc.getElementById("mpu-recfield-name");
@@ -1088,7 +1123,7 @@ export function stopFieldInspector(doc: Document = document): void {
   } catch {
     /* ignore */
   }
-  detachFrameReload(doc);
+  detachFrameReload();
   try {
     removeIcons(target);
   } catch {

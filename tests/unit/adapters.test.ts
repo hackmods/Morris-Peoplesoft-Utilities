@@ -385,6 +385,29 @@ describe("header mount and UI model", () => {
     );
   });
 
+  it("getTargetDocument follows Fluid nav iframe into nested Classic page", () => {
+    document.body.innerHTML = `
+      <div id="PT_HEADER"></div>
+      <iframe class="ps_target-iframe"></iframe>
+    `;
+    const outer = document.querySelector(".ps_target-iframe") as HTMLIFrameElement;
+    const outerDoc = outer.contentDocument!;
+    outerDoc.open();
+    outerDoc.write(`<!doctype html><html><body>
+      <div class="ps_box-control"><span>shell</span></div>
+      <iframe id="ptifrmtgtframe" name="TargetContent"></iframe>
+    </body></html>`);
+    outerDoc.close();
+    const classic = outerDoc.querySelector("#ptifrmtgtframe") as HTMLIFrameElement;
+    classic.contentDocument!.open();
+    classic.contentDocument!.write(
+      `<!doctype html><html><body><input id="JOB_EMPLID$0" value="1" /></body></html>`,
+    );
+    classic.contentDocument!.close();
+
+    expect(getTargetDocument(document).getElementById("JOB_EMPLID$0")).toBeTruthy();
+  });
+
   it("detects Fluid CREF path and theme from DOM (FL-02/03)", () => {
     document.documentElement.className = "ptal-theme-redwood";
     document.body.innerHTML = `<nav class="ps_breadcrumb"><a>Home</a><span>Employees</span></nav>`;

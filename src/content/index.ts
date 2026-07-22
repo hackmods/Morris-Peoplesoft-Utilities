@@ -156,6 +156,7 @@ function onTargetFrameReady(): void {
 function bindTargetFrameLoad(): void {
   const frame =
     (document.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+    (document.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null) ||
     (document.querySelector(".ps_target-iframe") as HTMLIFrameElement | null);
   if (frameLoadEl && frameLoadHandler) {
     frameLoadEl.removeEventListener("load", frameLoadHandler);
@@ -166,10 +167,13 @@ function bindTargetFrameLoad(): void {
   frame.addEventListener("load", onTargetFrameReady);
   if (frame.contentDocument?.body) {
     onTargetFrameReady();
-    // Nested nav-collection iframe may load after outer TargetContent
-    const nested = frame.contentDocument.querySelector(
-      ".ps_target-iframe",
-    ) as HTMLIFrameElement | null;
+    // Nested nav-collection / Classic-in-Fluid iframe may load after outer shell
+    const nested =
+      (frame.contentDocument.querySelector(".ps_target-iframe") as HTMLIFrameElement | null) ||
+      (frame.contentDocument.querySelector("#ptifrmtgtframe") as HTMLIFrameElement | null) ||
+      (frame.contentDocument.querySelector(
+        'iframe[name="TargetContent"]',
+      ) as HTMLIFrameElement | null);
     nested?.addEventListener("load", onTargetFrameReady);
   }
 }
