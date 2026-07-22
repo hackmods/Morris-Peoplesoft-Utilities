@@ -52,7 +52,9 @@
       <section id="panel-favorites" class="panel hidden" data-panel="favorites" role="tabpanel" aria-labelledby="tab-favorites" hidden>
         <h2>Favorites</h2>
         <p>Import/export CSV with columns: Servlet, Menu, Component, Market, Parameters, Category, SubCategory, Description, Notes</p>
-        <p class="hint"><strong>Note:</strong> Export may contain business keys in Parameters, descriptions, or Notes — share carefully.</p>
+        <p class="help warn" role="note">
+          Exports may include menu/component business keys for your PeopleSoft sites. Treat CSV and JSON backups as sensitive and share only as needed.
+        </p>
         <div class="row-actions">
           <button type="button" id="export-fav">Export CSV</button>
           <label class="file-btn">Import CSV <input type="file" id="import-fav" accept=".csv,text/csv" /></label>
@@ -63,6 +65,7 @@
           <button type="button" id="export-json">Backup JSON</button>
           <label class="file-btn">Restore JSON <input type="file" id="import-json" accept=".json,application/json" /></label>
         </div>
+        <p id="fav-empty" class="empty-state" hidden>No favorites yet — add one from the utilities bar ★ on a component page.</p>
         <div class="table-wrap">
           <table id="fav-table">
             <thead>
@@ -146,7 +149,7 @@
         </p>
       </section>
     </main>
-    <div id="toast" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script type="module" src="./options.ts"></script>
   </body>
 </html>

@@ -1,9 +1,15 @@
 import { loadSettings, saveSettings } from "../../storage/settings";
+import { FEATURE_LABELS } from "../../storage/feature-labels";
+import { removeEnvironmentAt } from "../../storage/env-map";
+import {
+  favoritesToCsv,
+  isSettingsBackup,
+  parseFavoritesCsv,
+} from "../../storage/favorites-io";
 import {
   DEFAULT_FEATURE_UI_SCOPES,
   DEFAULT_TRACE,
   FIELD_COPY_FORMATS,
-  type Favorite,
   type FeatureFlags,
   type FeatureUiScope,
   type FeatureUiScopes,
@@ -20,27 +26,20 @@ import {
 } from "../../features/trace-presets";
 
 const toast = document.getElementById("toast")!;
+let toastTimer = 0;
 
 function say(msg: string): void {
   toast.textContent = msg;
+  toast.classList.add("is-visible");
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
+    toast.classList.remove("is-visible");
+  }, 2800);
 }
 
 function broadcast(): void {
   chrome.runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
 }
-
-const FEATURE_LABELS: Array<{ key: keyof FeatureFlags; label: string }> = [
-  { key: "userIdOption", label: "Show User ID" },
-  { key: "greetingOption", label: "Environment indicator" },
-  { key: "shortcutsOption", label: "Favorites" },
-  { key: "traceOption", label: "Tracing" },
-  { key: "pageInfoOption", label: "Page Information" },
-  { key: "recFieldInfoOption", label: "Field Inspector" },
-  { key: "newWindowOption", label: "New Window" },
-  { key: "advSearchOption", label: "Auto-expand Advanced Search" },
-  { key: "correctHistoryOption", label: "Auto-select Correct History" },
-  { key: "loginPageOption", label: "Show bar on login page" },
-];
 
 const SCOPE_LABELS: Array<{ key: keyof FeatureUiScopes; label: string }> = [
   { key: "recFieldInfoOption", label: "Field Inspector UI scope" },
@@ -73,15 +72,38 @@ const TRACE_LABELS: Array<{ key: keyof TraceSettings; label: string }> = [
 function wireTabs(): void {
   const tabs = [...document.querySelectorAll<HTMLButtonElement>(".tab")];
   const panels = [...document.querySelectorAll<HTMLElement>(".panel")];
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const id = tab.dataset.tab;
-      tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
-      panels.forEach((p) => {
-        const on = p.dataset.panel === id;
-        p.hidden = !on;
-        p.classList.toggle("hidden", !on);
-      });
+
+  const selectTab = (tab: HTMLButtonElement): void => {
+    const id = tab.dataset.tab;
+    tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+    tabs.forEach((t) => {
+      t.tabIndex = t === tab ? 0 : -1;
+    });
+    panels.forEach((p) => {
+      const on = p.dataset.panel === id;
+      p.hidden = !on;
+      p.classList.toggle("hidden", !on);
+    });
+    tab.focus();
+  };
+
+  tabs.forEach((tab, index) => {
+    tab.tabIndex = tab.getAttribute("aria-selected") === "true" ? 0 : -1;
+    tab.addEventListener("click", () => selectTab(tab));
+    tab.addEventListener("keydown", (e) => {
+      let next = -1;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        next = (index + 1) % tabs.length;
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        next = (index - 1 + tabs.length) % tabs.length;
+      } else if (e.key === "Home") {
+        next = 0;
+      } else if (e.key === "End") {
+        next = tabs.length - 1;
+      }
+      if (next < 0) return;
+      e.preventDefault();
+      selectTab(tabs[next]);
     });
   });
 }
@@ -202,9 +224,22 @@ function refreshTraceSummaryFromDom(): void {
   el.textContent = `Active flags: ${summarizeActiveTraceFlags(readTraceFromDom())}`;
 }
 
+function emptyState(text: string): HTMLParagraphElement {
+  const p = document.createElement("p");
+  p.className = "empty-state";
+  p.textContent = text;
+  return p;
+}
+
 function renderFavorites(settings: MpuSettings): void {
   const tbody = document.querySelector("#fav-table tbody")!;
+  const empty = document.getElementById("fav-empty")!;
   tbody.replaceChildren();
+  if (!settings.favorites.length) {
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
   settings.favorites.forEach((fav, index) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td>`;
@@ -246,6 +281,12 @@ function renderFavorites(settings: MpuSettings): void {
 function renderEnvs(settings: MpuSettings): void {
   const root = document.getElementById("env-list")!;
   root.replaceChildren();
+  if (!settings.environments.length) {
+    root.appendChild(
+      emptyState("No environments yet — add one here, or name a site when the bar first loads."),
+    );
+    return;
+  }
   settings.environments.forEach((env, index) => {
     const card = document.createElement("div");
     card.className = "env-card";
@@ -278,11 +319,11 @@ function renderEnvs(settings: MpuSettings): void {
     del.type = "button";
     del.textContent = "Delete";
     del.addEventListener("click", async () => {
-      const s = await loadSettings();
-      s.environments.splice(index, 1);
+      const s = removeEnvironmentAt(await loadSettings(), index);
       await saveSettings(s);
-      renderEnvs(await loadSettings());
+      renderEnvs(s);
       broadcast();
+      say("Environment deleted");
     });
     const activeLab = document.createElement("label");
     activeLab.append(active, document.createTextNode(" Active on this browser"));
@@ -296,48 +337,6 @@ function renderAllowlist(settings: MpuSettings): void {
     settings.features.hostAllowlistEnabled === "Yes";
   (document.getElementById("hostAllowlist") as HTMLTextAreaElement).value =
     settings.hostAllowlist.join("\n");
-}
-
-function favoritesToCsv(favs: Favorite[]): string {
-  const header =
-    "Servlet,Menu,Component,Market,Parameters,Category,SubCategory,Description,Notes";
-  const rows = favs.map((f) =>
-    [
-      f.Servlet,
-      f.Menu,
-      f.Component,
-      f.Market,
-      f.Parameters,
-      f.Category,
-      f.SubCategory,
-      f.Description,
-      f.Notes || "",
-    ]
-      .map((c) => `"${String(c).replace(/"/g, '""')}"`)
-      .join(","),
-  );
-  return [header, ...rows].join("\n");
-}
-
-function parseCsv(text: string): Favorite[] {
-  const lines = text.trim().split(/\r?\n/).filter(Boolean);
-  if (lines.length < 2) return [];
-  return lines.slice(1).map((line) => {
-    const cols =
-      line.match(/("([^"]|"")*"|[^,]*)/g)?.map((c) => c.replace(/^"|"$/g, "").replace(/""/g, '"')) ??
-      [];
-    return {
-      Servlet: (cols[0] === "psc" ? "psc" : "psp") as "psp" | "psc",
-      Menu: cols[1] || "",
-      Component: cols[2] || "",
-      Market: cols[3] || "GBL",
-      Parameters: cols[4] || "",
-      Category: cols[5] || "",
-      SubCategory: cols[6] || "",
-      Description: cols[7] || "",
-      ...(cols[8]?.trim() ? { Notes: cols[8].trim() } : {}),
-    };
-  });
 }
 
 function download(filename: string, content: string, type: string): void {
@@ -362,7 +361,7 @@ async function init(): Promise<void> {
     const s = await loadSettings();
     for (const f of FEATURE_LABELS) {
       const el = document.getElementById(f.key) as HTMLInputElement;
-      s.features[f.key] = (el.checked ? "Yes" : "No") as YesNo;
+      s.features[f.key as keyof FeatureFlags] = (el.checked ? "Yes" : "No") as YesNo;
     }
     s.quietEnvPrompt = (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked
       ? "Yes"
@@ -425,6 +424,7 @@ async function init(): Promise<void> {
     });
     await saveSettings(s);
     renderEnvs(s);
+    say("Environment added");
   });
 
   document.getElementById("export-fav")!.addEventListener("click", async () => {
@@ -434,48 +434,66 @@ async function init(): Promise<void> {
     if (!ok) return;
     const s = await loadSettings();
     download("mpu-favorites.csv", favoritesToCsv(s.favorites), "text/csv");
+    say("Favorites exported");
   });
 
   document.getElementById("import-fav")!.addEventListener("change", async (e) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const text = await file.text();
-    const imported = parseCsv(text);
-    if (!imported.length) {
-      say("No favorites found in CSV");
-      return;
+    try {
+      const text = await file.text();
+      const imported = parseFavoritesCsv(text);
+      if (!imported.length) {
+        say("No favorites found in CSV");
+        return;
+      }
+      const replace = (document.getElementById("import-replace") as HTMLInputElement | null)?.checked;
+      const s = await loadSettings();
+      s.favorites = replace ? imported : [...s.favorites, ...imported];
+      await saveSettings(s);
+      renderFavorites(s);
+      broadcast();
+      say(
+        replace
+          ? `Replaced with ${imported.length} favorite(s)`
+          : `Imported ${imported.length} favorite(s)`,
+      );
+    } catch {
+      say("Could not import CSV — check the file format");
+    } finally {
+      (e.target as HTMLInputElement).value = "";
     }
-    const replace = (document.getElementById("import-replace") as HTMLInputElement | null)?.checked;
-    const s = await loadSettings();
-    s.favorites = replace ? imported : [...s.favorites, ...imported];
-    await saveSettings(s);
-    renderFavorites(s);
-    broadcast();
-    say(
-      replace
-        ? `Replaced with ${imported.length} favorite(s)`
-        : `Imported ${imported.length} favorite(s)`,
-    );
   });
 
   document.getElementById("export-json")!.addEventListener("click", async () => {
     const s = await loadSettings();
     download("mpu-settings-backup.json", JSON.stringify(s, null, 2), "application/json");
+    say("Settings backup downloaded");
   });
 
   document.getElementById("import-json")!.addEventListener("change", async (e) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const parsed = JSON.parse(await file.text()) as MpuSettings;
-    await saveSettings({ ...(await loadSettings()), ...parsed });
-    const s = await loadSettings();
-    renderFeatures(s);
-    renderTrace(s);
-    renderFavorites(s);
-    renderEnvs(s);
-    renderAllowlist(s);
-    broadcast();
-    say("Settings restored");
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!isSettingsBackup(parsed)) {
+        say("Invalid settings file");
+        return;
+      }
+      await saveSettings({ ...(await loadSettings()), ...(parsed as Partial<MpuSettings>) });
+      const s = await loadSettings();
+      renderFeatures(s);
+      renderTrace(s);
+      renderFavorites(s);
+      renderEnvs(s);
+      renderAllowlist(s);
+      broadcast();
+      say("Settings restored");
+    } catch {
+      say("Could not restore JSON — file may be invalid");
+    } finally {
+      (e.target as HTMLInputElement).value = "";
+    }
   });
 }
 

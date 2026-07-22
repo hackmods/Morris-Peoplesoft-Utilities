@@ -1,18 +1,6 @@
 import { loadSettings, saveSettings } from "../../storage/settings";
-import type { FeatureFlags, YesNo } from "../../storage/schema";
-
-const TOGGLES: Array<{ key: keyof FeatureFlags; label: string }> = [
-  { key: "userIdOption", label: "User ID" },
-  { key: "greetingOption", label: "Environment" },
-  { key: "shortcutsOption", label: "Favorites" },
-  { key: "traceOption", label: "Tracing" },
-  { key: "pageInfoOption", label: "Page Info" },
-  { key: "recFieldInfoOption", label: "Field Inspector" },
-  { key: "newWindowOption", label: "New Window" },
-  { key: "advSearchOption", label: "Advanced Search" },
-  { key: "correctHistoryOption", label: "Correct History" },
-  { key: "loginPageOption", label: "Login page bar" },
-];
+import { FEATURE_LABELS } from "../../storage/feature-labels";
+import type { YesNo } from "../../storage/schema";
 
 const list = document.getElementById("toggle-list")!;
 const status = document.getElementById("status")!;
@@ -36,7 +24,7 @@ async function init(): Promise<void> {
   const settings = await loadSettings();
   list.replaceChildren();
 
-  for (const t of TOGGLES) {
+  for (const t of FEATURE_LABELS) {
     const row = document.createElement("div");
     row.className = "label-row";
     const lab = document.createElement("label");

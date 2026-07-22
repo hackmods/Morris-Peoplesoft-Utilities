@@ -157,7 +157,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   }
 
   if (!loginOnly && isYes(f.shortcutsOption)) {
-    const fav = btn("mpu-fav", "★", "Favorites — add current page");
+    const fav = btn("mpu-fav", "★", "Add current page to favorites");
     fav.addEventListener("click", () => ctx.onAddFavorite());
     bar.appendChild(fav);
 
@@ -185,7 +185,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
         select.replaceChildren();
         const placeholder = document.createElement("option");
         placeholder.value = "";
-        placeholder.textContent = "Favorites…";
+        placeholder.textContent = "Open favorite…";
         select.appendChild(placeholder);
 
         for (const group of groupFavoritesByCategory(ctx.settings.favorites)) {
@@ -440,15 +440,15 @@ export function announce(doc: Document, message: string): void {
   if (live) live.textContent = message;
 }
 
-function showHelpDialog(doc: Document): void {
-  const existing = doc.getElementById("mpu-dialog");
-  existing?.remove();
-
-  const meta = collectPageMeta(doc);
-  const tips = toolsRelTips(meta.toolsRel, meta.uiMode || detectUiModel(doc));
-  const tipHtml = tips.length
-    ? `<h3>Tips for this page</h3><ul>${tips.map(() => `<li></li>`).join("")}</ul>`
-    : "";
+function openModalDialog(
+  doc: Document,
+  opts: {
+    labelledBy: string;
+    build: (dialog: HTMLDivElement, close: () => void) => void;
+    initialFocus: string;
+  },
+): void {
+  doc.getElementById("mpu-dialog")?.remove();
 
   const backdrop = document.createElement("div");
   backdrop.id = "mpu-dialog";
@@ -459,13 +459,45 @@ function showHelpDialog(doc: Document): void {
   dialog.className = "mpu-dialog";
   dialog.setAttribute("role", "dialog");
   dialog.setAttribute("aria-modal", "true");
-  dialog.setAttribute("aria-labelledby", "mpu-dialog-title");
+  dialog.setAttribute("aria-labelledby", opts.labelledBy);
 
-  dialog.innerHTML = `
+  const close = (): void => {
+    doc.removeEventListener("keydown", onKey);
+    backdrop.remove();
+  };
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close();
+    }
+  };
+
+  opts.build(dialog, close);
+  backdrop.appendChild(dialog);
+  doc.body.appendChild(backdrop);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  doc.addEventListener("keydown", onKey);
+  (dialog.querySelector(opts.initialFocus) as HTMLElement | null)?.focus();
+}
+
+function showHelpDialog(doc: Document): void {
+  const meta = collectPageMeta(doc);
+  const tips = toolsRelTips(meta.toolsRel, meta.uiMode || detectUiModel(doc));
+  const tipHtml = tips.length
+    ? `<h3>Tips for this page</h3><ul>${tips.map(() => `<li></li>`).join("")}</ul>`
+    : "";
+
+  openModalDialog(doc, {
+    labelledBy: "mpu-dialog-title",
+    initialFocus: "#mpu-dialog-close",
+    build: (dialog, close) => {
+      dialog.innerHTML = `
     <h2 id="mpu-dialog-title">Morris PeopleSoft Utilities</h2>
     <p>Productivity overlay for PeopleSoft Classic and Fluid. Settings stay on this device. No passwords. No telemetry.</p>
     <ul>
-      <li><strong>Favorites</strong> — jump to components (optional Notes)</li>
+      <li><strong>Favorites</strong> — ★ adds the current component; use the dropdown to open one</li>
       <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs</li>
       <li><strong>Page Tabs</strong> — delivered multi-page links when present</li>
       <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
@@ -478,29 +510,16 @@ function showHelpDialog(doc: Document): void {
     <button type="button" class="mpu-btn" id="mpu-dialog-close">Close</button>
   `;
 
-  if (tips.length) {
-    const lis = dialog.querySelectorAll("h3 + ul li");
-    tips.forEach((tip, i) => {
-      if (lis[i]) lis[i].textContent = tip;
-    });
-  }
+      if (tips.length) {
+        const lis = dialog.querySelectorAll("h3 + ul li");
+        tips.forEach((tip, i) => {
+          if (lis[i]) lis[i].textContent = tip;
+        });
+      }
 
-  backdrop.appendChild(dialog);
-  doc.body.appendChild(backdrop);
-
-  const close = () => backdrop.remove();
-  dialog.querySelector("#mpu-dialog-close")?.addEventListener("click", close);
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) close();
-  });
-  doc.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.key === "Escape") close();
+      dialog.querySelector("#mpu-dialog-close")?.addEventListener("click", close);
     },
-    { once: true },
-  );
-  (dialog.querySelector("#mpu-dialog-close") as HTMLButtonElement)?.focus();
+  });
 }
 
 /** CSP-safe Page Tabs list from delivered links (SP-01). */
@@ -569,19 +588,11 @@ export function showPageInfoDialog(
   const text = formatPageInfoPlain(meta, parsed, lockedField);
   const markdown = formatPageInfoMarkdown(meta, parsed, lockedField);
 
-  const existing = doc.getElementById("mpu-dialog");
-  existing?.remove();
-
-  const backdrop = document.createElement("div");
-  backdrop.id = "mpu-dialog";
-  backdrop.className = "mpu-dialog-backdrop";
-
-  const dialog = document.createElement("div");
-  dialog.className = "mpu-dialog";
-  dialog.setAttribute("role", "dialog");
-  dialog.setAttribute("aria-modal", "true");
-  dialog.setAttribute("aria-labelledby", "mpu-pi-title");
-  dialog.innerHTML = `
+  openModalDialog(doc, {
+    labelledBy: "mpu-pi-title",
+    initialFocus: "#mpu-pi-close",
+    build: (dialog, close) => {
+      dialog.innerHTML = `
     <h2 id="mpu-pi-title">Page Information</h2>
     <pre class="mpu-pre" id="mpu-pi-body"></pre>
     <pre class="mpu-pre mpu-pre-diff" id="mpu-pi-diff" hidden></pre>
@@ -592,56 +603,50 @@ export function showPageInfoDialog(
       <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
     </div>
   `;
-  (dialog.querySelector("#mpu-pi-body") as HTMLElement).textContent = text;
-  backdrop.appendChild(dialog);
-  doc.body.appendChild(backdrop);
-
-  const close = () => backdrop.remove();
-  dialog.querySelector("#mpu-pi-close")?.addEventListener("click", close);
-  dialog.querySelector("#mpu-pi-copy")?.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      announce(doc, "Page information copied");
-    } catch {
-      announce(doc, "Unable to copy — select text manually");
-    }
+      (dialog.querySelector("#mpu-pi-body") as HTMLElement).textContent = text;
+      dialog.querySelector("#mpu-pi-close")?.addEventListener("click", close);
+      dialog.querySelector("#mpu-pi-copy")?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          announce(doc, "Page information copied");
+        } catch {
+          announce(doc, "Unable to copy — select text manually");
+        }
+      });
+      dialog.querySelector("#mpu-pi-copy-md")?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(markdown);
+          announce(doc, "Markdown page info copied");
+        } catch {
+          announce(doc, "Unable to copy — select text manually");
+        }
+      });
+      dialog.querySelector("#mpu-pi-compare")?.addEventListener("click", async () => {
+        const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;
+        try {
+          const clip = await navigator.clipboard.readText();
+          if (!clip.trim()) {
+            announce(doc, "Clipboard is empty — copy Page Info from another env first");
+            return;
+          }
+          const { lines, changedCount } = comparePageInfoToBuffer(text, clip);
+          const out = lines
+            .map((l) => `${l.changed ? "≠" : "="} ${l.key}: ${l.other} → ${l.current}`)
+            .join("\n");
+          diffEl.hidden = false;
+          diffEl.textContent = `Compare vs clipboard (${changedCount} differ)\n${out}`;
+          announce(
+            doc,
+            changedCount === 0
+              ? "Page Info matches clipboard"
+              : `${changedCount} Page Info field(s) differ from clipboard`,
+          );
+        } catch {
+          announce(doc, "Unable to read clipboard for compare");
+        }
+      });
+    },
   });
-  dialog.querySelector("#mpu-pi-copy-md")?.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(markdown);
-      announce(doc, "Markdown page info copied");
-    } catch {
-      announce(doc, "Unable to copy — select text manually");
-    }
-  });
-  dialog.querySelector("#mpu-pi-compare")?.addEventListener("click", async () => {
-    const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;
-    try {
-      const clip = await navigator.clipboard.readText();
-      if (!clip.trim()) {
-        announce(doc, "Clipboard is empty — copy Page Info from another env first");
-        return;
-      }
-      const { lines, changedCount } = comparePageInfoToBuffer(text, clip);
-      const out = lines
-        .map((l) => `${l.changed ? "≠" : "="} ${l.key}: ${l.other} → ${l.current}`)
-        .join("\n");
-      diffEl.hidden = false;
-      diffEl.textContent = `Compare vs clipboard (${changedCount} differ)\n${out}`;
-      announce(
-        doc,
-        changedCount === 0
-          ? "Page Info matches clipboard"
-          : `${changedCount} Page Info field(s) differ from clipboard`,
-      );
-    } catch {
-      announce(doc, "Unable to read clipboard for compare");
-    }
-  });
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) close();
-  });
-  (dialog.querySelector("#mpu-pi-close") as HTMLButtonElement)?.focus();
 }
 
 /** In-bar component URL builder (UX-02). */

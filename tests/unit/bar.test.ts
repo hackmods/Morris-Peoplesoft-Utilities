@@ -222,6 +222,14 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-dialog")).toBeNull();
   });
 
+  it("page info dialog closes on Escape", () => {
+    document.body.innerHTML = `<div id="PT_HEADER"></div>`;
+    showPageInfoDialog(document, parsed);
+    expect(document.getElementById("mpu-dialog")).toBeTruthy();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(document.getElementById("mpu-dialog")).toBeNull();
+  });
+
   it("mounts UI mode badge and favorites filter", () => {
     const settings = createDefaultSettings();
     settings.favorites = [

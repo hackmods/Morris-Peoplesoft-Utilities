@@ -236,6 +236,52 @@ textarea {
   clip: rect(0, 0, 0, 0);
 }
 
+.empty-state {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.help.warn {
+  border-left: 3px solid var(--gold);
+  padding-left: 0.65rem;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%) translateY(0.5rem);
+  max-width: min(28rem, calc(100vw - 2rem));
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 24px color-mix(in srgb, #000 22%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  z-index: 20;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+}
+
 a {
   color: var(--accent);
 }

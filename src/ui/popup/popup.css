@@ -22,8 +22,8 @@
 
 body {
   margin: 0;
-  min-width: 280px;
-  max-width: 320px;
+  min-width: 300px;
+  max-width: 360px;
   font: 14px/1.4 "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
   color: var(--fg);
