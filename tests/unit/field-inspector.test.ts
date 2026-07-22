@@ -18,6 +18,7 @@ import {
   preferredFluidBoxHost,
   nearbyPageLabel,
   fieldDomAttrs,
+  detectFieldContextChips,
   isFieldInViewport,
 } from "@/features/field-inspector";
 
@@ -402,6 +403,31 @@ describe("field inspector", () => {
     startFieldInspector(document);
     expect(iframeDoc.querySelectorAll(".mpu-recfield-icon").length).toBe(1);
     stopFieldInspector(document);
+  });
+
+  it("detects prompt, display-only, and deferred context chips (PC-04)", () => {
+    document.body.innerHTML = `
+      <div class="ps-field">
+        <label>Empl ID</label>
+        <input id="JOB_EMPLID$0" />
+        <a id="JOB_EMPLID$prompt" title="Lookup">Lookup</a>
+      </div>
+      <div class="ps-field">
+        <span class="PSEDITBOX_DISPONLY" id="NAMES_NAME_DISPLAY">Ada</span>
+      </div>
+      <div class="ps-field">
+        <input id="DERIVED_HR_STATUS$0" title="Deferred processing scheduled" />
+      </div>
+    `;
+    const promptEl = document.getElementById("JOB_EMPLID$0")!;
+    const displayEl = document.getElementById("NAMES_NAME_DISPLAY")!;
+    const deferredEl = document.getElementById("DERIVED_HR_STATUS$0")!;
+    expect(detectFieldContextChips(promptEl)).toContain("Prompt");
+    expect(detectFieldContextChips(displayEl)).toContain("Display");
+    expect(detectFieldContextChips(deferredEl)).toContain("Deferred");
+
+    const parsed = parseRecField("JOB_EMPLID$0", ["JOB_EMPLID"], promptEl);
+    expect(parsed.contextChips).toContain("Prompt");
   });
 
   it("wraps Fluid ps_box hosts without swallowing the whole group", () => {

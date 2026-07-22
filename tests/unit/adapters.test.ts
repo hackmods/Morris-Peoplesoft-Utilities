@@ -12,6 +12,9 @@ import {
   buildComponentUrl,
   detectPageTokenPresent,
   comparePageInfoToBuffer,
+  compareKeyValueBuffer,
+  detectFluidCrefPath,
+  detectFluidTheme,
   formatFavoriteDescriptionTemplate,
   toolsRelTips,
   collectPageTabs,
@@ -380,5 +383,20 @@ describe("header mount and UI model", () => {
     expect((getTargetDocument(document).getElementById("PRCSRUNCNTL_RUN_CNTL_ID") as HTMLInputElement).value).toBe(
       "TEST",
     );
+  });
+
+  it("detects Fluid CREF path and theme from DOM (FL-02/03)", () => {
+    document.documentElement.className = "ptal-theme-redwood";
+    document.body.innerHTML = `<nav class="ps_breadcrumb"><a>Home</a><span>Employees</span></nav>`;
+    expect(detectFluidCrefPath(document)).toContain("Home");
+    expect(detectFluidTheme(document)).toBe("ptal-theme-redwood");
+  });
+
+  it("compareKeyValueBuffer diffs arbitrary key lists (AD-04)", () => {
+    const current = "Menu: A\nComponent: B\nToolsRel: 8.60";
+    const other = "Menu: A\nComponent: C\nToolsRel: 8.60";
+    const { changedCount, lines } = compareKeyValueBuffer(current, other, ["Menu", "Component", "ToolsRel"]);
+    expect(changedCount).toBe(1);
+    expect(lines.find((l) => l.key === "Component")?.changed).toBe(true);
   });
 });

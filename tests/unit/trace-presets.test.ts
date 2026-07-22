@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   applyTracePreset,
+  countActiveTraceFlags,
+  detectTracePreset,
+  formatTraceBarHint,
   summarizeActiveTraceFlags,
   TRACE_PRESET_META,
 } from "@/features/trace-presets";
@@ -44,5 +47,13 @@ describe("trace presets", () => {
     expect(computePeopleCodeMask(t)).toBeGreaterThan(0);
     expect(computeSqlMask(t)).toBeGreaterThan(0);
     expect(summarizeActiveTraceFlags(t)).toContain("SQL Stmt");
+  });
+
+  it("detects preset and formats bar hint (TR-04)", () => {
+    const sql = applyTracePreset("sql");
+    expect(detectTracePreset(sql)).toBe("sql");
+    expect(formatTraceBarHint(sql)).toBe("SQL");
+    expect(countActiveTraceFlags(sql)).toBe(2);
+    expect(formatTraceBarHint(applyTracePreset("off"))).toBe("");
   });
 });

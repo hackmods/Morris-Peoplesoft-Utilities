@@ -4,7 +4,41 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.16] — 2026-07-22
+
+### Added
+
+- **Wave 6.1 PeopleCode / Fluid / Admin remainder** (see `docs/findings/future-enhancements.md`):
+  - **Field Inspector context chips** — Prompt, Display, Deferred from DOM/ARIA (PC-04)
+  - **Message / translate keys** — scan visible DOM for MsgGet / XLAT hints; copy from PCode dialog (PC-05)
+  - **CREF path + theme** metadata in Page Info, object pack, and Structure dialog (FL-02, FL-03)
+  - **IB breadcrumb** — compact bar chip + Page Info line on Integration Broker pages (AD-02)
+  - **Process Monitor ticket pack** — copy visible instance/type/run control from Page Info (AD-03)
+  - **Object pack compare** — clipboard diff for multi-env handoffs (AD-04)
+  - **Trace bar hint** — preset name or active flag count on Trace button (TR-04)
+  - **Trace flag guide** — plain-language help in Options → Tracing (TR-05)
+
+## [1.0.16] — 2026-07-22
+
+### Added
+
+- **Wave 6.1** (see `docs/findings/future-enhancements.md`):
+  - Field Inspector **Prompt / Display / Deferred** context chips (PC-04)
+  - **Message / XLAT key** detect + copy from visible DOM in PCode dialog (PC-05)
+  - **CREF path** and **theme/branding** clues in Page Info / Structure / object pack (FL-02/03)
+  - **IB breadcrumb** chip + copy on Integration Broker pages (AD-02)
+  - **Process Monitor ticket pack** copy from visible cells (AD-03)
+  - **Compare object pack** clipboard diff on Page Info (AD-04)
+  - Trace bar hint for active preset / flag count (TR-04)
+  - Options Tracing **flag chooser guide** (TR-05)
+
+### Fixed
+
+- Packaging script archiver import for CI/`tsc` (`export =` interop) so tag releases can publish the Store zip
+
 ## [1.0.15] — 2026-07-22
+
+> Note: The `v1.0.15` git tag’s GitHub Release zip failed CI packaging; features below ship in the **v1.0.16** Store zip.
 
 ### Added
 

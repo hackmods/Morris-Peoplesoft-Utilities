@@ -100,7 +100,7 @@
 **Goal:** Expose PeopleCode-oriented and Fluid/setup navigation that helps programmers and PS administrators without App Designer APIs, credentials, or PII scraping.  
 **Constraints:** DOM/session local only; soft-fail on missing security; opt-in toggles where noisy; export warnings for business keys.  
 **Plan:** [`.cursor/plans/implement-wave6.md`](../../.cursor/plans/implement-wave6.md)  
-**Status:** First slice shipped in **1.0.15** (PC-01..03, FL-01, AD-01). Remainder deferred to Wave 6.1+.
+**Status:** Wave 6.1 shipped in **1.0.16** (PC-04/05, FL-02/03, AD-02..04, TR-04/05). First slice shipped in **1.0.15** (PC-01..03, FL-01, AD-01).
 
 ### PeopleCode aids
 
@@ -109,32 +109,32 @@
 | PC-01 | ~~**PeopleCode stub pack**~~ — **Done (1.0.15)** | Dev | Faster coding from page context | Pure local templates from `RECORD.FIELD` + Page Info; no server |
 | PC-02 | ~~**Object clipboard pack**~~ — **Done (1.0.15)** | BA, Dev | Ticket/handoff speed | Extend Page Info actions; never include tokens/secrets |
 | PC-03 | ~~**Grid / rowset copy formats**~~ — **Done (1.0.15)** | Dev | Scroll/grid PeopleCode | Extend `FieldCopyFormat` + inspector lock |
-| PC-04 | Deeper **prompt / display-only / deferred** chips from DOM | Dev | FieldEdit context | DOM/ARIA only; follow-up after PC-01..03 |
-| PC-05 | **Message Catalog / translate** key detect + copy when present in DOM | Dev, Admin | MsgGet / XLAT hunting | Only when keys already visible; no scraping |
+| PC-04 | ~~Deeper **prompt / display-only / deferred** chips from DOM~~ — **Done (1.0.16)** | Dev | FieldEdit context | DOM/ARIA only; follow-up after PC-01..03 |
+| PC-05 | ~~**Message Catalog / translate** key detect + copy when present in DOM~~ — **Done (1.0.16)** | Dev, Admin | MsgGet / XLAT hunting | Only when keys already visible; no scraping |
 
 ### Fluid / page structure
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | FL-01 | ~~**Fluid structure tree**~~ — **Done (1.0.15)** | Dev, BA | Layout debugging without App Designer | Read-only overlay/dialog; Classic best-effort |
-| FL-02 | Portal / **CREF path** copy when Fluid nav exposes it | Admin | Registry troubleshooting | Metadata only |
-| FL-03 | Theme / branding **clue** (id/family if in DOM) | Admin | Env visual diffs | Boolean/id only; no asset download |
+| FL-02 | ~~Portal / **CREF path** copy when Fluid nav exposes it~~ — **Done (1.0.16)** | Admin | Registry troubleshooting | Metadata only |
+| FL-03 | ~~Theme / branding **clue** (id/family if in DOM)~~ — **Done (1.0.16)** | Admin | Env visual diffs | Boolean/id only; no asset download |
 
 ### Admin / setup navigation
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | AD-01 | ~~**Admin jump panel**~~ — **Done (1.0.15)** | Admin, Dev | Daily setup hops | Soft-fail / Trace-style 🔒 if unauthorized; uses existing session |
-| AD-02 | **IB breadcrumb** — Service Op / Queue / Node names when on IB pages | Admin | Integration support | Copy + optional Shortcut; DOM-visible only |
-| AD-03 | Process Monitor **ticket pack** (Process Instance, type, run control from visible cells) | Admin | Ops handoffs | Visible cells only |
-| AD-04 | Multi-env **object/field diff** (clipboard packs between tabs) | BA, Dev | DEV vs QA vs PRD | Local string compare; extend Page Info Compare |
+| AD-02 | ~~**IB breadcrumb** — Service Op / Queue / Node names when on IB pages~~ — **Done (1.0.16)** | Admin | Integration support | Copy + optional Shortcut; DOM-visible only |
+| AD-03 | ~~Process Monitor **ticket pack** (Process Instance, type, run control from visible cells)~~ — **Done (1.0.16)** | Admin | Ops handoffs | Visible cells only |
+| AD-04 | ~~Multi-env **object/field diff** (clipboard packs between tabs)~~ — **Done (1.0.16)** | BA, Dev | DEV vs QA vs PRD | Local string compare; extend Page Info Compare |
 
 ### Trace companion (optional follow-on)
 
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
-| TR-04 | Bar summary of **which trace flags are on** + last toggle hint | Dev | Avoid surprise verbose traces | Local settings only |
-| TR-05 | Short **flag chooser guide** (FieldChange vs SQL binds) | Dev | Education | Docs + Options help text |
+| TR-04 | ~~Bar summary of **which trace flags are on** + last toggle hint~~ — **Done (1.0.16)** | Dev | Avoid surprise verbose traces | Local settings only |
+| TR-05 | ~~Short **flag chooser guide** (FieldChange vs SQL binds)~~ — **Done (1.0.16)** | Dev | Education | Docs + Options help text |
 
 ### Wave 6 suggested slice (implement first)
 
@@ -166,6 +166,7 @@
 6. ~~**UX-04, UX-07..10** — remaining P2 UX~~ (shipped 1.0.12)
 7. ~~P3 items only with ADR if they add permissions or major UI surface~~ (shipped 1.0.13)
 8. ~~**Wave 6 (PC-01..03, FL-01, AD-01)** — PeopleCode / Fluid / admin setup aids~~ (shipped 1.0.15)
+9. ~~**Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05)** — PeopleCode / Fluid / admin remainder~~ (shipped 1.0.16)
 
 ---
 
@@ -181,3 +182,4 @@
 | 2026-07-22 | Hierarchical Shortcuts + Pages flyout parity vs legacy screenshots |
 | 2026-07-22 | **P4 / Wave 6 backlog** logged (PeopleCode stubs, object pack, Fluid structure, admin jumps) |
 | 2026-07-22 | Wave 6 first slice shipped in **v1.0.15** (PC-01..03, FL-01, AD-01) — plan: `.cursor/plans/implement-wave6.md` |
+| 2026-07-22 | **Wave 6.1** shipped in **v1.0.16** (PC-04/05, FL-02/03, AD-02..04, TR-04/05) — plan: `.cursor/plans/implement-wave6.1.md` |

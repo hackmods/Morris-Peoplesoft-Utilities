@@ -1,10 +1,12 @@
-import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent } from "../storage/schema";
+import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings } from "../storage/schema";
 import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
 import {
   collectPageMeta,
   collectPageTabs,
   detectUiModel,
+  detectFluidCrefPath,
+  detectFluidTheme,
   findHeaderMount,
   formatPageInfoMarkdown,
   formatPageInfoPlain,
@@ -20,12 +22,20 @@ import {
 } from "./favorites-ui";
 import {
   buildPeopleCodeStubs,
+  compareObjectPackToBuffer,
   formatObjectPackMarkdown,
   formatObjectPackPlain,
 } from "./peoplecode-aids";
 import { collectFluidStructure, formatFluidStructurePlain } from "./fluid-structure";
 import { groupAdminJumps, type AdminJump } from "./admin-jumps";
 import { getLockedParsedRecField } from "./field-inspector";
+import { scanMessageKeys, formatMessageKeysPlain } from "./message-keys";
+import { collectIbBreadcrumb, formatIbBreadcrumbPlain } from "./ib-breadcrumb";
+import {
+  collectProcessPack,
+  formatProcessPackPlain,
+} from "./process-pack";
+import { formatTraceBarHint, summarizeActiveTraceFlags } from "./trace-presets";
 
 export interface BarContext {
   settings: MpuSettings;
@@ -43,6 +53,7 @@ export interface BarContext {
   lockedFieldName?: string | null;
   traceRunning: boolean;
   traceLocked: boolean;
+  traceSettings: TraceSettings;
   /** Classic login/logout: greeting (+ help) only */
   loginMode?: boolean;
 }
@@ -587,12 +598,12 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
         const li = doc.createElement("li");
         li.className = "mpu-pcode-item";
 
-        const row = doc.createElement("div");
-        row.className = "mpu-pcode-row";
+        const stubRow = doc.createElement("div");
+        stubRow.className = "mpu-pcode-row";
 
         const label = doc.createElement("strong");
         label.textContent = stub.label;
-        row.appendChild(label);
+        stubRow.appendChild(label);
 
         const copyOne = doc.createElement("button");
         copyOne.type = "button";
@@ -602,8 +613,8 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
         copyOne.addEventListener("click", () => {
           void copyText(doc, stub.stub, `Copied ${stub.label} stub`);
         });
-        row.appendChild(copyOne);
-        li.appendChild(row);
+        stubRow.appendChild(copyOne);
+        li.appendChild(stubRow);
 
         const pre = doc.createElement("pre");
         pre.className = "mpu-pre mpu-pcode-stub";
@@ -613,8 +624,46 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
       }
       dialog.appendChild(list);
 
-      const actions = doc.createElement("div");
-      actions.className = "mpu-dialog-actions";
+      const msgHits = scanMessageKeys(doc);
+      const msgsHeading = doc.createElement("h3");
+      msgsHeading.textContent = "Message / translate keys";
+      dialog.appendChild(msgsHeading);
+
+      const msgsHint = doc.createElement("p");
+      msgsHint.className = "mpu-dialog-hint";
+      msgsHint.textContent = msgHits.length
+        ? "Keys found in visible DOM only — never invented."
+        : "No Message Catalog or translate keys detected in visible page DOM.";
+      dialog.appendChild(msgsHint);
+
+      if (msgHits.length) {
+        const msgList = doc.createElement("ul");
+        msgList.className = "mpu-pcode-list";
+        for (const hit of msgHits) {
+          const li = doc.createElement("li");
+          li.className = "mpu-pcode-item";
+          const row = doc.createElement("div");
+          row.className = "mpu-pcode-row";
+          const strong = doc.createElement("strong");
+          strong.textContent = hit.label;
+          row.appendChild(strong);
+          const copyMsg = doc.createElement("button");
+          copyMsg.type = "button";
+          copyMsg.className = "mpu-btn mpu-pcode-copy";
+          copyMsg.textContent = "Copy";
+          copyMsg.setAttribute("aria-label", `Copy ${hit.label}`);
+          copyMsg.addEventListener("click", () => {
+            void copyText(doc, hit.copyText, `Copied ${hit.label}`);
+          });
+          row.appendChild(copyMsg);
+          li.appendChild(row);
+          msgList.appendChild(li);
+        }
+        dialog.appendChild(msgList);
+      }
+
+      const actionRow = doc.createElement("div");
+      actionRow.className = "mpu-dialog-actions";
 
       const copyAll = doc.createElement("button");
       copyAll.type = "button";
@@ -626,6 +675,15 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
         void copyText(doc, all, "Copied all PeopleCode stubs");
       });
 
+      const copyMsgs = doc.createElement("button");
+      copyMsgs.type = "button";
+      copyMsgs.className = "mpu-btn";
+      copyMsgs.textContent = "Copy all keys";
+      copyMsgs.disabled = !msgHits.length;
+      copyMsgs.addEventListener("click", () => {
+        void copyText(doc, formatMessageKeysPlain(msgHits), "Copied message keys");
+      });
+
       const closeBtn = doc.createElement("button");
       closeBtn.type = "button";
       closeBtn.className = "mpu-btn";
@@ -633,15 +691,21 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
       closeBtn.textContent = "Close";
       closeBtn.addEventListener("click", close);
 
-      actions.append(copyAll, closeBtn);
-      dialog.appendChild(actions);
+      actionRow.append(copyAll, copyMsgs, closeBtn);
+      dialog.appendChild(actionRow);
     },
   });
 }
 
 export function showStructureDialog(doc: Document): void {
   const nodes = collectFluidStructure(doc);
-  const text = formatFluidStructurePlain(nodes);
+  const crefPath = detectFluidCrefPath(doc);
+  const theme = detectFluidTheme(doc);
+  const metaLines: string[] = [];
+  if (crefPath) metaLines.push(`CREF path: ${crefPath}`);
+  if (theme) metaLines.push(`Theme: ${theme}`);
+  const structure = formatFluidStructurePlain(nodes);
+  const text = metaLines.length ? `${metaLines.join("\n")}\n\n${structure}` : structure;
 
   openModalDialog(doc, {
     labelledBy: "mpu-structure-title",
@@ -852,10 +916,17 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   }
 
   if (!loginOnly && isYes(f.traceOption)) {
-    const label = ctx.traceLocked ? "Trace 🔒" : ctx.traceRunning ? "Trace ON" : "Trace OFF";
+    const traceHint = formatTraceBarHint(ctx.settings.traceSettings);
+    const traceSummary = summarizeActiveTraceFlags(ctx.settings.traceSettings);
+    let label = ctx.traceLocked ? "Trace 🔒" : ctx.traceRunning ? "Trace ON" : "Trace OFF";
+    if (!ctx.traceLocked && traceHint) {
+      label = ctx.traceRunning ? `Trace ON · ${traceHint}` : `Trace · ${traceHint}`;
+    }
     const title = ctx.traceLocked
       ? "Trace locked — your user likely lacks access to UTILITIES PeopleCode/SQL Trace components (see FAQ)"
-      : "Toggle PeopleCode/SQL trace";
+      : traceHint
+        ? `Toggle PeopleCode/SQL trace — active flags: ${traceSummary}`
+        : "Toggle PeopleCode/SQL trace";
     const t = btn("mpu-trace", label, title, ctx.traceRunning);
     if (ctx.traceLocked) t.disabled = true;
     t.addEventListener("click", () => ctx.onTraceToggle());
@@ -877,6 +948,25 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(pcode);
   }
 
+
+  if (!loginOnly && isYes(f.pageInfoOption)) {
+    const ibCrumb = collectIbBreadcrumb(doc, ctx.parsed);
+    if (ibCrumb) {
+      const ibChip = document.createElement("span");
+      ibChip.className = "mpu-ib-crumb";
+      ibChip.id = "mpu-ib-crumb";
+      ibChip.textContent = ibCrumb.summary;
+      ibChip.title = "Integration Broker context (visible DOM only)";
+      const copyIb = btn("mpu-ib-copy", "Copy IB", "Copy IB breadcrumb");
+      copyIb.addEventListener("click", () => {
+        void copyText(doc, formatIbBreadcrumbPlain(ibCrumb), "IB breadcrumb copied");
+      });
+      const wrap = document.createElement("span");
+      wrap.className = "mpu-ib-wrap";
+      wrap.append(ibChip, copyIb);
+      bar.appendChild(wrap);
+    }
+  }
   if (!loginOnly && isYes(f.pageInfoOption)) {
     const structure = btn("mpu-structure", "Structure", "Fluid / Classic page structure inventory");
     structure.addEventListener("click", () => showStructureDialog(doc));
@@ -1220,7 +1310,7 @@ export function showPageInfoDialog(
   const meta = collectPageMeta(doc);
   const text = formatPageInfoPlain(meta, parsed, lockedField);
   const markdown = formatPageInfoMarkdown(meta, parsed, lockedField);
-  const objectPack = formatObjectPackPlain({ parsed, meta, lockedField });
+  const objectPack = formatObjectPackPlain({ parsed, meta, lockedField, doc });
   const objectPackMd = formatObjectPackMarkdown({ parsed, meta, lockedField });
 
   openModalDialog(doc, {
@@ -1237,6 +1327,8 @@ export function showPageInfoDialog(
       <button type="button" class="mpu-btn" id="mpu-pi-copy-pack">Copy object pack</button>
       <button type="button" class="mpu-btn" id="mpu-pi-copy-pack-md">Copy pack MD</button>
       <button type="button" class="mpu-btn" id="mpu-pi-compare">Compare clipboard</button>
+      <button type="button" class="mpu-btn" id="mpu-pi-compare-pack">Compare object pack</button>
+      <button type="button" class="mpu-btn" id="mpu-pi-copy-process" hidden>Copy process pack</button>
       <button type="button" class="mpu-btn" id="mpu-pi-close">Close</button>
     </div>
   `;
@@ -1276,6 +1368,48 @@ export function showPageInfoDialog(
           );
         } catch {
           announce(doc, "Unable to read clipboard for compare");
+        }
+      });
+      const ibCrumb = collectIbBreadcrumb(doc, parsed);
+      if (ibCrumb) {
+        const ibLine = doc.createElement("p");
+        ibLine.className = "mpu-dialog-hint";
+        ibLine.textContent = `IB: ${ibCrumb.summary}`;
+        dialog.querySelector("#mpu-pi-body")?.insertAdjacentElement("afterend", ibLine);
+      }
+
+      const processPack = collectProcessPack(doc, parsed);
+      const processBtn = dialog.querySelector("#mpu-pi-copy-process") as HTMLButtonElement | null;
+      if (processPack && processBtn) {
+        processBtn.hidden = false;
+        const packText = formatProcessPackPlain(processPack);
+        processBtn.addEventListener("click", () => {
+          void copyText(doc, packText, "Process pack copied");
+        });
+      }
+
+      dialog.querySelector("#mpu-pi-compare-pack")?.addEventListener("click", async () => {
+        const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;
+        try {
+          const clip = await navigator.clipboard.readText();
+          if (!clip.trim()) {
+            announce(doc, "Clipboard is empty — copy object pack from another env first");
+            return;
+          }
+          const { lines, changedCount } = compareObjectPackToBuffer(objectPack, clip);
+          const out = lines
+            .map((l) => `${l.changed ? "≠" : "="} ${l.key}: ${l.other} → ${l.current}`)
+            .join("\n");
+          diffEl.hidden = false;
+          diffEl.textContent = `Compare object pack (${changedCount} differ)\n${out}`;
+          announce(
+            doc,
+            changedCount === 0
+              ? "Object pack matches clipboard"
+              : `${changedCount} object pack field(s) differ from clipboard`,
+          );
+        } catch {
+          announce(doc, "Unable to read clipboard for object pack compare");
         }
       });
     },

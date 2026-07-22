@@ -1,5 +1,6 @@
 import type { ParsedPsUrl } from "../adapters/ps-page";
 import type { PageMeta } from "../adapters/ps-page";
+import { compareKeyValueBuffer, detectFluidCrefPath, detectFluidTheme } from "../adapters/ps-page";
 import type { ParsedRecField } from "./field-inspector";
 import { formatGetRowsetCopy, formatRecFieldCopy } from "./field-inspector";
 
@@ -70,12 +71,31 @@ export function buildPeopleCodeStubs(input: {
   ];
 }
 
+export const OBJECT_PACK_COMPARE_KEYS = [
+  "Menu",
+  "Component",
+  "Page",
+  "Market",
+  "Portal",
+  "Node",
+  "Site",
+  "UI",
+  "ToolsRel",
+  "DB",
+  "Locked field",
+  "CREF path",
+  "Theme",
+] as const;
+
 export function formatObjectPackPlain(input: {
   parsed: ParsedPsUrl;
   meta: PageMeta;
   lockedField?: string | null;
+  doc?: Document;
 }): string {
-  const { parsed, meta, lockedField } = input;
+  const { parsed, meta, lockedField, doc } = input;
+  const crefPath = doc ? detectFluidCrefPath(doc) : detectFluidCrefPath();
+  const theme = doc ? detectFluidTheme(doc) : detectFluidTheme();
   const lines = [
     `Menu: ${meta.menu ?? parsed.menu ?? "—"}`,
     `Component: ${meta.component ?? parsed.component ?? "—"}`,
@@ -89,7 +109,17 @@ export function formatObjectPackPlain(input: {
     `DB: ${meta.dbName ?? "—"} (${meta.dbType ?? "—"})`,
   ];
   if (lockedField) lines.push(`Locked field: ${lockedField}`);
+  if (crefPath) lines.push(`CREF path: ${crefPath}`);
+  if (theme) lines.push(`Theme: ${theme}`);
   return lines.join("\n");
+}
+
+/** AD-04: compare object pack clipboard between environments. */
+export function compareObjectPackToBuffer(
+  currentPlain: string,
+  buffer: string,
+): { lines: ReturnType<typeof compareKeyValueBuffer>["lines"]; changedCount: number } {
+  return compareKeyValueBuffer(currentPlain, buffer, OBJECT_PACK_COMPARE_KEYS);
 }
 
 export function formatObjectPackMarkdown(input: {

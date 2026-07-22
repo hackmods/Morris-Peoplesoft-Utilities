@@ -202,6 +202,73 @@ export interface PageMeta {
   pageTokenPresent?: boolean;
 }
 
+/** FL-02: portal / CREF path when Fluid nav or breadcrumbs expose it. */
+export function detectFluidCrefPath(doc: Document = document): string | undefined {
+  const target = getTargetDocument(doc);
+  const crumbs: string[] = [];
+
+  const selectors = [
+    ".ps_breadcrumb a",
+    ".ps_breadcrumb span",
+    "#PT_BREAD_CRUMB a",
+    "#PT_BREAD_CRUMB span",
+    "[class*='breadcrumb'] a",
+    "nav[aria-label*='breadcrumb' i] a",
+    ".ps_header-crumb a",
+  ];
+  for (const sel of selectors) {
+    for (const el of Array.from(target.querySelectorAll(sel))) {
+      const t = el.textContent?.replace(/\s+/g, " ").trim();
+      if (t && t.length > 1 && t !== "/") crumbs.push(t);
+    }
+    if (crumbs.length) break;
+  }
+
+  const crefEl =
+    target.querySelector('[data-cref], [data-content-ref], [id*="CREF" i][title]') ||
+    target.querySelector('[class*="cref" i][title]');
+  const crefTitle = crefEl?.getAttribute("title") || crefEl?.getAttribute("data-cref");
+  if (crefTitle?.trim()) crumbs.push(crefTitle.trim());
+
+  const portalPath = target.querySelector('[id*="PORTAL_PATH" i], [data-portal-path]');
+  const portalVal =
+    portalPath?.getAttribute("data-portal-path") ||
+    portalPath?.textContent?.replace(/\s+/g, " ").trim();
+  if (portalVal && portalVal.length > 2) crumbs.push(portalVal);
+
+  if (!crumbs.length) return undefined;
+  return [...new Set(crumbs)].join(" > ").slice(0, 240);
+}
+
+/** FL-03: Fluid theme / branding id from DOM markers (metadata only). */
+export function detectFluidTheme(doc: Document = document): string | undefined {
+  const target = getTargetDocument(doc);
+  const root = target.documentElement;
+  const body = target.body;
+
+  const classTokens = `${root?.className || ""} ${body?.className || ""}`.split(/\s+/);
+  const themeClass = classTokens.find((c) => /^ptal-theme/i.test(c) || /^ps_theme/i.test(c));
+  if (themeClass) return themeClass;
+
+  const branding =
+    target.querySelector(".ps_branding, [class*='branding'], [id*='branding' i], #PT_BRAND") ||
+    doc.querySelector(".ps_branding, [class*='branding'], #PT_BRAND");
+  if (branding) {
+    const id = branding.id || branding.getAttribute("data-theme") || branding.getAttribute("data-brand");
+    if (id?.trim()) return id.trim().slice(0, 80);
+    const cls = typeof branding.className === "string" ? branding.className.split(/\s+/).find(Boolean) : "";
+    if (cls) return cls.slice(0, 80);
+  }
+
+  for (const link of Array.from(target.querySelectorAll('link[rel="stylesheet"]'))) {
+    const href = link.getAttribute("href") || "";
+    const m = href.match(/(?:theme|branding|ptal)[/_-]([a-z0-9_-]+)/i);
+    if (m?.[1]) return `stylesheet:${m[1]}`.slice(0, 80);
+  }
+
+  return undefined;
+}
+
 /** Pull connection keys from a PeopleSoft HTML comment (parity with PS Utilities). */
 export function parseConnectionComment(text: string): Partial<PageMeta> {
   const cleaned = text.replace(/^<!--/, "").replace(/-->$/, "").trim();
@@ -414,6 +481,10 @@ export function formatPageInfoPlain(
     `Page token: ${meta.pageTokenPresent ? "present" : "not detected"}`,
   ];
   if (lockedField) lines.push(`Locked field: ${lockedField}`);
+  const crefPath = detectFluidCrefPath();
+  if (crefPath) lines.push(`CREF path: ${crefPath}`);
+  const theme = detectFluidTheme();
+  if (theme) lines.push(`Theme: ${theme}`);
   const tips = toolsRelTips(meta.toolsRel, meta.uiMode);
   if (tips.length) {
     lines.push("", "Tips:");
@@ -454,6 +525,10 @@ export function formatPageInfoMarkdown(
     ["Page token", meta.pageTokenPresent ? "present" : "not detected"],
   ];
   if (lockedField) rows.push(["Locked field", lockedField]);
+  const crefPath = detectFluidCrefPath();
+  if (crefPath) rows.push(["CREF path", crefPath]);
+  const theme = detectFluidTheme();
+  if (theme) rows.push(["Theme", theme]);
   const body = rows.map(([k, v]) => `| ${k} | ${v} |`).join("\n");
   const tips = toolsRelTips(meta.toolsRel, meta.uiMode);
   const tipBlock = tips.length ? `\n\n**Tips**\n\n${tips.map((t) => `- ${t}`).join("\n")}\n` : "\n";
@@ -515,27 +590,38 @@ function parsePageInfoLines(text: string): Record<string, string> {
   return out;
 }
 
-export interface PageInfoDiffLine {
+export interface KeyValueDiffLine {
   key: string;
   current: string;
   other: string;
   changed: boolean;
 }
 
-/** Compare current Page Info to a clipboard / buffer string (UX-07). */
-export function comparePageInfoToBuffer(
+/** Generic key:value diff for Page Info, object pack, etc. (AD-04). */
+export function compareKeyValueBuffer(
   currentPlain: string,
   buffer: string,
-): { lines: PageInfoDiffLine[]; changedCount: number } {
+  keys: readonly string[],
+): { lines: KeyValueDiffLine[]; changedCount: number } {
   const cur = parsePageInfoLines(currentPlain);
   const other = parsePageInfoLines(buffer);
-  const lines: PageInfoDiffLine[] = PAGE_INFO_COMPARE_KEYS.map((key) => {
+  const lines: KeyValueDiffLine[] = keys.map((key) => {
     const current = cur[key] ?? "—";
     const o = other[key] ?? "—";
     return { key, current, other: o, changed: current !== o };
   });
   return { lines, changedCount: lines.filter((l) => l.changed).length };
 }
+
+/** Compare current Page Info to a clipboard / buffer string (UX-07). */
+export function comparePageInfoToBuffer(
+  currentPlain: string,
+  buffer: string,
+): { lines: KeyValueDiffLine[]; changedCount: number } {
+  return compareKeyValueBuffer(currentPlain, buffer, PAGE_INFO_COMPARE_KEYS);
+}
+
+export type PageInfoDiffLine = KeyValueDiffLine;
 
 /** Favorite description template from Page Info + locked field (UX-10). */
 export function formatFavoriteDescriptionTemplate(

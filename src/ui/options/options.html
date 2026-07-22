@@ -86,6 +86,12 @@
       <section id="panel-tracing" class="panel hidden" data-panel="tracing" role="tabpanel" aria-labelledby="tab-tracing" hidden>
         <h2>Tracing profiles</h2>
         <p>Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+        <p class="help">
+          <strong>When to use which flags:</strong>
+          Start with <strong>SQL Statement + Bind</strong> when a page feels slow or returns wrong data — binds show the literal values sent to the database.
+          Add <strong>PeopleCode Assignments</strong> or <strong>Start of programs</strong> when a field change, save, or row event looks wrong but SQL is clean.
+          Use <strong>Verbose</strong> only for short, targeted sessions — it adds a lot of log noise. Turn Trace off when you are done.
+        </p>
         <div class="trace-presets" role="group" aria-label="Trace presets">
           <span class="trace-presets-label">Presets</span>
           <div id="trace-presets" class="row-actions"></div>

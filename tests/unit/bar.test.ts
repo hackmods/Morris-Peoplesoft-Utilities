@@ -10,6 +10,7 @@ import {
 } from "@/features/bar";
 import { buildFavoriteTree, showAddFavoriteDialog } from "@/features/favorites-ui";
 import { createDefaultSettings } from "@/storage/schema";
+import { applyTracePreset } from "@/features/trace-presets";
 import type { ParsedPsUrl } from "@/adapters/ps-page";
 
 const parsed: ParsedPsUrl = {
@@ -42,6 +43,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo,
       onFieldInspector: vi.fn(),
@@ -68,6 +70,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -90,6 +93,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -112,6 +116,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -135,6 +140,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -156,6 +162,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: true,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -167,6 +174,29 @@ describe("utilities bar", () => {
     expect(trace.textContent).toContain("🔒");
   });
 
+  it("shows trace preset hint on bar when flags configured (TR-04)", () => {
+    const settings = createDefaultSettings();
+    settings.features.traceOption = "Yes";
+    settings.traceSettings = applyTracePreset("sql");
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: true,
+      traceLocked: false,
+      traceSettings: settings.traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+    const trace = document.getElementById("mpu-trace");
+    expect(trace?.textContent).toContain("Trace ON");
+    expect(trace?.textContent).toContain("SQL");
+  });
+
   it("removeBar clears chrome", () => {
     mountBar({
       settings: createDefaultSettings(),
@@ -175,6 +205,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -194,6 +225,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -330,6 +362,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -398,6 +431,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),
@@ -467,6 +501,7 @@ describe("utilities bar", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: vi.fn(),
       onPageInfo: vi.fn(),
       onFieldInspector: vi.fn(),

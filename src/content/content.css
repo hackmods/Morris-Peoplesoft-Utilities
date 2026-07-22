@@ -455,6 +455,21 @@
   white-space: nowrap;
 }
 
+.mpu-ib-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 14rem;
+}
+
+.mpu-ib-crumb {
+  font: 600 11px/1.2 system-ui, sans-serif;
+  color: #1f5f99;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mpu-bar,
   .mpu-btn,

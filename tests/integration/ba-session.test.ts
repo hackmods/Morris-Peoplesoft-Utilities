@@ -48,6 +48,7 @@ describe("integration: BA session bootstrap", () => {
       fieldInspectorActive: false,
       traceRunning: false,
       traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
       onTraceToggle: () => undefined,
       onPageInfo: () => undefined,
       onFieldInspector: () => undefined,

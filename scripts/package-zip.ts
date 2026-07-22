@@ -1,6 +1,13 @@
 import { createWriteStream, readFileSync, existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
-import archiver from "archiver";
+import type { Archiver } from "archiver";
+
+const require = createRequire(import.meta.url);
+const archiver = require("archiver") as (
+  format: string,
+  options?: { zlib?: { level: number } },
+) => Archiver;
 
 const pkg = JSON.parse(readFileSync(resolve("package.json"), "utf8")) as { version: string };
 const dist = resolve("dist");

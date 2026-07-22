@@ -62,6 +62,81 @@ export interface ParsedRecField {
   maxLength?: number;
   /** disabled / aria-disabled (UX-05) */
   disabled?: boolean;
+  /** PC-04: prompt / display-only / deferred hints from DOM */
+  contextChips?: FieldContextChip[];
+}
+
+export type FieldContextChip = "Prompt" | "Display" | "Deferred";
+
+const PROMPT_SELECTOR =
+  'img[src*="PROMPT"], img[alt*="prompt" i], img[title*="prompt" i], .PTSEARCH, .PTLOOKUP, .PSPROMPT, [class*="prompt" i], a[id*="PROMPT" i], a[id*="$prompt" i]';
+
+/** PC-04: infer prompt / display-only / deferred from DOM near the field host. */
+export function detectFieldContextChips(el: Element | null | undefined): FieldContextChip[] {
+  if (!el) return [];
+  const chips = new Set<FieldContextChip>();
+  const html = el as HTMLElement;
+  const id = html.id || "";
+  const tag = html.tagName?.toLowerCase() || "";
+
+  if (
+    html.matches?.(
+      "span.PSEDITBOX_DISPONLY, span.PSDROPDOWNLIST_DISPONLY, span.ps_box-value, [readonly], [aria-readonly='true']",
+    )
+  ) {
+    if (
+      html.classList.contains("PSEDITBOX_DISPONLY") ||
+      html.classList.contains("PSDROPDOWNLIST_DISPONLY") ||
+      html.classList.contains("ps_box-value")
+    ) {
+      chips.add("Display");
+    }
+  }
+
+  const scope =
+    html.closest(
+      "tr, .ps_box-group, .ps_box-control, .ps_box-widget, .ps_box-edit, td, th, .ps-field",
+    ) || html.parentElement;
+
+  if (scope) {
+    if (scope.querySelector(PROMPT_SELECTOR)) chips.add("Prompt");
+    const promptLink = scope.querySelector(
+      'a[id*="PROMPT" i], a[id*="$prompt" i], a[title*="lookup" i], a[title*="prompt" i]',
+    );
+    if (promptLink && promptLink !== html) chips.add("Prompt");
+  }
+
+  if (/PROMPT/i.test(id)) chips.add("Prompt");
+
+  const titleBits = [html.getAttribute("title"), html.getAttribute("aria-label"), html.getAttribute("aria-description")]
+    .filter(Boolean)
+    .join(" ");
+  if (/deferred/i.test(titleBits)) chips.add("Deferred");
+
+  if (scope) {
+    const scopeText = [
+      scope.getAttribute("title"),
+      scope.getAttribute("aria-label"),
+      scope.querySelector(".ps_box-label, label, .PSEDITBOXLABEL")?.textContent,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    if (/deferred\s+process/i.test(scopeText)) chips.add("Deferred");
+    if (scope.querySelector('[class*="deferred" i], [id*="DEFERRED" i], [title*="deferred" i]')) {
+      chips.add("Deferred");
+    }
+  }
+
+  if (
+    tag === "input" &&
+    (html as HTMLInputElement).readOnly &&
+    !html.matches(PROMPT_SELECTOR) &&
+    !scope?.querySelector(PROMPT_SELECTOR)
+  ) {
+    chips.add("Display");
+  }
+
+  return [...chips];
 }
 
 export function fieldNameFromId(id: string): string {
@@ -197,6 +272,7 @@ export function parseRecField(
     record && base.startsWith(`${record}_`) ? base.slice(record.length + 1) || undefined : undefined;
   const pageLabel = fieldEl ? nearbyPageLabel(fieldEl) : undefined;
   const attrs = fieldDomAttrs(fieldEl);
+  const contextChips = fieldEl ? detectFieldContextChips(fieldEl) : undefined;
   return {
     raw: id,
     base,
@@ -205,6 +281,7 @@ export function parseRecField(
     occurrence,
     pageLabel,
     workRecord: Boolean(isWorkRecordName(record) || /^(DERIVED_|WRK_|WORK_)/i.test(base)),
+    contextChips: contextChips?.length ? contextChips : undefined,
     ...attrs,
   };
 }
@@ -421,6 +498,9 @@ function setNamePanel(id: string | null): void {
 
   if (parsed.workRecord) {
     addPart("mpu-rf-work", "Type", "Work");
+  }
+  if (parsed.contextChips?.length) {
+    addPart("mpu-rf-ctx", "Ctx", parsed.contextChips.join(", "));
   }
   if (parsed.pageLabel) {
     addPart("mpu-rf-label", "Label", parsed.pageLabel);

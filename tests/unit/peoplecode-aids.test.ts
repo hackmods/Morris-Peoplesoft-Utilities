@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPeopleCodeStubs,
+  compareObjectPackToBuffer,
   formatObjectPackPlain,
   formatRecFieldCopyExtended,
 } from "@/features/peoplecode-aids";
@@ -69,5 +70,16 @@ describe("peoplecode aids", () => {
       { raw: "JOB_EMPLID$3", base: "JOB_EMPLID", record: "JOB", field: "EMPLID", occurrence: "3" },
       "getrowset",
     )).toBe(text);
+  });
+
+  it("compares object packs between environments (AD-04)", () => {
+    const current = formatObjectPackPlain({
+      parsed,
+      meta: { menu: "M", component: "C", page: "P", uiMode: "fluid", toolsRel: "8.60" },
+    });
+    const other = current.replace("ToolsRel: 8.60", "ToolsRel: 8.61");
+    const { changedCount, lines } = compareObjectPackToBuffer(current, other);
+    expect(changedCount).toBe(1);
+    expect(lines.find((l) => l.key === "ToolsRel")?.changed).toBe(true);
   });
 });

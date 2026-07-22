@@ -82,3 +82,31 @@ export function summarizeActiveTraceFlags(t: TraceSettings): string {
   const on = SHORT_LABELS.filter((f) => t[f.key] === ("Yes" as YesNo)).map((f) => f.short);
   return on.length ? on.join(" · ") : "None (all off)";
 }
+
+/** Count of trace flags set to Yes (TR-04). */
+export function countActiveTraceFlags(t: TraceSettings): number {
+  return SHORT_LABELS.filter((f) => t[f.key] === ("Yes" as YesNo)).length;
+}
+
+/** Best-effort preset name when settings match a named preset (TR-04). */
+export function detectTracePreset(t: TraceSettings): TracePresetId | null {
+  const presets: TracePresetId[] = ["off", "default", "sql", "peoplecode", "verbose"];
+  for (const id of presets) {
+    const applied = applyTracePreset(id);
+    const keys = Object.keys(applied) as Array<keyof TraceSettings>;
+    if (keys.every((k) => applied[k] === t[k])) return id;
+  }
+  return null;
+}
+
+/** Compact bar label suffix when trace is configured (TR-04). */
+export function formatTraceBarHint(t: TraceSettings): string {
+  const count = countActiveTraceFlags(t);
+  if (count === 0) return "";
+  const preset = detectTracePreset(t);
+  if (preset && preset !== "off") {
+    const label = TRACE_PRESET_META.find((p) => p.id === preset)?.label;
+    if (label) return label;
+  }
+  return `${count} flag${count === 1 ? "" : "s"}`;
+}

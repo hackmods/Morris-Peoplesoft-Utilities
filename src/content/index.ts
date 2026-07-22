@@ -280,6 +280,7 @@ async function refresh(): Promise<void> {
     lockedFieldName: getLockedFieldName(),
     traceRunning,
     traceLocked,
+    traceSettings: effective.traceSettings,
     loginMode,
     onTraceToggle: async () => {
       const result = await toggleTrace(settings, parsed, index, !traceRunning);
