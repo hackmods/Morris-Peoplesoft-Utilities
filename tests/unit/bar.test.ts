@@ -385,6 +385,74 @@ describe("utilities bar", () => {
     expect(env.style.getPropertyValue("--mpu-env-color")).toBe("#2288aa");
   });
 
+  it("opens nested Shortcuts submenu without immediate close on leave bridge", async () => {
+    vi.useFakeTimers();
+    const settings = createDefaultSettings();
+    settings.favorites = [
+      {
+        Servlet: "psp",
+        Menu: "M",
+        Component: "C",
+        Market: "GBL",
+        Parameters: "",
+        Category: "Campus",
+        SubCategory: "Admissions",
+        Description: "Rehire",
+      },
+      {
+        Servlet: "psp",
+        Menu: "M2",
+        Component: "C2",
+        Market: "GBL",
+        Parameters: "",
+        Category: "HR",
+        SubCategory: "",
+        Description: "Job Data",
+      },
+    ];
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    document.getElementById("mpu-fav")?.click();
+    const catItem = Array.from(document.querySelectorAll(".mpu-menu-has-sub")).find((el) =>
+      el.textContent?.includes("Campus »"),
+    ) as HTMLElement;
+    expect(catItem).toBeTruthy();
+    const sub = catItem.querySelector(".mpu-flyout-sub") as HTMLElement;
+    expect(sub.hidden).toBe(true);
+
+    catItem.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(sub.hidden).toBe(false);
+    expect(sub.style.position).toBe("fixed");
+    expect(catItem.querySelector(".mpu-menu-subtrigger")?.getAttribute("aria-expanded")).toBe(
+      "true",
+    );
+
+    // Leaving the trigger starts a delay — submenu stays until timeout or pointer enters sub
+    catItem.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    expect(sub.hidden).toBe(false);
+    sub.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(sub.hidden).toBe(false);
+
+    sub.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(sub.hidden).toBe(true);
+    vi.useRealTimers();
+  });
+
   it("buildFavoriteTree groups category and subcategory", () => {
     const tree = buildFavoriteTree([
       {
