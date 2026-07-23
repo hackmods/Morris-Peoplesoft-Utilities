@@ -4,6 +4,11 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- **Env flyout:** click the Env chip for Site / Portal / Node / ToolsRel / Theme / CREF path + Copy
+- **Playwright e2e:** extension UI tests against PeopleSoft-shaped fixtures (`npm run test:e2e`)
+
 ## [1.0.22] — 2026-07-22
 
 ### Changed

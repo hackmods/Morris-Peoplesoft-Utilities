@@ -206,3 +206,4 @@
 | 2026-07-22 | **v1.0.18** — Field Inspector per-field wraps (Classic + Fluid) + Classic pages inside Fluid menus/nav collections |
 | 2026-07-22 | **v1.0.19** — Shortcuts / Admin nested flyout submenus (fixed positioning, no clip / early close) |
 | 2026-07-22 | **v1.0.20** — Options Features regroup (bar / helpers / careful) + PCode starter dialog clarity |
+| 2026-07-22 | Env flyout (Site/Portal/Node/ToolsRel/Theme/CREF) + Playwright extension UI tests |

@@ -26,14 +26,61 @@
 
 .mpu-env {
   padding: 0.15rem 0.45rem;
+  border: none;
   border-left: 4px solid var(--mpu-env-color, #c4a035);
   border-bottom: 2px solid var(--mpu-env-color, #c4a035);
   background: color-mix(in srgb, var(--mpu-env-color, #c4a035) 18%, transparent);
   border-radius: 0 2px 2px 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.mpu-env {
+  appearance: none;
+}
+
+.mpu-env:hover,
+.mpu-env:focus-visible {
+  background: color-mix(in srgb, var(--mpu-env-color, #c4a035) 28%, transparent);
 }
 
 .mpu-env[data-mpu-env-colored="true"] {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mpu-env-color, #c4a035) 35%, transparent);
+}
+
+.mpu-env-flyout {
+  min-width: 16rem;
+  max-width: min(28rem, 92vw);
+}
+
+.mpu-env-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.75rem;
+  margin: 0;
+  padding: 0.55rem 0.7rem 0.35rem;
+  font: 500 12px/1.35 "Segoe UI", system-ui, sans-serif;
+}
+
+.mpu-env-dl dt {
+  margin: 0;
+  opacity: 0.78;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mpu-env-dl dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.mpu-flyout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem 0.55rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .mpu-user {

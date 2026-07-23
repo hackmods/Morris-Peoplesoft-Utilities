@@ -14,6 +14,7 @@ import {
   comparePageInfoToBuffer,
   toolsRelTips,
 } from "../adapters/ps-page";
+import { buildEnvContextRows, formatEnvContextPlain } from "../adapters/env-context";
 import {
   buildFavoriteTree,
   favoriteDisplayLabel,
@@ -1049,16 +1050,87 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   }
 
   if (isYes(f.greetingOption)) {
-    const env = document.createElement("span");
+    const envRoot = document.createElement("span");
+    envRoot.className = "mpu-menu-root";
+
+    const env = document.createElement("button");
+    env.type = "button";
+    env.id = "mpu-env";
     env.className = "mpu-env";
     env.textContent = ctx.envLabel || ctx.parsed.siteNormalized || "Environment";
-    env.title = "Environment";
+    env.title = "Environment context (site, portal, node, ToolsRel, theme, CREF)";
+    env.setAttribute(
+      "aria-label",
+      `Environment ${env.textContent}. Open environment context.`,
+    );
+    env.setAttribute("aria-haspopup", "dialog");
+    env.setAttribute("aria-expanded", "false");
     const color = ctx.settings.environments.find((e) => e.label === ctx.envLabel)?.color;
     if (color) {
       env.style.setProperty("--mpu-env-color", color);
       env.setAttribute("data-mpu-env-colored", "true");
     }
-    bar.appendChild(env);
+
+    const envFlyout = document.createElement("div");
+    envFlyout.className = "mpu-flyout mpu-env-flyout";
+    envFlyout.id = "mpu-env-flyout";
+    envFlyout.setAttribute("role", "dialog");
+    envFlyout.setAttribute("aria-label", "Environment context");
+    envFlyout.hidden = true;
+
+    const fillEnvFlyout = (): void => {
+      envFlyout.replaceChildren();
+      const meta = collectPageMeta(doc);
+      const rows = buildEnvContextRows(meta, ctx.parsed, ctx.envLabel || "", doc);
+      const dl = document.createElement("dl");
+      dl.className = "mpu-env-dl";
+      for (const row of rows) {
+        const dt = document.createElement("dt");
+        dt.textContent = row.label;
+        const dd = document.createElement("dd");
+        dd.textContent = row.value;
+        dl.append(dt, dd);
+      }
+      envFlyout.appendChild(dl);
+
+      const actions = document.createElement("div");
+      actions.className = "mpu-flyout-actions";
+      const copyBtn = btn("mpu-env-copy", "Copy", "Copy environment context");
+      copyBtn.addEventListener("click", () => {
+        void copyText(
+          doc,
+          formatEnvContextPlain(meta, ctx.parsed, ctx.envLabel || "", doc),
+          "Environment context copied",
+        );
+      });
+      actions.appendChild(copyBtn);
+      envFlyout.appendChild(actions);
+    };
+
+    const closeEnv = (): void => {
+      envFlyout.hidden = true;
+      env.setAttribute("aria-expanded", "false");
+      endFlyoutPosition();
+      restorePortaledFlyout(envFlyout);
+      endMenuDismiss();
+    };
+
+    const openEnv = (): void => {
+      closeAllFlyouts(doc);
+      fillEnvFlyout();
+      envFlyout.hidden = false;
+      env.setAttribute("aria-expanded", "true");
+      bindFlyoutPosition(env, envFlyout);
+      bindMenuDismiss(doc, envRoot, closeEnv, envFlyout);
+    };
+
+    env.addEventListener("click", () => {
+      if (envFlyout.hidden) openEnv();
+      else closeEnv();
+    });
+
+    envRoot.append(env, envFlyout);
+    bar.appendChild(envRoot);
   }
 
   if (!loginOnly && isYes(f.userIdOption)) {

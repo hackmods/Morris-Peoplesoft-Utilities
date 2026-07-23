@@ -16,11 +16,14 @@ This repository is a **Chrome Manifest V3 extension** for PeopleSoft productivit
 ```bash
 npm run lint
 npm run test:unit
+npm run test:e2e
 npm run audit
 npm run build
 npm run package
 npm run release:check
 ```
+
+E2E loads the unpacked extension from `dist/` (see `tests/e2e/README.md`). Not part of `release:check`.
 
 ## Do not
 

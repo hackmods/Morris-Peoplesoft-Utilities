@@ -61,6 +61,60 @@ describe("utilities bar", () => {
     expect(onPageInfo).toHaveBeenCalledOnce();
   });
 
+  it("opens Env flyout with site / portal / node / ToolsRel / theme / CREF", () => {
+    document.body.innerHTML = `
+      <div id="PT_HEADER"></div>
+      <!-- User=BA1; ToolsRel=8.61.15; AppServ=//h:1 -->
+      <html class="ptal-theme-redwood"></html>
+    `;
+    // jsdom: put theme on documentElement
+    document.documentElement.className = "ptal-theme-redwood";
+    const crumb = document.createElement("nav");
+    crumb.className = "ps_breadcrumb";
+    crumb.innerHTML = `<a href="#">Home</a><a href="#">Workforce</a>`;
+    document.body.appendChild(crumb);
+
+    const settings = createDefaultSettings();
+    settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No", color: "#2288aa" }];
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    const envBtn = document.getElementById("mpu-env") as HTMLButtonElement;
+    expect(envBtn.tagName).toBe("BUTTON");
+    envBtn.click();
+
+    const flyout = document.getElementById("mpu-env-flyout") as HTMLElement;
+    expect(flyout.hidden).toBe(false);
+    expect(flyout.parentElement).toBe(document.body);
+    expect(flyout.classList.contains("mpu-flyout-top")).toBe(true);
+    expect(flyout.textContent).toContain("Environment");
+    expect(flyout.textContent).toContain("DEV");
+    expect(flyout.textContent).toContain("Site");
+    expect(flyout.textContent).toContain("ps");
+    expect(flyout.textContent).toContain("Portal");
+    expect(flyout.textContent).toContain("EMPLOYEE");
+    expect(flyout.textContent).toContain("Node");
+    expect(flyout.textContent).toContain("HRMS");
+    expect(flyout.textContent).toContain("ToolsRel");
+    expect(flyout.textContent).toMatch(/8\.61/);
+    expect(flyout.textContent).toContain("Theme");
+    expect(flyout.textContent).toContain("ptal-theme-redwood");
+    expect(flyout.textContent).toContain("CREF path");
+    expect(document.getElementById("mpu-env-copy")).toBeTruthy();
+  });
+
   it("mounts wave 6 PCode, Structure, and Admin buttons when page info is on", () => {
     const settings = createDefaultSettings();
     mountBar({

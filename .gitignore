@@ -13,5 +13,9 @@ proxmox_mcp.log
 *.crx
 *.pem
 
+playwright-report/
+test-results/
+blob-report/
+
 # Local legacy oracle — keep untracked by default (large vendor tree)
 .reference/

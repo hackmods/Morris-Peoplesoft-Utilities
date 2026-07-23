@@ -21,7 +21,9 @@
     "package": "npm run build && tsx scripts/package-zip.ts",
     "release:check": "npm run lint && npm run test:coverage && npm run audit && npm run package",
     "generate:icons": "tsx scripts/generate-icons.ts",
-    "generate:store-assets": "tsx scripts/generate-store-assets.ts"
+    "generate:store-assets": "tsx scripts/generate-store-assets.ts",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:ui": "npm run build && playwright test --ui"
   },
   "repository": {
     "type": "git",
@@ -38,6 +40,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "archiver": "^8.0.0",
     "axe-core": "^4.10.3",
+    "@playwright/test": "^1.54.1",
     "eslint": "^10.7.0",
     "globals": "^16.2.0",
     "jsdom": "^29.1.1",
