@@ -4,6 +4,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.23] — 2026-07-23
+
 ### Added
 
 - **Env flyout:** click the Env chip for Site / Portal / Node / ToolsRel / Theme / CREF path + Copy
