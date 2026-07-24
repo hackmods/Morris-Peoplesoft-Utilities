@@ -2,7 +2,7 @@
 name: Component/Table/Process Agent Trainer (meta-guide)
 applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
-status: full (v2)
+status: full (v3)
 ---
 
 # What this is
@@ -76,10 +76,12 @@ When reviewing SQL/PeopleCode for this area:
 3. Never invent undocumented custom fields
 
 # Who/what to defer to
-- Generic effdt/joins/keys → agents/code-review-effdt-joins/AGENT.md
-- PeopleCode quality → agents/peoplecode-quality/AGENT.md
-- Security → agents/security-role-review/AGENT.md
-- Live schema/query → agents/mcp-schema-assistant/AGENT.md (or paste)
+- Generic effdt/joins/keys → agents/review-data-correctness/AGENT.md
+- SQL authorship → agents/assist-sql-query/AGENT.md
+- PeopleCode quality → agents/review-peoplecode-quality/AGENT.md
+- IB / CI → agents/assist-integrations/AGENT.md
+- Security → agents/review-security/AGENT.md
+- Live schema/query → agents/assist-schema-mcp/AGENT.md (or paste)
 
 # Example Q&A
 Q: …
@@ -128,7 +130,7 @@ You are an expert on process <name> (App Engine / SQR / JobSet): <one-sentence p
 
 # Who/what to defer to
 - Generic SQL/PeopleCode review → public pack agents
-- Security of who can run this → security-role-review agent
+- Security of who can run this → review-security agent
 
 # Example Q&A
 Q: …

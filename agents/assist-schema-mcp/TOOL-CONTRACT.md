@@ -44,7 +44,7 @@ Fetches the single current-as-of row for a given set of business keys on an effe
 }
 ```
 
-**Expected behavior:** internally applies correlated MAX(EFFDT) + EFFSEQ tie-break + optional `EFF_STATUS = 'A'` (see `../code-review-effdt-joins/AGENT.md` §1). Returns at most one row or an empty result with a clear reason.
+**Expected behavior:** internally applies correlated MAX(EFFDT) + EFFSEQ tie-break + optional `EFF_STATUS = 'A'` (see `../review-data-correctness/AGENT.md` §1). Returns at most one row or an empty result with a clear reason.
 
 ## `ps.queryReadOnly`
 

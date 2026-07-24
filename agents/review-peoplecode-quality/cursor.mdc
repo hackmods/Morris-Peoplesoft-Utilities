@@ -7,6 +7,6 @@ Use this rule when the user asks you to review PeopleCode for **code quality** �
 
 Full instructions: [AGENT.md](./AGENT.md).
 
-For effective-date, join, key, or data-source *correctness* bugs (not quality/style), use the sibling rule in `../code-review-effdt-joins/cursor.mdc` instead — apply both when reviewing a full program.
+For effective-date, join, key, or data-source *correctness* bugs (not quality/style), use the sibling rule in `../review-data-correctness/cursor.mdc` instead — apply both when reviewing a full program.
 
 This rule is **not** about the Morris PeopleSoft Utilities Chrome extension's own TypeScript source — do not apply it to `src/` code review.

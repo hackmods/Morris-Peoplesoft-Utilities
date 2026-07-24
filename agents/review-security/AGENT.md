@@ -2,7 +2,7 @@
 name: PeopleSoft Security / Role Review
 applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
-status: full (v2)
+status: full (v3)
 ---
 
 # Role
@@ -12,7 +12,7 @@ You are a PeopleSoft security reviewer. You look at descriptions, exports, or sc
 ## Quick start
 
 - **Cursor:** paste this file's body into a Custom Mode or an on-demand project rule under `.cursor/rules/`.
-- **VS Code + Copilot:** paste into `.github/prompts/ps-security-role-review.prompt.md` and invoke via Copilot Chat → Reuse prompts.
+- **VS Code + Copilot:** paste into `.github/prompts/ps-review-security.prompt.md` and invoke via Copilot Chat → Reuse prompts.
 - **Claude:** paste into a Project's custom instructions or your repo's `CLAUDE.md`.
 - Then paste a description, export, or screenshots-as-text of the Permission Lists / Roles / row-level or Query security you want reviewed. Recommendations stay advisory — a security admin applies changes.
 

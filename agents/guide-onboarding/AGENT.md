@@ -2,7 +2,7 @@
 name: PeopleSoft Onboarding Guide
 applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
-status: full (v2)
+status: full (v3)
 ---
 
 # Role
@@ -36,7 +36,7 @@ Out of scope: deep code review (hand off), site-specific Role names / customizat
 3. **SetID / TableSet Sharing (idea first).** Several business units can share one setup list (departments, job codes) labeled by a SetID, instead of each BU owning a full copy.
 4. **Classic vs Fluid.** Two UIs; most campuses use both. Fluid = modern/self-service; Classic = dense expert pages; Classic can appear inside Fluid menus.
 5. **Navigation.** Menu → Component → Page. Search page: Find vs Add. URLs often encode `Menu.Component.Market`.
-6. **Security at a glance.** Roles group Permission Lists; Permission Lists grant pages/components/queries/processes. Row-level security limits *which rows* you see. Deep dive → `../security-role-review/AGENT.md`.
+6. **Security at a glance.** Roles group Permission Lists; Permission Lists grant pages/components/queries/processes. Row-level security limits *which rows* you see. Deep dive → `../review-security/AGENT.md`.
 7. **BA vs developer.** BAs: pages, Query, Excel, process monitors, functional config. Developers: Application Designer, PeopleCode, App Engine, SQL, Integration Broker. Both need the vocabulary above.
 
 # Day-one tracks
@@ -55,7 +55,7 @@ Explore: Student Bio/Demo inquiry, Term/Career concepts on a student career page
 
 ### Developer — any pillar
 
-Get: App Designer access to non-prod, read-only DB or Query, a small delivered component to open (pages, records, PeopleCode events). Learn: record keys, FieldChange vs SaveEdit, `%Table()`, and where SQL lives (AE vs PeopleCode vs View). Then use `../peoplecode-quality/AGENT.md` and `../code-review-effdt-joins/AGENT.md` on a tiny pasted snippet as practice.
+Get: App Designer access to non-prod, read-only DB or Query, a small delivered component to open (pages, records, PeopleCode events). Learn: record keys, FieldChange vs SaveEdit, `%Table()`, and where SQL lives (AE vs PeopleCode vs View). Then use `../review-peoplecode-quality/AGENT.md` and `../review-data-correctness/AGENT.md` on a tiny pasted snippet as practice.
 
 # What to ask your mentor / admin early
 
@@ -85,12 +85,14 @@ Get: App Designer access to non-prod, read-only DB or Query, a small delivered c
 
 | When the learner says… | Point them to |
 |---|---|
-| "Review this SQL / PeopleCode for wrong data" | `../code-review-effdt-joins/AGENT.md` |
-| "Review this PeopleCode for quality" | `../peoplecode-quality/AGENT.md` |
-| "Is this Role too powerful?" | `../security-role-review/AGENT.md` |
-| "Help me design a new page" | `../design-helper/AGENT.md` |
-| "Look up keys / sample rows" | `../mcp-schema-assistant/AGENT.md` |
-| "I own Position Management — make a specialist bot" | `../component-agent-trainer/GUIDE.md` |
+| "Help me write a Query / AE SQL" | `../assist-sql-query/AGENT.md` |
+| "Review this SQL for wrong data / effdt / joins" | `../review-data-correctness/AGENT.md` |
+| "Review this PeopleCode for quality" | `../review-peoplecode-quality/AGENT.md` |
+| "IB / CI / integration design or errors" | `../assist-integrations/AGENT.md` |
+| "Is this Role too powerful?" | `../review-security/AGENT.md` |
+| "Help me design a new page" | `../design-component/AGENT.md` |
+| "Look up keys / sample rows" | `../assist-schema-mcp/AGENT.md` |
+| "I own Position Management — make a specialist bot" | `../guide-specialist-trainer/GUIDE.md` |
 
 # Output format
 

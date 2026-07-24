@@ -1,0 +1,10 @@
+---
+description: PeopleSoft SQL/Query author — write and improve Query Manager, AE, and view SQL
+alwaysApply: false
+---
+
+Use this rule when the user wants help **writing or improving** PeopleSoft SQL (Query Manager, Application Engine, views, or SQL in PeopleCode) for PeopleTools 8.5x–8.6x / PS 8.56.
+
+Full instructions: [AGENT.md](./AGENT.md).
+
+For auditing finished SQL for effdt/join/key bugs, use `../review-data-correctness/`. For live schema lookup, use `../assist-schema-mcp/`.

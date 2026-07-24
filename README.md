@@ -103,7 +103,7 @@ See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## PeopleSoft agent prompt pack
 
-Separate from the extension itself: [`agents/`](agents/README.md) is a set of portable, generic AI-agent/skill prompts for PeopleSoft 8.56 (PeopleTools 8.5x–8.6x) development work — code review (effective dates, joins, keys, data sources), security/role review, an MCP-ready schema assistant, design help, onboarding, and a guide for training your own component-specific agent. Usable in Cursor, VS Code + Copilot, Claude, or any chat tool; nothing in it ships in the extension bundle.
+Separate from the extension itself: [`agents/`](agents/README.md) is a portable PeopleSoft AI prompt pack (PeopleTools 8.5x–8.6x) — data/PeopleCode/security review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training. Usable in Cursor, Visual Studio / VS Code + Copilot, or Claude; nothing in it ships in the extension bundle.
 
 ## Releases
 
