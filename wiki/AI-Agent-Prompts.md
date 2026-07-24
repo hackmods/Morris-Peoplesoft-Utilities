@@ -28,13 +28,13 @@ For a full program review, run **PeopleCode quality** and **effdt / joins** toge
 
 | Agent | Status | What it does |
 |---|---|---|
-| [code-review-effdt-joins](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/code-review-effdt-joins/AGENT.md) | **Full** | Effective-date logic, bad joins, missing keys, wrong data sources |
-| [peoplecode-quality](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/peoplecode-quality/AGENT.md) | **Full** | Meta-SQL vs hardcoding, `.Value`/record access, variable scope, SQL injection risk, error handling, duplication |
-| [security-role-review](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/security-role-review/AGENT.md) | Stub | Permission lists, roles, row-level and Query security |
-| [mcp-schema-assistant](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/mcp-schema-assistant/AGENT.md) | Stub | Read-only schema / query assistant; [tool contract](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/mcp-schema-assistant/TOOL-CONTRACT.md) for a future MCP connector |
-| [design-helper](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-helper/AGENT.md) | Stub | Classic vs Fluid, search records, levels, upgrade risk |
-| [onboarding-guide](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/onboarding-guide/AGENT.md) | Stub | New-to-PeopleSoft orientation (BA or developer) |
-| [component-agent-trainer](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/component-agent-trainer/GUIDE.md) | Stub | Meta-guide + template to train a **local** specialist agent |
+| [code-review-effdt-joins](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/code-review-effdt-joins/AGENT.md) | **Full (v2)** | Effective-date logic, bad joins, missing keys, wrong data sources |
+| [peoplecode-quality](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/peoplecode-quality/AGENT.md) | **Full (v2)** | Meta-SQL, `.Value`, variables, SQL safety, App Classes, CI constraints |
+| [security-role-review](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/security-role-review/AGENT.md) | **Full (v2)** | Permission lists, roles, row/Query/process security, SoD matrices |
+| [mcp-schema-assistant](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/mcp-schema-assistant/AGENT.md) | **Full (v2)** | Schema / current-row / sample query (MCP or paste); [tool contract](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/mcp-schema-assistant/TOOL-CONTRACT.md) |
+| [design-helper](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-helper/AGENT.md) | **Full (v2)** | Classic vs Fluid, search records, levels, upgrade risk |
+| [onboarding-guide](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/onboarding-guide/AGENT.md) | **Full (v2)** | New-to-PeopleSoft orientation (BA or developer) |
+| [component-agent-trainer](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/component-agent-trainer/GUIDE.md) | **Full (v2)** | Meta-guide to train a **local** specialist agent |
 
 Each file includes a **Quick start** section (Cursor / Copilot / Claude) and, where useful, a `cursor.mdc` wrapper for on-demand Cursor rules.
 

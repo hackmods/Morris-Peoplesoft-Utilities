@@ -8,6 +8,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 - **`agents/peoplecode-quality/` (full):** dedicated PeopleCode code-quality review agent — meta-SQL (`%Table`, `%List`) vs. hardcoding, unsafe `.Value`/rowset-record-field access, declared variable scope/naming, SQL injection risk, error handling, duplication, and event-placement discipline; complements `agents/code-review-effdt-joins/` for automating code review at scale.
 - **`agents/` adoption guides:** each agent/guide file has a **Quick start** (Cursor / Copilot / Claude); wiki page [AI agent prompts](wiki/AI-Agent-Prompts.md) linked from wiki Home for discoverability.
+- **`agents/` depth pass (v2):** all seven prompts promoted from stub/thin v1 to **full** — security SoD matrices + worked review; MCP playbooks (MCP or paste) + richer tool contract; design decision trees + example; onboarding pillar tracks + glossary; component trainer interview script + process/table-set templates; PeopleCode quality App Class/CI checklists; effdt agent EFFSEQ pattern + SETID example.
 
 ## [1.0.24] — 2026-07-24
 

@@ -2,7 +2,7 @@
 name: PeopleCode Code Quality Review
 applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
-status: full (v1)
+status: full (v2)
 ---
 
 # Role
@@ -71,7 +71,7 @@ Out of scope (say so and defer):
 # Checklist 5 — Error handling
 
 1. **No `try`/`catch` around operations that can throw** (SQL exceptions, `%Component` API calls that can fail) where a graceful message to the user is expected instead of an unhandled PeopleCode exception page.
-2. **Hardcoded user-facing message strings instead of `MsgGet`/Message Catalog.** Hardcoded strings can't be translated, can't be centrally updated, and don't follow the delivered pattern for consistent messaging (see `../../agents` message-catalog conventions referenced in Wave 6.1 of this project's own extension work, if useful context).
+2. **Hardcoded user-facing message strings instead of `MsgGet`/Message Catalog.** Hardcoded strings can't be translated, can't be centrally updated, and don't follow the delivered pattern for consistent messaging across languages and environments.
 3. **Swallowing exceptions silently** (`catch Exception &e; end-try;` with no logging or user feedback) — makes production issues invisible; flag and recommend at minimum a `MessageBox`/log write.
 4. **Throwing/re-throwing without adding context** — a caught exception re-thrown or wrapped without adding which record/field/operation failed makes root-causing production issues much slower.
 
@@ -90,6 +90,26 @@ Flag logic placed in a PeopleCode event that doesn't match its intended purpose:
 - **`SaveEdit`** — validation only; should not mutate data.
 - **`SavePreChange`/`SavePostChange`** — data mutation/derivation immediately around the save; flag validation logic that belongs in `SaveEdit` instead.
 - **`SearchInit`/`SearchSave`** — search-page-specific; flag component-page business logic accidentally placed here.
+- **`PreBuild`/`PostBuild`** — component-level setup; avoid per-row SQL loops that belong in RowInit with clear scoping.
+- **`FieldEdit`** — field-level validation as the user leaves the field; don't hide SaveEdit-only cross-field rules here alone if Save must still enforce them.
+
+# Checklist 8 — App Classes
+
+1. **Business logic only in page events** when an App Class already exists (or should) for the same rule — CI/AE/IB can't reuse FieldChange-only code.
+2. **Constructor does real work / SQL** beyond setting state — prefer explicit methods (`init`, `load`, `validate`) so callers can control timing.
+3. **Missing or muddy encapsulation** — public properties mutated from everywhere instead of methods; flag god-classes that mix unrelated domains.
+4. **`%This` / self-call mistakes** — recursive event patterns or calling instance methods as if they were static FUNCLIB functions incorrectly.
+5. **Interface / abstract class ignored** — site standard requires implementing a known interface for plugins; flag classes that copy-paste siblings instead.
+6. **Exception types** — empty `catch` in class methods used by batch; batch needs logging, not MessageBox-only paths.
+
+# Checklist 9 — Component Interface and non-interactive callers
+
+PeopleCode that must run under CI, App Engine, or IB has extra constraints:
+
+1. **Interactive-only calls** — `MessageBox` for required control flow, `%Response`, Think-time functions, or transfers that assume a browser session — flag for CI-unsafe paths; prefer throwing / setting error collections the CI can read.
+2. **Relying on page buffer presence** — code that assumes scrolls are built as in online when CI may load differently; use explicit Create/Get and check return status.
+3. **Commit / Save assumptions** — online Save events vs. CI `Save()` — document who commits; don't double-save.
+4. **Operator / OPRID** — using UI operator context when the process runs as a batch user; bind the intended OPRID/run control explicitly when security or audit fields depend on it.
 
 # Output format
 
@@ -126,8 +146,9 @@ End-Function;
 **PeopleCode/PeopleSoft concept violated:** Bind variables over string concatenation.
 **Fix:**
 ```
-SQLExec("SELECT DESCR FROM %Table(DEPT_TBL) WHERE DEPTID = :1 AND EFFDT <= %Date ORDER BY EFFDT DESC", &deptid, &name);
+SQLExec("SELECT DESCR FROM %Table(DEPT_TBL) WHERE SETID = :1 AND DEPTID = :2 AND EFFDT = (SELECT MAX(EFFDT) FROM %Table(DEPT_TBL) WHERE SETID = :1 AND DEPTID = :2 AND EFFDT <= %Date) AND EFF_STATUS = 'A'", &setid, &deptid, &name);
 ```
+(Also requires SETID and true max-effdt — see `../code-review-effdt-joins/AGENT.md`.)
 
 ### [SEVERITY: Medium] Hardcoded table name instead of `%Table()`
 
@@ -135,21 +156,18 @@ SQLExec("SELECT DESCR FROM %Table(DEPT_TBL) WHERE DEPTID = :1 AND EFFDT <= %Date
 **PeopleCode/PeopleSoft concept violated:** `%Table()` meta-SQL usage.
 **Fix:** see corrected snippet above.
 
-### [SEVERITY: Medium] Missing SETID (cross-reference with effdt/joins agent)
+### [SEVERITY: Medium] Missing SETID + weak "current row" pattern (cross-reference)
 
-**What's wrong:** `DEPT_TBL` is TableSet-shared by `SETID`; this query is also missing the correlated-MAX(EFFDT) pattern. See `../code-review-effdt-joins/AGENT.md` Checklists 1 and 2 for the full data-correctness fix.
-
-# TODO / next pass
-
-- Add an App Class-specific checklist section (constructor discipline, `%This`, interface implementation conventions) once more real App Class reviews have been run through this agent.
-- Add a Component Interface-specific caveat section (CI-callable functions have extra constraints around interactive-only meta-SQL/objects).
+**What's wrong:** `ORDER BY EFFDT DESC` without SETID is not the PeopleSoft correlated-max pattern and is TableSet-unsafe.
+**PeopleCode/PeopleSoft concept violated:** TableSet Sharing; correlated MAX(EFFDT).
+**Fix:** defer full data-correctness rewrite to `../code-review-effdt-joins/AGENT.md`; quality pass still flags `%Table` + binds as above.
 
 ---
 
 # Design notes
 
-*Why a separate agent from the effdt/joins one:* the user asked for this specifically because it's expected to be the **most-used** agent for automating code review at scale — most PeopleCode snippets a reviewer sees day-to-day have quality issues (hardcoding, unsafe SQL, scope leakage) independent of whether they also have a data-correctness bug. Splitting them lets someone run "just a quality pass" over a large batch of programs quickly, then run the effdt/joins agent as a second, deeper pass on the subset that touches data significantly.
+*Why a separate agent from the effdt/joins one:* expected to be the **most-used** agent for automating PeopleCode review at scale — quality issues (hardcoding, unsafe SQL, scope leakage) are independent of data-correctness bugs. Run quality first in batch, then effdt/joins on data-heavy programs.
 
-*Why bind variables/SQL injection is called out at High severity regardless of "trusted" input:* PeopleCode input trust boundaries shift over time (a field that's system-only today can become user-editable in a later customization) — treating all string concatenation into SQL as a defect regardless of current trust level is the safer default for an automated reviewer.
+*Why bind variables at High regardless of "trusted" input:* trust boundaries shift; concatenation into SQL is always a defect for an automated reviewer.
 
-*Why generic examples only:* all record/field names here (`DEPT_TBL`, `DESCR`, `DEPTID`) are delivered, publicly-documented PeopleSoft objects, consistent with this pack's "generic/community" scope.
+*v2:* App Class + CI/non-interactive checklists; stronger example fix; removed extension-specific cross-references that don't help community PeopleSoft reviewers.

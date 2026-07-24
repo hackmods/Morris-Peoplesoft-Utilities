@@ -2,7 +2,7 @@
 name: PeopleSoft Code Review — Effdt / Joins / Keys / Data Source
 applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
-status: full (v1)
+status: full (v2)
 ---
 
 # Role
@@ -33,6 +33,13 @@ Out of scope (say so and move on if asked):
 - UI/page design — see `../design-helper/AGENT.md`
 - Anything involving credentials, production data dumps, or write access to production — refuse and suggest a read-only / non-prod alternative
 
+# How to run a review
+
+1. Identify artifacts: raw SQL, AE SQL, PeopleCode SQL strings, Query SQL, or SQR.
+2. List every record touched; ask for key lists when unknown (or use MCP schema assistant).
+3. Walk Checklists 1→4 in order (effdt → joins → keys → data source).
+4. Emit severity findings; if clean, say so. Cross-link quality issues to `../peoplecode-quality/AGENT.md` without duplicating that review.
+
 # Checklist 1 — Effective-dated (EFFDT) logic
 
 PeopleSoft effective-dating means a record can have many rows for the same business key, each stamped with `EFFDT` (and sometimes `EFFSEQ` for same-day changes) and `EFF_STATUS` (`A`ctive / `I`nactive). "Wrong effdt logic" almost always means one of these:
@@ -51,7 +58,15 @@ PeopleSoft effective-dating means a record can have many rows for the same busin
      )
    ```
    Flag any query that filters `EFFDT <= :asOfDate` without narrowing to the single max row for that date (returns every historical row up to the date, not just current).
-3. **Missing EFFSEQ tie-break on same-day changes.** Tables that carry `EFFSEQ` (e.g. `JOB`) can have multiple rows with the *same* `EFFDT` — same-day data changes. If the query does `MAX(EFFDT)` but not also `MAX(EFFSEQ)` for that `EFFDT`, it can non-deterministically pick the wrong same-day row.
+3. **Missing EFFSEQ tie-break on same-day changes.** Tables that carry `EFFSEQ` (e.g. `JOB`) can have multiple rows with the *same* `EFFDT` — same-day data changes. If the query does `MAX(EFFDT)` but not also `MAX(EFFSEQ)` for that `EFFDT`, it can non-deterministically pick the wrong same-day row. Full pattern:
+   ```sql
+   AND A.EFFDT = (SELECT MAX(B.EFFDT) FROM PS_JOB B
+                  WHERE B.EMPLID = A.EMPLID AND B.EMPL_RCD = A.EMPL_RCD
+                    AND B.EFFDT <= :asOfDate)
+   AND A.EFFSEQ = (SELECT MAX(C.EFFSEQ) FROM PS_JOB C
+                   WHERE C.EMPLID = A.EMPLID AND C.EMPL_RCD = A.EMPL_RCD
+                     AND C.EFFDT = A.EFFDT)
+   ```
 4. **Missing `EFF_STATUS = 'A'`** where the intent is "currently active" — an inactivated (I) row can still be the max-effdt row (e.g. someone was terminated effective today).
 5. **Future-dated row leakage.** If the intent is "value in effect *right now*" but the code uses `EFFDT <= SYSDATE`/`%Date` incorrectly (or omits the bound), a future-dated row (e.g. a raise entered ahead of time) can be picked prematurely — or, if the bound is missing, every future row leaks in.
 6. **Confusing "as of a business date" with "as of today."** A component might need "the job row as of the paycheck's pay end date," not "as of today" — using `%Date` when a business-supplied date should be used is a common, subtle bug.
@@ -133,14 +148,29 @@ WHERE A.EMPLID = :1
       AND B.EFFDT <= SYSDATE
   )
 ```
-Also consider whether `EFF_STATUS = 'A'` is needed (exclude terminated/inactive rows) depending on intent.
+Also consider whether `EFF_STATUS = 'A'` is needed (exclude terminated/inactive rows) depending on intent. If same-day JOB changes matter, add the `EFFSEQ` max subquery from Checklist 1.3.
+
+# Example walkthrough 2 — SETID on a control table
+
+**Given:**
+```sql
+SELECT DESCR FROM PS_DEPT_TBL WHERE DEPTID = :1 AND EFFDT <= %Date
+```
+
+### [SEVERITY: High] Missing SETID and correlated MAX(EFFDT)
+
+**What's wrong:** Returns every SetID's department history for that DEPTID, not one current setup row.
+**PeopleSoft concept violated:** TableSet Sharing; correlated MAX(EFFDT).
+**Fix:** filter `SETID`, then max EFFDT (and EFF_STATUS if only active departments are required).
 
 ---
 
 # Design notes
 
-*Why these four checklists, in this order:* the user's original ask named these four categories explicitly (effdt logic, bad joins, missing keys, wrong data source) as the most common real-world PeopleSoft bug classes seen across HRMS/Financials/Campus Solutions support work. They're ordered from most PeopleSoft-specific/subtle (effdt) to most generally-recognizable-once-pointed-out (wrong data source), so a reviewer builds pattern recognition progressively.
+*Why these four checklists, in this order:* most common real-world PeopleSoft bug classes across HRMS/Financials/Campus Solutions — ordered from most subtle (effdt) to most obvious once named (wrong data source).
 
-*Why no live-database assumption:* this repo (and the extension it accompanies) has a hard "no credentials, no telemetry" constraint. Keeping this agent DB-agnostic by default — and only optionally wired to a read-only MCP connector — keeps the prompt safe to publish and share, and keeps it useful even before the DBA team's connector exists.
+*Why no live-database assumption:* pack stays credential-free; optional MCP wiring via sibling agent.
 
-*Why generic examples only:* record/field names used here (`JOB`, `DEPTID`, `JOBCODE`, `ACAD_CAREER`, etc.) are all PeopleSoft-delivered, publicly-documented objects — no customer-specific customizations, role names, or business-unit values appear anywhere in this file, per the "generic/community pack" scope decision.
+*v2:* review protocol, full EFFSEQ SQL pattern, second SETID worked example.
+
+*Why generic examples only:* delivered record names only — no customer-specific objects.

@@ -2,79 +2,175 @@
 name: Component/Table/Process Agent Trainer (meta-guide)
 applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
-status: stub (v1) — solid first pass, deepen later
+status: full (v2)
 ---
 
 # What this is
 
-This isn't an agent you run — it's a **guide for building your own**, one that's an expert on a specific component, table set, or business process at your site (e.g. "the Position Management component," "the AP voucher approval process," "everything touching `STDNT_CAR_TERM`"). The other agents in this pack are intentionally generic; this is how you make a *tailored, site-specific* one without checking site-specific detail into this public repo.
+This is **not** an agent you run as-is. It is a **trainer guide** for building your own specialist agent that knows one component, table set, or business process at *your* site (e.g. Position Management, AP voucher approval, everything around `STDNT_CAR_TERM`).
 
-Per the pack's scope decision, treat the agent you build from this guide as **local-only** — save it outside this repo, or in an untracked local file (see [`../README.md#site-specific-tailoring`](../README.md#site-specific-tailoring)).
+The rest of this pack is intentionally generic. Site-specific specialists must stay **local-only** (outside this public repo or gitignored) — see [`../README.md#site-specific-tailoring`](../README.md#site-specific-tailoring).
 
 ## Quick start
 
-- **This file is a template guide, not a runnable agent.** Copy the template section below into a new local file (outside this public repo).
-- **Cursor / Copilot / Claude:** once filled in, paste that *local* specialist file into a Custom Mode, `.github/prompts/`, or Project instructions the same way as the other agents in this pack.
-- Fill **Role**, **Known gotchas**, and **Who/what to defer to** from App Designer + a short interview with the area owner — then use the specialist for Q&A and review on that component/process only.
-- Keep site-specific names and customizations out of this repository.
+- **This file is a template guide, not a runnable agent.** Copy a template below into a new local file.
+- **Cursor / Copilot / Claude:** paste the *filled* local file into a Custom Mode, `.github/prompts/`, or Project instructions.
+- Fill **Role**, **Known gotchas**, and **Who/what to defer to** from App Designer + a short owner interview.
+- Keep site-specific names out of this repository.
 
-# Why build a component-specific agent
+# Why bother
 
-The generic code-review agent knows PeopleSoft's *general* effdt/join/key/data-source patterns. A component-specific agent additionally knows *your* customizations, *your* record extensions, *your* naming conventions, and *your* known-gotchas for one area — which makes review and Q&A dramatically faster once someone has actually built and validated it.
+Generic agents know PeopleSoft *patterns*. A specialist knows *your* custom records, *your* naming, *your* "don't do X on Fridays" process quirks — which is what makes review and onboarding fast for a real team.
 
-# Template — fill in each section
+# Quality bar for a useful specialist
 
-Copy this into a new file and fill in the bracketed parts. Keep the frontmatter shape consistent with the rest of the pack so it's easy to tell apart later.
+A specialist file is ready when it has:
+
+1. Accurate delivered + custom record/key list for the area
+2. At least **5 real gotchas** that are *not* just generic effdt/join advice
+3. Explicit deferrals to the public pack for generic patterns
+4. One scrubbed Example Q&A
+5. A Change log section (date / what / why)
+
+If you only have record names and no gotchas, keep interviewing — the gotchas are the product.
+
+# Interview script (20–30 minutes)
+
+Ask the functional or technical owner:
+
+1. What are the top three tickets people file about this area?
+2. Which fields look effective-dated but aren't (or the reverse)?
+3. Which custom records/fields exist, and why (upgrade, reporting, gap)?
+4. What breaks if someone joins without SETID / EMPL_RCD / ACAD_CAREER / BUSINESS_UNIT?
+5. Which batch jobs touch these tables, in what order, and what interim states exist?
+6. What should a new developer never do in App Designer here (delivered modify, wrong event, etc.)?
+7. Who else must be consulted before security or process changes?
+
+Mine recurring tickets and post-upgrade notes for more gotchas.
+
+# Template A — Component / page specialist
 
 ```markdown
 ---
-name: <Your Institution> <Component/Process Name> Specialist
-applies_to: <your PeopleTools version> / <your PeopleSoft pillar + release>
+name: <Site> <Component Name> Specialist
+applies_to: PeopleTools <x> / <pillar + release>
 status: local / site-specific — do not commit to a public repo
 ---
 
 # Role
-You are an expert on <component/process name> at <institution, optional>. You know:
-- The delivered records involved: <list>
-- Any custom records/fields added on top: <list, plus WHY each was added if known>
-- The component structure (search record, levels): <describe>
-- Known customizations vs. delivered behavior: <list>
+You are an expert on <component> at <site>. You know:
+- Delivered records: <list with keys / effdt notes>
+- Custom records/fields: <list + why each exists>
+- Search record: <name> — keys: …
+- Levels: L0 … / L1 …
+- Customizations vs delivered: <list>
 
-# Known gotchas specific to this area
-<This is the highest-value section — capture every "oh yeah, watch out for..." a
-veteran of this component would tell a new person. Examples of the KIND of thing
-that belongs here (replace with your real ones):>
-- <"Field X looks effective-dated but isn't — it's overwritten in place by process Y">
-- <"Custom record Z duplicates a delivered key field with a different name; joins must use Z.CUSTOM_ID not the delivered ID">
-- <"Process P runs nightly and can leave rows in an intermediate state until step 2 completes">
+# Known gotchas
+- <specific, non-generic>
+- …
+
+# Review stance
+When reviewing SQL/PeopleCode for this area:
+1. Apply local gotchas first
+2. Then defer generic effdt/join/quality checks to the public pack agents
+3. Never invent undocumented custom fields
 
 # Who/what to defer to
-- General PeopleSoft patterns not specific to this component → point back to
-  `agents/code-review-effdt-joins/AGENT.md` (or the generic checklist inline) in the public pack
-- Security/role questions → `agents/security-role-review/AGENT.md`
-- Anything requiring a live query → your MCP connector setup, once available
-  (see `agents/mcp-schema-assistant/AGENT.md`)
+- Generic effdt/joins/keys → agents/code-review-effdt-joins/AGENT.md
+- PeopleCode quality → agents/peoplecode-quality/AGENT.md
+- Security → agents/security-role-review/AGENT.md
+- Live schema/query → agents/mcp-schema-assistant/AGENT.md (or paste)
 
 # Example Q&A
-<Once you've used this a few times, paste 2-3 real (scrubbed of any sensitive
-data) example exchanges here so future maintainers of this file see the
-intended depth/style.>
+Q: …
+A: …
+
+# Change log
+| Date | Change | Why |
+|---|---|---|
+| YYYY-MM-DD | Initial | …
 ```
 
-# How to gather the content (process, not a one-sitting task)
+# Template B — Process / batch specialist
 
-1. **Start from the record structure.** Pull the component's records in Application Designer, note keys, effective-dating, and any custom fields/subrecords added — this seeds the "Role" section.
-2. **Interview whoever owns this area.** The "known gotchas" section is almost always tribal knowledge, not documented anywhere — a 20-30 minute conversation with the functional owner or the developer who built the last customization usually produces most of it.
-3. **Mine ticket history if you have it.** Recurring support tickets about the same component are gotchas waiting to be written down.
-4. **Validate against the generic pack.** Before writing a "gotcha," check whether it's actually just the generic effdt/join/key/data-source pattern from `../code-review-effdt-joins/AGENT.md` — if so, don't duplicate it, just reference it. Only write down what's genuinely specific to this component.
-5. **Keep it updated.** Add a `## Change log` section (date + what changed + why) at the bottom of your local file so it doesn't go stale after the next customization or upgrade — same spirit as this pack's own commit history.
+```markdown
+---
+name: <Site> <Process Name> Specialist
+applies_to: PeopleTools <x> / <pillar + release>
+status: local / site-specific — do not commit to a public repo
+---
 
-# TODO / next pass
+# Role
+You are an expert on process <name> (App Engine / SQR / JobSet): <one-sentence purpose>.
 
-- Add a second worked example template for a *process* (e.g. a nightly batch/App Engine job) rather than a component, since the two need slightly different "Role" framing (component = page/record structure; process = job steps, dependencies, run controls).
+# Run profile
+- Process type / name: …
+- Run control record: … keys: …
+- Process group / security notes: <generic description only>
+- Schedule: …
+- Upstream dependencies: …
+- Downstream consumers: …
+
+# Step map
+1. Step … — reads … — writes … — interim state if fails: …
+2. …
+
+# Known gotchas
+- <restart / double-run / interim state issues>
+- <temp table / state record key issues>
+- <effdt as-of-date taken from run control vs %Date>
+- …
+
+# Failure triage
+| Symptom | Likely cause | What to check |
+|---|---|---|
+| … | … | … |
+
+# Who/what to defer to
+- Generic SQL/PeopleCode review → public pack agents
+- Security of who can run this → security-role-review agent
+
+# Example Q&A
+Q: …
+A: …
+
+# Change log
+| Date | Change | Why |
+|---|---|---|
+| YYYY-MM-DD | Initial | …
+```
+
+# Template C — Table-set specialist (integration / reporting)
+
+Use when the "unit" is a cluster of tables (e.g. all student career term tables), not one component:
+
+- List tables, grains, and allowed join paths
+- Document which views are approved for reporting
+- Document IB / interface staging tables and ownership
+- Gotchas: stale interface rows, partial loads, pillar boundaries
+
+# Anti-patterns (don't put these in the specialist)
+
+- Pasting generic MAX(EFFDT) advice with no local twist — link the public agent instead
+- Real employee/student IDs, SSNs, or production connection strings
+- "Just modify delivered Job Data" without upgrade warning
+- Security Role names that identify your institution in a sharable file (if you ever open-source a sanitized version, scrub them)
+
+# How to gather content
+
+1. App Designer: records, keys, effdt, component structure  
+2. Interview (script above)  
+3. Ticket / incident history  
+4. Compare against public pack — keep only *local* gotchas  
+5. Maintain Change log after each customization or upgrade  
+
+# Example of a *good* gotcha vs a *bad* one
+
+- **Good:** "Our custom `XX_ACTING_REQ` is status-based, not EFFDT; reporting that uses MAX(EFFDT) on it is wrong — use STATUS and REQUEST_DTTM."
+- **Bad:** "Remember to use MAX(EFFDT) on effective-dated tables." (generic — use code-review agent)
 
 ---
 
 # Design notes
 
-This file is a *guide*, not an *agent*, on purpose — the actual site-specific agent it helps you build cannot live in this public repo without violating the "generic pack" scope decision (it would necessarily contain real customization/table details). Splitting it this way means the public pack still delivers the full value of "help me build a specialist agent" without ever needing a private fork or a gitignored exception carved out of `agents/` itself.
+v2 adds a quality bar, interview script, separate **process** and **table-set** templates, triage table, and good/bad gotcha examples so this guide produces specialists that actually save time — not empty Role stubs. The public pack still never stores site-specific content.

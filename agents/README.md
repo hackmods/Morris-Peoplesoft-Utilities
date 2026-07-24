@@ -16,15 +16,15 @@ PeopleSoft has a small set of bugs that show up over and over — wrong effectiv
 
 | Folder | Status | What it does |
 |---|---|---|
-| [`code-review-effdt-joins/`](code-review-effdt-joins/AGENT.md) | **Full** | Reviews PeopleCode/SQL/App Engine/Query snippets for effective-date logic bugs, bad joins, missing keys, and wrong data sources |
-| [`peoplecode-quality/`](peoplecode-quality/AGENT.md) | **Full** | Reviews PeopleCode for code-quality issues: hardcoding vs. meta-SQL (`%Table`, `%List`), unsafe `.Value`/record-field access, declared variable scope/naming, SQL injection risk, error handling, duplication — the one most suited to automating code review at scale |
-| [`security-role-review/`](security-role-review/AGENT.md) | Stub | Reviews permission lists, roles, and row-level/query security patterns |
-| [`mcp-schema-assistant/`](mcp-schema-assistant/AGENT.md) | Stub | An assistant persona designed to drive a read-only PeopleSoft MCP connector (e.g. one your DBA team provides) — see [`TOOL-CONTRACT.md`](mcp-schema-assistant/TOOL-CONTRACT.md) for the tool shapes it expects |
-| [`design-helper/`](design-helper/AGENT.md) | Stub | Helps plan component/page design, Classic vs. Fluid tradeoffs, App Designer structure |
-| [`onboarding-guide/`](onboarding-guide/AGENT.md) | Stub | Orientation agent for someone new to PeopleSoft development or business analysis |
-| [`component-agent-trainer/`](component-agent-trainer/GUIDE.md) | Stub | A meta-guide + fill-in template for building your **own** agent that's an expert on one component, table set, or business process |
+| [`code-review-effdt-joins/`](code-review-effdt-joins/AGENT.md) | **Full (v2)** | Effective-date logic, bad joins, missing keys, wrong data sources — review protocol, EFFSEQ pattern, SETID example |
+| [`peoplecode-quality/`](peoplecode-quality/AGENT.md) | **Full (v2)** | Meta-SQL, `.Value`, variables, SQL safety, events, **App Classes**, **CI/non-interactive** constraints — best for batch code review |
+| [`security-role-review/`](security-role-review/AGENT.md) | **Full (v2)** | Permission lists, roles, row/Query/process security, pillar SoD matrices (HCM/FSCM/CS), worked review example |
+| [`mcp-schema-assistant/`](mcp-schema-assistant/AGENT.md) | **Full (v2)** | Read-only schema / current-row / sample query playbooks (MCP or paste-based); [`TOOL-CONTRACT.md`](mcp-schema-assistant/TOOL-CONTRACT.md) for DBA connectors |
+| [`design-helper/`](design-helper/AGENT.md) | **Full (v2)** | Pre–App Designer plans: Classic vs Fluid, search record, levels, effdt, upgrade risk, worked example |
+| [`onboarding-guide/`](onboarding-guide/AGENT.md) | **Full (v2)** | New BA/dev mentor — concept-first, pillar day-one tracks, glossary, hand-offs to other agents |
+| [`component-agent-trainer/`](component-agent-trainer/GUIDE.md) | **Full (v2)** | Build a **local** specialist agent — interview script, component / process / table-set templates, quality bar |
 
-"Stub" means the structure and a solid first pass of checklist content are there, but it hasn't had the same depth pass as the code-review agent yet. They're usable today; treat them as v1.
+All seven are meant to be usable as-is for real reviews and planning — not placeholder stubs.
 
 ## How to use a prompt in your tool
 
