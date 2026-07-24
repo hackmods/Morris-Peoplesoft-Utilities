@@ -3,12 +3,15 @@ import {
   buildFindReplaceBuffer,
   captureFieldValues,
   clearSessionBuffer,
+  ensureGridRows,
   fieldEntryKey,
   getSessionBuffer,
+  listPageFields,
   matchBufferToPage,
   parseRecordFieldHeader,
   parseSheetPaste,
   parseProfilesImportJson,
+  prepareSheetBuffer,
   profilesToExportJson,
   resolveLabelRowsAgainstPage,
   setSessionBuffer,
@@ -48,11 +51,22 @@ describe("field entry parsers", () => {
 
   it("parses TSV sheet paste", () => {
     const text = "JOB.EMPLID\tJOB.DEPTID\n2002\t200";
-    const { rows, error } = parseSheetPaste(text);
+    const { rows, error, dataRowCount } = parseSheetPaste(text);
     expect(error).toBeUndefined();
+    expect(dataRowCount).toBe(1);
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({ record: "JOB", field: "EMPLID", value: "2002" });
+    expect(rows[0].occurrence).toBeUndefined();
     expect(rows[1]).toMatchObject({ record: "JOB", field: "DEPTID", value: "200" });
+  });
+
+  it("assigns $occ for multi-row sheet paste", () => {
+    const text = "JOB.DEPTID\tJOB.JOBCODE\n100\tA\n200\tB";
+    const { rows, dataRowCount } = parseSheetPaste(text);
+    expect(dataRowCount).toBe(2);
+    expect(rows.filter((r) => r.occurrence === "0")).toHaveLength(2);
+    expect(rows.filter((r) => r.occurrence === "1")).toHaveLength(2);
+    expect(rows.find((r) => r.field === "DEPTID" && r.occurrence === "1")?.value).toBe("200");
   });
 
   it("parses CSV with quoted cells", () => {
@@ -156,7 +170,7 @@ describe("field entry capture / eligibility / apply", () => {
   });
 
   it("resolves label headers against page labels", () => {
-    const text = 'Dept\n250';
+    const text = "Dept\n250";
     // Prefer previous-sibling labels when label[for] is unavailable in the test DOM
     const { rows } = parseSheetPaste(text);
     expect(rows[0].record).toBe("__LABEL__");
@@ -164,6 +178,47 @@ describe("field entry capture / eligibility / apply", () => {
     expect(resolved).toEqual([
       expect.objectContaining({ record: "JOB", field: "DEPTID", value: "250" }),
     ]);
+  });
+
+  it("reads fields inside role=dialog modal hosts (Modify a Person style)", () => {
+    document.body.innerHTML = `
+      <input id="PERSONAL_DATA_EMPLID" value="1" />
+      <input id="PERSONAL_DATA_FIRST_NAME" value="Pat" />
+      <div role="dialog" id="pt_modals" class="ps_modal">
+        <input id="ADDRESSES_ADDRESS1" value="1 Main" />
+        <input id="ADDRESSES_CITY" value="Town" />
+      </div>
+    `;
+    const keys = listPageFields(document).map((h) => fieldEntryKey(h.row));
+    expect(keys).toContain("PERSONAL_DATA.EMPLID");
+    expect(keys).toContain("PERSONAL_DATA.FIRST_NAME");
+    expect(keys).toContain("ADDRESSES.ADDRESS1");
+    expect(keys).toContain("ADDRESSES.CITY");
+  });
+
+  it("ensureGridRows clicks Add Row until enough occurrences exist", () => {
+    document.body.innerHTML = `
+      <table id="g"><tbody>
+        <tr><td><input id="JOB_DEPTID$0" value="1" /><input id="JOB_JOBCODE$0" value="A" /></td></tr>
+      </tbody></table>
+      <a id="ICAddRow$0" href="#" data-mpu-fe-add-row>Add</a>
+    `;
+    document.getElementById("ICAddRow$0")!.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tbody = document.querySelector("#g tbody")!;
+      const n = tbody.querySelectorAll("tr").length;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td><input id="JOB_DEPTID$${n}" value="" /><input id="JOB_JOBCODE$${n}" value="" /></td>`;
+      tbody.appendChild(tr);
+    });
+    const result = ensureGridRows(document, 3, "JOB");
+    expect(result.ok).toBe(true);
+    expect(result.clicked).toBe(2);
+    expect(document.getElementById("JOB_DEPTID$2")).toBeTruthy();
+
+    const prepared = prepareSheetBuffer("JOB.DEPTID\n10\n20\n30", document);
+    expect(prepared.error).toBeUndefined();
+    expect(prepared.rows.filter((r) => r.field === "DEPTID")).toHaveLength(3);
   });
 });
 

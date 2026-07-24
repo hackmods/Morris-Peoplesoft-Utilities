@@ -11,8 +11,7 @@ import {
   clearSessionBuffer,
   getSessionBuffer,
   matchBufferToPage,
-  parseSheetPaste,
-  resolveLabelRowsAgainstPage,
+  prepareSheetBuffer,
   setSessionBuffer,
   showEligibilityPreview,
   summarizeEligibility,
@@ -163,9 +162,9 @@ export function showSheetPasteDialog(doc: Document): void {
     build: (dialog, close) => {
       dialog.innerHTML = `
         <h2 id="mpu-fe-sheet-title">From sheet</h2>
-        <p class="mpu-dialog-hint">Paste a TSV or CSV with a header row of <code>RECORD.FIELD</code> (or page labels) and one data row. Only the first data row is applied.</p>
+        <p class="mpu-dialog-hint">Paste TSV/CSV with a header of <code>RECORD.FIELD</code> (or page labels). One data row fills the current page; <strong>multiple data rows</strong> map to grid occurrences (<code>$0</code>, <code>$1</code>, …) and click Add Row when more rows are needed.</p>
         <label class="mpu-dialog-label" for="mpu-fe-sheet-text">Spreadsheet paste
-          <textarea id="mpu-fe-sheet-text" class="mpu-dialog-input mpu-fe-textarea" rows="8" autocomplete="off" spellcheck="false"></textarea>
+          <textarea id="mpu-fe-sheet-text" class="mpu-dialog-input mpu-fe-textarea" rows="10" autocomplete="off" spellcheck="false" placeholder="JOB.DEPTID&#9;JOB.JOBCODE&#10;100&#9;ABC&#10;200&#9;DEF"></textarea>
         </label>
         <div class="mpu-dialog-actions">
           <button type="button" class="mpu-btn" id="mpu-fe-sheet-preview">Preview</button>
@@ -175,19 +174,24 @@ export function showSheetPasteDialog(doc: Document): void {
       dialog.querySelector("#mpu-fe-sheet-cancel")?.addEventListener("click", () => close());
       dialog.querySelector("#mpu-fe-sheet-preview")?.addEventListener("click", () => {
         const text = (dialog.querySelector("#mpu-fe-sheet-text") as HTMLTextAreaElement).value;
-        const parsed = parseSheetPaste(text);
-        if (parsed.error || !parsed.rows.length) {
-          announce(doc, parsed.error || "No columns recognized");
+        const prepared = prepareSheetBuffer(text, doc);
+        if (prepared.error && !prepared.rows.length) {
+          announce(doc, prepared.error);
           return;
         }
-        const resolved = resolveLabelRowsAgainstPage(parsed.rows, doc);
-        if (!resolved.length) {
+        if (prepared.error && prepared.rows.length) {
+          announce(doc, prepared.error);
+          // Still allow preview of what we can match
+        } else if (prepared.grid?.clicked) {
+          announce(doc, prepared.grid.message);
+        }
+        if (!prepared.rows.length) {
           announce(doc, "No columns matched RECORD.FIELD or page labels");
           return;
         }
-        setSessionBuffer(resolved);
+        setSessionBuffer(prepared.rows);
         close();
-        showEligibilityPreviewDialog(doc, resolved, "From sheet — eligibility preview");
+        showEligibilityPreviewDialog(doc, prepared.rows, "From sheet — eligibility preview");
       });
     },
   });

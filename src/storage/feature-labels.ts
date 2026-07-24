@@ -99,7 +99,7 @@ export const FEATURE_TOGGLE_GROUPS: FeatureToggleGroup[] = [
       {
         key: "fieldEntryOption",
         label: "Field Entry toolkit",
-        hint: "Capture / paste / sheet / find-replace for editable fields — preview first; may hold business keys in profiles",
+        hint: "Capture / paste / multi-row sheet / find-replace for editable fields (Fluid + modals) — preview first; profiles may hold business keys",
       },
     ],
   },

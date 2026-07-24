@@ -15,9 +15,17 @@ export const E2E_ORIGIN = `http://127.0.0.1:${E2E_PORT}`;
 
 export const FLUID_COMPONENT_PATH = "/psp/ps/EMPLOYEE/HRMS/c/MENU.COMP.GBL";
 export const CLASSIC_COMPONENT_PATH = "/psp/ps/EMPLOYEE/HRMS/c/CLASSIC.COMP.GBL";
+export const FLUID_FIELD_ENTRY_PATH = "/psp/ps/EMPLOYEE/HRMS/c/HR_ADD_PERSON.PERSONAL_DATA.GBL";
+export const CLASSIC_GRID_PATH = "/psp/ps/EMPLOYEE/HRMS/c/JOB_DATA.JOB_DATA.GBL";
 export const HOMEPAGE_PATH = "/psp/ps/EMPLOYEE/HRMS/h/?tab=DEFAULT";
 
 function htmlFor(urlPath: string): string | null {
+  if (urlPath.includes("/c/JOB_DATA.") || urlPath.includes("/c/job_data.")) {
+    return readFileSync(resolve(fixtures, "classic-grid.html"), "utf8");
+  }
+  if (urlPath.includes("/c/HR_ADD_PERSON.") || urlPath.includes("/c/hr_add_person.")) {
+    return readFileSync(resolve(fixtures, "fluid-field-entry.html"), "utf8");
+  }
   if (urlPath.includes("/c/CLASSIC.") || urlPath.includes("/c/classic.")) {
     return readFileSync(resolve(fixtures, "classic-component.html"), "utf8");
   }

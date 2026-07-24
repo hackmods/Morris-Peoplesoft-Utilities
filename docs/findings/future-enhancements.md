@@ -84,9 +84,11 @@
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | ~~FE-01~~ | ~~**Capture → Paste** editable field values by `RECORD.FIELD` with eligibility preview~~ | BA | Done (Unreleased) | Careful toggle; session buffer only |
-| ~~FE-02~~ | ~~**From sheet** TSV/CSV (`RECORD.FIELD` or labels) + first data row~~ | BA | Done (Unreleased) | One row / current page |
+| ~~FE-02~~ | ~~**From sheet** TSV/CSV (`RECORD.FIELD` or labels) + first data row~~ | BA | Done (Unreleased) | Single row when one data line |
 | ~~FE-03~~ | ~~**Find / Replace** with highlight eligibility preview~~ | BA | Done (Unreleased) | Exact value match; optional CI |
 | ~~FE-04~~ | ~~**Named profiles** + Options JSON import/export with business-key warn~~ | BA | Done (Unreleased) | Never passwords; local only |
+| ~~FE-05~~ | ~~**Multi-row sheet → grid** (`$0`/`$1`/…) + click **Add Row** when needed~~ | BA | Done (Unreleased) | Soft-fail if no Add control |
+| ~~FE-06~~ | ~~**Fluid + modal/popup frames** (ptModFrame / role=dialog) for Modify a Person–style overlays~~ | BA | Done (Unreleased) | Same-origin iframes only |
 
 ---
 
@@ -219,3 +221,4 @@
 | 2026-07-22 | Env flyout (Site/Portal/Node/ToolsRel/Theme/CREF) + Playwright extension UI tests |
 | 2026-07-23 | **UX-11** — bar placement (document top) + sticky; dismiss menus when entering Classic content iframe |
 | 2026-07-23 | **FE-01..04** — Field Entry toolkit (capture/paste/sheet/find-replace + profiles + eligibility preview); careful opt-in |
+| 2026-07-23 | **FE-05/06** — multi-row grid sheet paste + Add Row; Fluid/modal (ptModFrame) field discovery; Playwright e2e |

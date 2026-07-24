@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MPU E2E Classic Job Data grid</title>
+  </head>
+  <body>
+    <!-- User=CLASSIC_BA; ToolsRel=8.60.05; AppServ=//classic:9000 -->
+    <div id="ptifrmtarget">
+      <div id="PT_HEADER">Classic Job Data</div>
+      <h1>Job Data</h1>
+      <table class="PSLEVEL1GRID" id="jobGrid">
+        <thead>
+          <tr>
+            <th>Dept</th>
+            <th>Job Code</th>
+          </tr>
+        </thead>
+        <tbody id="jobGridBody">
+          <tr id="trJOB_0">
+            <td>
+              <label class="PSEDITBOXLABEL" for="JOB_DEPTID$0">Dept</label>
+              <input id="JOB_DEPTID$0" name="JOB_DEPTID$0" value="100" />
+            </td>
+            <td>
+              <label class="PSEDITBOXLABEL" for="JOB_JOBCODE$0">Job Code</label>
+              <input id="JOB_JOBCODE$0" name="JOB_JOBCODE$0" value="ABC" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <a id="ICAddRow$0" href="#add" title="Add Row" data-mpu-fe-add-row>Add Row</a>
+      </p>
+    </div>
+    <!-- Empty TargetContent frame keeps Classic shell shape for UI mode detection -->
+    <iframe id="ptifrmtgtframe" name="TargetContent" title="Target Content" src="about:blank"></iframe>
+    <script>
+      document.getElementById("ICAddRow$0").addEventListener("click", function (e) {
+        e.preventDefault();
+        var body = document.getElementById("jobGridBody");
+        var next = body.querySelectorAll("tr").length;
+        var tr = document.createElement("tr");
+        tr.id = "trJOB_" + next;
+        tr.innerHTML =
+          '<td><label class="PSEDITBOXLABEL" for="JOB_DEPTID$' +
+          next +
+          '">Dept</label><input id="JOB_DEPTID$' +
+          next +
+          '" name="JOB_DEPTID$' +
+          next +
+          '" value="" /></td>' +
+          '<td><label class="PSEDITBOXLABEL" for="JOB_JOBCODE$' +
+          next +
+          '">Job Code</label><input id="JOB_JOBCODE$' +
+          next +
+          '" name="JOB_JOBCODE$' +
+          next +
+          '" value="" /></td>';
+        body.appendChild(tr);
+      });
+    </script>
+  </body>
+</html>

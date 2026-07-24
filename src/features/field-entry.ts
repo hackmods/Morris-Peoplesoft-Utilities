@@ -59,15 +59,66 @@ export function fieldEntryKey(row: Pick<FieldEntryRow, "record" | "field" | "occ
   return `${row.record}.${row.field}${occ}`;
 }
 
-function collectDocs(root: Document, out: Document[] = []): Document[] {
+function collectDocs(root: Document, out: Document[] = [], seen = new Set<Document>()): Document[] {
+  if (seen.has(root)) return out;
+  seen.add(root);
   out.push(root);
   const frames = root.querySelectorAll("iframe");
   for (const frame of frames) {
     try {
       const child = (frame as HTMLIFrameElement).contentDocument;
-      if (child?.body) collectDocs(child, out);
+      if (child?.body) collectDocs(child, out, seen);
     } catch {
       /* cross-origin */
+    }
+  }
+  return out;
+}
+
+/**
+ * Classic TargetContent + Fluid shells + same-origin modal/popup frames
+ * (PT_MODAL / ptModFrame / role=dialog hosts used by Modify a Person lookups).
+ */
+export function collectFieldEntryDocs(topDoc: Document = document): Document[] {
+  const seen = new Set<Document>();
+  const out: Document[] = [];
+  collectDocs(topDoc, out, seen);
+  try {
+    const content = getInspectorContentRoot(topDoc);
+    if (content !== topDoc) collectDocs(content, out, seen);
+  } catch {
+    /* ignore */
+  }
+  // Explicit modal hosts on the portal document (often siblings of the content frame)
+  const modalSelectors = [
+    'iframe[id*="ptModFrame" i]',
+    'iframe[id*="PT_MODAL" i]',
+    'iframe[name*="Modal" i]',
+    'iframe[id*="popup" i]',
+    '[id*="pt_modals"] iframe',
+    '[class*="ps_modal"] iframe',
+    '[role="dialog"] iframe',
+  ];
+  for (const sel of modalSelectors) {
+    try {
+      for (const frame of Array.from(topDoc.querySelectorAll(sel))) {
+        try {
+          const child = (frame as HTMLIFrameElement).contentDocument;
+          if (child?.body) collectDocs(child, out, seen);
+        } catch {
+          /* cross-origin */
+        }
+      }
+    } catch {
+      /* bad selector in older engines */
+    }
+  }
+  // Also scan open dialog containers that host fields without an iframe
+  for (const dlg of Array.from(
+    topDoc.querySelectorAll('[role="dialog"], .ui-dialog, #ptModals, .ps_modal, .ps_box-modal'),
+  )) {
+    if (dlg.ownerDocument && !seen.has(dlg.ownerDocument)) {
+      collectDocs(dlg.ownerDocument, out, seen);
     }
   }
   return out;
@@ -137,6 +188,14 @@ function peerBasesFromDocs(docs: Document[]): string[] {
   return bases;
 }
 
+/** Peers that share the same leading id token (keeps PERSONAL_DATA_* vs ADDRESSES_* separate). */
+function peersForBase(base: string, all: string[]): string[] {
+  const token = base.split("_")[0];
+  if (!token) return all;
+  const related = all.filter((p) => p === base || p.startsWith(`${token}_`) || p.split("_")[0] === token);
+  return related.length >= 2 ? related : all;
+}
+
 export interface PageFieldHit {
   element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   row: FieldEntryRow;
@@ -144,10 +203,9 @@ export interface PageFieldHit {
   skipReason?: string;
 }
 
-/** Enumerate PeopleSoft-looking controls on the page (Classic + Fluid frames). */
+/** Enumerate PeopleSoft-looking controls on the page (Classic + Fluid + modals). */
 export function listPageFields(topDoc: Document = document): PageFieldHit[] {
-  const root = getInspectorContentRoot(topDoc);
-  const docs = collectDocs(root);
+  const docs = collectFieldEntryDocs(topDoc);
   const peers = peerBasesFromDocs(docs);
   const hits: PageFieldHit[] = [];
 
@@ -157,7 +215,9 @@ export function listPageFields(topDoc: Document = document): PageFieldHit[] {
       if (!node.id || !node.id.includes("_")) continue;
       if (node.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
 
-      const parsed = parseRecField(node.id, peers, node);
+      const dollar = node.id.indexOf("$");
+      const baseId = dollar >= 0 ? node.id.slice(0, dollar) : node.id;
+      const parsed = parseRecField(node.id, peersForBase(baseId, peers), node);
       if (!parsed.record || !parsed.field) continue;
 
       const label = resolveFieldPageLabel(node, parsed.pageLabel);
@@ -211,17 +271,18 @@ export function captureFieldValues(topDoc: Document = document): FieldEntryRow[]
 }
 
 function findHitForRow(hits: PageFieldHit[], row: FieldEntryRow): PageFieldHit | undefined {
-  const exact = hits.find(
-    (h) =>
-      h.row.record === row.record &&
-      h.row.field === row.field &&
-      (row.occurrence == null || row.occurrence === ""
-        ? true
-        : h.row.occurrence === row.occurrence),
-  );
+  const wantOcc = row.occurrence != null && row.occurrence !== "" ? row.occurrence : undefined;
+
+  const exact = hits.find((h) => {
+    if (h.row.record !== row.record || h.row.field !== row.field) return false;
+    if (wantOcc == null) return true;
+    if (h.row.occurrence === wantOcc) return true;
+    // $0 and bare (no dollar) are the same first grid row in many Classic pages
+    return wantOcc === "0" && (h.row.occurrence == null || h.row.occurrence === "");
+  });
   if (exact) return exact;
-  // Fall back to first RECORD.FIELD ignoring occurrence when buffer has no occ
-  if (row.occurrence == null || row.occurrence === "") {
+
+  if (wantOcc == null || wantOcc === "") {
     return hits.find((h) => h.row.record === row.record && h.row.field === row.field);
   }
   return undefined;
@@ -327,8 +388,7 @@ function ensurePreviewStyles(doc: Document): void {
 
 /** Clear eligibility highlight overlays. */
 export function clearEligibilityPreview(topDoc: Document = document): void {
-  const root = getInspectorContentRoot(topDoc);
-  for (const doc of collectDocs(root)) {
+  for (const doc of collectFieldEntryDocs(topDoc)) {
     doc.querySelectorAll(`[${PREVIEW_ATTR}]`).forEach((el) => {
       el.removeAttribute(PREVIEW_ATTR);
     });
@@ -338,8 +398,7 @@ export function clearEligibilityPreview(topDoc: Document = document): void {
 /** Highlight matched fields for eligibility preview. */
 export function showEligibilityPreview(report: FieldEntryEligibilityReport, topDoc: Document = document): void {
   clearEligibilityPreview(topDoc);
-  const root = getInspectorContentRoot(topDoc);
-  for (const doc of collectDocs(root)) {
+  for (const doc of collectFieldEntryDocs(topDoc)) {
     ensurePreviewStyles(doc);
   }
   for (const m of report.matches) {
@@ -408,41 +467,267 @@ export function summarizeEligibility(report: FieldEntryEligibilityReport): strin
   return `Will write ${report.willWrite} · unchanged ${report.unchanged} · skipped ${report.skipped} · unmatched ${report.unmatched}`;
 }
 
-/** Parse TSV or simple CSV into header + first data row as FieldEntryRows. */
-export function parseSheetPaste(text: string): { rows: FieldEntryRow[]; error?: string } {
+export interface SheetParseResult {
+  /** Flattened buffer rows; multi-row sheets set `occurrence` to 0-based line index */
+  rows: FieldEntryRow[];
+  /** Number of spreadsheet data lines (excluding header) */
+  dataRowCount: number;
+  error?: string;
+}
+
+/**
+ * Parse TSV/CSV. Multiple data rows become grid occurrences ($0, $1, …).
+ * A single data row leaves occurrence unset so bare ids (no $) still match.
+ */
+export function parseSheetPaste(text: string): SheetParseResult {
   const raw = text.replace(/^\uFEFF/, "").trim();
-  if (!raw) return { rows: [], error: "Nothing to paste" };
+  if (!raw) return { rows: [], dataRowCount: 0, error: "Nothing to paste" };
 
   const lines = raw.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) {
-    return { rows: [], error: "Need a header row and at least one data row" };
+    return { rows: [], dataRowCount: 0, error: "Need a header row and at least one data row" };
   }
 
   const delimiter = lines[0].includes("\t") ? "\t" : ",";
   const headers = splitDelimited(lines[0], delimiter).map((h) => h.trim());
-  const values = splitDelimited(lines[1], delimiter);
-
+  const dataLines = lines.slice(1);
+  const multi = dataLines.length > 1;
   const rows: FieldEntryRow[] = [];
-  for (let i = 0; i < headers.length; i += 1) {
-    const header = headers[i];
-    if (!header) continue;
-    const value = values[i] ?? "";
-    const rf = parseRecordFieldHeader(header);
-    if (rf) {
-      rows.push({ record: rf.record, field: rf.field, value });
-      continue;
+
+  for (let r = 0; r < dataLines.length; r += 1) {
+    const values = splitDelimited(dataLines[r], delimiter);
+    for (let i = 0; i < headers.length; i += 1) {
+      const header = headers[i];
+      if (!header) continue;
+      const value = values[i] ?? "";
+      const occ = multi ? String(r) : undefined;
+      const rf = parseRecordFieldHeader(header);
+      if (rf) {
+        rows.push({
+          record: rf.record,
+          field: rf.field,
+          value,
+          ...(occ != null ? { occurrence: occ } : {}),
+        });
+        continue;
+      }
+      rows.push({
+        record: "__LABEL__",
+        field: header,
+        value,
+        pageLabel: header,
+        ...(occ != null ? { occurrence: occ } : {}),
+      });
     }
-    // Label headers resolved later against page labels
-    rows.push({
-      record: "__LABEL__",
-      field: header,
-      value,
-      pageLabel: header,
-    });
   }
 
-  if (!rows.length) return { rows: [], error: "No columns recognized" };
-  return { rows };
+  if (!rows.length) return { rows: [], dataRowCount: 0, error: "No columns recognized" };
+  return { rows, dataRowCount: dataLines.length };
+}
+
+/**
+ * Resolve `__LABEL__` columns against page labels, preserving occurrence.
+ */
+export function resolveLabelRowsAgainstPage(
+  rows: FieldEntryRow[],
+  topDoc: Document = document,
+): FieldEntryRow[] {
+  const hits = listPageFields(topDoc);
+  const labelMap = new Map<string, PageFieldHit>();
+  for (const h of hits) {
+    const label = (h.row.pageLabel || "").trim().toLowerCase();
+    if (label && !labelMap.has(label)) labelMap.set(label, h);
+  }
+
+  const out: FieldEntryRow[] = [];
+  for (const row of rows) {
+    if (row.record !== "__LABEL__") {
+      out.push(row);
+      continue;
+    }
+    const key = (row.pageLabel || row.field || "").trim().toLowerCase();
+    const hit = labelMap.get(key);
+    if (!hit) continue;
+    out.push({
+      record: hit.row.record,
+      field: hit.row.field,
+      occurrence: row.occurrence ?? hit.row.occurrence,
+      value: row.value,
+      pageLabel: hit.row.pageLabel,
+    });
+  }
+  return out;
+}
+
+/** Highest numeric $occ for a record currently on the page (−1 if none). */
+export function maxOccurrenceForRecord(record: string, topDoc: Document = document): number {
+  let max = -1;
+  for (const hit of listPageFields(topDoc)) {
+    if (hit.row.record !== record) continue;
+    const occ = hit.row.occurrence;
+    if (occ == null || occ === "") {
+      max = Math.max(max, 0);
+      continue;
+    }
+    const n = Number.parseInt(occ, 10);
+    if (Number.isFinite(n)) max = Math.max(max, n);
+  }
+  return max;
+}
+
+const ADD_ROW_SELECTOR = [
+  "[data-mpu-fe-add-row]",
+  'a[id*="ICAdd"]',
+  'a[id*="$new"]',
+  'a[id*="ADDROW"]',
+  'img[id*="ICAdd"]',
+  'button[id*="ICAdd"]',
+  'input[type="button"][id*="ICAdd"]',
+  'a[title*="Add Row"]',
+  'a[title*="Insert Row"]',
+  'button[title*="Add Row"]',
+  'img[alt*="Add Row"]',
+  'img[title*="Add Row"]',
+].join(", ");
+
+/** Find a delivered (or fixture) Add Row control. */
+export function findAddRowControl(topDoc: Document = document): HTMLElement | null {
+  for (const doc of collectFieldEntryDocs(topDoc)) {
+    try {
+      const el = doc.querySelector(ADD_ROW_SELECTOR);
+      if (el instanceof HTMLElement) return el;
+    } catch {
+      /* ignore selector issues per document */
+    }
+  }
+  return null;
+}
+
+export interface EnsureGridRowsResult {
+  needed: number;
+  existing: number;
+  clicked: number;
+  ok: boolean;
+  message: string;
+}
+
+/**
+ * Click Add Row until the page has enough grid occurrences for `record`
+ * (0-based count = neededRows). Soft-fail if no Add control or clicks stall.
+ */
+export function ensureGridRows(
+  topDoc: Document,
+  neededRows: number,
+  record: string,
+  opts: { maxClicks?: number } = {},
+): EnsureGridRowsResult {
+  const maxClicks = opts.maxClicks ?? 40;
+  if (neededRows <= 1) {
+    return {
+      needed: neededRows,
+      existing: Math.max(0, maxOccurrenceForRecord(record, topDoc) + 1),
+      clicked: 0,
+      ok: true,
+      message: "Single row — no grid expand",
+    };
+  }
+
+  let existing = maxOccurrenceForRecord(record, topDoc) + 1;
+  // Bare fields without $ count as 1 row when present
+  if (existing <= 0) existing = listPageFields(topDoc).some((h) => h.row.record === record) ? 1 : 0;
+
+  let clicked = 0;
+  while (existing < neededRows && clicked < maxClicks) {
+    const btn = findAddRowControl(topDoc);
+    if (!btn) {
+      return {
+        needed: neededRows,
+        existing,
+        clicked,
+        ok: false,
+        message: `Need ${neededRows} grid rows but only ${existing} exist — no Add Row control found`,
+      };
+    }
+    try {
+      btn.click();
+    } catch {
+      return {
+        needed: neededRows,
+        existing,
+        clicked,
+        ok: false,
+        message: "Add Row click failed",
+      };
+    }
+    clicked += 1;
+    const next = maxOccurrenceForRecord(record, topDoc) + 1;
+    if (next <= existing) {
+      // Fixture may create the row synchronously under a different path; re-count
+      const recount = maxOccurrenceForRecord(record, topDoc) + 1;
+      if (recount <= existing) {
+        return {
+          needed: neededRows,
+          existing,
+          clicked,
+          ok: false,
+          message: `Add Row clicked but grid for ${record} did not grow (still ${existing} rows)`,
+        };
+      }
+      existing = recount;
+    } else {
+      existing = next;
+    }
+  }
+
+  const ok = existing >= neededRows;
+  return {
+    needed: neededRows,
+    existing,
+    clicked,
+    ok,
+    message: ok
+      ? `Grid ready — ${existing} row(s) for ${record}`
+      : `Only ${existing}/${neededRows} rows for ${record} after ${clicked} Add Row click(s)`,
+  };
+}
+
+/**
+ * Prepare a multi-row sheet buffer: expand grid via Add Row, then return rows for preview.
+ */
+export function prepareSheetBuffer(
+  text: string,
+  topDoc: Document = document,
+): { rows: FieldEntryRow[]; error?: string; grid?: EnsureGridRowsResult } {
+  const parsed = parseSheetPaste(text);
+  if (parsed.error || !parsed.rows.length) {
+    return { rows: [], error: parsed.error || "No columns recognized" };
+  }
+  let resolved = resolveLabelRowsAgainstPage(parsed.rows, topDoc);
+  if (!resolved.length) {
+    return { rows: [], error: "No columns matched RECORD.FIELD or page labels" };
+  }
+
+  let grid: EnsureGridRowsResult | undefined;
+  if (parsed.dataRowCount > 1) {
+    const record =
+      resolved.find((r) => r.record && r.record !== "__LABEL__")?.record ||
+      listPageFields(topDoc).find((h) => h.editable)?.row.record ||
+      "";
+    if (record) {
+      grid = ensureGridRows(topDoc, parsed.dataRowCount, record);
+      if (!grid.ok) {
+        return {
+          rows: resolved,
+          error: grid.message,
+          grid,
+        };
+      }
+      // Re-resolve after rows added (labels / peers may change)
+      resolved = resolveLabelRowsAgainstPage(parsed.rows, topDoc);
+    }
+  }
+
+  return { rows: resolved, grid };
 }
 
 function splitDelimited(line: string, delimiter: string): string[] {
@@ -476,41 +761,6 @@ export function parseRecordFieldHeader(header: string): { record: string; field:
   const m = header.trim().match(/^([A-Za-z][A-Za-z0-9_]*)\.([A-Za-z][A-Za-z0-9_]*)$/);
   if (!m) return null;
   return { record: m[1], field: m[2] };
-}
-
-/**
- * Resolve `__LABEL__` sheet columns against current page labels → RECORD.FIELD.
- * Drops unresolved label columns.
- */
-export function resolveLabelRowsAgainstPage(
-  rows: FieldEntryRow[],
-  topDoc: Document = document,
-): FieldEntryRow[] {
-  const hits = listPageFields(topDoc);
-  const labelMap = new Map<string, PageFieldHit>();
-  for (const h of hits) {
-    const label = (h.row.pageLabel || "").trim().toLowerCase();
-    if (label && !labelMap.has(label)) labelMap.set(label, h);
-  }
-
-  const out: FieldEntryRow[] = [];
-  for (const row of rows) {
-    if (row.record !== "__LABEL__") {
-      out.push(row);
-      continue;
-    }
-    const key = (row.pageLabel || row.field || "").trim().toLowerCase();
-    const hit = labelMap.get(key);
-    if (!hit) continue;
-    out.push({
-      record: hit.row.record,
-      field: hit.row.field,
-      occurrence: hit.row.occurrence,
-      value: row.value,
-      pageLabel: hit.row.pageLabel,
-    });
-  }
-  return out;
 }
 
 export interface FindReplacePair {

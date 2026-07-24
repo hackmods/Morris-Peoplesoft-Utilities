@@ -26,3 +26,11 @@ Or in one step: `npm run test:e2e` (builds first).
 - Page Info dialog
 - Shortcuts flyout
 - Options + popup pages
+- **Field Entry** (`field-entry.spec.ts`): Fluid + modal capture/paste/apply; From sheet; Find/Replace; Classic multi-row grid + Add Row
+
+## Field Entry fixtures
+
+| Path | Fixture |
+|---|---|
+| `/psp/ps/EMPLOYEE/HRMS/c/HR_ADD_PERSON.PERSONAL_DATA.GBL` | Fluid “Modify a Person” style + `ptModFrame_0` address modal |
+| `/psp/ps/EMPLOYEE/HRMS/c/JOB_DATA.JOB_DATA.GBL` | Classic `#ptifrmtgtframe` Job grid with Add Row |

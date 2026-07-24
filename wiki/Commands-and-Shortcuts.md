@@ -15,7 +15,7 @@
 | Toggle Trace | Bar → Trace ON/OFF (🔒 = missing UTILITIES security) |
 | Trace presets | Options → Tracing → Off / Default / SQL / PeopleCode / Verbose |
 | Go to component | Bar → Go to · **Alt+Shift+G** (Menu.Component.Market + optional params) |
-| Field Entry toolkit | Bar → Entry (when enabled under Options → Optional / careful) · **Alt+Shift+E** — Capture / Paste / From sheet / Find-Replace with eligibility preview; Save/Load profiles |
+| Field Entry toolkit | Bar → Entry (when enabled under Options → Optional / careful) · **Alt+Shift+E** — Capture / Paste / From sheet (multi-row grids) / Find-Replace with eligibility preview; Save/Load profiles; Fluid + modal frames |
 | Add Favorite | Bar → ★ (optional Page Info template + notes) |
 | Open favorite / recent | Favorites dropdown · Recent dropdown; optional **New win** checkbox |
 | Filter Favorites | Bar filter box next to Favorites dropdown (grouped by Category) |
