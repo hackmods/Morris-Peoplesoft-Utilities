@@ -11,6 +11,13 @@ This isn't an agent you run — it's a **guide for building your own**, one that
 
 Per the pack's scope decision, treat the agent you build from this guide as **local-only** — save it outside this repo, or in an untracked local file (see [`../README.md#site-specific-tailoring`](../README.md#site-specific-tailoring)).
 
+## Quick start
+
+- **This file is a template guide, not a runnable agent.** Copy the template section below into a new local file (outside this public repo).
+- **Cursor / Copilot / Claude:** once filled in, paste that *local* specialist file into a Custom Mode, `.github/prompts/`, or Project instructions the same way as the other agents in this pack.
+- Fill **Role**, **Known gotchas**, and **Who/what to defer to** from App Designer + a short interview with the area owner — then use the specialist for Q&A and review on that component/process only.
+- Keep site-specific names and customizations out of this repository.
+
 # Why build a component-specific agent
 
 The generic code-review agent knows PeopleSoft's *general* effdt/join/key/data-source patterns. A component-specific agent additionally knows *your* customizations, *your* record extensions, *your* naming conventions, and *your* known-gotchas for one area — which makes review and Q&A dramatically faster once someone has actually built and validated it.

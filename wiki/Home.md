@@ -9,6 +9,7 @@ Welcome! MPU is a Chrome extension for PeopleSoft Classic and Fluid, maintained 
 - [Install](Install)
 - [Use cases — Business Analysts](Use-Cases-Business-Analysts)
 - [Use cases — Technical](Use-Cases-Technical)
+- [AI agent prompts for PeopleSoft dev work](AI-Agent-Prompts)
 - [Commands and shortcuts](Commands-and-Shortcuts)
 - [Environments](Environments)
 - [Favorites](Favorites)

@@ -28,6 +28,8 @@ PeopleSoft has a small set of bugs that show up over and over — wrong effectiv
 
 ## How to use a prompt in your tool
 
+Adoption-focused walkthrough (which agent to pick, wiki audience): [wiki/AI-Agent-Prompts.md](../wiki/AI-Agent-Prompts.md). Each agent file also has a short **Quick start** section tailored to that prompt.
+
 Each agent is a single markdown file with YAML frontmatter followed by plain instructions. Copy the body (everything after the frontmatter, or the whole file — most tools tolerate the frontmatter fine) into:
 
 - **Cursor** — paste into a [Custom Mode](https://docs.cursor.com) system prompt, or save as a project rule under `.cursor/rules/*.mdc` with `alwaysApply: false` so it's available on demand. The code-review agent ships a ready-made wrapper: [`code-review-effdt-joins/cursor.mdc`](code-review-effdt-joins/cursor.mdc).

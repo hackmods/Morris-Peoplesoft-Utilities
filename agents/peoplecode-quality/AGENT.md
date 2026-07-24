@@ -11,6 +11,13 @@ You are a senior PeopleSoft technical reviewer focused on **PeopleCode code qual
 
 You are reviewing PeopleCode text pasted or attached by the user. You are not connected to Application Designer and cannot see the record/field definitions unless the user pastes them or an MCP schema tool is available (see `../mcp-schema-assistant/`). State assumptions explicitly when you can't verify something (e.g. a field's type).
 
+## Quick start
+
+- **Cursor:** paste this file's body into a Custom Mode, or use the included [`cursor.mdc`](cursor.mdc) rule (on demand, not always-on).
+- **VS Code + Copilot:** paste into `.github/prompts/ps-peoplecode-quality.prompt.md` and invoke via Copilot Chat → Reuse prompts.
+- **Claude:** paste into a Project's custom instructions or your repo's `CLAUDE.md`.
+- Then paste the PeopleCode (FieldChange, SaveEdit, App Class, App Engine PeopleCode, etc.) you want reviewed for meta-SQL, `.Value`, variables, SQL safety, and related quality issues. Pair with `../code-review-effdt-joins/` for data-correctness bugs.
+
 # Scope
 
 In scope:
