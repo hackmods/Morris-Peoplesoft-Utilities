@@ -15,10 +15,11 @@
 | Toggle Trace | Bar → Trace ON/OFF (🔒 = missing UTILITIES security) |
 | Trace presets | Options → Tracing → Off / Default / SQL / PeopleCode / Verbose |
 | Go to component | Bar → Go to · **Alt+Shift+G** (Menu.Component.Market + optional params) |
+| Field Entry toolkit | Bar → Entry (when enabled under Options → Optional / careful) · **Alt+Shift+E** — Capture / Paste / From sheet / Find-Replace with eligibility preview; Save/Load profiles |
 | Add Favorite | Bar → ★ (optional Page Info template + notes) |
 | Open favorite / recent | Favorites dropdown · Recent dropdown; optional **New win** checkbox |
 | Filter Favorites | Bar filter box next to Favorites dropdown (grouped by Category) |
-| Classic/Fluid scopes | Options → Features → UI scope selects for Inspect / search helpers |
+| Classic/Fluid scopes | Options → Features → UI scope selects for Inspect / search helpers / Field Entry |
 | Bar placement / sticky | Options → Features → Utilities bar placement (above content vs very top of site; sticky while scrolling) |
 | Close dialogs | **Escape** or Close button |
 

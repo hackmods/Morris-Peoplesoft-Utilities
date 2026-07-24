@@ -87,6 +87,7 @@ function writeManifest() {
           "inject/corr-hist-and-adv-search.js",
           "inject/clear-bcs.js",
           "inject/resize-frame.js",
+          "inject/field-entry-write.js",
           "icons/*",
         ],
         // Chrome WAR matches are origin-only: path must be exactly /*.
@@ -119,6 +120,7 @@ export default defineConfig({
         "inject/corr-hist-and-adv-search": resolve(root, "src/inject/corr-hist-and-adv-search.ts"),
         "inject/clear-bcs": resolve(root, "src/inject/clear-bcs.ts"),
         "inject/resize-frame": resolve(root, "src/inject/resize-frame.ts"),
+        "inject/field-entry-write": resolve(root, "src/inject/field-entry-write.ts"),
       },
       output: {
         entryFileNames: (chunk) => {

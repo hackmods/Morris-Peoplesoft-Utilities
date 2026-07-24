@@ -19,7 +19,7 @@ import {
   type TraceSettings,
   type YesNo,
 } from "../../storage/schema";
-import {
+import { parseProfilesImportJson, profilesToExportJson } from "../../features/field-entry";import {
   TRACE_PRESET_META,
   applyTracePreset,
   summarizeActiveTraceFlags,
@@ -47,6 +47,7 @@ const SCOPE_LABELS: Array<{ key: keyof FeatureUiScopes; label: string }> = [
   { key: "recFieldInfoOption", label: "Field Inspector UI scope" },
   { key: "advSearchOption", label: "Advanced Search UI scope" },
   { key: "correctHistoryOption", label: "Correct History UI scope" },
+  { key: "fieldEntryOption", label: "Field Entry UI scope" },
 ];
 
 const TRACE_LABELS: Array<{ key: keyof TraceSettings; label: string }> = [
@@ -475,6 +476,44 @@ function renderAllowlist(settings: MpuSettings): void {
     settings.hostAllowlist.join("\n");
 }
 
+function renderFieldEntryProfiles(settings: MpuSettings): void {
+  const root = document.getElementById("field-entry-profiles");
+  if (!root) return;
+  root.replaceChildren();
+  const profiles = settings.fieldEntryProfiles || [];
+  if (!profiles.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = "No named profiles yet. Capture fields on a page, then Entry → Save profile.";
+    root.appendChild(empty);
+    return;
+  }
+  const list = document.createElement("ul");
+  list.className = "fe-profile-list";
+  for (const p of profiles) {
+    const li = document.createElement("li");
+    const hint = p.componentHint ? ` · ${p.componentHint}` : "";
+    li.textContent = `${p.name} (${p.rows.length} fields${hint})`;
+    const del = document.createElement("button");
+    del.type = "button";
+    del.textContent = "Delete";
+    del.setAttribute("aria-label", `Delete profile ${p.name}`);
+    del.addEventListener("click", async () => {
+      if (!window.confirm(`Delete Field Entry profile “${p.name}”?`)) return;
+      const s = await loadSettings();
+      s.fieldEntryProfiles = (s.fieldEntryProfiles || []).filter((x) => x.id !== p.id);
+      await saveSettings(s);
+      renderFieldEntryProfiles(s);
+      broadcast();
+      say("Profile deleted");
+    });
+    li.appendChild(document.createTextNode(" "));
+    li.appendChild(del);
+    list.appendChild(li);
+  }
+  root.appendChild(list);
+}
+
 function download(filename: string, content: string, type: string): void {
   const blob = new Blob([content], { type });
   const a = document.createElement("a");
@@ -493,6 +532,7 @@ async function init(): Promise<void> {
   renderUpgradeWatches(settings);
   renderEnvs(settings);
   renderAllowlist(settings);
+  renderFieldEntryProfiles(settings);
 
   document.getElementById("save-features")!.addEventListener("click", async () => {
     const s = await loadSettings();
@@ -582,6 +622,51 @@ async function init(): Promise<void> {
     const s = await loadSettings();
     download("mpu-favorites.csv", favoritesToCsv(s.favorites), "text/csv");
     say("Favorites exported");
+  });
+
+  document.getElementById("export-fe-profiles")?.addEventListener("click", async () => {
+    const ok = window.confirm(
+      "Field Entry profiles may contain business keys (EmplIDs, depts, guest defaults). Continue export?",
+    );
+    if (!ok) return;
+    const s = await loadSettings();
+    download(
+      "mpu-field-entry-profiles.json",
+      profilesToExportJson(s.fieldEntryProfiles || []),
+      "application/json",
+    );
+    say("Field Entry profiles exported");
+  });
+
+  document.getElementById("import-fe-profiles")?.addEventListener("change", async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parseProfilesImportJson(text);
+      if (parsed.error || !parsed.profiles.length) {
+        say(parsed.error || "No profiles found in JSON");
+        return;
+      }
+      const replace = (document.getElementById("import-fe-replace") as HTMLInputElement | null)
+        ?.checked;
+      const s = await loadSettings();
+      s.fieldEntryProfiles = replace
+        ? parsed.profiles
+        : [...(s.fieldEntryProfiles || []), ...parsed.profiles];
+      await saveSettings(s);
+      renderFieldEntryProfiles(s);
+      broadcast();
+      say(
+        replace
+          ? `Replaced with ${parsed.profiles.length} profile(s)`
+          : `Imported ${parsed.profiles.length} profile(s)`,
+      );
+    } catch {
+      say("Could not import Field Entry profiles — check the file format");
+    } finally {
+      (e.target as HTMLInputElement).value = "";
+    }
   });
 
   document.getElementById("import-fav")!.addEventListener("change", async (e) => {

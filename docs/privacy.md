@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-07-21  
+**Last updated:** 2026-07-23  
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome extension)
 
@@ -14,6 +14,7 @@ Settings are stored only in Chrome’s `chrome.storage.local` on your profile, i
 
 - Feature on/off preferences
 - Favorites (may include menu/component names and optional URL parameters)
+- Optional **Field Entry** named profiles (field values you choose to save; may include business keys such as EmplIDs or department IDs — never passwords; session clipboard is not persisted)
 - Environment labels and URL/site mappings
 - Trace flag preferences
 - Optional host allowlist origins (Phase 2, off by default)

@@ -54,7 +54,7 @@
 
           <div class="pref-block">
             <h4>Classic / Fluid scope</h4>
-            <p class="hint">Limit Inspect and search helpers to Classic, Fluid, or both.</p>
+            <p class="hint">Limit Inspect, search helpers, and Field Entry to Classic, Fluid, or both.</p>
             <div id="feature-ui-scopes" class="pref-stack"></div>
           </div>
 
@@ -96,6 +96,26 @@
               </span>
               <input type="checkbox" id="barSticky" class="toggle-input" />
             </label>
+          </div>
+
+          <div class="pref-block">
+            <h4>Field Entry profiles</h4>
+            <p class="hint">
+              Named capture/paste profiles used by the Entry bar menu (enable under Optional / careful).
+              Session clipboard is not stored; only named profiles persist here.
+            </p>
+            <p class="help warn" role="note">
+              Profiles may contain business keys (EmplIDs, department IDs, guest defaults). Treat exports as sensitive.
+            </p>
+            <div id="field-entry-profiles" class="pref-stack" aria-live="polite"></div>
+            <div class="row-actions">
+              <button type="button" id="export-fe-profiles">Export profiles JSON</button>
+              <label class="file-btn">Import profiles JSON <input type="file" id="import-fe-profiles" accept=".json,application/json" /></label>
+              <label class="row inline">
+                <input type="checkbox" id="import-fe-replace" />
+                Replace existing profiles on import
+              </label>
+            </div>
           </div>
         </section>
 

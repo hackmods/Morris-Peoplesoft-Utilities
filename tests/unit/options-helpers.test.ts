@@ -85,7 +85,7 @@ describe("isSettingsBackup", () => {
 describe("FEATURE_LABELS / groups", () => {
   it("covers the popup/options toggle set once each", () => {
     expect(FEATURE_LABELS.map((f) => f.key)).toContain("advSearchOption");
-    expect(FEATURE_LABELS).toHaveLength(10);
+    expect(FEATURE_LABELS).toHaveLength(11);
     const keys = FEATURE_LABELS.map((f) => f.key);
     expect(new Set(keys).size).toBe(keys.length);
   });

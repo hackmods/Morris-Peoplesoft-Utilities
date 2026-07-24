@@ -1,6 +1,7 @@
 import {
   createDefaultSettings,
   normalizeBarPlacement,
+  normalizeFieldEntryProfiles,
   SCHEMA_VERSION,
   type Favorite,
   type FeatureFlags,
@@ -98,6 +99,7 @@ export async function loadSettings(): Promise<MpuSettings> {
           : "record.field",
       barPlacement: normalizeBarPlacement(s.barPlacement),
       barSticky: s.barSticky === "Yes" || s.barSticky === "No" ? s.barSticky : "No",
+      fieldEntryProfiles: normalizeFieldEntryProfiles(s.fieldEntryProfiles),
     };
   }
 

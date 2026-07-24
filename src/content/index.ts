@@ -19,6 +19,7 @@ import {
   reinjectFieldInspector,
   copyLockedField,
 } from "../features/field-inspector";
+import { openFieldEntryFromShortcut } from "../features/field-entry-ui";
 import type { FieldCopyFormat } from "../storage/schema";
 import { toggleTrace } from "../features/trace";
 import { runSearchOptions } from "../features/search";
@@ -232,6 +233,11 @@ async function refresh(): Promise<void> {
         featureAllowedForUi(scopes.correctHistoryOption, uiMode)
           ? settings.features.correctHistoryOption
           : "No",
+      fieldEntryOption:
+        isYes(settings.features.fieldEntryOption) &&
+        featureAllowedForUi(scopes.fieldEntryOption, uiMode)
+          ? settings.features.fieldEntryOption
+          : "No",
     },
   };
 
@@ -334,7 +340,7 @@ async function refresh(): Promise<void> {
 function onMpuShortcut(e: KeyboardEvent): void {
   if (!(e.altKey && e.shiftKey) || e.ctrlKey || e.metaKey) return;
   const key = e.key.toLowerCase();
-  if (key !== "p" && key !== "i" && key !== "c" && key !== "g") return;
+  if (key !== "p" && key !== "i" && key !== "c" && key !== "g" && key !== "e") return;
   e.preventDefault();
   if (key === "p") {
     const parsed = parsePsUrl(location.href);
@@ -352,6 +358,10 @@ function onMpuShortcut(e: KeyboardEvent): void {
   }
   if (key === "g") {
     showGoToComponentDialog(document, parsePsUrl(location.href));
+    return;
+  }
+  if (key === "e") {
+    void openFieldEntryFromShortcut(document);
     return;
   }
   void (async () => {

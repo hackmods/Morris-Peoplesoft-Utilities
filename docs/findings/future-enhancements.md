@@ -79,6 +79,15 @@
 | ~~UX-10~~ | ~~Export **Page Info + locked field** into Favorites description template~~ | BA | Done in 1.0.12 | Confirm on add |
 | ~~UX-11~~ | ~~Bar **placement** (above content vs document top) + **sticky**; Classic absolute `#ptifrmtarget` offset so the bar does not cover Run / Process Scheduler~~ | BA | Done (Unreleased) | Main bar overlap, not flyout |
 
+### Field Entry (bulk capture / paste / replace)
+
+| ID | Idea | Who | Why | Notes |
+|---|---|---|---|---|
+| ~~FE-01~~ | ~~**Capture → Paste** editable field values by `RECORD.FIELD` with eligibility preview~~ | BA | Done (Unreleased) | Careful toggle; session buffer only |
+| ~~FE-02~~ | ~~**From sheet** TSV/CSV (`RECORD.FIELD` or labels) + first data row~~ | BA | Done (Unreleased) | One row / current page |
+| ~~FE-03~~ | ~~**Find / Replace** with highlight eligibility preview~~ | BA | Done (Unreleased) | Exact value match; optional CI |
+| ~~FE-04~~ | ~~**Named profiles** + Options JSON import/export with business-key warn~~ | BA | Done (Unreleased) | Never passwords; local only |
+
 ---
 
 ## P3 — Larger / speculative (keep constraints)
@@ -209,3 +218,4 @@
 | 2026-07-22 | **v1.0.20** — Options Features regroup (bar / helpers / careful) + PCode starter dialog clarity |
 | 2026-07-22 | Env flyout (Site/Portal/Node/ToolsRel/Theme/CREF) + Playwright extension UI tests |
 | 2026-07-23 | **UX-11** — bar placement (document top) + sticky; dismiss menus when entering Classic content iframe |
+| 2026-07-23 | **FE-01..04** — Field Entry toolkit (capture/paste/sheet/find-replace + profiles + eligibility preview); careful opt-in |

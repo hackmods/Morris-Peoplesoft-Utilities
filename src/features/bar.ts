@@ -46,7 +46,16 @@ import {
   formatDriftReportPlain,
   upsertWatch,
 } from "./upgrade-watch";
-
+import {
+  clearBufferAndPreview,
+  runCapture,
+  runPastePreview,
+  showFindReplaceDialog,
+  showLoadProfileDialog,
+  showSaveProfileDialog,
+  showSheetPasteDialog,
+} from "./field-entry-ui";
+import { getSessionBuffer } from "./field-entry";
 export interface BarContext {
   settings: MpuSettings;
   parsed: ParsedPsUrl;
@@ -1574,6 +1583,98 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(copyField);
   }
 
+  if (!loginOnly && isYes(f.fieldEntryOption)) {
+    const entryRoot = document.createElement("span");
+    entryRoot.className = "mpu-menu-root";
+
+    const bufLen = getSessionBuffer().length;
+    const entryBtn = btn(
+      "mpu-entry",
+      bufLen ? `Entry (${bufLen})` : "Entry",
+      "Field Entry toolkit — capture, paste, sheet, find/replace (Alt+Shift+E)",
+    );
+    entryBtn.setAttribute("aria-haspopup", "menu");
+    entryBtn.setAttribute("aria-expanded", "false");
+
+    const entryFlyout = document.createElement("div");
+    entryFlyout.className = "mpu-flyout";
+    entryFlyout.setAttribute("role", "menu");
+    entryFlyout.setAttribute("aria-label", "Field Entry");
+    entryFlyout.hidden = true;
+
+    const closeEntry = (): void => {
+      entryFlyout.hidden = true;
+      entryBtn.setAttribute("aria-expanded", "false");
+      endFlyoutPosition();
+      restorePortaledFlyout(entryFlyout);
+      endMenuDismiss();
+    };
+
+    const addEntryItem = (label: string, title: string, onClick: () => void): void => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "mpu-btn";
+      item.setAttribute("role", "menuitem");
+      item.textContent = label;
+      item.title = title;
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeEntry();
+        onClick();
+      });
+      entryFlyout.appendChild(item);
+    };
+
+    const buildEntryFlyout = (): void => {
+      entryFlyout.replaceChildren();
+      addEntryItem("Capture", "Copy editable field values into the session buffer", () =>
+        runCapture(doc),
+      );
+      addEntryItem("Paste…", "Preview session buffer against this page, then apply", () =>
+        runPastePreview(doc),
+      );
+      addEntryItem("From sheet…", "Paste TSV/CSV header + one data row", () =>
+        showSheetPasteDialog(doc),
+      );
+      addEntryItem("Find / Replace…", "Replace matching field values with preview", () =>
+        showFindReplaceDialog(doc),
+      );
+      addEntryItem("Save profile…", "Save session buffer as a named local profile", () =>
+        showSaveProfileDialog(doc, ctx.settings),
+      );
+      addEntryItem("Load profile…", "Load a saved profile into the buffer and preview", () =>
+        showLoadProfileDialog(doc, ctx.settings),
+      );
+      addEntryItem("Clear buffer", "Clear session buffer and highlights", () =>
+        clearBufferAndPreview(doc),
+      );
+    };
+
+    const openEntry = (): void => {
+      closeAllFlyouts(doc);
+      buildEntryFlyout();
+      entryFlyout.hidden = false;
+      entryBtn.setAttribute("aria-expanded", "true");
+      bindFlyoutPosition(entryBtn, entryFlyout);
+      bindMenuDismiss(doc, entryRoot, closeEntry, entryFlyout);
+      const first = entryFlyout.querySelector<HTMLElement>('button[role="menuitem"]');
+      first?.focus();
+    };
+
+    entryBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!entryFlyout.hidden) {
+        closeEntry();
+        return;
+      }
+      openEntry();
+    });
+
+    buildEntryFlyout();
+    entryRoot.append(entryBtn, entryFlyout);
+    bar.appendChild(entryRoot);
+  }
+
   if (!loginOnly && isYes(f.pageInfoOption)) {
     const pagesRoot = document.createElement("span");
     pagesRoot.className = "mpu-menu-root";
@@ -1755,10 +1856,11 @@ function showHelpDialog(doc: Document): void {
       <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs; <strong>Upgrade watch</strong> compares UI fingerprints after PS upgrades (not PeopleCode)</li>
       <li><strong>Pages</strong> — delivered multi-page links when present (flyout or full list)</li>
       <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
+      <li><strong>Entry</strong> — capture / paste / sheet / find-replace with eligibility preview (Alt+Shift+E; Options → careful)</li>
       <li><strong>PCode / Structure / Admin</strong> — App Designer starters, page structure tree, setup jumps</li>
       <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
       <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
-      <li><strong>Shortcuts</strong> — Alt+Shift+P/I/C/G</li>
+      <li><strong>Shortcuts</strong> — Alt+Shift+P/I/C/G/E</li>
     </ul>
     ${tipHtml}
     <p>Maintained by <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>. Inspired by PS Utilities.</p>

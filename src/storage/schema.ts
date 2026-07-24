@@ -13,6 +13,11 @@ export interface FeatureFlags {
   correctHistoryOption: YesNo;
   advSearchOption: YesNo;
   loginPageOption: YesNo;
+  /**
+   * FE-01..04: Field Entry toolkit (capture / paste / sheet / find-replace).
+   * Careful — writes visible editable field values; default Off.
+   */
+  fieldEntryOption: YesNo;
   /** Phase 2: when Yes, restrict to hostAllowlist origins */
   hostAllowlistEnabled: YesNo;
 }
@@ -38,6 +43,27 @@ export interface FeatureUiScopes {
   recFieldInfoOption: FeatureUiScope;
   advSearchOption: FeatureUiScope;
   correctHistoryOption: FeatureUiScope;
+  fieldEntryOption: FeatureUiScope;
+}
+
+/** One captured / pasted field value keyed by RECORD.FIELD (FE-01..04). */
+export interface FieldEntryRow {
+  record: string;
+  field: string;
+  /** Grid occurrence after `$` when present */
+  occurrence?: string;
+  value: string;
+  pageLabel?: string;
+}
+
+/** Named local profile of field values (may contain business keys). */
+export interface FieldEntryProfile {
+  id: string;
+  name: string;
+  updatedAt: number;
+  /** Optional Menu.Component hint for filtering */
+  componentHint?: string;
+  rows: FieldEntryRow[];
 }
 
 /**
@@ -172,6 +198,8 @@ export interface MpuSettings {
   barPlacement: BarPlacement;
   /** UX-11: keep bar visible while the portal document scrolls */
   barSticky: YesNo;
+  /** FE-04: named Field Entry profiles (local only; may hold business keys) */
+  fieldEntryProfiles: FieldEntryProfile[];
   schemaVersion: number;
 }
 
@@ -205,6 +233,7 @@ export const DEFAULT_FEATURES: FeatureFlags = {
   // Optional / careful — off
   traceOption: "No",
   correctHistoryOption: "No",
+  fieldEntryOption: "No",
   // Compliance — allowlist opt-in off
   hostAllowlistEnabled: "No",
 };
@@ -235,6 +264,7 @@ export const DEFAULT_FEATURE_UI_SCOPES: FeatureUiScopes = {
   recFieldInfoOption: "both",
   advSearchOption: "both",
   correctHistoryOption: "both",
+  fieldEntryOption: "both",
 };
 
 export function createDefaultSettings(): MpuSettings {
@@ -253,8 +283,58 @@ export function createDefaultSettings(): MpuSettings {
     fieldCopyFormat: "record.field",
     barPlacement: "aboveContent",
     barSticky: "No",
+    fieldEntryProfiles: [],
     schemaVersion: SCHEMA_VERSION,
   };
+}
+
+/** Normalize a stored Field Entry profile (drop empty / invalid rows). */
+export function normalizeFieldEntryProfile(raw: unknown): FieldEntryProfile | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Partial<FieldEntryProfile>;
+  const name = typeof p.name === "string" ? p.name.trim() : "";
+  if (!name) return null;
+  const id =
+    typeof p.id === "string" && p.id.trim()
+      ? p.id.trim()
+      : `fe-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const rows = Array.isArray(p.rows)
+    ? p.rows
+        .map((r) => normalizeFieldEntryRow(r))
+        .filter((r): r is FieldEntryRow => r != null)
+    : [];
+  return {
+    id,
+    name,
+    updatedAt: typeof p.updatedAt === "number" && Number.isFinite(p.updatedAt) ? p.updatedAt : Date.now(),
+    componentHint:
+      typeof p.componentHint === "string" && p.componentHint.trim()
+        ? p.componentHint.trim()
+        : undefined,
+    rows,
+  };
+}
+
+export function normalizeFieldEntryRow(raw: unknown): FieldEntryRow | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Partial<FieldEntryRow>;
+  const record = typeof r.record === "string" ? r.record.trim() : "";
+  const field = typeof r.field === "string" ? r.field.trim() : "";
+  if (!record || !field) return null;
+  const value = typeof r.value === "string" ? r.value : r.value == null ? "" : String(r.value);
+  return {
+    record,
+    field,
+    value,
+    occurrence:
+      typeof r.occurrence === "string" && r.occurrence.trim() ? r.occurrence.trim() : undefined,
+    pageLabel: typeof r.pageLabel === "string" && r.pageLabel.trim() ? r.pageLabel.trim() : undefined,
+  };
+}
+
+export function normalizeFieldEntryProfiles(raw: unknown): FieldEntryProfile[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(normalizeFieldEntryProfile).filter((p): p is FieldEntryProfile => p != null);
 }
 
 export function normalizeBarPlacement(v: unknown): BarPlacement {

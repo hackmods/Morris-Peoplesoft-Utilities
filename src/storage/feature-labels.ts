@@ -94,7 +94,12 @@ export const FEATURE_TOGGLE_GROUPS: FeatureToggleGroup[] = [
       {
         key: "correctHistoryOption",
         label: "Auto-select Correct History",
-        hint: "Changes search Action automatically ? enable only if intentional",
+        hint: "Changes search Action automatically — enable only if intentional",
+      },
+      {
+        key: "fieldEntryOption",
+        label: "Field Entry toolkit",
+        hint: "Capture / paste / sheet / find-replace for editable fields — preview first; may hold business keys in profiles",
       },
     ],
   },

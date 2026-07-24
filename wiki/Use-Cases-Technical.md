@@ -2,6 +2,7 @@
 
 - **Trace:** Configure PeopleCode/SQL flags (or named presets: Off / Default / SQL / PeopleCode / Verbose) in Options → Tracing, then toggle Trace on the bar. The bar shows the active preset or flag count (e.g. `Trace ON · SQL`). Options includes a short guide on when to use SQL binds vs PeopleCode vs Verbose. Requires security access to delivered trace components. Cross-tab sync updates other tabs. 🔒 means UTILITIES access is missing.
 - **Field Inspector:** Orange icons beside fields on Classic and Fluid (`ps_box-*`), including Fluid menus/nav collections that host Classic pages in nested iframes; each field is wrapped tightly (not a shared container); viewport-scoped on large grids; Rec/Fld/Row (+ Label / Work / **Ctx** chips for Prompt, Display, Deferred / HTML type chips); high-contrast borders under forced-colors; click locks and copies PeopleCode formats (`RECORD.FIELD` / `&Record.FIELD` / `GetField` / `GetRowset…GetField`); Escape exits; Alt+Shift+C copies again.
+- **Field Entry:** Opt-in **Entry** menu writes visible editable values only (eligibility preview first). Capture → Paste, From sheet, Find/Replace, named profiles. Soft-calls Classic `addchg_` when present; never auto-saves; skips passwords.
 - **Page Info / Page Tabs / Tips:** ToolsRel, DB, portal/node/site, UI mode, **CREF path**, **theme**, page-token present (boolean only); ToolsRel context tips; Markdown copy; **object pack** (plain + Markdown) with **Compare object pack**; Compare clipboard; **Copy process pack** on Process Monitor pages; IB breadcrumb line when on Integration Broker pages; Page Tabs from delivered multi-page links; **Customization upgrade watch** — capture UI fingerprint before upgrade and **Check upgrade drift** after (tabs, structure hosts, field ids — not PeopleCode).
 - **PCode starters:** Bar **PCode** opens copy-paste starters for App Designer (FieldChange, RowInit, GetRowset, …). Lock a field with Inspect first so RECORD.FIELD is real; otherwise placeholders are shown. Also lists MsgGet keys found in visible HTML when present.
 - **Structure:** Bar **Structure** button lists Fluid/Classic group boxes, scroll areas, grids, and related hosts plus CREF path / theme metadata when present (read-only).
@@ -9,7 +10,7 @@
 - **IB breadcrumb:** On Integration Broker monitor pages, a compact bar chip shows Service Op / Queue / Node from visible DOM with **Copy IB**.
 - **Go to / New Window / Recent / Side Panel:** Jump to Menu.Component.Market (Alt+Shift+G), open Favorites/Recent in `_newwin`, open the current component in a new tab, or use the Chrome Side Panel for Favorites + Page Info.
 - **Login placement:** On sign-in pages the bar mounts above the password form container — credentials are never read.
-- **UI scopes:** Options can limit Inspect / search helpers to Classic only, Fluid only, or both.
+- **UI scopes:** Options can limit Inspect / search helpers / Field Entry to Classic only, Fluid only, or both.
 - **Backup:** Export full settings JSON from Favorites tab tools (import append or replace).
 
 ## Customization upgrade watch (UG-01)

@@ -249,6 +249,29 @@ button.mpu-env {
   gap: 0.55rem;
 }
 
+.mpu-fe-textarea {
+  width: 100%;
+  min-height: 8rem;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.mpu-fe-elig-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  max-height: 12rem;
+  overflow: auto;
+  font-size: 0.85rem;
+}
+
+.mpu-fe-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
 .mpu-action-group {
   display: flex;
   flex-wrap: wrap;

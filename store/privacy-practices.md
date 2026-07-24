@@ -32,7 +32,7 @@ No.
 
 ## Handling of personally identifiable information / financial / health / authentication
 
-MPU does not request or store passwords. Favorites may include PeopleSoft menu/component identifiers and optional parameters that a user chooses to save **locally**. Trace actions use the user’s existing PeopleSoft session on the PeopleSoft host only.
+MPU does not request or store passwords. Favorites may include PeopleSoft menu/component identifiers and optional parameters that a user chooses to save **locally**. Optional Field Entry profiles may hold field values the user captured or pasted (business keys possible) **locally only**, with export warnings. Trace actions use the user’s existing PeopleSoft session on the PeopleSoft host only.
 
 ## Permissions justification
 

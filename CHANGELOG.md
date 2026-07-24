@@ -6,6 +6,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ### Added
 
+- **Field Entry toolkit (FE-01..04):** opt-in Entry bar menu (Optional / careful) — Capture editable field values, Paste with eligibility preview + highlight, From sheet (TSV/CSV), Find/Replace, named local profiles with export warn; **Alt+Shift+E**; never writes passwords
 - **Options → Utilities bar placement:** mount **Above content** (default) or at the **Very top of the site**, plus optional **Sticky while scrolling**
 
 ### Fixed
