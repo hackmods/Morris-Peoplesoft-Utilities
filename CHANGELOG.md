@@ -4,10 +4,13 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.24] — 2026-07-24
+
 ### Added
 
-- **Field Entry toolkit (FE-01..06):** opt-in Entry bar menu (Optional / careful) — Capture editable field values, Paste with eligibility preview + highlight, From sheet (TSV/CSV; **multi-row → grid `$occ` + Add Row**), Find/Replace, named local profiles; works on **Fluid + Classic** and **same-origin modal/popup frames** (Modify a Person–style); **Alt+Shift+E**; never writes passwords
+- **Field Entry toolkit (FE-01..06):** opt-in Entry bar menu (Optional / careful) — Capture editable field values, Paste with eligibility preview + highlight, From sheet (TSV/CSV; **multi-row → grid `$occ` + Add Row**), Find/Replace, named local profiles; works on **Fluid + Classic** and **same-origin modal/popup frames** (Modify a Person–style); **Alt+Shift+E**; never writes passwords; Playwright e2e coverage
 - **Options → Utilities bar placement:** mount **Above content** (default) or at the **Very top of the site**, plus optional **Sticky while scrolling**
+- **`agents/` PeopleSoft prompt pack (side toolkit, not shipped in the extension):** portable, generic markdown agents/skills for AI tools — see [`agents/README.md`](agents/README.md)
 
 ### Fixed
 

@@ -19,8 +19,9 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 | Environment labels | PeopleCode / SQL trace toggle |
 | Favorites with CSV import/export | Field Inspector (Classic, Fluid, Classic-in-Fluid) |
 | Page information + upgrade watch | New window / deep links / Admin jumps |
-| Advanced Search & Correct History helpers | Trace profiles + PCode stubs |
-| Quiet mode for env prompts | Settings JSON backup |
+| Field Entry (bulk paste / multi-row grids) | Trace profiles + PCode stubs |
+| Advanced Search & Correct History helpers | Settings JSON backup |
+| Quiet mode for env prompts | |
 
 ## Install
 
@@ -100,11 +101,15 @@ npm run release:check    # full gate
 
 See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+## PeopleSoft agent prompt pack
+
+Separate from the extension itself: [`agents/`](agents/README.md) is a set of portable, generic AI-agent/skill prompts for PeopleSoft 8.56 (PeopleTools 8.5x–8.6x) development work — code review (effective dates, joins, keys, data sources), security/role review, an MCP-ready schema assistant, design help, onboarding, and a guide for training your own component-specific agent. Usable in Cursor, VS Code + Copilot, Claude, or any chat tool; nothing in it ships in the extension bundle.
+
 ## Releases
 
 Tagged versions (`v*`) publish a Chrome Web Store zip via GitHub Actions. Prefer installing from the Store once live; use Release artifacts for review builds.
 
-Latest: [v1.0.23](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.23)
+Latest: [v1.0.24](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.24)
 
 ## Credits
 

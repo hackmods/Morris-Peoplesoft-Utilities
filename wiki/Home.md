@@ -2,7 +2,7 @@
 
 Welcome! MPU is a Chrome extension for PeopleSoft Classic and Fluid, maintained by [hackmods](https://github.com/hackmods).
 
-**Latest release:** [v1.0.23](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.23). Unreleased: Field Entry toolkit (bulk capture/paste/multi-row grids, Fluid + modal frames).
+**Latest release:** [v1.0.24](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.24) — Field Entry toolkit, bar placement/sticky, Classic bar offset fixes.
 
 ## Quick links
 

@@ -10,6 +10,7 @@ This repository is a **Chrome Manifest V3 extension** for PeopleSoft productivit
 - Findings: `docs/findings/legacy-ps-utilities-audit.md`, `docs/findings/classic-tools-audit.md`
 - Cursor rules: `.cursor/rules/` (includes `product-roadmap.mdc`)
 - Legacy oracle (local only, gitignored): `.reference/PS-Utilities`
+- **PeopleSoft agent prompt pack (separate side toolkit, not shipped in the extension):** `agents/README.md` — generic Cursor/Copilot/Claude prompts for PeopleSoft dev work (code review, security review, MCP schema assistant, design help, onboarding, component-agent trainer). Keep it generic — no site-specific customizations/role names checked in here.
 
 ## Commands
 
