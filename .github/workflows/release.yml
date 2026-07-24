@@ -20,16 +20,25 @@ jobs:
       - run: npm run generate:icons
       - run: npm run generate:store-assets
       - run: npm run release:check
-      - name: Upload release asset
+      - name: Upload release assets
         uses: softprops/action-gh-release@v3
         with:
-          files: morris-peoplesoft-utilities-v*.zip
+          files: |
+            morris-peoplesoft-utilities-v*.zip
+            morris-peoplesoft-agents-v*.zip
           body: |
-            Morris PeopleSoft Utilities release.
+            ## Morris PeopleSoft Utilities
 
-            - Chrome Web Store zip attached (upload via Developer Dashboard)
-            - See `store/SUBMISSION_CHECKLIST.md`
-            - Changelog: CHANGELOG.md
+            Chrome extension zip for Chrome Web Store / load-unpacked review builds.
+            See `store/SUBMISSION_CHECKLIST.md` and `CHANGELOG.md`.
+
+            ## PeopleSoft agent prompt pack (side toolkit)
+
+            Not part of the extension — portable AI prompts for Cursor, VS Code / Visual Studio + Copilot, and Claude.
+
+            - **Browse on GitHub:** https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents
+            - **Adoption guide (wiki):** https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/wiki/AI-Agent-Prompts.md
+            - **Download:** `morris-peoplesoft-agents-v*.zip` attached to this release (unpack and copy prompts into your IDE)
 
             Maintained by [hackmods](https://github.com/hackmods).
         env:

@@ -20,8 +20,16 @@
 3. After upgrade (or on another env), open the same component and **Check upgrade drift** — results appear in the dialog diff area; severity is announced (clean / tools-only / drifted).
 4. Manage baselines in **Options → Upgrade** — list, delete, export/import JSON. PeopleCode-only overrides still need App Designer Compare Report or Change Assistant.
 
+## AI agent prompts (side toolkit)
+
+Not in the Chrome extension — use while coding in Cursor / VS Copilot / Claude:
+
+- Browse: [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · wiki [AI agent prompts](AI-Agent-Prompts)
+- Download: `morris-peoplesoft-agents-v*.zip` from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest)
+- Specialists: data-correctness review, PeopleCode quality, security/SoD, SQL authoring, IB+CI integrations, MCP schema assist, design, onboarding, specialist trainer
+
 ## Planned enhancements
 
-P3 Wave 5 items (SP-01…SP-08) shipped in **1.0.13**. Wave 6 (PC-01…03, FL-01, AD-01) shipped in **1.0.15**. Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05) shipped in **1.0.16**. Wave 7 UG-01 (customization upgrade watch) shipped in **1.0.17**. Field Inspector Classic/Fluid/Classic-in-Fluid highlight fixes shipped in **1.0.18**. Shortcuts/Admin nested flyout fix shipped in **1.0.19**. Options Features QOL regroup + PCode starter clarity shipped in **1.0.20**. Further ideas:
+P3 Wave 5 items (SP-01…SP-08) shipped in **1.0.13**. Wave 6 (PC-01…03, FL-01, AD-01) shipped in **1.0.15**. Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05) shipped in **1.0.16**. Wave 7 UG-01 (customization upgrade watch) shipped in **1.0.17**. Field Inspector Classic/Fluid/Classic-in-Fluid highlight fixes shipped in **1.0.18**. Shortcuts/Admin nested flyout fix shipped in **1.0.19**. Options Features QOL regroup + PCode starter clarity shipped in **1.0.20**. Agent prompt pack v3 shipped in **1.0.25**. Further ideas:
 
 - [`docs/findings/future-enhancements.md`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/findings/future-enhancements.md)

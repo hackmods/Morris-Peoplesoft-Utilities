@@ -8,6 +8,12 @@
 
 **Pack version:** **v3 (alignment)** — consistent `review-*` / `assist-*` / `design-*` / `guide-*` names; SQL + integrations specialists; VS Copilot stubs; tool-fit matrix (hosts, not model SKUs).
 
+**Get the pack:**
+
+- Browse: https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents
+- Download zip from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) (`morris-peoplesoft-agents-v*.zip`) or run `npm run package:agents` in a clone
+- Wiki adoption guide: [wiki/AI-Agent-Prompts.md](../wiki/AI-Agent-Prompts.md)
+
 ---
 
 ## Why this exists

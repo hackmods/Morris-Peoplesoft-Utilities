@@ -2,7 +2,7 @@
 
 Welcome! MPU is a Chrome extension for PeopleSoft Classic and Fluid, maintained by [hackmods](https://github.com/hackmods).
 
-**Latest release:** [v1.0.24](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.24) — Field Entry toolkit, bar placement/sticky, Classic bar offset fixes.
+**Latest release:** [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25) — PeopleSoft AI agent prompt pack (v3) + agents zip on Releases; Field Entry / bar placement from 1.0.24.
 
 ## Quick links
 

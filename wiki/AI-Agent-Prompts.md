@@ -2,7 +2,9 @@
 
 MPU ships a **side toolkit** of portable AI prompts for PeopleSoft work — separate from the Chrome extension. Use them in **Cursor**, **VS Code / Visual Studio + GitHub Copilot**, **Claude**, or any chat tool. Nothing in the pack runs inside the browser or phones home.
 
-**Source of truth:** [`agents/README.md`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/README.md)
+**Source of truth:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · [`agents/README.md`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/README.md)
+
+**Download:** `morris-peoplesoft-agents-v*.zip` from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) (separate from the Chrome extension zip).
 
 **Target stack:** PeopleSoft **8.56**, PeopleTools **8.5x–8.6x**, on-prem **HRMS**, **Financials**, and **Campus Solutions**. Prompts stay **generic**.
 

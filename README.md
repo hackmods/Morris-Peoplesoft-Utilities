@@ -103,13 +103,18 @@ See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## PeopleSoft agent prompt pack
 
-Separate from the extension itself: [`agents/`](agents/README.md) is a portable PeopleSoft AI prompt pack (PeopleTools 8.5x–8.6x) — data/PeopleCode/security review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training. Usable in Cursor, Visual Studio / VS Code + Copilot, or Claude; nothing in it ships in the extension bundle.
+Separate from the extension itself — nothing under `agents/` ships in the Chrome zip:
+
+- **Browse:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · guide [`agents/README.md`](agents/README.md) · wiki [AI agent prompts](wiki/AI-Agent-Prompts.md)
+- **Download:** each GitHub Release attaches `morris-peoplesoft-agents-v*.zip` (or run `npm run package:agents`)
+
+Covers PeopleTools 8.5x–8.6x / PS 8.56: data & PeopleCode review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training — for Cursor, Visual Studio / VS Code + Copilot, or Claude.
 
 ## Releases
 
-Tagged versions (`v*`) publish a Chrome Web Store zip via GitHub Actions. Prefer installing from the Store once live; use Release artifacts for review builds.
+Tagged versions (`v*`) publish the Chrome Web Store zip **and** the agents prompt zip via GitHub Actions. Prefer installing the extension from the Store once live; use Release artifacts for review builds.
 
-Latest: [v1.0.24](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.24)
+Latest: [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25)
 
 ## Credits
 
