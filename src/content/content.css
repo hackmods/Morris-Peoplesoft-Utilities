@@ -17,6 +17,23 @@
   box-sizing: border-box;
 }
 
+/* UX-11: very top of the portal document (above header chrome) */
+.mpu-bar-document-top {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/*
+ * UX-11: stay visible while the portal document scrolls.
+ * Classic content usually scrolls inside the iframe — the bar already stays put
+ * above `#ptifrmtarget`; sticky helps when the portal page itself scrolls (Fluid).
+ */
+.mpu-bar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2147481000;
+}
+
 .mpu-brand {
   letter-spacing: 0.04em;
   padding: 0.15rem 0.4rem;

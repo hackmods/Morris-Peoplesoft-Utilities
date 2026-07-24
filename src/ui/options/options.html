@@ -75,6 +75,28 @@
               <input type="checkbox" id="quietEnvPrompt" class="toggle-input" />
             </label>
           </div>
+
+          <div class="pref-block">
+            <h4>Utilities bar placement</h4>
+            <p class="hint">
+              Default sits above the Classic content iframe (or in the Fluid header).
+              Open menus close when you click into the page so they don’t cover Run / Process Scheduler controls.
+            </p>
+            <label class="pref-field" for="barPlacement">
+              <span class="pref-field-label">Bar position</span>
+              <select id="barPlacement" aria-label="Utilities bar position">
+                <option value="aboveContent">Above content (default)</option>
+                <option value="documentTop">Very top of the site</option>
+              </select>
+            </label>
+            <label class="toggle-row" for="barSticky">
+              <span class="toggle-copy">
+                <span class="toggle-title">Sticky while scrolling</span>
+                <span class="toggle-hint">Keep the bar pinned to the top of the viewport as the portal page scrolls</span>
+              </span>
+              <input type="checkbox" id="barSticky" class="toggle-input" />
+            </label>
+          </div>
         </section>
 
         <div class="panel-actions">

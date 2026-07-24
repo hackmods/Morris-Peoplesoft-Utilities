@@ -34,6 +34,29 @@ describe("storage load/save/update", () => {
     expect(loaded.fieldCopyFormat).toBe("getfield");
   });
 
+  it("persists bar placement and sticky preferences", async () => {
+    const s = createDefaultSettings();
+    s.barPlacement = "documentTop";
+    s.barSticky = "Yes";
+    await saveSettings(s);
+    const loaded = await loadSettings();
+    expect(loaded.barPlacement).toBe("documentTop");
+    expect(loaded.barSticky).toBe("Yes");
+  });
+
+  it("defaults invalid barPlacement to aboveContent", async () => {
+    await chrome.storage.local.set({
+      mpuSettings: {
+        ...createDefaultSettings(),
+        barPlacement: "sideways",
+        barSticky: "Maybe",
+      },
+    });
+    const loaded = await loadSettings();
+    expect(loaded.barPlacement).toBe("aboveContent");
+    expect(loaded.barSticky).toBe("No");
+  });
+
   it("persists getrowset copy format", async () => {
     const s = createDefaultSettings();
     s.fieldCopyFormat = "getrowset";

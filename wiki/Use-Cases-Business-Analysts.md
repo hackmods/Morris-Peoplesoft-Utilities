@@ -6,6 +6,7 @@
 - **Inspect fields:** Field Inspector shows Label / Rec / Fld / Row (+ HTML type chips) on Classic, Fluid, and Classic pages opened from Fluid menus; lock copies PeopleCode formats (`RECORD.FIELD`, `&Record.FIELD`, `GetField`) for paste into tickets.
 - **Search pages:** Enable Advanced Search expand (including Fluid MORE/expand-all) and optional Correct History; limit to Classic or Fluid in Options if needed.
 - **Quiet mode:** Skip repeated “name this environment” prompts from Options → Features.
+- **Bar layout:** Options → Features → Utilities bar placement — keep the default above Classic content, or move the bar to the very top of the site; optionally sticky while the portal page scrolls. Open menus close when you click into the page so they don’t cover Run / Process Scheduler buttons.
 - **Shortcuts:** Alt+Shift+P Page Info · Alt+Shift+I Inspect · Alt+Shift+C copy locked field · Alt+Shift+G Go to component.
 
 ## Planned enhancements

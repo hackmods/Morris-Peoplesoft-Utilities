@@ -54,11 +54,103 @@ describe("utilities bar", () => {
     const bar = document.getElementById("mpu-bar");
     expect(bar?.getAttribute("role")).toBe("toolbar");
     expect(bar?.getAttribute("aria-label")).toBe("Morris PeopleSoft Utilities");
+    expect(bar?.dataset.mpuPlacement).toBe("aboveContent");
+    expect(bar?.dataset.mpuSticky).toBe("No");
     expect(document.querySelector(".mpu-env")?.textContent).toBe("DEV");
     expect(document.getElementById("mpu-live")?.getAttribute("aria-live")).toBe("polite");
 
     document.getElementById("mpu-pageinfo")?.click();
     expect(onPageInfo).toHaveBeenCalledOnce();
+  });
+
+  it("mounts at document top when barPlacement is documentTop", () => {
+    document.body.innerHTML = `
+      <header id="portal-hdr">Header</header>
+      <div id="ptifrmtarget"><iframe id="ptifrmtgtframe"></iframe></div>
+    `;
+    const settings = createDefaultSettings();
+    settings.barPlacement = "documentTop";
+    settings.barSticky = "Yes";
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    const bar = document.getElementById("mpu-bar");
+    expect(bar).toBeTruthy();
+    expect(bar?.classList.contains("mpu-bar-document-top")).toBe(true);
+    expect(bar?.classList.contains("mpu-bar-sticky")).toBe(true);
+    expect(bar?.dataset.mpuPlacement).toBe("documentTop");
+    expect(bar?.dataset.mpuSticky).toBe("Yes");
+    expect(document.body.firstElementChild).toBe(bar);
+  });
+
+  it("closes open menus when pointer goes into the Classic content frame", () => {
+    document.body.innerHTML = `
+      <div id="PT_HEADER"></div>
+      <div id="ptifrmtarget"><iframe id="ptifrmtgtframe"></iframe></div>
+    `;
+    const settings = createDefaultSettings();
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    document.getElementById("mpu-env")?.click();
+    const flyout = document.getElementById("mpu-env-flyout") as HTMLElement;
+    expect(flyout.hidden).toBe(false);
+
+    document.getElementById("ptifrmtarget")!.dispatchEvent(
+      new Event("pointerdown", { bubbles: true, cancelable: true }),
+    );
+    expect(flyout.hidden).toBe(true);
+  });
+
+  it("mounts Classic bar above the content iframe by default", () => {
+    document.body.innerHTML = `
+      <header id="portal-hdr">Header</header>
+      <div id="ptifrmtarget"><iframe id="ptifrmtgtframe"></iframe></div>
+    `;
+    const settings = createDefaultSettings();
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    const bar = document.getElementById("mpu-bar");
+    const target = document.getElementById("ptifrmtarget");
+    expect(bar?.nextElementSibling).toBe(target);
+    expect(bar?.classList.contains("mpu-bar-classic")).toBe(true);
   });
 
   it("opens Env flyout with site / portal / node / ToolsRel / theme / CREF", () => {

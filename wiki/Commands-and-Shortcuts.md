@@ -19,6 +19,7 @@
 | Open favorite / recent | Favorites dropdown · Recent dropdown; optional **New win** checkbox |
 | Filter Favorites | Bar filter box next to Favorites dropdown (grouped by Category) |
 | Classic/Fluid scopes | Options → Features → UI scope selects for Inspect / search helpers |
+| Bar placement / sticky | Options → Features → Utilities bar placement (above content vs very top of site; sticky while scrolling) |
 | Close dialogs | **Escape** or Close button |
 
 MPU uses **Alt+Shift** accelerators so it does not steal PeopleSoft **CTRL+J** (System Information).

@@ -227,6 +227,8 @@ function bindMenuDismiss(
   const ac = new AbortController();
   menuDismissAbort = ac;
   const { signal } = ac;
+  const view = doc.defaultView;
+
   doc.addEventListener(
     "click",
     (e) => {
@@ -245,6 +247,35 @@ function bindMenuDismiss(
       }
     },
     { signal },
+  );
+
+  // Classic/Fluid content lives in iframes — clicks there never bubble to the portal
+  // document, so open menus would otherwise keep covering Run / Process Scheduler
+  // controls. Close as soon as focus moves into a frame (or the portal window blurs).
+  const closeIfEnteredFrame = (): void => {
+    view?.setTimeout(() => {
+      if (signal.aborted) return;
+      const ae = doc.activeElement;
+      if (ae && (ae.tagName === "IFRAME" || ae.tagName === "FRAME")) {
+        close();
+        return;
+      }
+      if (view && view.document.hasFocus && !view.document.hasFocus()) {
+        close();
+      }
+    }, 0);
+  };
+  view?.addEventListener("blur", closeIfEnteredFrame, { signal });
+  doc.addEventListener(
+    "pointerdown",
+    (e) => {
+      const t = e.target as Element | null;
+      if (!t) return;
+      if (t.closest("iframe, frame, #ptifrmtarget, #ptifrmtgtframe")) {
+        close();
+      }
+    },
+    { capture: true, signal },
   );
 }
 
@@ -1007,16 +1038,41 @@ export function showStructureDialog(doc: Document): void {
 
 export function removeBar(doc: Document = document): void {
   closeAllFlyouts(doc);
+  endBarLayoutWatch();
   doc.getElementById("mpu-bar")?.remove();
+  doc.getElementById("mpu-bar-spacer")?.remove();
   doc.getElementById("mpu-live")?.remove();
   // Orphaned portaled menus (if any) after bar tear-down
   doc.querySelectorAll("body > .mpu-flyout").forEach((el) => el.remove());
+}
+
+/** ResizeObserver that re-asks Classic for iframe layout when the bar wraps. */
+let barLayoutObserver: ResizeObserver | null = null;
+
+function endBarLayoutWatch(): void {
+  barLayoutObserver?.disconnect();
+  barLayoutObserver = null;
+}
+
+function watchBarLayoutForClassicResize(bar: HTMLElement, doc: Document): void {
+  endBarLayoutWatch();
+  if (typeof ResizeObserver === "undefined") return;
+  let lastH = Math.round(bar.getBoundingClientRect().height);
+  barLayoutObserver = new ResizeObserver(() => {
+    const h = Math.round(bar.getBoundingClientRect().height);
+    if (h <= 0 || h === lastH) return;
+    lastH = h;
+    injectResizeFrame(doc);
+  });
+  barLayoutObserver.observe(bar);
 }
 
 export function mountBar(ctx: BarContext, doc: Document = document): void {
   removeBar(doc);
   const f = ctx.settings.features;
   const loginOnly = Boolean(ctx.loginMode);
+  const placement = ctx.settings.barPlacement === "documentTop" ? "documentTop" : "aboveContent";
+  const sticky = isYes(ctx.settings.barSticky);
   const mount = findHeaderMount(doc, { loginMode: loginOnly });
   if (!mount) return;
 
@@ -1024,9 +1080,13 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
 
   const bar = document.createElement("div");
   bar.id = "mpu-bar";
-  bar.className = classicTarget ? "mpu-bar mpu-bar-classic" : "mpu-bar";
+  bar.className = classicTarget || placement === "documentTop" ? "mpu-bar mpu-bar-classic" : "mpu-bar";
+  if (placement === "documentTop") bar.classList.add("mpu-bar-document-top");
+  if (sticky) bar.classList.add("mpu-bar-sticky");
   bar.setAttribute("role", "toolbar");
   bar.setAttribute("aria-label", "Morris PeopleSoft Utilities");
+  bar.dataset.mpuPlacement = placement;
+  bar.dataset.mpuSticky = sticky ? "Yes" : "No";
 
   const live = document.createElement("div");
   live.id = "mpu-live";
@@ -1509,12 +1569,10 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   help.addEventListener("click", () => showHelpDialog(doc));
   bar.appendChild(help);
 
-  if (classicTarget?.parentElement) {
+  if (placement === "documentTop" && doc.body) {
+    doc.body.insertBefore(bar, doc.body.firstChild);
+  } else if (classicTarget?.parentElement) {
     classicTarget.parentElement.insertBefore(bar, classicTarget);
-    // resizeAll can rebuild the content iframe and wipe Field Inspector icons
-    if (!ctx.fieldInspectorActive) {
-      injectResizeFrame(doc);
-    }
   } else if (loginOnly && mount !== doc.body && mount.parentElement) {
     // SP-08: insert above password form container, not inside it
     mount.parentElement.insertBefore(bar, mount);
@@ -1523,6 +1581,16 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   } else {
     mount.appendChild(bar);
   }
+
+  // Classic: ask PeopleSoft to shrink the content iframe for the bar height.
+  // resizeAll can rebuild the content iframe and wipe Field Inspector icons.
+  // Re-run when the bar wraps (taller strip) so Run / Process Scheduler buttons
+  // are not half-covered by the utilities chrome.
+  if (classicTarget && !ctx.fieldInspectorActive) {
+    injectResizeFrame(doc);
+    watchBarLayoutForClassicResize(bar, doc);
+  }
+
   doc.body.appendChild(live);
   announce(doc, "Morris PeopleSoft Utilities bar ready");
 }

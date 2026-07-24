@@ -40,6 +40,13 @@ export interface FeatureUiScopes {
   correctHistoryOption: FeatureUiScope;
 }
 
+/**
+ * Where the utilities bar mounts.
+ * - aboveContent: Classic — above `#ptifrmtarget`; Fluid — in header (default)
+ * - documentTop: first child of `document.body` (very top of the site)
+ */
+export type BarPlacement = "aboveContent" | "documentTop";
+
 /** Recently visited components (PI-04) — local only, capped. */
 export interface RecentComponent {
   Servlet: "psp" | "psc";
@@ -161,6 +168,10 @@ export interface MpuSettings {
   showOnboarding: YesNo;
   /** SP-07: preferred locked-field copy format */
   fieldCopyFormat: FieldCopyFormat;
+  /** UX-11: bar mount — above content iframe/header vs very top of the page */
+  barPlacement: BarPlacement;
+  /** UX-11: keep bar visible while the portal document scrolls */
+  barSticky: YesNo;
   schemaVersion: number;
 }
 
@@ -240,8 +251,14 @@ export function createDefaultSettings(): MpuSettings {
     quietEnvPrompt: "No",
     showOnboarding: "No",
     fieldCopyFormat: "record.field",
+    barPlacement: "aboveContent",
+    barSticky: "No",
     schemaVersion: SCHEMA_VERSION,
   };
+}
+
+export function normalizeBarPlacement(v: unknown): BarPlacement {
+  return v === "documentTop" ? "documentTop" : "aboveContent";
 }
 
 export function isYes(v: YesNo | undefined): boolean {

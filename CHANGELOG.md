@@ -4,6 +4,15 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- **Options → Utilities bar placement:** mount **Above content** (default) or at the **Very top of the site**, plus optional **Sticky while scrolling**
+
+### Fixed
+
+- **Open menus vs Classic page actions:** Shortcuts / Admin / Env / Pages menus now close when focus or pointer moves into the content iframe, so they no longer half-cover Run / Process Scheduler controls on run control pages
+- **Classic bar height:** re-ask `ptIframe.resizeAll` when the utilities bar wraps to a taller strip
+
 ## [1.0.23] — 2026-07-23
 
 ### Added

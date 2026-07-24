@@ -77,6 +77,7 @@
 | ~~UX-08~~ | ~~Nav collection / nested iframe Field Inspector polish~~ | Dev | Done in 1.0.12 | Deep `.ps_target-iframe` resolve |
 | ~~UX-09~~ | ~~Options: per-feature **Classic vs Fluid** enablement~~ | BA | Done in 1.0.12 | Inspect + search scopes |
 | ~~UX-10~~ | ~~Export **Page Info + locked field** into Favorites description template~~ | BA | Done in 1.0.12 | Confirm on add |
+| ~~UX-11~~ | ~~Bar **placement** (above content vs document top) + **sticky** while portal scrolls; menus dismiss into content iframe~~ | BA | Done (Unreleased) | Avoid covering Run / Process Scheduler |
 
 ---
 
@@ -207,3 +208,4 @@
 | 2026-07-22 | **v1.0.19** — Shortcuts / Admin nested flyout submenus (fixed positioning, no clip / early close) |
 | 2026-07-22 | **v1.0.20** — Options Features regroup (bar / helpers / careful) + PCode starter dialog clarity |
 | 2026-07-22 | Env flyout (Site/Portal/Node/ToolsRel/Theme/CREF) + Playwright extension UI tests |
+| 2026-07-23 | **UX-11** — bar placement (document top) + sticky; dismiss menus when entering Classic content iframe |

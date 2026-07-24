@@ -169,6 +169,13 @@ function renderFeatures(settings: MpuSettings): void {
   (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked =
     settings.quietEnvPrompt === "Yes";
 
+  const placeSel = document.getElementById("barPlacement") as HTMLSelectElement | null;
+  if (placeSel) {
+    placeSel.value = settings.barPlacement === "documentTop" ? "documentTop" : "aboveContent";
+  }
+  const stickyEl = document.getElementById("barSticky") as HTMLInputElement | null;
+  if (stickyEl) stickyEl.checked = settings.barSticky === "Yes";
+
   const fmtSel = document.getElementById("fieldCopyFormat") as HTMLSelectElement | null;
   if (fmtSel) {
     fmtSel.replaceChildren();
@@ -496,11 +503,21 @@ async function init(): Promise<void> {
     s.quietEnvPrompt = (document.getElementById("quietEnvPrompt") as HTMLInputElement).checked
       ? "Yes"
       : "No";
+    const place = (document.getElementById("barPlacement") as HTMLSelectElement | null)?.value;
+    s.barPlacement = place === "documentTop" ? "documentTop" : "aboveContent";
+    s.barSticky = (document.getElementById("barSticky") as HTMLInputElement | null)?.checked
+      ? "Yes"
+      : "No";
     const fmt = (document.getElementById("fieldCopyFormat") as HTMLSelectElement | null)?.value as
       | FieldCopyFormat
       | undefined;
     s.fieldCopyFormat =
-      fmt === "ampersand" || fmt === "getfield" || fmt === "record.field" ? fmt : "record.field";
+      fmt === "ampersand" ||
+      fmt === "getfield" ||
+      fmt === "getrowset" ||
+      fmt === "record.field"
+        ? fmt
+        : "record.field";
     const scopes = { ...DEFAULT_FEATURE_UI_SCOPES };
     for (const f of SCOPE_LABELS) {
       const el = document.getElementById(`scope-${f.key}`) as HTMLSelectElement | null;
