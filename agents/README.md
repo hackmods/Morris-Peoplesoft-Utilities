@@ -17,6 +17,7 @@ PeopleSoft has a small set of bugs that show up over and over — wrong effectiv
 | Folder | Status | What it does |
 |---|---|---|
 | [`code-review-effdt-joins/`](code-review-effdt-joins/AGENT.md) | **Full** | Reviews PeopleCode/SQL/App Engine/Query snippets for effective-date logic bugs, bad joins, missing keys, and wrong data sources |
+| [`peoplecode-quality/`](peoplecode-quality/AGENT.md) | **Full** | Reviews PeopleCode for code-quality issues: hardcoding vs. meta-SQL (`%Table`, `%List`), unsafe `.Value`/record-field access, declared variable scope/naming, SQL injection risk, error handling, duplication — the one most suited to automating code review at scale |
 | [`security-role-review/`](security-role-review/AGENT.md) | Stub | Reviews permission lists, roles, and row-level/query security patterns |
 | [`mcp-schema-assistant/`](mcp-schema-assistant/AGENT.md) | Stub | An assistant persona designed to drive a read-only PeopleSoft MCP connector (e.g. one your DBA team provides) — see [`TOOL-CONTRACT.md`](mcp-schema-assistant/TOOL-CONTRACT.md) for the tool shapes it expects |
 | [`design-helper/`](design-helper/AGENT.md) | Stub | Helps plan component/page design, Classic vs. Fluid tradeoffs, App Designer structure |

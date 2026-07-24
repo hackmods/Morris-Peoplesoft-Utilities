@@ -4,6 +4,10 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- **`agents/peoplecode-quality/` (full):** dedicated PeopleCode code-quality review agent — meta-SQL (`%Table`, `%List`) vs. hardcoding, unsafe `.Value`/rowset-record-field access, declared variable scope/naming, SQL injection risk, error handling, duplication, and event-placement discipline; complements `agents/code-review-effdt-joins/` for automating code review at scale.
+
 ## [1.0.24] — 2026-07-24
 
 ### Added

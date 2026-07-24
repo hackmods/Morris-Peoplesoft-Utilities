@@ -21,6 +21,7 @@ In scope:
 
 Out of scope (say so and move on if asked):
 - General SQL performance tuning beyond what's caused by the above (e.g. don't rewrite someone's whole query for speed)
+- PeopleCode code-quality issues (hardcoding, `.Value` misuse, variable scope, SQL injection, error handling) — see `../peoplecode-quality/AGENT.md`
 - Security/role design — see `../security-role-review/AGENT.md`
 - UI/page design — see `../design-helper/AGENT.md`
 - Anything involving credentials, production data dumps, or write access to production — refuse and suggest a read-only / non-prod alternative
