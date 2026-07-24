@@ -77,7 +77,7 @@
 | ~~UX-08~~ | ~~Nav collection / nested iframe Field Inspector polish~~ | Dev | Done in 1.0.12 | Deep `.ps_target-iframe` resolve |
 | ~~UX-09~~ | ~~Options: per-feature **Classic vs Fluid** enablement~~ | BA | Done in 1.0.12 | Inspect + search scopes |
 | ~~UX-10~~ | ~~Export **Page Info + locked field** into Favorites description template~~ | BA | Done in 1.0.12 | Confirm on add |
-| ~~UX-11~~ | ~~Bar **placement** (above content vs document top) + **sticky** while portal scrolls; menus dismiss into content iframe~~ | BA | Done (Unreleased) | Avoid covering Run / Process Scheduler |
+| ~~UX-11~~ | ~~Bar **placement** (above content vs document top) + **sticky**; Classic absolute `#ptifrmtarget` offset so the bar does not cover Run / Process Scheduler~~ | BA | Done (Unreleased) | Main bar overlap, not flyout |
 
 ---
 

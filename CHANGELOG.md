@@ -10,8 +10,8 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ### Fixed
 
-- **Open menus vs Classic page actions:** Shortcuts / Admin / Env / Pages menus now close when focus or pointer moves into the content iframe, so they no longer half-cover Run / Process Scheduler controls on run control pages
-- **Classic bar height:** re-ask `ptIframe.resizeAll` when the utilities bar wraps to a taller strip
+- **Classic utilities bar covering page actions:** `#ptifrmtarget` is absolutely positioned, so the bar no longer paints over the top of the content iframe — after `resizeAll`, MPU reserves the bar’s measured height (fixes half-covered Run / Process Scheduler buttons on run control pages). Re-applies when the bar wraps or the window resizes.
+- **Open menus vs Classic page actions:** Shortcuts / Admin / Env / Pages menus also close when focus or pointer moves into the content iframe
 
 ## [1.0.23] — 2026-07-23
 

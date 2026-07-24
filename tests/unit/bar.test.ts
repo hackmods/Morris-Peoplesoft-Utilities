@@ -7,6 +7,8 @@ import {
   showGoToComponentDialog,
   showPageTabsDialog,
   groupFavoritesByCategory,
+  applyClassicContentOffset,
+  clearClassicContentOffset,
 } from "@/features/bar";
 import { buildFavoriteTree, showAddFavoriteDialog } from "@/features/favorites-ui";
 import { createDefaultSettings } from "@/storage/schema";
@@ -151,6 +153,77 @@ describe("utilities bar", () => {
     const target = document.getElementById("ptifrmtarget");
     expect(bar?.nextElementSibling).toBe(target);
     expect(bar?.classList.contains("mpu-bar-classic")).toBe(true);
+  });
+
+  it("offsets absolutely positioned Classic content so the bar does not cover it", () => {
+    document.body.innerHTML = `
+      <div id="ptifrmcontent" style="position:relative;height:600px">
+        <div id="ptifrmtarget" style="position:absolute;top:100px;left:0;width:100%;height:400px">
+          <iframe id="ptifrmtgtframe"></iframe>
+        </div>
+      </div>
+    `;
+    const settings = createDefaultSettings();
+    mountBar({
+      settings,
+      parsed,
+      envLabel: "DEV",
+      fieldInspectorActive: false,
+      traceRunning: false,
+      traceLocked: false,
+      traceSettings: createDefaultSettings().traceSettings,
+      onTraceToggle: vi.fn(),
+      onPageInfo: vi.fn(),
+      onFieldInspector: vi.fn(),
+      onNewWindow: vi.fn(),
+      onAddFavorite: vi.fn(),
+    });
+
+    const bar = document.getElementById("mpu-bar") as HTMLElement;
+    const target = document.getElementById("ptifrmtarget") as HTMLElement;
+    // jsdom layout is flat — simulate Classic absolute frame under the bar strip
+    Object.defineProperty(bar, "getBoundingClientRect", {
+      value: () => ({
+        top: 100,
+        bottom: 136,
+        left: 0,
+        right: 800,
+        width: 800,
+        height: 36,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    Object.defineProperty(target, "getBoundingClientRect", {
+      value: () => ({
+        top: 100,
+        bottom: 500,
+        left: 0,
+        right: 800,
+        width: 800,
+        height: 400,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }),
+    });
+    applyClassicContentOffset(document, bar);
+
+    expect(target.dataset.mpuNudge).toBe("36");
+    expect(target.style.top).toBe("136px");
+    expect(target.style.height).toBe("364px");
+
+    removeBar();
+    expect(target.dataset.mpuNudge).toBeUndefined();
+    expect(target.style.top).toBe("100px");
+    expect(target.style.height).toBe("400px");
+  });
+
+  it("clearClassicContentOffset is a no-op without a prior nudge", () => {
+    document.body.innerHTML = `<div id="ptifrmtarget" style="top:10px"></div>`;
+    clearClassicContentOffset(document);
+    expect((document.getElementById("ptifrmtarget") as HTMLElement).style.top).toBe("10px");
   });
 
   it("opens Env flyout with site / portal / node / ToolsRel / theme / CREF", () => {

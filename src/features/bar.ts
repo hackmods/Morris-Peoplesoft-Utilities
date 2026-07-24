@@ -1039,6 +1039,7 @@ export function showStructureDialog(doc: Document): void {
 export function removeBar(doc: Document = document): void {
   closeAllFlyouts(doc);
   endBarLayoutWatch();
+  clearClassicContentOffset(doc);
   doc.getElementById("mpu-bar")?.remove();
   doc.getElementById("mpu-bar-spacer")?.remove();
   doc.getElementById("mpu-live")?.remove();
@@ -1046,23 +1047,101 @@ export function removeBar(doc: Document = document): void {
   doc.querySelectorAll("body > .mpu-flyout").forEach((el) => el.remove());
 }
 
-/** ResizeObserver that re-asks Classic for iframe layout when the bar wraps. */
+/**
+ * Classic portals absolutely position `#ptifrmtarget`. Inserting the MPU bar as a
+ * previous sibling does not push that frame down — the bar paints over the top of
+ * the content (Run / Process Scheduler buttons). We reserve space by nudging the
+ * target's top/height after PeopleSoft's own resize.
+ */
+export function clearClassicContentOffset(doc: Document = document): void {
+  const target = doc.getElementById("ptifrmtarget") as HTMLElement | null;
+  if (!target?.dataset.mpuNudge) return;
+  if (target.dataset.mpuPsTop !== undefined) {
+    target.style.top = target.dataset.mpuPsTop;
+  }
+  if (target.dataset.mpuPsHeight !== undefined) {
+    target.style.height = target.dataset.mpuPsHeight;
+  }
+  if (target.dataset.mpuPsMarginTop !== undefined) {
+    target.style.marginTop = target.dataset.mpuPsMarginTop;
+  }
+  delete target.dataset.mpuNudge;
+  delete target.dataset.mpuPsTop;
+  delete target.dataset.mpuPsHeight;
+  delete target.dataset.mpuPsMarginTop;
+}
+
+/** Push `#ptifrmtarget` below the utilities bar so page chrome is not covered. */
+export function applyClassicContentOffset(doc: Document, bar: HTMLElement): void {
+  const target = doc.getElementById("ptifrmtarget") as HTMLElement | null;
+  if (!target || !bar.isConnected) return;
+
+  clearClassicContentOffset(doc);
+
+  const barRect = bar.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  // Only reserve space when the bar strip actually covers the content frame
+  // (above-content mount). documentTop with no overlap is a no-op.
+  const overlap = Math.ceil(barRect.bottom - targetRect.top);
+  if (overlap <= 0) return;
+
+  const cs = doc.defaultView?.getComputedStyle(target) ?? getComputedStyle(target);
+  if (cs.position === "absolute" || cs.position === "fixed") {
+    target.dataset.mpuPsTop = target.style.top;
+    target.dataset.mpuPsHeight = target.style.height;
+    const top = parseFloat(cs.top) || 0;
+    const height = parseFloat(cs.height) || targetRect.height;
+    target.style.top = `${top + overlap}px`;
+    if (height > 0) {
+      target.style.height = `${Math.max(50, height - overlap)}px`;
+    }
+    target.dataset.mpuNudge = String(overlap);
+    return;
+  }
+
+  target.dataset.mpuPsMarginTop = target.style.marginTop;
+  const mt = parseFloat(cs.marginTop) || 0;
+  target.style.marginTop = `${mt + overlap}px`;
+  target.dataset.mpuNudge = String(overlap);
+}
+
+/** ResizeObserver / window listeners that keep Classic content clear of the bar. */
 let barLayoutObserver: ResizeObserver | null = null;
+let barLayoutAbort: AbortController | null = null;
 
 function endBarLayoutWatch(): void {
   barLayoutObserver?.disconnect();
   barLayoutObserver = null;
+  barLayoutAbort?.abort();
+  barLayoutAbort = null;
+}
+
+function scheduleClassicLayoutSync(doc: Document, bar: HTMLElement): void {
+  injectResizeFrame(doc, () => applyClassicContentOffset(doc, bar));
 }
 
 function watchBarLayoutForClassicResize(bar: HTMLElement, doc: Document): void {
   endBarLayoutWatch();
+  const ac = new AbortController();
+  barLayoutAbort = ac;
+  const view = doc.defaultView;
+
+  view?.addEventListener(
+    "resize",
+    () => {
+      scheduleClassicLayoutSync(doc, bar);
+    },
+    { signal: ac.signal },
+  );
+
   if (typeof ResizeObserver === "undefined") return;
   let lastH = Math.round(bar.getBoundingClientRect().height);
   barLayoutObserver = new ResizeObserver(() => {
     const h = Math.round(bar.getBoundingClientRect().height);
     if (h <= 0 || h === lastH) return;
     lastH = h;
-    injectResizeFrame(doc);
+    // Bar wrap/unwrap only — restore PS baseline then re-reserve the new height
+    applyClassicContentOffset(doc, bar);
   });
   barLayoutObserver.observe(bar);
 }
@@ -1582,17 +1661,32 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     mount.appendChild(bar);
   }
 
-  // Classic: ask PeopleSoft to shrink the content iframe for the bar height.
-  // resizeAll can rebuild the content iframe and wipe Field Inspector icons.
-  // Re-run when the bar wraps (taller strip) so Run / Process Scheduler buttons
-  // are not half-covered by the utilities chrome.
-  if (classicTarget && !ctx.fieldInspectorActive) {
-    injectResizeFrame(doc);
+  // Classic: `#ptifrmtarget` is usually position:absolute, so the in-flow bar would
+  // otherwise paint over Run / Process Scheduler controls. resizeAll first (PS
+  // baseline), then reserve the measured bar height. Skip resizeAll while Field
+  // Inspector is active — it can rebuild the iframe and wipe icons.
+  if (classicTarget) {
+    applyClassicContentOffset(doc, bar);
+    viewRaf(doc, () => applyClassicContentOffset(doc, bar));
+    if (!ctx.fieldInspectorActive) {
+      scheduleClassicLayoutSync(doc, bar);
+    }
     watchBarLayoutForClassicResize(bar, doc);
   }
 
   doc.body.appendChild(live);
   announce(doc, "Morris PeopleSoft Utilities bar ready");
+}
+
+function viewRaf(doc: Document, fn: () => void): void {
+  const view = doc.defaultView;
+  if (!view) {
+    fn();
+    return;
+  }
+  view.requestAnimationFrame(() => {
+    view.requestAnimationFrame(fn);
+  });
 }
 
 export function announce(doc: Document, message: string): void {
@@ -2015,10 +2109,18 @@ function injectClearBcs(doc: Document): void {
   (doc.head || doc.documentElement).appendChild(s);
 }
 
-function injectResizeFrame(doc: Document): void {
+function injectResizeFrame(doc: Document, after?: () => void): void {
   const url = chrome.runtime.getURL("inject/resize-frame.js");
   const s = doc.createElement("script");
   s.src = url;
-  s.onload = () => s.remove();
+  s.onload = () => {
+    s.remove();
+    // Let PeopleSoft finish applying top/height before we reserve bar space
+    viewRaf(doc, () => after?.());
+  };
+  s.onerror = () => {
+    s.remove();
+    after?.();
+  };
   (doc.head || doc.documentElement).appendChild(s);
 }
