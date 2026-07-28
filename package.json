@@ -36,7 +36,7 @@
     "@eslint/js": "^10.0.1",
     "@types/archiver": "^8.0.0",
     "@types/chrome": "^0.2.2",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "@types/pngjs": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.10",
     "archiver": "^8.0.0",
