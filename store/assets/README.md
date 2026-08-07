@@ -1,6 +1,9 @@
 # Store assets
 
-Generated preview assets for Chrome Web Store listing (`npm run generate:store-assets`).
+Chrome Web Store listing assets. Run `npm run prepare:store` for the complete
+release gate. `generate:store-assets` creates missing screenshot mockups but
+preserves real captures already in this directory; set
+`FORCE_MOCK_SCREENSHOTS=1` only when intentionally rebuilding the mockups.
 
 | File | Size | Role |
 |------|------|------|
@@ -13,6 +16,12 @@ Generated preview assets for Chrome Web Store listing (`npm run generate:store-a
 | `screenshots/04-field-inspector.png` | 1280×800 | Field Inspector hover/lock |
 | `screenshots/05-options.png` | 1280×800 | Options → Features |
 
-Mockups use the real MPU bar/options styling and fictional demo data (`HRDEV`, `JSMITH`, `PSOPRDEFN.*`). They are suitable for draft Store review; replace screenshots with live Classic/Fluid captures (blur sensitive IDs) before final publish.
+Mockups use the real MPU bar/options styling and fictional demo data (`HRDEV`, `JSMITH`, `PSOPRDEFN.*`). They are suitable for draft review only. Before final submission, replace them with 1–5 real PNG captures that are exactly 1280×800 or 640×400 and blur sensitive IDs. The Store audit rejects incorrect dimensions.
+
+Recommended three-shot final set:
+
+1. Classic search page with **Inspect ON**
+2. Classic component page showing the MPU bar and field highlighting
+3. MPU **Options → Features**
 
 Requires Chrome or Edge on PATH (or `CHROME_PATH`) for headless capture. Extension toolbar icons: `npm run generate:icons` (copies the 128 store icon when present).

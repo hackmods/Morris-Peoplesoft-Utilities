@@ -4,6 +4,10 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- Chrome Web Store release prep now preserves real screenshots, validates all listing asset dimensions, runs a dependency audit, and provides one `npm run prepare:store` gate.
+
 ## [1.0.25] — 2026-07-24
 
 ### Added

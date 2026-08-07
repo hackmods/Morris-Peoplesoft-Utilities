@@ -1,6 +1,7 @@
 /**
  * Generate Chrome Web Store listing assets from HTML mockups.
  * Captures exact pixel sizes via headless Chrome (fallback: pngjs placeholders).
+ * Existing screenshots are preserved unless FORCE_MOCK_SCREENSHOTS=1.
  *
  * Outputs under store/assets/:
  *   store-icon-128.png, promo-small-440x280.png, promo-marquee-1400x560.png
@@ -638,9 +639,18 @@ function main() {
   }
 
   for (const [rel, spec] of Object.entries(shots)) {
+    const outPath = resolve(outDir, rel);
+    const isScreenshot = rel.startsWith("screenshots/");
+    if (
+      isScreenshot &&
+      existsSync(outPath) &&
+      process.env.FORCE_MOCK_SCREENSHOTS !== "1"
+    ) {
+      console.log(`Preserved existing ${rel}`);
+      continue;
+    }
     const htmlName = rel.replace(/[\\/]/g, "__").replace(/\.png$/, ".html");
     const htmlPath = resolve(mockDir, htmlName);
-    const outPath = resolve(outDir, rel);
     mkdirSync(dirname(outPath), { recursive: true });
     writeFileSync(htmlPath, spec.html, "utf8");
     let ok = false;

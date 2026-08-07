@@ -5,9 +5,9 @@ See also the prioritized readiness summary: [`docs/release-readiness.md`](../doc
 ## Blocking before Chrome Web Store submit
 
 - [ ] Manual PeopleSoft parity checklist completed ([`docs/testing/manual-parity-checklist.md`](../docs/testing/manual-parity-checklist.md)) on target Classic/Fluid envs
-- [ ] Replace mock screenshots under `store/assets/screenshots/` with real captures (blur sensitive IDs)
+- [ ] Replace mock screenshots under `store/assets/screenshots/` with 1–5 real PNG captures, exactly 1280×800 or 640×400 (blur sensitive IDs)
 - [ ] Refresh upload zip from current `main` (`npm run package` or tag `v1.0.25+` for a new GitHub Release artifact)
-- [ ] `npm run release:check` passes locally and CI is green on `main`
+- [ ] `npm run prepare:store` passes locally and CI is green on `main`
 - [ ] Privacy policy URL reachable (`docs/privacy.md` on GitHub)
 - [ ] Listing copy from `store/listing.md` pasted into dashboard
 - [ ] Privacy practices from `store/privacy-practices.md` completed in dashboard

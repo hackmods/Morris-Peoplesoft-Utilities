@@ -2,7 +2,7 @@
 
 Status for shipping Morris PeopleSoft Utilities as an official Chrome extension.
 
-**As of:** 2026-07-22  
+**As of:** 2026-08-07
 **Repo:** https://github.com/hackmods/Morris-Peoplesoft-Utilities  
 **Latest tagged zip:** [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25)
 
@@ -17,8 +17,8 @@ These must be done before uploading / submitting for review:
 1. **Manual PeopleSoft parity**  
    Complete [`docs/testing/manual-parity-checklist.md`](testing/manual-parity-checklist.md) on real Classic and Fluid environments (bar, favorites, search helpers, trace, field inspector including Classic pages hosted inside Fluid menus/nav collections, allowlist off/on).
 
-2. **Replace mock screenshots**  
-   Files under [`store/assets/screenshots/`](../store/assets/screenshots/) are placeholders. Capture real MPU UI on PeopleSoft (blur sensitive IDs) before Store upload. Prefer five 1280×800 shots.
+2. **Install correctly sized real screenshots**
+   Files generated under [`store/assets/screenshots/`](../store/assets/screenshots/) are placeholders. Use 1–5 real PeopleSoft captures (blur sensitive IDs), each exactly **1280×800 or 640×400**. A strong minimum set is: Classic search with Inspect ON, a Classic component with field highlighting, and Options → Features. `npm run prepare:store` validates the dimensions and preserves installed real captures.
 
 3. **Chrome Web Store Developer Dashboard (human-only)**  
    - Pay developer registration fee (if not already)  
@@ -32,7 +32,7 @@ These must be done before uploading / submitting for review:
 
 4. **Refresh the upload zip from current `main`**  
    Prefer the latest Release zip (currently v1.0.25). Before Store submit either:  
-   - Run `npm run release:check` / `npm run package` locally and upload that zip, **or**  
+   - Run `npm run prepare:store` locally and upload the resulting extension zip, **or**
    - Tag the next patch so GitHub Actions publishes a fresh Release artifact.
 
 Operational checklist: [`store/SUBMISSION_CHECKLIST.md`](../store/SUBMISSION_CHECKLIST.md).
