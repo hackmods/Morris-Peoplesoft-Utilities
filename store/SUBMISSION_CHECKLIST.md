@@ -1,5 +1,6 @@
 # Chrome Web Store submission checklist
 
+**Publish checklist:** [`PUBLISH.md`](PUBLISH.md)  
 **Dashboard walkthrough:** [`DEVELOPER_DASHBOARD.md`](DEVELOPER_DASHBOARD.md)  
 **Readiness summary:** [`docs/release-readiness.md`](../docs/release-readiness.md)
 
