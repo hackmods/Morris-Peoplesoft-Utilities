@@ -29,6 +29,7 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 
 Store listing is in progress. When you are ready to submit:
 
+- [`store/PUBLISH.md`](store/PUBLISH.md) — **start here** (publish checklist)
 - [`store/DEVELOPER_DASHBOARD.md`](store/DEVELOPER_DASHBOARD.md) — step-by-step upload guide
 - [`docs/release-readiness.md`](docs/release-readiness.md) — blocking vs nice-to-have
 - [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md) — dashboard checklist
