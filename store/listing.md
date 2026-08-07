@@ -17,6 +17,7 @@ Morris PeopleSoft Utilities (MPU) helps college business analysts and technical 
 **For technical staff**
 • One-click PeopleCode/SQL trace using your existing PeopleSoft access  
 • Field Inspector to reveal RECORD.FIELD identities on Classic, Fluid, and Classic pages hosted inside Fluid menus/nav collections  
+• Field Entry toolkit for bulk capture / paste / multi-row grids (opt-in)  
 • New Window / deep-link workflows  
 • Customization upgrade watch (UI fingerprint baseline + drift check)  
 

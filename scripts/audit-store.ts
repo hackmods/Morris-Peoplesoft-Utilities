@@ -8,6 +8,14 @@ function need(path: string, label: string) {
   if (!existsSync(resolve(path))) errors.push(`Missing ${label}: ${path}`);
 }
 
+function pngSize(path: string): { w: number; h: number } | null {
+  const abs = resolve(path);
+  if (!existsSync(abs)) return null;
+  const buf = readFileSync(abs);
+  if (buf.length < 24 || buf.toString("ascii", 1, 4) !== "PNG") return null;
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+
 need("store/listing.md", "listing copy");
 need("store/privacy-practices.md", "privacy practices");
 need("store/SUBMISSION_CHECKLIST.md", "submission checklist");
@@ -16,6 +24,25 @@ need("store/assets/store-icon-128.png", "store icon");
 need("store/assets/screenshots/01-utilities-bar.png", "screenshot");
 need("docs/privacy.md", "privacy policy");
 need("public/icons/icon128.png", "extension icon");
+
+const shotChecks: Array<{ path: string; w: number; h: number }> = [
+  { path: "store/assets/store-icon-128.png", w: 128, h: 128 },
+  { path: "store/assets/promo-small-440x280.png", w: 440, h: 280 },
+  { path: "store/assets/screenshots/01-utilities-bar.png", w: 1280, h: 800 },
+];
+for (const { path, w, h } of shotChecks) {
+  const dims = pngSize(path);
+  if (!dims) continue;
+  if (dims.w !== w || dims.h !== h) {
+    errors.push(`${path} must be ${w}x${h} (got ${dims.w}x${dims.h})`);
+  }
+}
+
+if (!existsSync(resolve("store/assets/screenshots/LIVE_CAPTURES.md"))) {
+  warnings.push(
+    "store/assets/screenshots/LIVE_CAPTURES.md missing — import live captures before Store upload (npm run import:store-screenshots)",
+  );
+}
 
 const manifestPath = resolve("dist/manifest.json");
 if (existsSync(manifestPath)) {

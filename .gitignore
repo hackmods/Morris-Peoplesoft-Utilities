@@ -19,3 +19,9 @@ blob-report/
 
 # Local legacy oracle — keep untracked by default (large vendor tree)
 .reference/
+
+# Screenshot drop-folder (keep README / gitkeep only)
+store/assets/screenshots/_inbox/*
+!store/assets/screenshots/_inbox/README.md
+!store/assets/screenshots/_inbox/.gitkeep
+store/assets/_mock/

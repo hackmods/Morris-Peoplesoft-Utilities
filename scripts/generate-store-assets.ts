@@ -626,6 +626,10 @@ function fallbackPng(path: string, w: number, h: number) {
   writeFileSync(path, PNG.sync.write(png));
 }
 
+function isScreenshot(rel: string): boolean {
+  return rel.startsWith("screenshots/");
+}
+
 function main() {
   mkdirSync(shotDir, { recursive: true });
   mkdirSync(mockDir, { recursive: true });
@@ -637,11 +641,19 @@ function main() {
     console.log(`Using browser: ${chrome}`);
   }
 
+  // Preserve committed live captures unless FORCE_STORE_SCREENSHOTS=1.
+  // CI/release must not clobber real PeopleSoft screenshots with HTML mocks.
+  const forceShots = process.env.FORCE_STORE_SCREENSHOTS === "1";
+
   for (const [rel, spec] of Object.entries(shots)) {
-    const htmlName = rel.replace(/[\\/]/g, "__").replace(/\.png$/, ".html");
-    const htmlPath = resolve(mockDir, htmlName);
     const outPath = resolve(outDir, rel);
     mkdirSync(dirname(outPath), { recursive: true });
+    if (isScreenshot(rel) && existsSync(outPath) && !forceShots) {
+      console.log(`Keeping existing ${rel} (set FORCE_STORE_SCREENSHOTS=1 to regenerate mocks)`);
+      continue;
+    }
+    const htmlName = rel.replace(/[\\/]/g, "__").replace(/\.png$/, ".html");
+    const htmlPath = resolve(mockDir, htmlName);
     writeFileSync(htmlPath, spec.html, "utf8");
     let ok = false;
     if (chrome) ok = capture(chrome, htmlPath, outPath, spec.w, spec.h);

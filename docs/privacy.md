@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-07-23  
+**Last updated:** 2026-08-07  
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome extension)
 

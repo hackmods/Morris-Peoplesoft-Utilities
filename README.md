@@ -60,7 +60,7 @@ MPU targets **WCAG 2.1 Level AA** for extension UI and the injected utilities ba
 
 ## Screenshots
 
-Preview assets live under [`store/assets/screenshots/`](store/assets/screenshots/). Replace with live PeopleSoft captures before Store submission.
+Store listing shots live under [`store/assets/screenshots/`](store/assets/screenshots/). For Store submit, drop live PeopleSoft captures into `store/assets/screenshots/_inbox/` and run `npm run import:store-screenshots` (see [`docs/release-readiness.md`](docs/release-readiness.md)).
 
 ## Testing
 
@@ -91,6 +91,7 @@ Manual PeopleSoft parity: [`docs/testing/manual-parity-checklist.md`](docs/testi
 npm ci
 npm run generate:icons
 npm run generate:store-assets
+npm run import:store-screenshots   # after dropping live PNGs in store/assets/screenshots/_inbox/
 npm run lint
 npm run test:coverage
 npm run audit

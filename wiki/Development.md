@@ -4,6 +4,7 @@
 npm ci
 npm run generate:icons
 npm run generate:store-assets
+npm run import:store-screenshots   # after dropping live PNGs in store/assets/screenshots/_inbox/
 npm run lint
 npm run test:unit
 npm run audit
@@ -11,7 +12,7 @@ npm run build
 npm run package
 ```
 
-CI runs on pull requests and `main`. Tag `v*` to publish a Release zip.
+CI runs on pull requests and `main`. Tag `v*` to publish a Release zip. Existing screenshot PNGs are preserved unless `FORCE_STORE_SCREENSHOTS=1`.
 
 ## Roadmap / agent knowledge
 

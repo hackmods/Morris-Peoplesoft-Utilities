@@ -4,6 +4,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.26] — 2026-08-07
+
+### Changed
+
+- **Chrome Web Store release prep:** submission checklist + release readiness updated for live screenshot import; `npm run import:store-screenshots` letterboxes captures to 1280×800; `generate:store-assets` / CI no longer overwrite existing screenshot files (use `FORCE_STORE_SCREENSHOTS=1` only to regenerate mocks)
+
 ## [1.0.25] — 2026-07-24
 
 ### Added
