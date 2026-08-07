@@ -12,6 +12,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ### Changed
 
+- **Store listing screenshots:** `01` (Roles search + Inspect), `04` (Field Inspector lock bar), and `05` (Options Features) refreshed via `npm run capture:store-screenshots`; `02` Favorites and `03` Page Info unchanged
 - **Release workflow** no longer runs `generate:store-assets` on tag (avoids overwriting committed listing screenshots)
 - **`generate:store-assets`** skips screenshot regeneration when `store/assets/screenshots/.live-captures` exists or `SKIP_STORE_SCREENSHOTS=1`
 - Submission checklist and release-readiness docs updated for dashboard upload

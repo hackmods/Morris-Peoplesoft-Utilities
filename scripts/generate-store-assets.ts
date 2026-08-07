@@ -162,6 +162,36 @@ const SHARED_CSS = `
   }
   .fav-open div { padding: 0.35rem 0.65rem; }
   .fav-open .sel { background: ${COLORS.gold}; color: #1a1a1a; font-weight: 650; }
+  .mpu-bar-row2 {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem;
+    padding: 0.25rem 0.6rem; background: #1a3344; color: ${COLORS.cream};
+    font: 600 11px/1.3 ui-monospace, Consolas, monospace;
+    border-bottom: 1px solid ${COLORS.gold};
+  }
+  .mpu-bar-row2 .grow { flex: 1; min-width: 12rem; }
+  .mpu-bar-row2 .hi { color: ${COLORS.goldLite}; }
+  .inspect-dot {
+    display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%;
+    background: ${COLORS.amber}; margin-right: 0.2rem; vertical-align: middle;
+  }
+  .ps-inspect {
+    outline: 2px solid ${COLORS.amber}; outline-offset: 1px; position: relative;
+  }
+  .ps-tabs {
+    display: flex; gap: 0; border-bottom: 2px solid ${COLORS.psBlue};
+    margin: 0 0 0.75rem; font: 600 13px "Segoe UI";
+  }
+  .ps-tabs span {
+    padding: 0.45rem 0.85rem; background: #e8eef2; border: 1px solid ${COLORS.border};
+    border-bottom: none; margin-right: 2px; color: ${COLORS.muted};
+  }
+  .ps-tabs .on { background: #fff; color: ${COLORS.psBlue}; border-top: 3px solid ${COLORS.psBlue}; }
+  .search-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 2rem; max-width: 46rem;
+  }
+  .search-field label { display: block; font: 600 12px "Segoe UI"; color: ${COLORS.muted}; margin-bottom: 0.25rem; }
+  .search-row { display: flex; gap: 0.35rem; align-items: center; }
+  .search-row select { font: inherit; font-size: 12px; }
 `;
 
 function shell(htmlBody: string, width: number, height: number, extraCss = ""): string {
@@ -207,6 +237,109 @@ function mpuBar(opts: {
   </div>`;
 }
 
+function mpuBarRoles(opts: {
+  inspectOn?: boolean;
+  statusLine?: string;
+  copyField?: boolean;
+} = {}): string {
+  const inspect = opts.inspectOn
+    ? `<button class="mpu-btn" aria-pressed="true">Inspect ON</button>`
+    : `<button class="mpu-btn">Inspect</button>`;
+  const status = opts.statusLine
+    ? `<div class="mpu-bar-row2" role="status">
+        <span class="grow"><span class="hi">LABEL</span> ${opts.statusLine}</span>
+        ${opts.copyField ? `<button class="mpu-btn">Copy field</button>` : ""}
+      </div>`
+    : "";
+  return `
+  <div class="mpu-bar" role="toolbar" aria-label="Morris PeopleSoft Utilities">
+    <span class="mpu-brand">MPU</span>
+    <span class="mpu-env" style="border-color:#6b9fd4">CLASSIC</span>
+    <span class="mpu-env">HRDEV</span>
+    <button class="mpu-btn">Shortcuts</button>
+    <select class="mpu-select" aria-label="Recent pages"><option>Recent…</option></select>
+    <span style="flex:1"></span>
+    <button class="mpu-btn">Page Info</button>
+    <button class="mpu-btn">PCode</button>
+    <button class="mpu-btn">Structure</button>
+    <button class="mpu-btn">Admin</button>
+    ${inspect}
+    <button class="mpu-btn">Entry</button>
+    <button class="mpu-btn">Pages</button>
+    <button class="mpu-btn">Go to</button>
+    <button class="mpu-btn">?</button>
+  </div>${status}`;
+}
+
+function psRolesChrome(): string {
+  return `
+  <div class="ps-chrome">
+    <span class="ps-logo">PeopleSoft</span>
+    <span>Enterprise PeopleTools · Demo</span>
+    <span class="ps-search">Search…</span>
+  </div>`;
+}
+
+function rolesSearchPage(): string {
+  return `
+  ${psRolesChrome()}
+  <div class="ps-page">
+    <h1 class="ps-title ps-inspect"><span class="inspect-dot"></span>Roles</h1>
+    <p class="ps-inspect" style="font:500 13px Segoe UI;color:${COLORS.muted};margin:-0.35rem 0 0.85rem">
+      <span class="inspect-dot"></span>Find an Existing Value
+    </p>
+    <div class="search-grid">
+      <div class="search-field ps-inspect">
+        <label><span class="inspect-dot"></span>Role Name</label>
+        <div class="search-row">
+          <select><option>begins with</option></select>
+          <input class="ps-input" style="max-width:none;flex:1" value="" />
+        </div>
+      </div>
+      <div class="search-field ps-inspect">
+        <label><span class="inspect-dot"></span>Description</label>
+        <div class="search-row">
+          <select><option>begins with</option></select>
+          <input class="ps-input" style="max-width:none;flex:1" value="" />
+        </div>
+      </div>
+    </div>
+    <div class="ps-actions">
+      <button class="primary ps-inspect">Search</button>
+      <button class="ps-inspect">Clear</button>
+      <button class="ps-inspect" style="margin-left:auto">Add a New Value</button>
+    </div>
+  </div>`;
+}
+
+function rolesDetailPage(): string {
+  return `
+  ${psRolesChrome()}
+  <div class="ps-nav">PeopleTools &gt; Security &gt; <strong>Roles</strong></div>
+  <div class="ps-page">
+    <h1 class="ps-title">Roles</h1>
+    <div class="ps-card">
+      <div class="ps-grid">
+        <label class="ps-inspect"><span class="inspect-dot"></span>Role Name</label>
+        <input class="ps-input field-lock" value="ALLPANELS" />
+        <label class="ps-inspect"><span class="inspect-dot"></span>Description</label>
+        <input class="ps-input" value="All Panels" />
+      </div>
+      <div class="ps-tabs">
+        <span>General</span><span>Members</span><span class="on">Dynamic Members</span><span>History</span>
+      </div>
+      <div class="ps-grid" style="margin-top:0.5rem">
+        <label class="ps-inspect"><span class="inspect-dot"></span>Directory Rule Enabled</label>
+        <input type="checkbox" class="field-lock" checked />
+      </div>
+      <div class="ps-actions">
+        <button class="primary">Save</button>
+        <button>Return to Search</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function psPage(content: string): string {
   return `
   <div class="ps-chrome">
@@ -244,11 +377,7 @@ const shots: Record<string, { w: number; h: number; html: string }> = {
   "screenshots/01-utilities-bar.png": {
     w: 1280,
     h: 800,
-    html: shell(
-      `${mpuBar()}${psPage(formCard())}<div class="caption">MPU utilities bar on PeopleSoft</div>`,
-      1280,
-      800,
-    ),
+    html: shell(`${mpuBarRoles({ inspectOn: true })}${rolesSearchPage()}`, 1280, 800),
   },
   "screenshots/02-favorites.png": {
     w: 1280,
@@ -298,28 +427,11 @@ App Server: APPSRV-DEMO</pre>
     w: 1280,
     h: 800,
     html: shell(
-      `${mpuBar({ inspectOn: true })}
-      ${psPage(`
-        <h1 class="ps-title">User Profiles</h1>
-        <div class="ps-card">
-          <div class="ps-grid">
-            <label>User ID</label>
-            <input class="ps-input field-lock" id="PSOPRDEFN_OPRID" value="JSMITH" />
-            <label>Description</label>
-            <input class="ps-input field-hi" id="PSOPRDEFN_OPRDEFNDESC" value="Jane Smith (demo)" />
-            <label>Symbolic ID</label>
-            <input class="ps-input" id="PSOPRDEFN_SYMBOLICID" value="SYSADM1" />
-            <label>Language</label>
-            <input class="ps-input" id="PSOPRDEFN_LANGUAGE_CD" value="ENG" />
-          </div>
-          <div class="ps-actions">
-            <button class="primary">Save</button>
-            <button>Return to Search</button>
-          </div>
-        </div>
-      `)}
-      <div class="mpu-field-tip" style="left: 28rem; top: 17.5rem;">PSOPRDEFN.OPRDEFNDESC</div>
-      <div class="caption">Field Inspector — hover RECORD.FIELD</div>`,
+      `${mpuBarRoles({
+        inspectOn: true,
+        statusLine: "Directory Rule Enabled . HTML checkbox . ID PSROLEDEFN_LDAP_RULE_ON",
+        copyField: true,
+      })}${rolesDetailPage()}`,
       1280,
       800,
     ),
@@ -330,12 +442,14 @@ App Server: APPSRV-DEMO</pre>
     html: shell(
       `<div class="opts">
         <header class="top">
-          <h1>Morris PeopleSoft Utilities</h1>
-          <p>Configure features for business analysts and technical staff. Data stays on this device.</p>
+          <p class="brand">Morris PeopleSoft Utilities</p>
+          <h1>Options</h1>
+          <p class="lede">Tune the utilities bar for Classic and Fluid. Everything stays in <code>chrome.storage.local</code> on this device — no passwords, no telemetry.</p>
         </header>
         <nav class="tabs">
           <span class="tab on">Features</span>
           <span class="tab">Favorites</span>
+          <span class="tab">Upgrade</span>
           <span class="tab">Tracing</span>
           <span class="tab">Environments</span>
           <span class="tab">Host allowlist</span>
@@ -343,51 +457,74 @@ App Server: APPSRV-DEMO</pre>
         </nav>
         <section class="panel">
           <h2>Features</h2>
-          <label class="row"><input type="checkbox" checked disabled /> Show User ID</label>
-          <label class="row"><input type="checkbox" checked disabled /> Environment indicator</label>
-          <label class="row"><input type="checkbox" checked disabled /> Favorites</label>
-          <label class="row"><input type="checkbox" checked disabled /> Tracing</label>
-          <label class="row"><input type="checkbox" checked disabled /> Page Information</label>
-          <label class="row"><input type="checkbox" checked disabled /> Field Inspector</label>
-          <label class="row"><input type="checkbox" checked disabled /> New Window</label>
-          <label class="row"><input type="checkbox" checked disabled /> Auto-expand Advanced Search</label>
-          <label class="row"><input type="checkbox" disabled /> Auto-select Correct History</label>
-          <label class="row"><input type="checkbox" disabled /> Show bar on login page</label>
-          <label class="row quiet"><input type="checkbox" disabled /> Quiet mode — don’t prompt to name new environments</label>
-          <button class="primary" type="button">Save features</button>
+          <p class="panel-lede">Essentials and page helpers are on by default. Optional / careful items stay off until you need them.</p>
+          <div class="onboarding">
+            <h3>Welcome — quick checklist</h3>
+            <ol>
+              <li>Open a PeopleSoft Classic or Fluid page</li>
+              <li>Confirm the MPU bar appears (Environment / Page Info / Inspect)</li>
+              <li>Add a Shortcut with ★ (optional notes)</li>
+              <li>Optional: set Trace presets if you have UTILITIES security</li>
+            </ol>
+            <button class="primary" type="button">Got it — dismiss</button>
+          </div>
+          <div class="feature-group">
+            <h3 class="fg-title">Utilities bar</h3>
+            <p class="fg-desc">Orientation and navigation on every PeopleSoft page. Recommended on.</p>
+            <label class="row"><span>Environment indicator</span><input type="checkbox" checked disabled /></label>
+            <label class="row"><span>Show User ID</span><input type="checkbox" disabled /></label>
+            <label class="row"><span>Shortcuts</span><input type="checkbox" checked disabled /></label>
+            <label class="row"><span>Page Information</span><input type="checkbox" checked disabled /></label>
+          </div>
         </section>
-        <div class="caption">Options — local-only settings, no passwords or telemetry</div>
       </div>`,
       1280,
       800,
       `
       .opts {
-        --bg: #eef2f5; --card: #fff; --fg: #14202b; --accent: #1f3a4d;
-        --gold: #b8922a; --border: #c5d0d8;
+        --bg: #0e151c; --card: #182430; --fg: #e8eef2; --accent: #9ec9e6;
+        --gold: #e0c15a; --border: #314556;
         min-height: 100%; background:
-          radial-gradient(ellipse at top left, color-mix(in srgb, var(--gold) 18%, transparent), transparent 45%),
+          radial-gradient(ellipse 80% 50% at 0% -10%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 55%),
           var(--bg);
         color: var(--fg); font: 16px/1.45 "Segoe UI", system-ui, sans-serif;
       }
-      .top, .tabs { max-width: 960px; margin: 0 auto; padding: 1rem 1.25rem; }
-      .top h1 { margin: 0 0 0.35rem; color: var(--accent); font-size: 1.75rem; }
-      .top p { margin: 0; opacity: 0.9; }
+      code { font: 500 0.9em ui-monospace, Consolas, monospace; }
+      .top, .tabs, .panel { max-width: 920px; margin: 0 auto; padding: 0.85rem 1.1rem; }
+      .brand { margin: 0; font-weight: 650; color: var(--accent); letter-spacing: 0.02em; }
+      .top h1 { margin: 0.15rem 0 0.35rem; font-size: 1.65rem; }
+      .lede { margin: 0; color: color-mix(in srgb, var(--fg) 88%, transparent); max-width: 42rem; }
       .tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; padding-top: 0; }
       .tab {
         border: 1px solid var(--border); background: var(--card); color: var(--fg);
         border-radius: 999px; padding: 0.35rem 0.85rem; font: inherit;
       }
-      .tab.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .tab.on { background: var(--accent); color: #0e151c; border-color: var(--accent); font-weight: 650; }
       .panel {
         background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-        padding: 1rem 1.25rem 1.25rem; margin: 0 auto 2rem; max-width: 960px;
+        padding: 1rem 1.15rem 1.1rem; margin-bottom: 1rem;
+        box-shadow: 0 12px 32px color-mix(in srgb, #000 35%, transparent);
       }
-      .panel h2 { margin: 0 0 0.65rem; }
-      .row { display: flex; align-items: center; gap: 0.6rem; margin: 0.4rem 0; }
-      .row.quiet { margin-top: 0.75rem; }
+      .panel h2 { margin: 0 0 0.35rem; }
+      .panel-lede { margin: 0 0 0.75rem; color: color-mix(in srgb, var(--fg) 75%, transparent); font-size: 0.95rem; }
+      .onboarding {
+        border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--border));
+        background: color-mix(in srgb, var(--gold) 10%, var(--card));
+        border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 0.85rem;
+      }
+      .onboarding h3 { margin: 0 0 0.35rem; font-size: 1rem; color: var(--gold); }
+      .onboarding ol { margin: 0 0 0.55rem 1.1rem; padding: 0; font-size: 0.92rem; }
+      .feature-group { margin-top: 0.35rem; }
+      .fg-title { margin: 0 0 0.2rem; font-size: 1rem; }
+      .fg-desc { margin: 0 0 0.45rem; font-size: 0.88rem; color: color-mix(in srgb, var(--fg) 72%, transparent); }
+      .row {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 0.6rem; margin: 0.35rem 0; padding: 0.35rem 0.45rem; border-radius: 6px;
+        background: color-mix(in srgb, var(--accent) 8%, var(--card));
+      }
       .primary {
-        margin-top: 0.85rem; background: var(--accent); color: #fff;
-        border: 1px solid var(--accent); border-radius: 6px; padding: 0.4rem 0.8rem; font: inherit;
+        background: var(--accent); color: #0e151c; border: 1px solid var(--accent);
+        border-radius: 6px; padding: 0.4rem 0.75rem; font: 650 inherit;
       }
       `,
     ),
@@ -638,6 +775,9 @@ function main() {
   }
 
   for (const [rel, spec] of Object.entries(shots)) {
+    const only = process.env.GENERATE_STORE_ONLY?.split(",").map((s) => s.trim()).filter(Boolean);
+    if (only?.length && !only.includes(rel)) continue;
+
     const outPath = resolve(outDir, rel);
     const isScreenshot = rel.startsWith("screenshots/");
     if (

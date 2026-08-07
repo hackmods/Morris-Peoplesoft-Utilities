@@ -20,7 +20,11 @@ Use either the final filename or a short alias:
 | `04-field-inspector.png` or `field-inspector.png` | Field Inspector (Inspect ON) |
 | `05-options.png` or `options.png` | Options → Features |
 
-Chrome Web Store allows up to five screenshots; you can submit with three and add more later.
+## Override with your own PNGs
+
+If you have **real** browser captures (recommended for final publish), drop them in this folder and run `npm run import:store-screenshots` — that replaces the generated files below.
+
+`npm run capture:store-screenshots` refreshes **01 / 04 / 05** from listing mock HTML (Roles + Options layout) and leaves **02 / 03** unchanged.
 
 **Privacy:** blur or crop user IDs, hostnames, or business keys you do not want on a public listing.
 

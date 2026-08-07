@@ -16,6 +16,7 @@
     "audit:a11y": "vitest run tests/a11y",
     "audit:store": "tsx scripts/audit-store.ts",
     "import:store-screenshots": "tsx scripts/import-store-screenshots.ts",
+    "capture:store-screenshots": "tsx scripts/capture-listing-screenshots.ts",
     "prep:store": "npm run audit:store && npm run package",
     "audit:compliance": "tsx scripts/audit-compliance.ts",
     "audit": "npm run audit:a11y && npm run audit:store && npm run audit:compliance",
