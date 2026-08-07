@@ -14,8 +14,8 @@ Code, CI, audits, privacy docs, Store asset pack, and GitHub product surface are
 
 These must be done before uploading / submitting for review:
 
-1. **Manual PeopleSoft parity**  
-   Complete [`docs/testing/manual-parity-checklist.md`](testing/manual-parity-checklist.md) on real Classic and Fluid environments (bar, favorites, search helpers, trace, field inspector including Classic pages hosted inside Fluid menus/nav collections, allowlist off/on).
+1. **Manual PeopleSoft parity — complete 2026-08-07**
+   The user confirmed [`docs/testing/manual-parity-checklist.md`](testing/manual-parity-checklist.md) on real Classic and Fluid environments (bar, favorites, search helpers, trace, field inspector including Classic pages hosted inside Fluid menus/nav collections, allowlist off/on).
 
 2. **Install correctly sized real screenshots**
    Files generated under [`store/assets/screenshots/`](../store/assets/screenshots/) are placeholders. Use 1–5 real PeopleSoft captures (blur sensitive IDs), each exactly **1280×800 or 640×400**. A strong minimum set is: Classic search with Inspect ON, a Classic component with field highlighting, and Options → Features. `npm run prepare:store` validates the dimensions and preserves installed real captures.
