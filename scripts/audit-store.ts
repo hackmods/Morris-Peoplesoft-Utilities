@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { validateStoreScreenshots } from "./validate-store-screenshots.js";
 
 const errors: string[] = [];
 const warnings: string[] = [];
@@ -12,8 +13,12 @@ need("store/listing.md", "listing copy");
 need("store/privacy-practices.md", "privacy practices");
 need("store/SUBMISSION_CHECKLIST.md", "submission checklist");
 need("store/assets/promo-small-440x280.png", "small promo");
+need("store/assets/promo-marquee-1400x560.png", "marquee promo");
 need("store/assets/store-icon-128.png", "store icon");
-need("store/assets/screenshots/01-utilities-bar.png", "screenshot");
+for (const issue of validateStoreScreenshots()) {
+  if (issue.level === "error") errors.push(issue.message);
+  else warnings.push(issue.message);
+}
 need("docs/privacy.md", "privacy policy");
 need("public/icons/icon128.png", "extension icon");
 

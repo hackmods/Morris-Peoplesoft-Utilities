@@ -4,6 +4,18 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+## [1.0.26] — 2026-08-07
+
+### Added
+
+- **Chrome Web Store submit path:** [`store/DEVELOPER_DASHBOARD.md`](store/DEVELOPER_DASHBOARD.md) walkthrough, [`store/incoming/`](store/incoming/README.md) + `npm run import:store-screenshots`, `npm run prep:store`, screenshot captions, mock-hash warnings in `audit:store`
+
+### Changed
+
+- **Release workflow** no longer runs `generate:store-assets` on tag (avoids overwriting committed listing screenshots)
+- **`generate:store-assets`** skips screenshot regeneration when `store/assets/screenshots/.live-captures` exists or `SKIP_STORE_SCREENSHOTS=1`
+- Submission checklist and release-readiness docs updated for dashboard upload
+
 ## [1.0.25] — 2026-07-24
 
 ### Added

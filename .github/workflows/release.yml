@@ -18,7 +18,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run generate:icons
-      - run: npm run generate:store-assets
       - run: npm run release:check
       - name: Upload release assets
         uses: softprops/action-gh-release@v3

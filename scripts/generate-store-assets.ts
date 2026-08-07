@@ -638,9 +638,21 @@ function main() {
   }
 
   for (const [rel, spec] of Object.entries(shots)) {
+    const outPath = resolve(outDir, rel);
+    const isScreenshot = rel.startsWith("screenshots/");
+    if (
+      isScreenshot &&
+      (process.env.SKIP_STORE_SCREENSHOTS === "1" ||
+        existsSync(resolve(shotDir, ".live-captures")))
+    ) {
+      if (existsSync(outPath)) {
+        console.log(`Skipping ${rel} (live captures present)`);
+        continue;
+      }
+      console.warn(`SKIP_STORE_SCREENSHOTS set but ${rel} missing — generating mock`);
+    }
     const htmlName = rel.replace(/[\\/]/g, "__").replace(/\.png$/, ".html");
     const htmlPath = resolve(mockDir, htmlName);
-    const outPath = resolve(outDir, rel);
     mkdirSync(dirname(outPath), { recursive: true });
     writeFileSync(htmlPath, spec.html, "utf8");
     let ok = false;

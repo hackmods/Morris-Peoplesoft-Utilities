@@ -1,6 +1,6 @@
 {
   "name": "morris-peoplesoft-utilities",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "private": true,
   "description": "Morris PeopleSoft Utilities — Chrome extension for PeopleSoft Classic and Fluid productivity",
   "type": "module",
@@ -15,6 +15,8 @@
     "test:a11y": "vitest run tests/a11y",
     "audit:a11y": "vitest run tests/a11y",
     "audit:store": "tsx scripts/audit-store.ts",
+    "import:store-screenshots": "tsx scripts/import-store-screenshots.ts",
+    "prep:store": "npm run audit:store && npm run package",
     "audit:compliance": "tsx scripts/audit-compliance.ts",
     "audit": "npm run audit:a11y && npm run audit:store && npm run audit:compliance",
     "test:all": "npm run lint && npm run test:coverage && npm run audit && npm run build && npm run audit:store",

@@ -27,10 +27,11 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 
 ### Chrome Web Store (recommended)
 
-Store listing is in progress. See:
+Store listing is in progress. When you are ready to submit:
 
-- [`docs/release-readiness.md`](docs/release-readiness.md) — blocking vs nice-to-have before submit
-- [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md) — dashboard upload checklist
+- [`store/DEVELOPER_DASHBOARD.md`](store/DEVELOPER_DASHBOARD.md) — step-by-step upload guide
+- [`docs/release-readiness.md`](docs/release-readiness.md) — blocking vs nice-to-have
+- [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md) — dashboard checklist
 
 When published, this section will link the Store URL.
 
@@ -60,7 +61,13 @@ MPU targets **WCAG 2.1 Level AA** for extension UI and the injected utilities ba
 
 ## Screenshots
 
-Preview assets live under [`store/assets/screenshots/`](store/assets/screenshots/). Replace with live PeopleSoft captures before Store submission.
+Listing images (1280×800) live under [`store/assets/screenshots/`](store/assets/screenshots/). Import live PeopleSoft captures with [`store/incoming/`](store/incoming/README.md) and `npm run import:store-screenshots`.
+
+| Utilities bar | Field Inspector | Options |
+|:---:|:---:|:---:|
+| ![MPU utilities bar](store/assets/screenshots/01-utilities-bar.png) | ![Field Inspector](store/assets/screenshots/04-field-inspector.png) | ![Options Features](store/assets/screenshots/05-options.png) |
+
+Replace mocks with your Classic/Fluid captures before the public Store listing (`npm run audit:store` warns while mocks remain).
 
 ## Testing
 
@@ -95,8 +102,8 @@ npm run lint
 npm run test:coverage
 npm run audit
 npm run build
-npm run package          # zip for CWS / GitHub Release
-npm run release:check    # full gate
+npm run import:store-screenshots  # live CWS screenshots from store/incoming/
+npm run prep:store                # audit + extension zip for dashboard upload
 ```
 
 See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
@@ -114,7 +121,7 @@ Covers PeopleTools 8.5x–8.6x / PS 8.56: data & PeopleCode review, SQL authorin
 
 Tagged versions (`v*`) publish the Chrome Web Store zip **and** the agents prompt zip via GitHub Actions. Prefer installing the extension from the Store once live; use Release artifacts for review builds.
 
-Latest: [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25)
+Latest: tag **`v1.0.26`** after merge, or run `npm run prep:store` for a local upload zip. Previous: [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25).
 
 ## Credits
 
