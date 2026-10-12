@@ -14,10 +14,10 @@ Or in one step: `npm run test:e2e` (builds first).
 
 ## Notes
 
-- Chromium runs **headed** (`headless: false`) because extension loading is unreliable in headless.
+- Chromium uses the full `chromium` channel in headless mode with a temporary profile.
 - Fixture server: `http://127.0.0.1:4173` with paths like `/psp/ps/EMPLOYEE/HRMS/c/MENU.COMP.GBL`.
 - Settings are seeded via `chrome.storage.local` (`quietEnvPrompt: Yes`, env label `DEV`) so the env naming prompt never blocks.
-- Not part of `release:check` (display / extension constraints). Run before Store uploads when UI changes.
+- Not part of `release:check`; run separately before Store uploads. Playwright's Chromium must be installed.
 
 ## Coverage
 
@@ -26,7 +26,12 @@ Or in one step: `npm run test:e2e` (builds first).
 - Page Info dialog
 - Shortcuts flyout
 - Options + popup pages
-- **Field Entry** (`field-entry.spec.ts`): Fluid + modal capture/paste/apply; From sheet; Find/Replace; Classic multi-row grid + Add Row
+- **Field Entry** (`field-entry.spec.ts`): Fluid + modal capture/paste/apply; From sheet; Find/Replace; Classic multi-row grid after the user clicks Add Row; Preview never adds rows
+- Rendered axe checks with contrast enabled: extension pages, bar/flyouts, primary dialogs, Field Entry previews/profile dialogs (all reported WCAG 2A/2AA/2.1AA violations fail)
+- Menu/submenu arrows, Home/End, Escape focus return, Tab exit, modal focus wrap, and 320 CSS-pixel bar/dialog bounds
+- Blocked-host shortcuts/snapshots and multi-tab recent-history stability
+
+Synthetic fixtures do not establish real PeopleTools 8.62 compatibility. The narrow viewport is a reflow proxy, not a full browser zoom or screen-reader test. See `docs/testing/peopletools-8.62.md` for remaining release evidence.
 
 ## Field Entry fixtures
 

@@ -213,7 +213,7 @@ export const FIELD_COPY_FORMATS: Array<{ id: FieldCopyFormat; label: string; exa
   {
     id: "getrowset",
     label: "GetRowset…GetField",
-    example: "GetLevel0().GetRow(1).GetRecord(Record.JOB).GetField(Field.EMPLID)",
+    example: "GetRow().GetRecord(Record.JOB).GetField(Field.EMPLID)",
   },
 ];
 

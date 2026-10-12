@@ -591,7 +591,7 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-ui-mode")?.textContent).toBeTruthy();
     const shortcutsBtn = document.getElementById("mpu-fav");
     expect(shortcutsBtn?.textContent).toBe("Shortcuts");
-    expect(shortcutsBtn?.getAttribute("aria-haspopup")).toBe("menu");
+    expect(shortcutsBtn?.getAttribute("aria-haspopup")).toBe("dialog");
     shortcutsBtn?.click();
     expect(shortcutsBtn?.getAttribute("aria-expanded")).toBe("true");
     expect(document.querySelector(".mpu-flyout")).toBeTruthy();

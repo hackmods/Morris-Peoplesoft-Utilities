@@ -31,7 +31,7 @@ const SQL_OPTS: TraceOpt[] = [
   { key: "SQL0001", elId: "TRACE_SQL_TRACE_SQL_STMT" },
   { key: "SQL0002", elId: "TRACE_SQL_TRACE_SQL_BIND" },
   { key: "SQL0004", elId: "TRACE_SQL_TRACE_SQL_CURSOR" },
-  { key: "SQL0008", elId: "TRACE_SQL_TRACE_SQL_CURSOR" },
+  { key: "SQL0008", elId: "TRACE_SQL_TRACE_SQL_FETCH" },
   { key: "SQL0016", elId: "TRACE_SQL_TRACE_SQL_API" },
   { key: "SQL0032", elId: "TRACE_SQL_TRACE_SQL_SSB" },
   { key: "SQL0064", elId: "TRACE_SQL_TRACE_SQL_DB" },
@@ -76,7 +76,7 @@ function selectedOpts(
   opts: TraceOpt[],
   turnOn: boolean,
 ): Array<{ elId: string; selected: boolean }> {
-  // De-dupe elIds (legacy SQL Fetch shares CURSOR id)
+  // Each SQL bit must address its own checkbox; never alias Fetch to Cursor.
   const byId = new Map<string, boolean>();
   for (const o of opts) {
     const on = turnOn && isYes(settings[o.key]);
@@ -86,9 +86,13 @@ function selectedOpts(
 }
 
 function absoluteUrl(baseURL: string, action: string, fallback: string): string {
-  if (/^https?:\/\//i.test(action)) return action;
-  if (action.startsWith("/")) return `${baseURL}${action}`;
-  return fallback;
+  try {
+    const target = new URL(action || fallback, fallback);
+    return target.origin === new URL(baseURL).origin && !target.username && !target.password
+      ? target.href : "";
+  } catch {
+    return "";
+  }
 }
 
 export type TraceApplyResult = "ok" | "locked" | "fail";
@@ -106,7 +110,7 @@ export async function applyTraceComponent(
   const openUrl = `${baseURL}/psc/${siteNormalized}_newwin/${portal}/${node}/c/${menuComp}`;
   let getRes: Response;
   try {
-    getRes = await fetchImpl(openUrl, { credentials: "include" });
+    getRes = await fetchImpl(openUrl, { credentials: "same-origin", redirect: "error" });
   } catch {
     return "fail";
   }
@@ -129,6 +133,7 @@ export async function applyTraceComponent(
   if (!icsid || elementNum == null || stateNum == null || !form) return "fail";
 
   const formAction = absoluteUrl(baseURL, form.getAttribute("action") || "", openUrl);
+  if (!formAction) return "fail";
   const params = [
     "ICAJAX=1",
     "ICNAVTYPEDROPDOWN=1",
@@ -161,7 +166,8 @@ export async function applyTraceComponent(
   try {
     postRes = await fetchImpl(formAction, {
       method: "POST",
-      credentials: "include",
+      credentials: "same-origin",
+      redirect: "error",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.join("&"),
     });
@@ -212,7 +218,11 @@ export async function toggleTrace(
   );
 
   const locked = pc === "locked" || sql === "locked";
-  const running = turnOn && pc === "ok" && sql === "ok" && !locked;
+  const succeeded = pc === "ok" && sql === "ok";
+  // A failed/partial stop does not prove that tracing stopped. Keep Stop available.
+  const running = succeeded ? turnOn : turnOn
+    ? pc === "ok" || sql === "ok"
+    : isYes(settings.environments[envIndex]?.trcProfRunning);
 
   if (envIndex >= 0 && envIndex < settings.environments.length) {
     await updateSettings((s) => {
@@ -233,13 +243,9 @@ export async function toggleTrace(
 
   announce(
     document,
-    locked
-      ? "Trace components not accessible for this user"
-      : running
-        ? "Trace started"
-        : turnOn
-          ? "Trace request failed"
-          : "Trace stopped",
+    !succeeded
+      ? "Trace request incomplete — tracing may still be active. Verify PeopleCode and SQL trace settings in PeopleSoft."
+      : running ? "Trace started" : "Trace stopped",
   );
 
   return { running, locked };

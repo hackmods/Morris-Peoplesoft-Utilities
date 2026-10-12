@@ -1,6 +1,6 @@
 ---
 name: PeopleCode Code Quality Review
-applies_to: PeopleTools 8.5x-8.6x; PeopleSoft 8.56 HRMS, Financials, Campus Solutions (on-prem)
+applies_to: PeopleTools 8.62 primary; PeopleSoft HCM, Financials, Campus Solutions (confirm application release and PUM image)
 compatible_tools: Cursor, VS Code + GitHub Copilot, Claude (Projects / Claude Code), any chat tool
 status: full (v3)
 ---

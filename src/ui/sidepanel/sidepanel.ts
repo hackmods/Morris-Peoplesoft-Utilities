@@ -1,5 +1,5 @@
-import { loadSettings } from "../../storage/settings";
-import { buildComponentUrl } from "../../adapters/ps-page";
+import { loadSettings, originAllowed } from "../../storage/settings";
+import { buildComponentUrl, parsePsUrl } from "../../adapters/ps-page";
 
 const favList = document.getElementById("fav-list")!;
 const favEmpty = document.getElementById("fav-empty")!;
@@ -35,29 +35,21 @@ async function renderFavorites(query = ""): Promise<void> {
         say("No active PeopleSoft tab");
         return;
       }
-      let portal = "EMPLOYEE";
-      let node = "HRMS";
-      let site = "ps";
-      let origin: string;
-      try {
-        const u = new URL(tab.url);
-        origin = u.origin;
-        const parts = u.pathname.split("/").filter(Boolean);
-        if (parts.length >= 4) {
-          site = parts[1] || site;
-          portal = parts[2] || portal;
-          node = parts[3] || node;
-        }
-      } catch {
-        say("Active tab is not a PeopleSoft tab URL");
+      const parsed = parsePsUrl(tab.url);
+      const current = await loadSettings();
+      const env = current.urlSites[parsed.baseURL]?.[parsed.siteNormalized];
+      if (parsed.kind === "unknown" || !parsed.portal || !parsed.node ||
+          !originAllowed(tab.url, current) ||
+          (env && current.environments[env.envId]?.active !== "Yes")) {
+        say("Open an enabled PeopleSoft component or homepage first");
         return;
       }
       const url = buildComponentUrl({
-        baseURL: origin,
+        baseURL: parsed.baseURL,
         servlet: fav.Servlet,
-        site,
-        portal,
-        node,
+        site: parsed.site,
+        portal: parsed.portal,
+        node: parsed.node,
         menu: fav.Menu,
         component: fav.Component,
         market: fav.Market,

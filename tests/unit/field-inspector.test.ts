@@ -90,7 +90,7 @@ describe("field inspector", () => {
     expect(formatRecFieldCopy(parsed, "ampersand")).toBe("&DERIVED_HR.EMPLID");
     expect(formatRecFieldCopy(parsed, "getfield")).toBe("GetField(Field.EMPLID)");
     expect(formatGetRowsetCopy(parsed)).toBe(
-      "GetLevel0().GetRow(0).GetRecord(Record.DERIVED_HR).GetField(Field.EMPLID)",
+      "GetRow().GetRecord(Record.DERIVED_HR).GetField(Field.EMPLID)",
     );
   });
 

@@ -11,16 +11,22 @@ optionsLink.addEventListener("click", (e) => {
   chrome.runtime.openOptionsPage();
 });
 
+let sidePanelTabId: number | undefined;
 document.getElementById("open-sidepanel")?.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ type: "mpu-open-side-panel" }, (resp) => {
-    status.textContent = resp?.ok ? "Side panel opened" : "Unable to open side panel";
-  });
+  if (sidePanelTabId === undefined) { status.textContent = "No active tab"; return; }
+  // Call directly within the click; asynchronous messaging can lose user activation.
+  void chrome.sidePanel.open({ tabId: sidePanelTabId }).then(
+    () => { status.textContent = "Side panel opened"; },
+    () => { status.textContent = "Unable to open side panel"; },
+  );
 });
 function broadcastRefresh(): void {
   chrome.runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
 }
 
 async function init(): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  sidePanelTabId = tab?.id;
   const settings = await loadSettings();
   list.replaceChildren();
 

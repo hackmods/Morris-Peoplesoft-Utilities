@@ -1,3 +1,4 @@
+import { bindModalDialog } from "./dialog";
 /**
  * Field Entry dialogs + eligibility preview UI (FE-01..04).
  */
@@ -33,27 +34,18 @@ function openModalDialog(
 ): void {
   doc.getElementById("mpu-dialog")?.remove();
 
-  const backdrop = document.createElement("div");
+  const backdrop = doc.createElement("div");
   backdrop.id = "mpu-dialog";
   backdrop.className = "mpu-dialog-backdrop";
   backdrop.setAttribute("role", "presentation");
 
-  const dialog = document.createElement("div");
+  const dialog = doc.createElement("div");
   dialog.className = "mpu-dialog";
   dialog.setAttribute("role", "dialog");
   dialog.setAttribute("aria-modal", "true");
   dialog.setAttribute("aria-labelledby", opts.labelledBy);
 
-  const close = (): void => {
-    doc.removeEventListener("keydown", onKey);
-    backdrop.remove();
-  };
-  const onKey = (e: KeyboardEvent): void => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      close();
-    }
-  };
+  const close = bindModalDialog(doc, backdrop, dialog, () => clearEligibilityPreview(doc));
 
   opts.build(dialog, close);
   backdrop.appendChild(dialog);
@@ -61,7 +53,6 @@ function openModalDialog(
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
   });
-  doc.addEventListener("keydown", onKey);
   (dialog.querySelector(opts.initialFocus) as HTMLElement | null)?.focus();
 }
 
@@ -162,7 +153,7 @@ export function showSheetPasteDialog(doc: Document): void {
     build: (dialog, close) => {
       dialog.innerHTML = `
         <h2 id="mpu-fe-sheet-title">From sheet</h2>
-        <p class="mpu-dialog-hint">Paste TSV/CSV with a header of <code>RECORD.FIELD</code> (or page labels). One data row fills the current page; <strong>multiple data rows</strong> map to grid occurrences (<code>$0</code>, <code>$1</code>, …) and click Add Row when more rows are needed.</p>
+        <p class="mpu-dialog-hint">Paste TSV/CSV with a header of <code>RECORD.FIELD</code> (or page labels). One data row fills the current page; <strong>multiple data rows</strong> map to grid occurrences (<code>$0</code>, <code>$1</code>, …) on existing rows. Add missing rows using PeopleSoft before previewing; Preview never adds rows.</p>
         <label class="mpu-dialog-label" for="mpu-fe-sheet-text">Spreadsheet paste
           <textarea id="mpu-fe-sheet-text" class="mpu-dialog-input mpu-fe-textarea" rows="10" autocomplete="off" spellcheck="false" placeholder="JOB.DEPTID&#9;JOB.JOBCODE&#10;100&#9;ABC&#10;200&#9;DEF"></textarea>
         </label>
@@ -182,8 +173,6 @@ export function showSheetPasteDialog(doc: Document): void {
         if (prepared.error && prepared.rows.length) {
           announce(doc, prepared.error);
           // Still allow preview of what we can match
-        } else if (prepared.grid?.clicked) {
-          announce(doc, prepared.grid.message);
         }
         if (!prepared.rows.length) {
           announce(doc, "No columns matched RECORD.FIELD or page labels");

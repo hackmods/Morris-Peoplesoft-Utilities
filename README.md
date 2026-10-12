@@ -23,6 +23,8 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 | Advanced Search & Correct History helpers | Settings JSON backup |
 | Quiet mode for env prompts | |
 
+**Compatibility target:** PeopleTools **8.62**, including Classic/Classic Plus, Fluid, and Classic components hosted inside Fluid. Real-environment sign-off remains required; see [the 8.62 validation checklist](docs/testing/peopletools-8.62.md). Chrome 116 or newer is required.
+
 ## Install
 
 ### Chrome Web Store (recommended)
@@ -116,7 +118,7 @@ Separate from the extension itself — nothing under `agents/` ships in the Chro
 - **Browse:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · guide [`agents/README.md`](agents/README.md) · wiki [AI agent prompts](wiki/AI-Agent-Prompts.md)
 - **Download:** each GitHub Release attaches `morris-peoplesoft-agents-v*.zip` (or run `npm run package:agents`)
 
-Covers PeopleTools 8.5x–8.6x / PS 8.56: data & PeopleCode review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training — for Cursor, Visual Studio / VS Code + Copilot, or Claude.
+Targets PeopleTools 8.62 (confirm application release and PUM image separately): data & PeopleCode review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training — for Cursor, Visual Studio / VS Code + Copilot, or Claude.
 
 ## Releases
 

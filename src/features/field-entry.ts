@@ -3,7 +3,9 @@
  * for visible editable PeopleSoft fields. Session buffer is in-memory only;
  * named profiles persist in chrome.storage.local with business-key warnings.
  */
+import { parseDelimited } from "../storage/delimited";
 import { getInspectorContentRoot } from "../adapters/ps-page";
+import { isHtmlElement, isInput, isSelect, isTextarea, isVisible } from "../adapters/dom";
 import {
   normalizeFieldEntryProfiles,
   type FieldEntryProfile,
@@ -125,7 +127,7 @@ export function collectFieldEntryDocs(topDoc: Document = document): Document[] {
 }
 
 function isPasswordControl(el: Element): boolean {
-  if (!(el instanceof HTMLInputElement)) return false;
+  if (!isInput(el)) return false;
   const t = (el.type || "").toLowerCase();
   if (t === "password") return true;
   const id = (el.id || "").toLowerCase();
@@ -136,7 +138,7 @@ function isPasswordControl(el: Element): boolean {
 function describeSkipReason(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): string {
   if (el.disabled || el.getAttribute("aria-disabled") === "true") return "disabled";
   if (
-    (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) &&
+    (isInput(el) || isTextarea(el)) &&
     (el.readOnly || el.getAttribute("aria-readonly") === "true")
   ) {
     return "readonly";
@@ -159,8 +161,11 @@ function resolveFieldPageLabel(node: HTMLElement, parsedLabel?: string): string 
 
 function controlIsEditable(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): boolean {
   if (isPasswordControl(el)) return false;
-  if (el.disabled) return false;
-  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+  if (!isVisible(el) || el.matches(":disabled")) return false;
+  // Checkboxes/radios use checked, not value; file/action inputs are never paste targets.
+  if (isInput(el) && !["text", "search", "tel", "url", "email", "number", "date", "time", "month", "week", "datetime-local"].includes(el.type)) return false;
+  if (isSelect(el) && el.multiple) return false;
+  if (isInput(el) || isTextarea(el)) {
     if (el.readOnly) return false;
   }
   if (el.getAttribute("aria-disabled") === "true") return false;
@@ -176,7 +181,7 @@ function peerBasesFromDocs(docs: Document[]): string[] {
   const bases: string[] = [];
   for (const doc of docs) {
     for (const node of Array.from(doc.querySelectorAll(FIELD_SELECTOR))) {
-      if (!(node instanceof HTMLElement)) continue;
+      if (!isHtmlElement(node)) continue;
       const id = node.id;
       if (!id || !id.includes("_")) continue;
       // Exclude credential hosts from peer pool so they do not poison RECORD inference
@@ -211,7 +216,7 @@ export function listPageFields(topDoc: Document = document): PageFieldHit[] {
 
   for (const doc of docs) {
     for (const node of Array.from(doc.querySelectorAll(FIELD_SELECTOR))) {
-      if (!(node instanceof HTMLElement)) continue;
+      if (!isHtmlElement(node)) continue;
       if (!node.id || !node.id.includes("_")) continue;
       if (node.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
 
@@ -229,7 +234,7 @@ export function listPageFields(topDoc: Document = document): PageFieldHit[] {
         pageLabel: label,
       };
 
-      if (!(node instanceof HTMLInputElement || node instanceof HTMLSelectElement || node instanceof HTMLTextAreaElement)) {
+      if (!(isInput(node) || isSelect(node) || isTextarea(node))) {
         continue;
       }
 
@@ -273,19 +278,16 @@ export function captureFieldValues(topDoc: Document = document): FieldEntryRow[]
 function findHitForRow(hits: PageFieldHit[], row: FieldEntryRow): PageFieldHit | undefined {
   const wantOcc = row.occurrence != null && row.occurrence !== "" ? row.occurrence : undefined;
 
-  const exact = hits.find((h) => {
+  const exact = hits.filter((h) => {
     if (h.row.record !== row.record || h.row.field !== row.field) return false;
     if (wantOcc == null) return true;
     if (h.row.occurrence === wantOcc) return true;
     // $0 and bare (no dollar) are the same first grid row in many Classic pages
     return wantOcc === "0" && (h.row.occurrence == null || h.row.occurrence === "");
   });
-  if (exact) return exact;
-
-  if (wantOcc == null || wantOcc === "") {
-    return hits.find((h) => h.row.record === row.record && h.row.field === row.field);
-  }
-  return undefined;
+  const visible = exact.filter((h) => isVisible(h.element));
+  // Do not silently choose between main-page, modal, or grid duplicates.
+  return visible.length === 1 ? visible[0] : exact.length === 1 ? exact[0] : undefined;
 }
 
 /** Match buffer rows against the open page (eligibility). */
@@ -316,10 +318,10 @@ export function matchBufferToPage(
     }
     const current = readControlValue(hit.element);
     const maxLen =
-      hit.element instanceof HTMLInputElement || hit.element instanceof HTMLTextAreaElement
+      isInput(hit.element) || isTextarea(hit.element)
         ? hit.element.maxLength
         : -1;
-    if (typeof maxLen === "number" && maxLen > 0 && maxLen < 100000 && row.value.length > maxLen) {
+    if (typeof maxLen === "number" && maxLen >= 0 && row.value.length > maxLen) {
       matches.push({
         row,
         status: "skipped",
@@ -328,6 +330,10 @@ export function matchBufferToPage(
         currentValue: current,
         key,
       });
+      continue;
+    }
+    if (isSelect(hit.element) && !Array.from(hit.element.options).some((o) => o.value === row.value && !o.disabled && !o.parentElement?.matches("optgroup:disabled"))) {
+      matches.push({ row, status: "skipped", reason: "value is not an enabled option", element: hit.element, currentValue: current, key });
       continue;
     }
     if (current === row.value) {
@@ -429,7 +435,11 @@ export function applyEligibilityReport(
   for (const m of report.matches) {
     if (m.status !== "willWrite" || !m.element) continue;
     if (isPasswordControl(m.element) || !controlIsEditable(m.element)) continue;
+    if (m.element.value !== m.currentValue) continue;
+    const fresh = matchBufferToPage([m.row], topDoc).matches[0];
+    if (fresh?.status !== "willWrite" || fresh.element !== m.element) continue;
     m.element.value = m.row.value;
+    if (m.element.value !== m.row.value) { m.element.value = m.currentValue ?? ""; continue; }
     dispatchValueEvents(m.element);
     m.element.setAttribute("data-mpu-fe-written", "1");
     written.push(m.element);
@@ -437,7 +447,7 @@ export function applyEligibilityReport(
   }
   clearEligibilityPreview(topDoc);
   // Soft-notify Classic page-context hooks when present
-  tryInjectFieldEntryWrite(topDoc);
+  for (const doc of new Set(written.map((el) => el.ownerDocument))) tryInjectFieldEntryWrite(doc);
   // Clean write markers shortly after inject loads
   window.setTimeout(() => {
     for (const el of written) {
@@ -480,22 +490,24 @@ export interface SheetParseResult {
  * A single data row leaves occurrence unset so bare ids (no $) still match.
  */
 export function parseSheetPaste(text: string): SheetParseResult {
-  const raw = text.replace(/^\uFEFF/, "").trim();
-  if (!raw) return { rows: [], dataRowCount: 0, error: "Nothing to paste" };
-
-  const lines = raw.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length < 2) {
-    return { rows: [], dataRowCount: 0, error: "Need a header row and at least one data row" };
+  if (!text.trim()) return { rows: [], dataRowCount: 0, error: "Nothing to paste" };
+  let data: string[][];
+  try {
+    data = parseDelimited(text, text.split(/\r?\n/)[0].includes("\t") ? "\t" : ",");
+  } catch {
+    return { rows: [], dataRowCount: 0, error: "Unclosed quoted cell" };
   }
-
-  const delimiter = lines[0].includes("\t") ? "\t" : ",";
-  const headers = splitDelimited(lines[0], delimiter).map((h) => h.trim());
-  const dataLines = lines.slice(1);
+  if (data.length < 2) return { rows: [], dataRowCount: 0, error: "Need a header row and at least one data row" };
+  const headers = data[0].map((h) => h.trim());
+  const dataLines = data.slice(1);
+  if (new Set(headers).size !== headers.length || headers.some((h) => !h) || dataLines.some((line) => line.length !== headers.length)) {
+    return { rows: [], dataRowCount: 0, error: "Use unique headers and the same number of cells in every row" };
+  }
   const multi = dataLines.length > 1;
   const rows: FieldEntryRow[] = [];
 
   for (let r = 0; r < dataLines.length; r += 1) {
-    const values = splitDelimited(dataLines[r], delimiter);
+    const values = dataLines[r];
     for (let i = 0; i < headers.length; i += 1) {
       const header = headers[i];
       if (!header) continue;
@@ -533,10 +545,11 @@ export function resolveLabelRowsAgainstPage(
   topDoc: Document = document,
 ): FieldEntryRow[] {
   const hits = listPageFields(topDoc);
-  const labelMap = new Map<string, PageFieldHit>();
+  const labelMap = new Map<string, PageFieldHit[]>();
   for (const h of hits) {
+    if (!isVisible(h.element)) continue;
     const label = (h.row.pageLabel || "").trim().toLowerCase();
-    if (label && !labelMap.has(label)) labelMap.set(label, h);
+    if (label) labelMap.set(label, [...(labelMap.get(label) || []), h]);
   }
 
   const out: FieldEntryRow[] = [];
@@ -546,8 +559,10 @@ export function resolveLabelRowsAgainstPage(
       continue;
     }
     const key = (row.pageLabel || row.field || "").trim().toLowerCase();
-    const hit = labelMap.get(key);
-    if (!hit) continue;
+    const candidates = labelMap.get(key) || [];
+    const fields = new Set(candidates.map((h) => `${h.row.record}.${h.row.field}`));
+    const hit = fields.size === 1 ? candidates[0] : undefined;
+    if (!hit) { out.push(row); continue; }
     out.push({
       record: hit.row.record,
       field: hit.row.field,
@@ -559,202 +574,23 @@ export function resolveLabelRowsAgainstPage(
   return out;
 }
 
-/** Highest numeric $occ for a record currently on the page (−1 if none). */
-export function maxOccurrenceForRecord(record: string, topDoc: Document = document): number {
-  let max = -1;
-  for (const hit of listPageFields(topDoc)) {
-    if (hit.row.record !== record) continue;
-    const occ = hit.row.occurrence;
-    if (occ == null || occ === "") {
-      max = Math.max(max, 0);
-      continue;
-    }
-    const n = Number.parseInt(occ, 10);
-    if (Number.isFinite(n)) max = Math.max(max, n);
-  }
-  return max;
-}
-
-const ADD_ROW_SELECTOR = [
-  "[data-mpu-fe-add-row]",
-  'a[id*="ICAdd"]',
-  'a[id*="$new"]',
-  'a[id*="ADDROW"]',
-  'img[id*="ICAdd"]',
-  'button[id*="ICAdd"]',
-  'input[type="button"][id*="ICAdd"]',
-  'a[title*="Add Row"]',
-  'a[title*="Insert Row"]',
-  'button[title*="Add Row"]',
-  'img[alt*="Add Row"]',
-  'img[title*="Add Row"]',
-].join(", ");
-
-/** Find a delivered (or fixture) Add Row control. */
-export function findAddRowControl(topDoc: Document = document): HTMLElement | null {
-  for (const doc of collectFieldEntryDocs(topDoc)) {
-    try {
-      const el = doc.querySelector(ADD_ROW_SELECTOR);
-      if (el instanceof HTMLElement) return el;
-    } catch {
-      /* ignore selector issues per document */
-    }
-  }
-  return null;
-}
-
-export interface EnsureGridRowsResult {
-  needed: number;
-  existing: number;
-  clicked: number;
-  ok: boolean;
-  message: string;
-}
-
 /**
- * Click Add Row until the page has enough grid occurrences for `record`
- * (0-based count = neededRows). Soft-fail if no Add control or clicks stall.
- */
-export function ensureGridRows(
-  topDoc: Document,
-  neededRows: number,
-  record: string,
-  opts: { maxClicks?: number } = {},
-): EnsureGridRowsResult {
-  const maxClicks = opts.maxClicks ?? 40;
-  if (neededRows <= 1) {
-    return {
-      needed: neededRows,
-      existing: Math.max(0, maxOccurrenceForRecord(record, topDoc) + 1),
-      clicked: 0,
-      ok: true,
-      message: "Single row — no grid expand",
-    };
-  }
-
-  let existing = maxOccurrenceForRecord(record, topDoc) + 1;
-  // Bare fields without $ count as 1 row when present
-  if (existing <= 0) existing = listPageFields(topDoc).some((h) => h.row.record === record) ? 1 : 0;
-
-  let clicked = 0;
-  while (existing < neededRows && clicked < maxClicks) {
-    const btn = findAddRowControl(topDoc);
-    if (!btn) {
-      return {
-        needed: neededRows,
-        existing,
-        clicked,
-        ok: false,
-        message: `Need ${neededRows} grid rows but only ${existing} exist — no Add Row control found`,
-      };
-    }
-    try {
-      btn.click();
-    } catch {
-      return {
-        needed: neededRows,
-        existing,
-        clicked,
-        ok: false,
-        message: "Add Row click failed",
-      };
-    }
-    clicked += 1;
-    const next = maxOccurrenceForRecord(record, topDoc) + 1;
-    if (next <= existing) {
-      // Fixture may create the row synchronously under a different path; re-count
-      const recount = maxOccurrenceForRecord(record, topDoc) + 1;
-      if (recount <= existing) {
-        return {
-          needed: neededRows,
-          existing,
-          clicked,
-          ok: false,
-          message: `Add Row clicked but grid for ${record} did not grow (still ${existing} rows)`,
-        };
-      }
-      existing = recount;
-    } else {
-      existing = next;
-    }
-  }
-
-  const ok = existing >= neededRows;
-  return {
-    needed: neededRows,
-    existing,
-    clicked,
-    ok,
-    message: ok
-      ? `Grid ready — ${existing} row(s) for ${record}`
-      : `Only ${existing}/${neededRows} rows for ${record} after ${clicked} Add Row click(s)`,
-  };
-}
-
-/**
- * Prepare a multi-row sheet buffer: expand grid via Add Row, then return rows for preview.
+ * Prepare a multi-row sheet buffer without changing the page. Missing rows remain unmatched.
  */
 export function prepareSheetBuffer(
   text: string,
   topDoc: Document = document,
-): { rows: FieldEntryRow[]; error?: string; grid?: EnsureGridRowsResult } {
+): { rows: FieldEntryRow[]; error?: string } {
   const parsed = parseSheetPaste(text);
   if (parsed.error || !parsed.rows.length) {
     return { rows: [], error: parsed.error || "No columns recognized" };
   }
-  let resolved = resolveLabelRowsAgainstPage(parsed.rows, topDoc);
+  const resolved = resolveLabelRowsAgainstPage(parsed.rows, topDoc);
   if (!resolved.length) {
     return { rows: [], error: "No columns matched RECORD.FIELD or page labels" };
   }
 
-  let grid: EnsureGridRowsResult | undefined;
-  if (parsed.dataRowCount > 1) {
-    const record =
-      resolved.find((r) => r.record && r.record !== "__LABEL__")?.record ||
-      listPageFields(topDoc).find((h) => h.editable)?.row.record ||
-      "";
-    if (record) {
-      grid = ensureGridRows(topDoc, parsed.dataRowCount, record);
-      if (!grid.ok) {
-        return {
-          rows: resolved,
-          error: grid.message,
-          grid,
-        };
-      }
-      // Re-resolve after rows added (labels / peers may change)
-      resolved = resolveLabelRowsAgainstPage(parsed.rows, topDoc);
-    }
-  }
-
-  return { rows: resolved, grid };
-}
-
-function splitDelimited(line: string, delimiter: string): string[] {
-  if (delimiter === "\t") return line.split("\t");
-  const out: string[] = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i += 1) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"';
-        i += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-    if (ch === delimiter && !inQuotes) {
-      out.push(cur);
-      cur = "";
-      continue;
-    }
-    cur += ch;
-  }
-  out.push(cur);
-  return out;
+  return { rows: resolved };
 }
 
 export function parseRecordFieldHeader(header: string): { record: string; field: string } | null {

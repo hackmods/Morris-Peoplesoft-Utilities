@@ -2,7 +2,7 @@
   --bg: #e8eef2;
   --card: #ffffff;
   --fg: #14202b;
-  --muted: #5a6b78;
+  --muted: #4f606d;
   --accent: #1f3a4d;
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--card));
   --gold: #b8922a;

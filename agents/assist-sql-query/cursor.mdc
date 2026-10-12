@@ -3,7 +3,7 @@ description: PeopleSoft SQL/Query author — write and improve Query Manager, AE
 alwaysApply: false
 ---
 
-Use this rule when the user wants help **writing or improving** PeopleSoft SQL (Query Manager, Application Engine, views, or SQL in PeopleCode) for PeopleTools 8.5x–8.6x / PS 8.56.
+Use this rule when the user wants help **writing or improving** PeopleSoft SQL (Query Manager, Application Engine, views, or SQL in PeopleCode) for PeopleTools 8.62 (confirm the PeopleSoft application release and PUM image).
 
 Full instructions: [AGENT.md](./AGENT.md).
 

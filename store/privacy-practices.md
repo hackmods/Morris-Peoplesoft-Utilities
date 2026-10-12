@@ -8,7 +8,9 @@ Increase productivity on PeopleSoft Classic and Fluid pages for business analyst
 
 ## Does this extension collect or use user data?
 
-**No remote collection.** The extension stores preferences **locally** in Chrome storage on the user’s device.
+**Local data use; no developer-side collection.** MPU reads PeopleSoft website content for its visible features and stores preferences, favorites, recent component identifiers, customization fingerprints/notes, and optional Field Entry profiles locally. Do not interpret “no telemetry” as “no access to user data.”
+
+For Dashboard data-use categories, disclose website content and the applicable personal/business data handled by the listed features. Page Info can display a user ID; optional profiles can contain personal field values. Recent components are a limited local navigation history. Reconcile the current Dashboard wording with these actual uses and the privacy policy; do not select “none” solely because nothing is sent to the developer.
 
 ## Remote code
 
@@ -38,8 +40,10 @@ MPU does not request or store passwords. Favorites may include PeopleSoft menu/c
 
 - **storage** — save feature flags, favorites, environments, and optional allowlist locally.
 - **sidePanel** — optional Side Panel for Favorites browsing and Page Info (opened from the popup).
-- **tabs** — navigate the active PeopleSoft tab to a Favorite and request a Page Info snapshot from the content script on that same tab.
+- **tabs** — read the active tab URL to confirm a PeopleSoft origin, servlet, site, portal and node before Side Panel navigation. Unrelated tab URLs are not retained.
 
 ## Host access
 
-Content scripts match PeopleSoft `psp`/`psc` URL patterns. Optional allowlist can further restrict origins (off by default).
+Content scripts match PeopleSoft `psp`/`psc` URL patterns. The optional allowlist disables features outside listed origins (off by default); it does not revoke Chrome's manifest permissions. Chrome site-access settings control browser-level access.
+
+See [Chrome's disclosure requirements](https://developer.chrome.com/docs/webstore/program-policies/disclosure-requirements) and [Limited Use policy](https://developer.chrome.com/docs/webstore/program-policies/limited-use). Keep listing, Dashboard answers, and [privacy policy](../docs/privacy.md) consistent.

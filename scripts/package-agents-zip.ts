@@ -16,6 +16,7 @@ const archive = new ZipArchive({ zlib: { level: 9 } });
 
 await new Promise<void>((resolvePromise, reject) => {
   output.on("close", () => resolvePromise());
+  output.on("error", reject);
   archive.on("error", reject);
   archive.pipe(output);
   archive.directory(agentsDir, "agents");

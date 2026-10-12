@@ -23,7 +23,6 @@ export function buildPeopleCodeStubs(input: {
   const field = input.field || "FIELD";
   const component = input.component || "COMPONENT";
   const page = input.page || "PAGE";
-  const row = input.occurrence != null && input.occurrence !== "" ? input.occurrence : "1";
 
   return [
     {
@@ -66,7 +65,7 @@ export function buildPeopleCodeStubs(input: {
       id: "getrowset",
       label: "GetRowset / GetRow",
       scope: "field",
-      stub: `Local Rowset &Rs = GetLevel0();\nLocal Row &Row = &Rs.GetRow(${row});\nLocal Record &Rec = &Row.GetRecord(Record.${record});\nLocal Field &Fld = &Rec.GetField(Field.${field});\n`,
+      stub: `/* Run in the intended row context; DOM occurrence does not identify the scroll path. */\nLocal Row &Row = GetRow();\nLocal Record &Rec = &Row.GetRecord(Record.${record});\nLocal Field &Fld = &Rec.GetField(Field.${field});\n`,
     },
   ];
 }

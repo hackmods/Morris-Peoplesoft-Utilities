@@ -17,7 +17,6 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm run generate:icons
       - run: npm run release:check
       - name: Upload release assets
         uses: softprops/action-gh-release@v3

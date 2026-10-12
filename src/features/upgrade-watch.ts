@@ -1,3 +1,4 @@
+import { isHtmlElement } from "../adapters/dom";
 import type { ParsedPsUrl } from "../adapters/ps-page";
 import {
   collectPageMeta,
@@ -50,7 +51,7 @@ export function collectFieldIdBases(doc: Document = document, cap = FIELD_ID_CAP
   const target = getTargetDocument(doc);
   const set = new Set<string>();
   for (const el of Array.from(target.querySelectorAll(FIELD_SCAN_SELECTOR))) {
-    if (!(el instanceof HTMLElement) || !el.id) continue;
+    if (!(isHtmlElement(el)) || !el.id) continue;
     const base = fieldBaseId(el.id);
     if (!base || base.length < 3) continue;
     set.add(base);

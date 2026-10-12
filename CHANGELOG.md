@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased — repository review / PeopleTools 8.62
+
+- Fix Classic iframe Field Entry, page tabs, structure and upgrade fingerprints; notify the actual field document's change hooks.
+- Enforce allowlist/environment/feature guards for shortcuts and page snapshots; cancel delayed search retries and prevent multi-tab recent-history loops.
+- Make sheet preview read-only, preserve quoted multiline and empty CSV/TSV cells, reject ambiguous/unsafe targets, and revalidate fields before Apply.
+- Validate settings backups before saving; preserve existing feature flags on partial restore.
+- Recover malformed saved settings and legacy entries safely while preserving valid data and environment indices; fail closed on unreadable host restrictions.
+- Add menu arrow-key navigation and focus restoration; correct Shortcuts/empty Pages ARIA semantics and Options text contrast. Add rendered browser axe and narrow-viewport regressions.
+- Keep trace form posts on the current origin; distinguish SQL Fetch from Cursor and preserve the running indicator when Stop is not confirmed.
+- Share modal keyboard/focus cleanup, fix Escape after typing, and avoid generating invalid PeopleCode `GetRow(0)` or guessed scroll paths.
+- Validate Side Panel navigation context and open directly from popup clicks.
+- Declare Chrome 116 minimum; audit freshly built packages, include license/credits, enforce short-description length, and preserve reviewed artwork in CI.
+- Target PeopleTools 8.62 in repository and prompt-pack instructions; expand privacy disclosures and real-environment release checks.
+
+
 All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]

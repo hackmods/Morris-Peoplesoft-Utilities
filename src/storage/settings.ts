@@ -1,7 +1,5 @@
 import {
   createDefaultSettings,
-  normalizeBarPlacement,
-  normalizeFieldEntryProfiles,
   SCHEMA_VERSION,
   type Favorite,
   type FeatureFlags,
@@ -9,6 +7,7 @@ import {
   type TraceSettings,
   type YesNo,
 } from "./schema";
+import { normalizeStoredSettings } from "./backup";
 
 const SETTINGS_KEY = "mpuSettings";
 
@@ -54,14 +53,14 @@ export function migrateFromLegacy(legacy: LegacyBlob, base = createDefaultSettin
     loginPageOption: yn(legacy.loginPageOption, base.features.loginPageOption),
   };
 
-  const environments =
-    legacy.psutilEnvs?.map((e) => ({
-      label: e.label ?? "Environment",
-      active: yn(e.active, "Yes"),
-      trcProfRunning: yn(e.trcProfRunning, "No"),
-    })) ?? base.environments;
+  const environments = Array.isArray(legacy.psutilEnvs)
+    ? legacy.psutilEnvs.map((e) => ({
+      label: typeof e?.label === "string" ? e.label : "Environment",
+      active: yn(e?.active, "No"),
+      trcProfRunning: yn(e?.trcProfRunning, "No"),
+    })) : base.environments;
 
-  return {
+  return normalizeStoredSettings({
     ...base,
     features,
     favorites: Array.isArray(legacy.shortcutstable) ? legacy.shortcutstable : base.favorites,
@@ -71,36 +70,13 @@ export function migrateFromLegacy(legacy: LegacyBlob, base = createDefaultSettin
       ? { ...base.traceSettings, ...legacy.psutilTraceSettings[0] }
       : base.traceSettings,
     schemaVersion: SCHEMA_VERSION,
-  };
+  });
 }
 
 export async function loadSettings(): Promise<MpuSettings> {
   const raw = await chrome.storage.local.get(null);
-  if (raw[SETTINGS_KEY] && typeof raw[SETTINGS_KEY] === "object") {
-    const s = raw[SETTINGS_KEY] as MpuSettings;
-    return {
-      ...createDefaultSettings(),
-      ...s,
-      features: { ...createDefaultSettings().features, ...s.features },
-      traceSettings: { ...createDefaultSettings().traceSettings, ...s.traceSettings },
-      recentComponents: Array.isArray(s.recentComponents) ? s.recentComponents : [],
-      customizationWatches: Array.isArray(s.customizationWatches) ? s.customizationWatches : [],
-      featureUiScopes: {
-        ...createDefaultSettings().featureUiScopes,
-        ...(s.featureUiScopes || {}),
-      },
-      showOnboarding: s.showOnboarding === "Yes" || s.showOnboarding === "No" ? s.showOnboarding : "No",
-      fieldCopyFormat:
-        s.fieldCopyFormat === "ampersand" ||
-        s.fieldCopyFormat === "getfield" ||
-        s.fieldCopyFormat === "getrowset" ||
-        s.fieldCopyFormat === "record.field"
-          ? s.fieldCopyFormat
-          : "record.field",
-      barPlacement: normalizeBarPlacement(s.barPlacement),
-      barSticky: s.barSticky === "Yes" || s.barSticky === "No" ? s.barSticky : "No",
-      fieldEntryProfiles: normalizeFieldEntryProfiles(s.fieldEntryProfiles),
-    };
+  if (Object.hasOwn(raw, SETTINGS_KEY)) {
+    return normalizeStoredSettings(raw[SETTINGS_KEY]);
   }
 
   // One-time migrate from legacy PS Utilities keys if present
@@ -138,9 +114,10 @@ export function originAllowed(
     const origin = new URL(pageUrl).origin;
     return settings.hostAllowlist.some((entry) => {
       try {
-        return new URL(entry).origin === origin;
+        const allowed = new URL(entry);
+        return /^(https?:)$/.test(allowed.protocol) && !allowed.username && !allowed.password && allowed.origin === origin;
       } catch {
-        return entry === origin || pageUrl.startsWith(entry);
+        return false;
       }
     });
   } catch {

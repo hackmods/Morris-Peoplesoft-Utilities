@@ -4,24 +4,6 @@
  * Never auto-submits the page.
  */
 (function mpuFieldEntryWrite() {
-  function resolveRoot(): Document | null {
-    try {
-      const named = (window as Window & { TargetContent?: Window }).TargetContent;
-      if (named?.document?.body) return named.document;
-    } catch {
-      /* ignore */
-    }
-    try {
-      const frame =
-        (document.getElementById("ptifrmtgtframe") as HTMLIFrameElement | null) ||
-        (document.querySelector('iframe[name="TargetContent"]') as HTMLIFrameElement | null);
-      if (frame?.contentDocument?.body) return frame.contentDocument;
-    } catch {
-      /* ignore */
-    }
-    return document.body ? document : null;
-  }
-
   type WinHooks = Window & {
     addchg_?: (el: Element) => void;
     doChange_?: (el: Element) => void;
@@ -29,7 +11,7 @@
   };
 
   try {
-    const root = resolveRoot();
+    const root = document;
     if (!root) return;
     const win = (root.defaultView || window) as WinHooks;
     const marked = root.querySelectorAll("[data-mpu-fe-written='1']");

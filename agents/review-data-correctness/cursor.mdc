@@ -3,7 +3,7 @@ description: PeopleSoft code review — effdt logic, bad joins, missing keys, wr
 alwaysApply: false
 ---
 
-Use this rule when the user asks you to review PeopleCode, Application Engine SQL/PeopleCode, SQR, Query Manager SQL, or raw SQL written against a PeopleSoft 8.56-era database (PeopleTools 8.5x–8.6x, HRMS/Financials/Campus Solutions on-prem) for correctness — especially anything touching effective dates, joins, keys, or which table/view is queried.
+Use this rule when the user asks you to review PeopleCode, Application Engine SQL/PeopleCode, SQR, Query Manager SQL, or raw SQL written against a PeopleSoft application database on PeopleTools 8.62 (confirm application release and PUM image; HCM/Financials/Campus Solutions on-prem) for correctness — especially anything touching effective dates, joins, keys, or which table/view is queried.
 
 Full instructions: [AGENT.md](./AGENT.md).
 

@@ -32,8 +32,8 @@ export async function launchExtensionContext(): Promise<{
   extensionId: string;
 }> {
   const context = await chromium.launchPersistentContext("", {
-    // Extensions require a non-headless Chromium channel in most Playwright versions.
-    headless: false,
+    channel: "chromium",
+    headless: true,
     args: [
       `--disable-extensions-except=${EXTENSION_DIST}`,
       `--load-extension=${EXTENSION_DIST}`,

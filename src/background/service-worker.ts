@@ -1,10 +1,9 @@
-import { createDefaultSettings } from "../storage/schema";
 import { loadSettings, saveSettings } from "../storage/settings";
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   const existing = await chrome.storage.local.get("mpuSettings");
   if (!existing.mpuSettings) {
-    const defaults = createDefaultSettings();
+    const defaults = await loadSettings();
     if (details.reason === "install") {
       defaults.showOnboarding = "Yes";
     }
@@ -19,8 +18,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // Strip any leftover legacy credential blobs if present
   const all = await chrome.storage.local.get(null);
   if (Array.isArray(all.psutilEnvs)) {
-    const cleaned = all.psutilEnvs.map((e: Record<string, unknown>) => {
-      const { creds: _creds, ...rest } = e;
+    const cleaned = all.psutilEnvs.map((e: unknown) => {
+      if (!e || typeof e !== "object" || Array.isArray(e)) return e;
+      const { creds: _creds, ...rest } = e as Record<string, unknown>;
       return rest;
     });
     await chrome.storage.local.set({ psutilEnvs: cleaned });
@@ -53,23 +53,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message?.type === "mpu-get-settings") {
     void loadSettings().then((s) => sendResponse(s));
-    return true;
-  }
-
-  if (message?.type === "mpu-open-side-panel") {
-    void (async () => {
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab?.id != null) {
-          await chrome.sidePanel.open({ tabId: tab.id });
-          sendResponse({ ok: true });
-          return;
-        }
-      } catch {
-        /* fall through */
-      }
-      sendResponse({ ok: false });
-    })();
     return true;
   }
 

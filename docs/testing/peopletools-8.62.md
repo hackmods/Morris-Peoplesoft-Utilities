@@ -1,0 +1,22 @@
+# PeopleTools 8.62 validation
+
+Primary compatibility target: **PeopleTools 8.62**. This is a validation plan, not a certification. Synthetic fixtures and generated screenshots do not establish support on an employer's installation.
+
+Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser version, UI model, tester/date, and outcome. Keep employer-specific results and sanitized captures outside the public repository.
+
+| Scenario | Acceptance | Status |
+|---|---|---|
+| Classic / Classic Plus inside Fluid portal | Bar does not cover Run/Save; inspector, Page Info, tabs, structure, and upgrade fingerprint read target iframe | Real-system test needed |
+| Fluid component and navigation collection | Correct UI scope; late/nested frames refresh once and remain usable | Real-system test needed |
+| Modal / popup frame | Field Entry sees same-origin editable fields, skips hidden/disabled/password and ambiguous controls | Real-system test needed |
+| Field Entry capture, CSV/TSV, profiles | Preview does not add rows; unmatched rows visible; Apply only changes reviewed controls; PeopleSoft validates and saves through normal user flow | Real-system test needed |
+| Delivered change hooks | Verify saved values after FieldChange/deferred processing, including AJAX replacement; do not infer success solely from changed DOM text | Real-system test needed |
+| Search helpers | Advanced Search does not toggle closed on retry; Correct History honors delivered security and user setting | Real-system test needed |
+| Trace | Validate distinct SQL cursor/fetch checkbox IDs, PC flags, save response, start/stop and partial denial; verify server trace stops | Real-system test needed |
+| Host allowlist / inactive environment | No bar, keyboard action, Page Info snapshot, or delayed search mutation; side panel cannot navigate disabled hosts | Real-system test needed |
+| Multi-tab / session | No storage churn; environment settings and favorites survive concurrent edits; sign-out/sign-in does not imply a verified trace state | Real-system test needed |
+| Keyboard / screen reader | Tab and Shift+Tab stay in dialogs; Escape works after typing; focus returns; 200% zoom, contrast, forced colors, and live announcements | Real-system test needed |
+
+The browser cannot confirm App Designer definitions, PeopleCode scroll paths, security entitlements, or server-side customization correctness. Treat generated code and DOM metadata as aids for a developer to verify.
+
+References: [Oracle PeopleTools 8.62 Fluid guide](https://docs.oracle.com/cd/G35126_01/psft/pdf/pt862tflu-b062025.pdf), [Oracle 8.62 accessibility report](https://docs.oracle.com/en/corporate/accessibility/templates/t2-15706.html). Oracle's report covers its product, not this extension.

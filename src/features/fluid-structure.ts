@@ -1,3 +1,4 @@
+import { isHtmlElement } from "../adapters/dom";
 import { getTargetDocument } from "../adapters/ps-page";
 
 export type FluidStructureKind =
@@ -63,7 +64,7 @@ export function collectFluidStructure(doc: Document = document, limit = 40): Flu
 
   for (const { kind, sel } of KIND_SELECTORS) {
     for (const el of Array.from(root.querySelectorAll(sel))) {
-      if (!(el instanceof HTMLElement)) continue;
+      if (!(isHtmlElement(el))) continue;
       const label = nodeLabel(el, kind);
       const key = `${kind}|${el.id || ""}|${label}`;
       if (seen.has(key)) continue;

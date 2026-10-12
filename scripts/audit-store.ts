@@ -21,17 +21,27 @@ for (const issue of validateStoreScreenshots()) {
 }
 need("docs/privacy.md", "privacy policy");
 need("public/icons/icon128.png", "extension icon");
+const listing = readFileSync(resolve("store/listing.md"), "utf8");
+const shortDescription = listing.match(/## Short description[^\n]*\n\s*\n([^\n]+)/)?.[1]?.trim();
+if (!shortDescription || shortDescription.length > 132) errors.push("Store short description must be 1–132 characters");
 
 const manifestPath = resolve("dist/manifest.json");
 if (existsSync(manifestPath)) {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
     manifest_version: number;
+    version: string;
+    minimum_chrome_version?: string;
+    description?: string;
     permissions?: string[];
     key?: string;
     web_accessible_resources?: Array<{ matches?: string[] }>;
     content_security_policy?: { extension_pages?: string };
   };
   if (manifest.manifest_version !== 3) errors.push("manifest_version must be 3");
+  const pkg = JSON.parse(readFileSync(resolve("package.json"), "utf8")) as { version: string };
+  if (manifest.version !== pkg.version) errors.push("Built manifest version differs from package.json");
+  if (Number(manifest.minimum_chrome_version) < 116 || !manifest.minimum_chrome_version) errors.push("sidePanel.open requires Chrome 116 or newer");
+  if (!manifest.description || manifest.description.length > 132) errors.push("Manifest description must be 1–132 characters");
   if (manifest.key) errors.push("Do not ship legacy private key in manifest");
   const perms = manifest.permissions ?? [];
   const allowed = new Set(["storage", "clipboardWrite", "tabs", "sidePanel"]);

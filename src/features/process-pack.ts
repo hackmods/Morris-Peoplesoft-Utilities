@@ -1,4 +1,5 @@
 import { getTargetDocument } from "../adapters/ps-page";
+import { isVisible } from "../adapters/dom";
 import type { ParsedPsUrl } from "../adapters/ps-page";
 
 export interface ProcessPack {
@@ -26,9 +27,9 @@ function cleanValue(raw: string): string {
 }
 
 function readFieldValue(doc: Document, idPart: string): string | undefined {
-  const el = doc.querySelector(
+  const el = Array.from(doc.querySelectorAll(
     `input[id*="${idPart}" i], span[id*="${idPart}" i], select[id*="${idPart}" i], a[id*="${idPart}" i]`,
-  );
+  )).find((node) => isVisible(node) && !node.matches('input[type="hidden"], input[type="password"]'));
   if (!el) return undefined;
   const v =
     (el as HTMLInputElement).value ??
@@ -41,6 +42,7 @@ function readFieldValue(doc: Document, idPart: string): string | undefined {
 
 function readLabelPair(doc: Document, labelRe: RegExp): string | undefined {
   for (const el of Array.from(doc.querySelectorAll("label, span, th, .PSEDITBOXLABEL, .ps_box-label"))) {
+    if (!isVisible(el)) continue;
     const text = el.textContent?.replace(/\s+/g, " ").trim() || "";
     if (!labelRe.test(text)) continue;
     const sibling =

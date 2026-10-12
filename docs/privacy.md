@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-07-23  
+**Last updated:** 2026-10-11
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome extension)
 
@@ -14,6 +14,8 @@ Settings are stored only in Chrome’s `chrome.storage.local` on your profile, i
 
 - Feature on/off preferences
 - Favorites (may include menu/component names and optional URL parameters)
+- The last 12 component identifiers visited for recent shortcuts (not full browsing history)
+- Customization watch notes and baseline UI fingerprints (field IDs, tab/structure labels, component identifiers and detected Tools version)
 - Optional **Field Entry** named profiles (field values you choose to save; may include business keys such as EmplIDs or department IDs — never passwords; session clipboard is not persisted)
 - Environment labels and URL/site mappings
 - Trace flag preferences
@@ -30,17 +32,29 @@ Settings are stored only in Chrome’s `chrome.storage.local` on your profile, i
 
 MPU may make requests **only to the PeopleSoft site you are already using** (same origin/session), for example to toggle delivered PeopleCode/SQL trace components when you click Trace. Those requests use your existing authenticated PeopleSoft session cookies. MPU never sends that traffic to hackmods or other third parties.
 
+## Page access, clipboard and exports
+
+MPU reads relevant PeopleSoft page content locally to display the signed-in user ID, page/system metadata, field identities, process details and Integration Broker context. Field Entry, when enabled, reads editable values into memory and writes reviewed values back to the open page; those values may be personal or business data. It does not automatically save the PeopleSoft transaction. The normal PeopleSoft field-change processing and subsequent user save may send changes to your PeopleSoft server.
+
+Copy and export actions put the selected information in your clipboard or a downloaded file. Settings backups include recent components, saved profiles and watch notes. You control those files and any later sharing; MPU does not upload them. Compare clipboard actions read text only when requested.
+
+## Retention and deletion
+
+The Field Entry session buffer lasts until cleared, disabled, or the page unloads. Saved preferences, favorites, profiles and watch baselines remain in local extension storage until removed or replaced through Options, or the extension is uninstalled. Uninstalling does not remove files you exported or clear your operating system clipboard.
+
+MPU's use of browser/page data is limited to its disclosed PeopleSoft productivity features and complies with the Chrome Web Store User Data Policy, including Limited Use restrictions. It does not use data for advertising or provide developer access to local records.
+
 ## Permissions
 
 - **storage** — save preferences locally
 - **sidePanel** — optional Side Panel UI for Favorites and Page Info (opened from the popup)
-- **tabs** — open Favorites in the active PeopleSoft tab and request a Page Info snapshot from the MPU content script (same tab; no third-party hosts)
+- **tabs** — read the active tab URL to validate PeopleSoft navigation context for the Side Panel. Navigation and Page Info messaging use that tab; MPU does not store unrelated tab URLs or browsing history.
 
 Content scripts run only on PeopleSoft URL patterns (`psp` / `psc` servlet paths).
 
 ## Host allowlist (optional)
 
-By default MPU matches PeopleSoft URL patterns on any host (parity with classic PS Utilities). You may enable an **opt-in host allowlist** in Options to restrict injection to listed origins.
+By default MPU matches PeopleSoft URL patterns on any host (parity with classic PS Utilities). You may enable an **opt-in host allowlist** in Options to disable MPU features on origins outside the list. This is an application-level guard: Chrome still grants the manifest's pattern-scoped content-script access. Use Chrome's extension site-access controls to restrict browser-level access.
 
 ## Children’s privacy
 

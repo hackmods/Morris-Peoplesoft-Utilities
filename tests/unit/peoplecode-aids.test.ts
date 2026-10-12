@@ -39,8 +39,8 @@ describe("peoplecode aids", () => {
     const fieldChange = stubs.find((s) => s.id === "fieldchange");
     expect(fieldChange?.stub).toContain("JOB.EMPLID.FieldChange");
     const getRowset = stubs.find((s) => s.id === "getrowset");
-    expect(getRowset?.stub).toContain("GetLevel0()");
-    expect(getRowset?.stub).toContain("GetRow(2)");
+    expect(getRowset?.stub).toContain("GetRow()");
+    expect(getRowset?.stub).not.toContain("GetRow(2)");
   });
 
   it("object pack includes Menu and Component", () => {
@@ -62,8 +62,8 @@ describe("peoplecode aids", () => {
       field: "EMPLID",
       occurrence: "3",
     });
-    expect(text).toContain("GetLevel0()");
-    expect(text).toContain("GetRow(3)");
+    expect(text).not.toContain("GetLevel0()");
+    expect(text).toContain("GetRow()");
     expect(text).toContain("GetRecord(Record.JOB)");
     expect(text).toContain("GetField(Field.EMPLID)");
     expect(formatRecFieldCopyExtended(

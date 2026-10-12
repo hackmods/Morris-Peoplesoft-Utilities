@@ -222,3 +222,7 @@
 | 2026-07-23 | **UX-11** — bar placement (document top) + sticky; dismiss menus when entering Classic content iframe |
 | 2026-07-23 | **FE-01..04** — Field Entry toolkit (capture/paste/sheet/find-replace + profiles + eligibility preview); careful opt-in |
 | 2026-07-23 | **FE-05/06** — multi-row grid sheet paste + Add Row; Fluid/modal (ptModFrame) field discovery; Playwright e2e |
+
+## Review correction — 2026-10-11
+
+FE-05 supports multi-row paste to existing grid occurrences. Automatic Add Row was removed after review: preview must not mutate records, and the original global selector/synchronous loop could target the wrong grid. A future implementation needs explicit consent in the UI, unambiguous grid targeting, and asynchronous completion on real PeopleTools 8.62. See [repository review](repo-review-2026-10-11.md).

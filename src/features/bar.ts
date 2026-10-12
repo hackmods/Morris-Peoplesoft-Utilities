@@ -1,3 +1,5 @@
+import { bindModalDialog } from "./dialog";
+import { isVisible } from "../adapters/dom";
 import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings } from "../storage/schema";
 import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
@@ -250,10 +252,32 @@ function bindMenuDismiss(
   doc.addEventListener(
     "keydown",
     (e) => {
+      if (e.defaultPrevented) return;
       if (e.key === "Escape") {
         e.preventDefault();
         close();
+        root.querySelector<HTMLElement>("button")?.focus();
+        return;
       }
+      const active = doc.activeElement as HTMLElement | null;
+      if (!active || !flyout?.contains(active)) return;
+      if (e.key === "Tab") {
+        close();
+        root.querySelector<HTMLElement>("button")?.focus();
+        return; // Browser advances to the previous/next toolbar control.
+      }
+      if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+      if (active.matches("input, textarea") && !e.key.startsWith("Arrow")) return;
+      const menu = active.closest('[role="menu"]') ?? flyout.querySelector('[role="menu"]') ?? flyout;
+      const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)'))
+        .filter((item) => item.closest('[role="menu"]') === menu && isVisible(item));
+      if (!items.length) return;
+      e.preventDefault();
+      const index = items.indexOf(active);
+      const next = e.key === "Home" ? 0 : e.key === "End" ? items.length - 1
+        : e.key === "ArrowDown" ? (index + 1) % items.length
+        : (index < 0 ? items.length - 1 : (index + items.length - 1) % items.length);
+      items[next].focus();
     },
     { signal },
   );
@@ -391,6 +415,7 @@ function appendFavoriteLeaf(
     const nw = doc.createElement("button");
     nw.type = "button";
     nw.className = "mpu-menu-newwin";
+    nw.setAttribute("role", "menuitem");
     nw.textContent = "↗";
     nw.title = "Open in new window";
     nw.setAttribute("aria-label", "Open in new window");
@@ -490,8 +515,8 @@ function wireSubmenuHover(item: HTMLElement, sub: HTMLElement): void {
     view?.requestAnimationFrame(() => {
       if (!sub.hidden) place();
     });
-    view?.addEventListener("scroll", onReposition, true);
-    view?.addEventListener("resize", onReposition);
+    view?.addEventListener("scroll", onReposition, { capture: true, signal: flyoutPositionAbort?.signal });
+    view?.addEventListener("resize", onReposition, { signal: flyoutPositionAbort?.signal });
   };
 
   const scheduleHide = (): void => {
@@ -503,6 +528,21 @@ function wireSubmenuHover(item: HTMLElement, sub: HTMLElement): void {
   };
 
   trigger.setAttribute("aria-expanded", "false");
+  trigger.addEventListener("keydown", (e) => {
+    if (!["ArrowRight", "Enter", " "].includes(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    show();
+    sub.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus();
+  });
+  sub.addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "Escape"].includes(e.key) ||
+      (e.target as Element).closest('[role="menu"]') !== sub) return;
+    e.preventDefault();
+    e.stopPropagation();
+    trigger.focus();
+    hide();
+  });
 
   item.addEventListener("mouseenter", show);
   item.addEventListener("mouseleave", scheduleHide);
@@ -688,7 +728,10 @@ function populatePagesMenu(
   const tabs = collectPageTabs(doc);
   container.replaceChildren();
   if (!tabs.length) {
-    const empty = doc.createElement("p");
+    const empty = doc.createElement("button");
+    empty.type = "button";
+    empty.disabled = true;
+    empty.setAttribute("role", "menuitem");
     empty.className = "mpu-menu-empty";
     empty.textContent = "No delivered page/tab links found on this page.";
     container.appendChild(empty);
@@ -819,6 +862,7 @@ function buildAdminFlyoutBody(
         const nw = doc.createElement("button");
         nw.type = "button";
         nw.className = "mpu-menu-newwin";
+        nw.setAttribute("role", "menuitem");
         nw.textContent = "↗";
         nw.title = "Open in new window";
         nw.setAttribute("aria-label", `Open ${jump.label} in new window`);
@@ -1256,6 +1300,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     };
 
     const closeEnv = (): void => {
+      if (envFlyout.contains(doc.activeElement)) env.focus();
       envFlyout.hidden = true;
       env.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
@@ -1270,6 +1315,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       env.setAttribute("aria-expanded", "true");
       bindFlyoutPosition(env, envFlyout);
       bindMenuDismiss(doc, envRoot, closeEnv, envFlyout);
+      envFlyout.querySelector<HTMLElement>("button")?.focus();
     };
 
     env.addEventListener("click", () => {
@@ -1295,12 +1341,12 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     menuRoot.className = "mpu-menu-root";
 
     const shortcutsBtn = btn("mpu-fav", "Shortcuts", "Open shortcuts menu");
-    shortcutsBtn.setAttribute("aria-haspopup", "menu");
+    shortcutsBtn.setAttribute("aria-haspopup", "dialog");
     shortcutsBtn.setAttribute("aria-expanded", "false");
 
     const flyout = document.createElement("div");
     flyout.className = "mpu-flyout";
-    flyout.setAttribute("role", "menu");
+    flyout.setAttribute("role", "dialog");
     flyout.setAttribute("aria-label", "Shortcuts");
     flyout.hidden = true;
 
@@ -1314,8 +1360,11 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
 
     const menuBody = document.createElement("div");
     menuBody.className = "mpu-flyout-body";
+    menuBody.setAttribute("role", "menu");
+    menuBody.setAttribute("aria-label", "Shortcut actions");
 
     const closeShortcuts = (): void => {
+      if (flyout.contains(doc.activeElement)) shortcutsBtn.focus();
       flyout.hidden = true;
       shortcutsBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
@@ -1430,7 +1479,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
         ? `Toggle PeopleCode/SQL trace — active flags: ${traceSummary}`
         : "Toggle PeopleCode/SQL trace";
     const t = btn("mpu-trace", label, title, ctx.traceRunning);
-    if (ctx.traceLocked) t.disabled = true;
+    if (ctx.traceLocked && !ctx.traceRunning) t.disabled = true;
     t.addEventListener("click", () => ctx.onTraceToggle());
     bar.appendChild(t);
   }
@@ -1500,6 +1549,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     adminFlyout.hidden = true;
 
     const closeAdmin = (): void => {
+      if (adminFlyout.contains(doc.activeElement)) adminBtn.focus();
       adminFlyout.hidden = true;
       adminBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
@@ -1603,6 +1653,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     entryFlyout.hidden = true;
 
     const closeEntry = (): void => {
+      if (entryFlyout.contains(doc.activeElement)) entryBtn.focus();
       entryFlyout.hidden = true;
       entryBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
@@ -1694,6 +1745,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     pagesFlyout.hidden = true;
 
     const closePages = (): void => {
+      if (pagesFlyout.contains(doc.activeElement)) pagesBtn.focus();
       pagesFlyout.hidden = true;
       pagesBtn.setAttribute("aria-expanded", "false");
       endFlyoutPosition();
@@ -1748,6 +1800,19 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   const help = btn("mpu-help", "?", "Help");
   help.addEventListener("click", () => showHelpDialog(doc));
   bar.appendChild(help);
+
+  bar.querySelectorAll<HTMLElement>('button[aria-haspopup="menu"], #mpu-fav').forEach((trigger) => {
+    trigger.addEventListener("keydown", (e) => {
+      if (!["ArrowDown", "ArrowUp"].includes(e.key)) return;
+      e.preventDefault();
+      if (trigger.getAttribute("aria-expanded") !== "true") trigger.click();
+      const flyout = doc.querySelector('.mpu-flyout:not([hidden])');
+      const menu = flyout?.matches('[role="menu"]') ? flyout : flyout?.querySelector('[role="menu"]');
+      const items = Array.from(menu?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])
+        .filter((item) => item.closest('[role="menu"]') === menu && isVisible(item));
+      (e.key === "ArrowUp" ? items.at(-1) : items[0])?.focus();
+    });
+  });
 
   if (placement === "documentTop" && doc.body) {
     doc.body.insertBefore(bar, doc.body.firstChild);
@@ -1805,27 +1870,18 @@ function openModalDialog(
 ): void {
   doc.getElementById("mpu-dialog")?.remove();
 
-  const backdrop = document.createElement("div");
+  const backdrop = doc.createElement("div");
   backdrop.id = "mpu-dialog";
   backdrop.className = "mpu-dialog-backdrop";
   backdrop.setAttribute("role", "presentation");
 
-  const dialog = document.createElement("div");
+  const dialog = doc.createElement("div");
   dialog.className = "mpu-dialog";
   dialog.setAttribute("role", "dialog");
   dialog.setAttribute("aria-modal", "true");
   dialog.setAttribute("aria-labelledby", opts.labelledBy);
 
-  const close = (): void => {
-    doc.removeEventListener("keydown", onKey);
-    backdrop.remove();
-  };
-  const onKey = (e: KeyboardEvent): void => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      close();
-    }
-  };
+  const close = bindModalDialog(doc, backdrop, dialog);
 
   opts.build(dialog, close);
   backdrop.appendChild(dialog);
@@ -1833,7 +1889,6 @@ function openModalDialog(
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
   });
-  doc.addEventListener("keydown", onKey);
   (dialog.querySelector(opts.initialFocus) as HTMLElement | null)?.focus();
 }
 
@@ -2152,18 +2207,12 @@ export function showGoToComponentDialog(doc: Document, parsed: ParsedPsUrl): voi
   backdrop.appendChild(dialog);
   doc.body.appendChild(backdrop);
 
-  const close = () => backdrop.remove();
+  const close = bindModalDialog(doc, backdrop, dialog);
   dialog.querySelector("#mpu-goto-close")?.addEventListener("click", close);
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
   });
-  doc.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.key === "Escape") close();
-    },
-    { once: true },
-  );
+
 
   dialog.querySelector("#mpu-goto-form")?.addEventListener("submit", (e) => {
     e.preventDefault();

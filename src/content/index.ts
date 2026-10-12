@@ -22,7 +22,8 @@ import {
 import { openFieldEntryFromShortcut } from "../features/field-entry-ui";
 import type { FieldCopyFormat } from "../storage/schema";
 import { toggleTrace } from "../features/trace";
-import { runSearchOptions } from "../features/search";
+import { runSearchOptions, stopSearchOptions } from "../features/search";
+import { clearEligibilityPreview, clearSessionBuffer } from "../features/field-entry";
 import "../content/content.css";
 
 function resolveEnv(settings: MpuSettings, href: string): { label: string; index: number } {
@@ -34,19 +35,25 @@ function resolveEnv(settings: MpuSettings, href: string): { label: string; index
   return { label: parsed.siteNormalized || "PeopleSoft", index: -1 };
 }
 
+const skippedRegistrations = new Set<string>();
+
 async function ensureEnvRegistration(settings: MpuSettings, href: string): Promise<MpuSettings> {
   const parsed = parsePsUrl(href);
   if (!parsed.baseURL || !parsed.siteNormalized) return settings;
   if (settings.urlSites[parsed.baseURL]?.[parsed.siteNormalized]) return settings;
   if (isYes(settings.quietEnvPrompt)) return settings;
+  const registrationKey = `${parsed.baseURL}/${parsed.siteNormalized}`;
+  if (skippedRegistrations.has(registrationKey)) return settings;
 
-  const label =
-    window.prompt(
-      "Morris PeopleSoft Utilities: name this environment (Cancel to skip)",
-      parsed.siteNormalized,
-    ) || parsed.siteNormalized;
+  const answer = window.prompt(
+    "Morris PeopleSoft Utilities: name this environment (Cancel to skip)",
+    parsed.siteNormalized,
+  );
+  if (answer === null) { skippedRegistrations.add(registrationKey); return settings; }
+  const label = answer.trim() || parsed.siteNormalized;
 
   return updateSettings((s) => {
+    if (s.urlSites[parsed.baseURL]?.[parsed.siteNormalized]) return s;
     const environments = [
       ...s.environments,
       { label, active: "Yes" as const, trcProfRunning: "No" as const },
@@ -138,6 +145,21 @@ let traceLocked = false;
 let frameLoadEl: HTMLIFrameElement | null = null;
 let frameLoadHandler: (() => void) | null = null;
 let lastSearchSettings: MpuSettings | null = null;
+let activeSettings: MpuSettings | null = null;
+let lastRecordedComponent = "";
+
+function suspendPage(): void {
+  activeSettings = null;
+  lastSearchSettings = null;
+  stopSearchOptions();
+  removeBar();
+  stopFieldInspector();
+  clearEligibilityPreview(document);
+  clearSessionBuffer();
+  document.getElementById("mpu-dialog")?.remove();
+  if (frameLoadEl && frameLoadHandler) frameLoadEl.removeEventListener("load", frameLoadHandler);
+  frameLoadEl = null;
+}
 
 function onTargetFrameReady(): void {
   const user = document.querySelector(".mpu-user");
@@ -179,16 +201,15 @@ function bindTargetFrameLoad(): void {
   }
 }
 
-async function refresh(): Promise<void> {
+async function refreshPage(): Promise<void> {
   let settings = await loadSettings();
   if (!originAllowed(location.href, settings)) {
-    removeBar();
-    stopFieldInspector();
+    suspendPage();
     return;
   }
 
   const parsed = parsePsUrl(location.href);
-  if (parsed.kind === "unknown") return;
+  if (parsed.kind === "unknown") { suspendPage(); return; }
 
   const envActive = (() => {
     const { index } = resolveEnv(settings, location.href);
@@ -197,13 +218,13 @@ async function refresh(): Promise<void> {
   })();
 
   if (!envActive) {
-    removeBar();
+    suspendPage();
     return;
   }
 
   const loginMode = parsed.kind === "login" || parsed.kind === "logout";
   if (loginMode && !isYes(settings.features.loginPageOption)) {
-    removeBar();
+    suspendPage();
     return;
   }
 
@@ -240,6 +261,12 @@ async function refresh(): Promise<void> {
           : "No",
     },
   };
+  activeSettings = loginMode ? null : effective;
+  if (!isYes(effective.features.fieldEntryOption)) {
+    clearSessionBuffer();
+    clearEligibilityPreview(document);
+    if (document.querySelector('#mpu-dialog [id^="mpu-fe-"]')) document.getElementById("mpu-dialog")?.remove();
+  }
 
   // PI-04: record component visits locally (skip if already top to avoid churn)
   if (
@@ -268,13 +295,16 @@ async function refresh(): Promise<void> {
       top.Component === entry.Component &&
       top.Market === entry.Market &&
       top.Site === entry.Site;
-    if (!same) {
+    const visitKey = `${entry.Menu}.${entry.Component}.${entry.Market}@${entry.Site}`;
+    if (!same && lastRecordedComponent !== visitKey) {
+      lastRecordedComponent = visitKey;
       settings = await updateSettings((s) => ({
         ...s,
         recentComponents: pushRecentComponent(s.recentComponents || [], entry),
       }));
       effective.recentComponents = settings.recentComponents;
     }
+    lastRecordedComponent = visitKey;
   }
 
   // If Inspect is out of scope for this UI, stop an active session
@@ -328,6 +358,7 @@ async function refresh(): Promise<void> {
     bindTargetFrameLoad();
   } else {
     lastSearchSettings = null;
+    stopSearchOptions();
   }
 
   if (isFieldInspectorActive() && isYes(effective.features.recFieldInfoOption)) {
@@ -336,11 +367,32 @@ async function refresh(): Promise<void> {
   }
 }
 
+// Coalesce storage/broadcast refreshes; never mount from concurrent stale snapshots.
+let refreshing = false;
+let refreshPending = false;
+async function refresh(): Promise<void> {
+  refreshPending = true;
+  if (refreshing) return;
+  refreshing = true;
+  try {
+    while (refreshPending) {
+      refreshPending = false;
+      await refreshPage();
+    }
+  } finally {
+    refreshing = false;
+  }
+}
+
 /** Alt+Shift shortcuts — avoid stealing CTRL+J (PeopleSoft System Information). */
 function onMpuShortcut(e: KeyboardEvent): void {
+  if (!activeSettings || document.getElementById("mpu-dialog")) return;
   if (!(e.altKey && e.shiftKey) || e.ctrlKey || e.metaKey) return;
   const key = e.key.toLowerCase();
   if (key !== "p" && key !== "i" && key !== "c" && key !== "g" && key !== "e") return;
+  if (key === "p" && !isYes(activeSettings.features.pageInfoOption)) return;
+  if ((key === "i" || key === "c") && !isYes(activeSettings.features.recFieldInfoOption)) return;
+  if (key === "e" && !isYes(activeSettings.features.fieldEntryOption)) return;
   e.preventDefault();
   if (key === "p") {
     const parsed = parsePsUrl(location.href);
@@ -380,6 +432,10 @@ chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }, 
     void refresh();
   }
   if (msg.type === "mpu-page-info-snapshot") {
+    if (!activeSettings || !isYes(activeSettings.features.pageInfoOption)) {
+      sendResponse({ text: "MPU Page Info is disabled for this page." });
+      return false;
+    }
     const parsed = parsePsUrl(location.href);
     const text = formatPageInfoPlain(collectPageMeta(document), parsed, getLockedFieldName());
     sendResponse({ text });
@@ -387,7 +443,11 @@ chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }, 
   }
 });
 
-chrome.storage.onChanged.addListener(() => {
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || !changes.mpuSettings) return;
+  activeSettings = null;
+  lastSearchSettings = null;
+  stopSearchOptions();
   void refresh();
 });
 

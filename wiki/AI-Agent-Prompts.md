@@ -6,7 +6,7 @@ MPU ships a **side toolkit** of portable AI prompts for PeopleSoft work — sepa
 
 **Download:** `morris-peoplesoft-agents-v*.zip` from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) (separate from the Chrome extension zip).
 
-**Target stack:** PeopleSoft **8.56**, PeopleTools **8.5x–8.6x**, on-prem **HRMS**, **Financials**, and **Campus Solutions**. Prompts stay **generic**.
+**Target stack:** PeopleSoft on PeopleTools **8.62** (application release and PUM image confirmed separately), on-prem **HRMS**, **Financials**, and **Campus Solutions**. Prompts stay **generic**.
 
 **Pack v3:** folders renamed to `review-*` / `assist-*` / `design-*` / `guide-*`; added SQL authoring and IB/CI integration agents; VS Copilot stubs under `agents/vscode-prompts/`.
 

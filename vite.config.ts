@@ -29,6 +29,7 @@ function writeManifest() {
   };
   const manifest = {
     manifest_version: 3,
+    minimum_chrome_version: "116",
     name: "Morris PeopleSoft Utilities",
     short_name: "MPU",
     version: pkg.version,

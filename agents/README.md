@@ -1,6 +1,6 @@
 # PeopleSoft Agent Prompt Pack
 
-**What this is:** a set of portable, generic AI-agent/skill prompts for working on **PeopleSoft 8.56** (PeopleTools **8.5x–8.6x**, on-prem **HRMS**, **Financials**, and **Campus Solutions**). Plain markdown — Cursor, VS Code / Visual Studio + Copilot, Claude, or any chat tool. No Cursor lock-in; no required MCP server.
+**What this is:** a set of portable, generic AI-agent/skill prompts for working on **PeopleSoft on PeopleTools 8.62**, across on-prem **HCM**, **Financials**, and **Campus Solutions** (confirm each application release and PUM image separately). Plain markdown — Cursor, VS Code / Visual Studio + Copilot, Claude, or any chat tool. No Cursor lock-in; no required MCP server.
 
 **What this is not:** part of the Morris PeopleSoft Utilities Chrome extension. Nothing here ships in the extension bundle.
 

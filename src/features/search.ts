@@ -27,14 +27,22 @@ function injectSelected(settings: MpuSettings): void {
   }
 }
 
+let retries: number[] = [];
+
+export function stopSearchOptions(): void {
+  retries.forEach((id) => window.clearTimeout(id));
+  retries = [];
+  document.querySelectorAll('script[data-mpu-inject*="search"], script[data-mpu-inject="inject/corr-hist.js"]').forEach((s) => s.remove());
+}
+
 /** Run search-page helpers via page-context inject scripts (with late iframe retries). */
 export function runSearchOptions(settings: MpuSettings): void {
+  stopSearchOptions();
   const corr = isYes(settings.features.correctHistoryOption);
   const adv = isYes(settings.features.advSearchOption);
   if (!corr && !adv) return;
 
   injectSelected(settings);
   // Classic portal: TargetContent may not be ready at first paint
-  window.setTimeout(() => injectSelected(settings), 400);
-  window.setTimeout(() => injectSelected(settings), 1200);
+  retries = [400, 1200].map((delay) => window.setTimeout(() => injectSelected(settings), delay));
 }

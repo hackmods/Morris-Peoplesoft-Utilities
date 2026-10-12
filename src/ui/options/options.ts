@@ -1,4 +1,5 @@
 import { loadSettings, saveSettings } from "../../storage/settings";
+import { mergeSettingsBackup } from "../../storage/backup";
 import { FEATURE_LABELS, FEATURE_TOGGLE_GROUPS } from "../../storage/feature-labels";
 import type { FeatureToggleKey } from "../../storage/feature-labels";
 import { removeEnvironmentAt } from "../../storage/env-map";
@@ -19,7 +20,8 @@ import {
   type TraceSettings,
   type YesNo,
 } from "../../storage/schema";
-import { parseProfilesImportJson, profilesToExportJson } from "../../features/field-entry";import {
+import { parseProfilesImportJson, profilesToExportJson } from "../../features/field-entry";
+import {
   TRACE_PRESET_META,
   applyTracePreset,
   summarizeActiveTraceFlags,
@@ -755,7 +757,7 @@ async function init(): Promise<void> {
         say("Invalid settings file");
         return;
       }
-      await saveSettings({ ...(await loadSettings()), ...(parsed as Partial<MpuSettings>) });
+      await saveSettings(mergeSettingsBackup(await loadSettings(), parsed));
       const s = await loadSettings();
       renderFeatures(s);
       renderTrace(s);

@@ -314,9 +314,9 @@ export function formatRecFieldCopy(
 export function formatGetRowsetCopy(parsed: ParsedRecField): string {
   const record = parsed.record || "RECORD";
   const field = parsed.field || parsed.base || "FIELD";
-  const row =
-    parsed.occurrence != null && parsed.occurrence !== "" ? parsed.occurrence : "CurrentRowNumber()";
-  return `GetLevel0().GetRow(${row}).GetRecord(Record.${record}).GetField(Field.${field})`;
+  // DOM $occurrence does not reveal the component buffer's scroll level or row path.
+  return `GetRow().GetRecord(Record.${record}).GetField(Field.${field})`;
+
 }
 
 /** Human-readable label for announcements / plain-text copy. */

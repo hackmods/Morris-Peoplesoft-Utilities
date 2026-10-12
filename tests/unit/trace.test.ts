@@ -54,6 +54,7 @@ const SQL_IDS = [
   "TRACE_SQL_TRACE_SQL_STMT",
   "TRACE_SQL_TRACE_SQL_BIND",
   "TRACE_SQL_TRACE_SQL_CURSOR",
+  "TRACE_SQL_TRACE_SQL_FETCH",
   "TRACE_SQL_TRACE_SQL_API",
   "TRACE_SQL_TRACE_SQL_SSB",
   "TRACE_SQL_TRACE_SQL_DB",
@@ -78,6 +79,15 @@ describe("trace masks", () => {
 });
 
 describe("applyTraceComponent", () => {
+  it("rejects cross-origin form actions before posting session state", async () => {
+    const fetchImpl = vi.fn(async () => ({ ok: true, status: 200,
+      text: async () => traceHtml(PC_IDS).replace('action="/psc/', 'action="https://other.example/psc/'),
+    })) as unknown as typeof fetch;
+    expect(await applyTraceComponent(parsed.baseURL, "ps", "EMPLOYEE", "HRMS", "UTILITIES.PEOPLECODE_TRACE.GBL",
+      [{ elId: PC_IDS[0], selected: true }], fetchImpl)).toBe("fail");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ redirect: "error" }));
+  });
   it("GETs psc site_newwin then POSTs checkbox save with ICSID", async () => {
     const calls: Array<{ url: string; method?: string; body?: string }> = [];
     const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -140,6 +150,15 @@ describe("applyTraceComponent", () => {
 });
 
 describe("toggleTrace", () => {
+  it("preserves the running indicator and warns when Stop fails", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 500 })));
+    const settings = createDefaultSettings();
+    settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "Yes" }];
+    resetChromeStorage({ mpuSettings: settings });
+    const result = await toggleTrace(settings, parsed, 0, false);
+    expect(result.running).toBe(true);
+    expect(document.getElementById("mpu-live")?.textContent).toContain("may still be active");
+  });
   beforeEach(() => {
     resetChromeStorage();
     document.body.innerHTML = `<div id="mpu-live" aria-live="polite"></div>`;
