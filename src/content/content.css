@@ -4,12 +4,12 @@
   align-items: center;
   gap: 0.4rem 0.55rem;
   padding: 0.35rem 0.6rem;
-  background: linear-gradient(180deg, #1f3a4d 0%, #173041 100%);
-  color: #f4f7fa;
+  background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+  color: #f8f8f8;
   font: 600 12px/1.3 "Segoe UI", system-ui, sans-serif;
   z-index: 100;
   position: relative;
-  border-bottom: 2px solid #c4a035;
+  border-bottom: 2px solid #ee4e12;
 }
 
 .mpu-bar-classic {
@@ -37,16 +37,16 @@
 .mpu-brand {
   letter-spacing: 0.04em;
   padding: 0.15rem 0.4rem;
-  border: 1px solid #c4a035;
+  border: 1px solid #ee4e12;
   border-radius: 2px;
 }
 
 .mpu-env {
   padding: 0.15rem 0.45rem;
   border: none;
-  border-left: 4px solid var(--mpu-env-color, #c4a035);
-  border-bottom: 2px solid var(--mpu-env-color, #c4a035);
-  background: color-mix(in srgb, var(--mpu-env-color, #c4a035) 18%, transparent);
+  border-left: 4px solid var(--mpu-env-color, #ee4e12);
+  border-bottom: 2px solid var(--mpu-env-color, #ee4e12);
+  background: color-mix(in srgb, var(--mpu-env-color, #ee4e12) 18%, transparent);
   border-radius: 0 2px 2px 0;
   color: inherit;
   font: inherit;
@@ -59,11 +59,11 @@ button.mpu-env {
 
 .mpu-env:hover,
 .mpu-env:focus-visible {
-  background: color-mix(in srgb, var(--mpu-env-color, #c4a035) 28%, transparent);
+  background: color-mix(in srgb, var(--mpu-env-color, #ee4e12) 28%, transparent);
 }
 
 .mpu-env[data-mpu-env-colored="true"] {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mpu-env-color, #c4a035) 35%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mpu-env-color, #ee4e12) 35%, transparent);
 }
 
 .mpu-env-flyout {
@@ -108,12 +108,12 @@ button.mpu-env {
 .mpu-mode {
   padding: 0.1rem 0.35rem;
   border-radius: 2px;
-  border: 1px solid #8aa0b0;
-  background: #0f2433;
+  border: 1px solid #808080;
+  background: #111111;
   font: 600 11px/1.2 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: #f0d56a;
+  color: #ff9a66;
 }
 
 .mpu-fav-wrap {
@@ -129,7 +129,7 @@ button.mpu-env {
   align-items: center;
   gap: 0.25rem;
   font: 500 11px/1.2 "Segoe UI", system-ui, sans-serif;
-  color: #f4f7fa;
+  color: #f8f8f8;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -142,31 +142,31 @@ button.mpu-env {
   width: 5.5rem;
   font: inherit;
   border-radius: 3px;
-  border: 1px solid #8aa0b0;
-  background: #0f2433;
-  color: #f4f7fa;
+  border: 1px solid #808080;
+  background: #111111;
+  color: #f8f8f8;
   padding: 0.2rem 0.3rem;
 }
 
 .mpu-fav-filter:focus-visible {
-  outline: 2px solid #f0d56a;
+  outline: 2px solid #ff9a66;
 }
 
 .mpu-select {
   max-width: 12rem;
   font: inherit;
   border-radius: 3px;
-  border: 1px solid #8aa0b0;
-  background: #0f2433;
-  color: #f4f7fa;
+  border: 1px solid #808080;
+  background: #111111;
+  color: #f8f8f8;
   padding: 0.2rem;
 }
 
 .mpu-btn {
   appearance: none;
-  border: 1px solid #8aa0b0;
-  background: #243f52;
-  color: #f4f7fa;
+  border: 1px solid #808080;
+  background: #292929;
+  color: #f8f8f8;
   border-radius: 3px;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
@@ -175,15 +175,15 @@ button.mpu-env {
 
 .mpu-btn:hover,
 .mpu-btn:focus-visible {
-  outline: 2px solid #f0d56a;
+  outline: 2px solid #ff9a66;
   outline-offset: 1px;
-  background: #2d5168;
+  background: #3b2a23;
 }
 
 .mpu-btn[aria-pressed="true"] {
-  background: #c4a035;
+  background: #ee4e12;
   color: #1a1a1a;
-  border-color: #f0d56a;
+  border-color: #ff9a66;
 }
 
 .mpu-btn:disabled {
@@ -192,7 +192,7 @@ button.mpu-env {
 }
 
 .mpu-select:focus-visible {
-  outline: 2px solid #f0d56a;
+  outline: 2px solid #ff9a66;
 }
 
 .mpu-sr-only {
@@ -218,8 +218,8 @@ button.mpu-env {
 }
 
 .mpu-dialog {
-  background: #f7f9fb;
-  color: #15202b;
+  background: #faf9f8;
+  color: #1a1a1a;
   max-width: min(40rem, 96vw);
   max-height: min(90vh, 52rem);
   width: 100%;
@@ -227,7 +227,7 @@ button.mpu-env {
   border-radius: 6px;
   padding: 1rem 1.25rem;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
-  border: 1px solid #c5d0d8;
+  border: 1px solid #cfcac7;
 }
 
 .mpu-dialog h2 {
@@ -292,7 +292,7 @@ button.mpu-env {
 .mpu-dialog-section {
   margin: 0.75rem 0;
   padding-top: 0.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--mpu-bar-fg, #14202b) 12%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--mpu-bar-fg, #1a1a1a) 12%, transparent);
 }
 
 .mpu-dialog-section h3 {
@@ -311,7 +311,7 @@ button.mpu-env {
 .mpu-dialog-input {
   font: inherit;
   padding: 0.35rem 0.5rem;
-  border: 1px solid #c5d0d8;
+  border: 1px solid #cfcac7;
   border-radius: 4px;
 }
 
@@ -332,7 +332,7 @@ button.mpu-env {
 .mpu-goto-form input[type="search"] {
   font: inherit;
   padding: 0.35rem 0.5rem;
-  border: 1px solid #c5d0d8;
+  border: 1px solid #cfcac7;
   border-radius: 4px;
 }
 
@@ -345,14 +345,14 @@ button.mpu-env {
 }
 
 .mpu-dialog .mpu-btn {
-  background: #1f3a4d;
+  background: #1a1a1a;
   color: #fff;
   white-space: nowrap;
 }
 
 .mpu-pre {
   white-space: pre-wrap;
-  background: #e8eef2;
+  background: #f1efed;
   padding: 0.75rem;
   border-radius: 4px;
   font: 500 13px/1.4 ui-monospace, Consolas, monospace;
@@ -360,8 +360,8 @@ button.mpu-env {
 
 .mpu-pre-diff {
   margin-top: 0.5rem;
-  background: #f7f1d8;
-  border: 1px solid #c4a035;
+  background: #fff0e8;
+  border: 1px solid #ee4e12;
 }
 
 .mpu-page-tabs-list {
@@ -412,10 +412,10 @@ button.mpu-env {
   min-width: 0;
   max-width: min(40rem, 55vw);
   overflow: hidden;
-  border: 1px solid #decc00;
+  border: 1px solid #ff9a66;
   border-radius: 2px;
-  background: #decc00;
-  color: #2f3c45;
+  background: #ff9a66;
+  color: #1a1a1a;
   font: 700 13px/1.2 ui-monospace, Consolas, monospace;
   padding: 0.15rem 0.45rem;
   vertical-align: middle;
@@ -445,9 +445,9 @@ button.mpu-env {
   overflow-x: hidden;
   overflow-y: auto;
   padding: 0.35rem 0;
-  background: linear-gradient(180deg, #1f3a4d 0%, #173041 100%);
-  color: #f4f7fa;
-  border: 1px solid #8aa0b0;
+  background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+  color: #f8f8f8;
+  border: 1px solid #808080;
   border-radius: 3px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
@@ -463,7 +463,7 @@ button.mpu-env {
 
 .mpu-flyout-top {
   /* Root menus hang from the MPU bar band (top chrome) */
-  border-top: 2px solid #c4a035;
+  border-top: 2px solid #ee4e12;
   border-radius: 0 0 3px 3px;
 }
 
@@ -488,7 +488,7 @@ button.mpu-env {
 }
 
 .mpu-menu-has-sub > .mpu-menu-subtrigger[aria-expanded="true"] {
-  background: #2d5168;
+  background: #3b2a23;
 }
 
 .mpu-menu-row {
@@ -512,7 +512,7 @@ button.mpu-env {
   width: 100%;
   border: 0;
   background: transparent;
-  color: #f4f7fa;
+  color: #f8f8f8;
   font: inherit;
   text-align: left;
   padding: 0.35rem 0.65rem;
@@ -526,9 +526,9 @@ button.mpu-env {
 .mpu-menu-newwin {
   flex: 0 0 auto;
   border: 0;
-  border-left: 1px solid #4a6275;
+  border-left: 1px solid #646464;
   background: transparent;
-  color: #f0d56a;
+  color: #ff9a66;
   font: inherit;
   padding: 0.35rem 0.45rem;
   cursor: pointer;
@@ -543,12 +543,12 @@ button.mpu-env {
 .mpu-menu-newwin:hover,
 .mpu-menu-newwin:focus-visible {
   outline: none;
-  background: #2d5168;
+  background: #3b2a23;
 }
 
 .mpu-menu-current,
 .mpu-menu-open:disabled {
-  background: #c4a035;
+  background: #ee4e12;
   color: #1a1a1a;
   cursor: default;
 }
@@ -563,7 +563,7 @@ button.mpu-env {
   appearance: none;
   border: 0;
   background: transparent;
-  color: #1f5f99;
+  color: #9a3412;
   text-decoration: underline;
   font: inherit;
   cursor: pointer;
@@ -571,7 +571,7 @@ button.mpu-env {
 }
 
 .mpu-dialog .mpu-linkish {
-  color: #1f5f99;
+  color: #9a3412;
 }
 
 .mpu-page-tabs-list .mpu-menu-current:disabled {
@@ -588,7 +588,7 @@ button.mpu-env {
 .mpu-rf-part + .mpu-rf-part::before {
   content: "·";
   margin-right: 0.45rem;
-  color: #6b5a00;
+  color: #5a210d;
   font-weight: 700;
 }
 
@@ -596,7 +596,7 @@ button.mpu-env {
   font: 600 10px/1.2 system-ui, sans-serif;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #6b5a00;
+  color: #5a210d;
 }
 
 .mpu-rf-val {
@@ -614,7 +614,7 @@ button.mpu-env {
 
 .mpu-ib-crumb {
   font: 600 11px/1.2 system-ui, sans-serif;
-  color: #1f5f99;
+  color: #ff9a66;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -629,3 +629,7 @@ button.mpu-env {
     transition: none !important;
   }
 }
+
+.mpu-dialog a { color: #9a3412; }
+.mpu-dialog .mpu-btn:focus-visible { outline-color: #9a3412; }
+.mpu-btn[aria-pressed="true"], .mpu-menu-current { font-weight: 700; }

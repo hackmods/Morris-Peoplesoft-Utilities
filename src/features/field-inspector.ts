@@ -8,8 +8,8 @@ import type { FieldCopyFormat } from "../storage/schema";
 const AREA = "mpu-recfield-area";
 const ICON = "mpu-recfield-icon";
 const LOCKED_BORDER = "solid 2px #5DA027";
-const ACTIVE_BORDER = "solid 2px #E36B22";
-const ORANGE = "#E36B22";
+const ACTIVE_BORDER = "solid 2px #EE4E12";
+const ORANGE = "#EE4E12";
 const GREEN = "#5DA027";
 const STYLE_ID = "mpu-field-inspector-style";
 

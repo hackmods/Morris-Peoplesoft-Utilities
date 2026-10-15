@@ -226,3 +226,11 @@
 ## Review correction — 2026-10-11
 
 FE-05 supports multi-row paste to existing grid occurrences. Automatic Add Row was removed after review: preview must not mutate records, and the original global selector/synchronous loop could target the wrong grid. A future implementation needs explicit consent in the UI, unambiguous grid targeting, and asynchronous completion on real PeopleTools 8.62. See [repository review](repo-review-2026-10-11.md).
+
+## Agent references — 2026-10-14
+
+AG-01 implemented (Unreleased): Options → Agents with a local, generated public-reference catalog, task/search filtering, three pillar-template links and entry points from popup/side panel/Help. Full prompts remain a separate toolkit; no AI execution, remote fetch, automatic page export or added permissions. Policy rationale: [ADR 0009](../adr/0009-agent-reference-library.md). Browser accessibility/privacy regressions accompany the change.
+
+AG-02 implemented for 1.0.28 (Unreleased): audience discovery and blank, editable task briefs with explicit clipboard copy/manual fallback; no page-context capture or persistence. Build-time catalog/export validation prevents stale references. Prompt maintenance 4.0.1 adds a private evaluation worksheet; host/model trials remain unexecuted.
+
+BR-01 implemented for 1.0.28 (Unreleased): UnionOps-inspired black/orange shared UI tokens and versioned PS artwork. Preserve semantic/environment state cues and prior assets. Release priority remains real 8.62/assistive-technology evidence and genuine updated Store captures; do not add speculative features to bypass those gates.

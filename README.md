@@ -113,12 +113,12 @@ See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## PeopleSoft agent prompt pack
 
-Separate from the extension itself — nothing under `agents/` ships in the Chrome zip:
+Full prompts, skills and templates are distributed separately from the extension. Options → Agents bundles only a searchable public reference catalog; popup/side-panel links open the library and Help links to setup documentation. MPU does not run agents or send page data to AI services.
 
 - **Browse:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · guide [`agents/README.md`](agents/README.md) · wiki [AI agent prompts](wiki/AI-Agent-Prompts.md)
 - **Download:** each GitHub Release attaches `morris-peoplesoft-agents-v*.zip` (or run `npm run package:agents`)
 
-Targets PeopleTools 8.62 (confirm application release and PUM image separately): data & PeopleCode review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training — for Cursor, Visual Studio / VS Code + Copilot, or Claude.
+Content v4.0.1 targets PeopleTools 8.62 (confirm application release and PUM image separately): 22 workflows for BA requirements, PeopleCode/SQL, IB/CI, AE/Scheduler, reporting, testing, upgrades, approvals, performance/trace, Fluid/accessibility, conversion, onboarding and specialist training. Complete Copilot, Claude/Codex skill and Cursor exports, three private pillar templates and a private host-evaluation worksheet are included. Options can prepare a blank task brief; it reads no page context.
 
 ## Releases
 

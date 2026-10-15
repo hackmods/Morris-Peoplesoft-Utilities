@@ -6,6 +6,8 @@ Use these answers in the Developer Dashboard. They must match `docs/privacy.md` 
 
 Increase productivity on PeopleSoft Classic and Fluid pages for business analysts and technical users (favorites, page metadata, search helpers, optional tracing/field inspection).
 
+The Agents reference library supports that purpose with local search of reusable PeopleSoft prompt descriptions and user-selected public GitHub documentation/release links. It provides no general chatbot, AI service connection or automatic data transfer.
+
 ## Does this extension collect or use user data?
 
 **Local data use; no developer-side collection.** MPU reads PeopleSoft website content for its visible features and stores preferences, favorites, recent component identifiers, customization fingerprints/notes, and optional Field Entry profiles locally. Do not interpret “no telemetry” as “no access to user data.”
@@ -15,6 +17,8 @@ For Dashboard data-use categories, disclose website content and the applicable p
 ## Remote code
 
 No. All code is packaged in the extension.
+
+Only public prompt-reference metadata is bundled; full prompts remain in the separate toolkit. External links open documentation as ordinary tabs, without executing it as extension logic. The library does not fetch remote configuration, prompts or code.
 
 ## Data types collected / transmitted to developer
 

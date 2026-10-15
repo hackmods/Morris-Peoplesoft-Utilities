@@ -26,11 +26,11 @@ const shotDir = resolve(outDir, "screenshots");
 const mockDir = resolve(outDir, "_mock");
 
 const COLORS = {
-  navy: "#1f3a4d",
-  navyDeep: "#173041",
-  navyDark: "#0f2433",
-  gold: "#c4a035",
-  goldLite: "#f0d56a",
+  black: "#1a1a1a",
+  blackDeep: "#111111",
+  blackDark: "#111111",
+  orange: "#ee4e12",
+  orangeLight: "#ff9a66",
   cream: "#f4f7fa",
   pageBg: "#eef2f5",
   card: "#ffffff",
@@ -55,13 +55,13 @@ const SHARED_CSS = `
   .mpu-bar {
     display: flex; flex-wrap: wrap; align-items: center;
     gap: 0.4rem 0.55rem; padding: 0.35rem 0.6rem;
-    background: linear-gradient(180deg, ${COLORS.navy} 0%, ${COLORS.navyDeep} 100%);
+    background: linear-gradient(180deg, ${COLORS.black} 0%, ${COLORS.blackDeep} 100%);
     color: ${COLORS.cream}; font: 600 12px/1.3 "Segoe UI", system-ui, sans-serif;
-    border-bottom: 2px solid ${COLORS.gold}; z-index: 100;
+    border-bottom: 2px solid ${COLORS.orange}; z-index: 100;
   }
   .mpu-brand {
     letter-spacing: 0.04em; padding: 0.15rem 0.4rem;
-    border: 1px solid ${COLORS.gold}; border-radius: 2px;
+    border: 1px solid ${COLORS.orange}; border-radius: 2px;
   }
   .mpu-env { padding: 0.15rem 0.35rem; border-bottom: 3px solid #e05a3c; }
   .mpu-user { opacity: 0.95; font-weight: 500; }
@@ -71,11 +71,11 @@ const SHARED_CSS = `
     font: inherit; cursor: default;
   }
   .mpu-btn[aria-pressed="true"] {
-    background: ${COLORS.gold}; color: #1a1a1a; border-color: ${COLORS.goldLite};
+    background: ${COLORS.orange}; color: #1a1a1a; border-color: ${COLORS.orangeLight};
   }
   .mpu-select {
     max-width: 14rem; font: inherit; border-radius: 3px;
-    border: 1px solid #8aa0b0; background: ${COLORS.navyDark};
+    border: 1px solid #8aa0b0; background: ${COLORS.blackDark};
     color: ${COLORS.cream}; padding: 0.2rem 0.35rem;
   }
   .ps-chrome {
@@ -139,12 +139,12 @@ const SHARED_CSS = `
   }
   .mpu-dialog h2 { margin: 0 0 0.5rem; font-size: 1.15rem; }
   .mpu-pre {
-    white-space: pre-wrap; background: #e8eef2; padding: 0.75rem;
+    white-space: pre-wrap; background: #f8f8f8; padding: 0.75rem;
     border-radius: 4px; font: 500 13px/1.45 ui-monospace, Consolas, monospace;
     margin: 0;
   }
   .mpu-dialog-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-  .mpu-dialog .mpu-btn { background: ${COLORS.navy}; color: #fff; }
+  .mpu-dialog .mpu-btn { background: ${COLORS.black}; color: #fff; }
   .field-hi { outline: 2px solid ${COLORS.amber}; outline-offset: 1px; }
   .field-lock { outline: 2px solid ${COLORS.green}; outline-offset: 1px; }
   .mpu-field-tip {
@@ -155,21 +155,21 @@ const SHARED_CSS = `
   }
   .fav-open {
     position: absolute; top: 2.55rem; left: 11.5rem; z-index: 150;
-    background: ${COLORS.navyDark}; color: ${COLORS.cream};
+    background: ${COLORS.blackDark}; color: ${COLORS.cream};
     border: 1px solid #8aa0b0; border-radius: 3px; min-width: 14rem;
     box-shadow: 0 6px 18px rgba(0,0,0,0.28); padding: 0.2rem 0;
     font: 500 12px/1.4 "Segoe UI";
   }
   .fav-open div { padding: 0.35rem 0.65rem; }
-  .fav-open .sel { background: ${COLORS.gold}; color: #1a1a1a; font-weight: 650; }
+  .fav-open .sel { background: ${COLORS.orange}; color: #1a1a1a; font-weight: 650; }
   .mpu-bar-row2 {
     display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem;
     padding: 0.25rem 0.6rem; background: #1a3344; color: ${COLORS.cream};
     font: 600 11px/1.3 ui-monospace, Consolas, monospace;
-    border-bottom: 1px solid ${COLORS.gold};
+    border-bottom: 1px solid ${COLORS.orange};
   }
   .mpu-bar-row2 .grow { flex: 1; min-width: 12rem; }
-  .mpu-bar-row2 .hi { color: ${COLORS.goldLite}; }
+  .mpu-bar-row2 .hi { color: ${COLORS.orangeLight}; }
   .inspect-dot {
     display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%;
     background: ${COLORS.amber}; margin-right: 0.2rem; vertical-align: middle;
@@ -182,7 +182,7 @@ const SHARED_CSS = `
     margin: 0 0 0.75rem; font: 600 13px "Segoe UI";
   }
   .ps-tabs span {
-    padding: 0.45rem 0.85rem; background: #e8eef2; border: 1px solid ${COLORS.border};
+    padding: 0.45rem 0.85rem; background: #f8f8f8; border: 1px solid ${COLORS.border};
     border-bottom: none; margin-right: 2px; color: ${COLORS.muted};
   }
   .ps-tabs .on { background: #fff; color: ${COLORS.psBlue}; border-top: 3px solid ${COLORS.psBlue}; }
@@ -482,10 +482,10 @@ App Server: APPSRV-DEMO</pre>
       800,
       `
       .opts {
-        --bg: #0e151c; --card: #182430; --fg: #e8eef2; --accent: #9ec9e6;
-        --gold: #e0c15a; --border: #314556;
+        --bg: #111111; --card: #1a1a1a; --fg: #f8f8f8; --accent: #ff9a66;
+        --brand: #ee4e12; --border: #525252;
         min-height: 100%; background:
-          radial-gradient(ellipse 80% 50% at 0% -10%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 55%),
+          radial-gradient(ellipse 80% 50% at 0% -10%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 55%),
           var(--bg);
         color: var(--fg); font: 16px/1.45 "Segoe UI", system-ui, sans-serif;
       }
@@ -499,7 +499,7 @@ App Server: APPSRV-DEMO</pre>
         border: 1px solid var(--border); background: var(--card); color: var(--fg);
         border-radius: 999px; padding: 0.35rem 0.85rem; font: inherit;
       }
-      .tab.on { background: var(--accent); color: #0e151c; border-color: var(--accent); font-weight: 650; }
+      .tab.on { background: var(--accent); color: #111111; border-color: var(--accent); font-weight: 650; }
       .panel {
         background: var(--card); border: 1px solid var(--border); border-radius: 10px;
         padding: 1rem 1.15rem 1.1rem; margin-bottom: 1rem;
@@ -508,11 +508,11 @@ App Server: APPSRV-DEMO</pre>
       .panel h2 { margin: 0 0 0.35rem; }
       .panel-lede { margin: 0 0 0.75rem; color: color-mix(in srgb, var(--fg) 75%, transparent); font-size: 0.95rem; }
       .onboarding {
-        border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--border));
-        background: color-mix(in srgb, var(--gold) 10%, var(--card));
+        border: 1px solid color-mix(in srgb, var(--brand) 55%, var(--border));
+        background: color-mix(in srgb, var(--brand) 10%, var(--card));
         border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 0.85rem;
       }
-      .onboarding h3 { margin: 0 0 0.35rem; font-size: 1rem; color: var(--gold); }
+      .onboarding h3 { margin: 0 0 0.35rem; font-size: 1rem; color: var(--brand); }
       .onboarding ol { margin: 0 0 0.55rem 1.1rem; padding: 0; font-size: 0.92rem; }
       .feature-group { margin-top: 0.35rem; }
       .fg-title { margin: 0 0 0.2rem; font-size: 1rem; }
@@ -523,7 +523,7 @@ App Server: APPSRV-DEMO</pre>
         background: color-mix(in srgb, var(--accent) 8%, var(--card));
       }
       .primary {
-        background: var(--accent); color: #0e151c; border: 1px solid var(--accent);
+        background: var(--accent); color: #111111; border: 1px solid var(--accent);
         border-radius: 6px; padding: 0.4rem 0.75rem; font: 650 inherit;
       }
       `,
@@ -548,22 +548,22 @@ App Server: APPSRV-DEMO</pre>
       `
       .promo {
         width: 100%; height: 100%; padding: 1.15rem 1.25rem 1rem;
-        background: linear-gradient(145deg, ${COLORS.navy} 0%, ${COLORS.navyDeep} 55%, #0c1c28 100%);
+        background: linear-gradient(145deg, ${COLORS.black} 0%, ${COLORS.blackDeep} 55%, #111111 100%);
         color: ${COLORS.cream}; position: relative;
       }
       .mark {
-        display: inline-block; border: 1px solid ${COLORS.gold}; border-radius: 2px;
+        display: inline-block; border: 1px solid ${COLORS.orange}; border-radius: 2px;
         padding: 0.15rem 0.45rem; font: 700 13px/1 "Segoe UI"; letter-spacing: 0.06em;
-        color: ${COLORS.goldLite}; margin-bottom: 0.65rem;
+        color: ${COLORS.orangeLight}; margin-bottom: 0.65rem;
       }
       h1 {
         margin: 0 0 0.4rem; font: 700 1.35rem/1.15 "Segoe UI";
         max-width: 18rem;
       }
       p { margin: 0 0 0.65rem; font: 500 12px/1.35 "Segoe UI"; opacity: 0.92; max-width: 19rem; }
-      ul { margin: 0; padding: 0 0 0 1rem; font: 600 11.5px/1.45 "Segoe UI"; color: ${COLORS.goldLite}; }
+      ul { margin: 0; padding: 0 0 0 1rem; font: 600 11.5px/1.45 "Segoe UI"; color: ${COLORS.orangeLight}; }
       .bar {
-        position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: ${COLORS.gold};
+        position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: ${COLORS.orange};
       }
       `,
     ),
@@ -600,7 +600,7 @@ App Server: APPSRV-DEMO</pre>
             <div class="tip">PSOPRDEFN.OPRID</div>
           </div>
         </div>
-        <div class="goldbar"></div>
+        <div class="orangebar"></div>
       </div>`,
       1400,
       560,
@@ -609,23 +609,23 @@ App Server: APPSRV-DEMO</pre>
         width: 100%; height: 100%; display: grid;
         grid-template-columns: 1.05fr 1fr; gap: 2rem; align-items: center;
         padding: 2.5rem 3rem 3.25rem;
-        background: linear-gradient(120deg, #0c1c28 0%, ${COLORS.navy} 42%, ${COLORS.navyDeep} 100%);
+        background: linear-gradient(120deg, #111111 0%, ${COLORS.black} 42%, ${COLORS.blackDeep} 100%);
         color: ${COLORS.cream}; position: relative;
       }
       .mark {
-        display: inline-block; border: 1px solid ${COLORS.gold}; border-radius: 2px;
+        display: inline-block; border: 1px solid ${COLORS.orange}; border-radius: 2px;
         padding: 0.2rem 0.55rem; font: 700 14px/1 "Segoe UI"; letter-spacing: 0.08em;
-        color: ${COLORS.goldLite}; margin-bottom: 0.85rem;
+        color: ${COLORS.orangeLight}; margin-bottom: 0.85rem;
       }
       h1 { margin: 0 0 0.65rem; font: 750 2.55rem/1.1 "Segoe UI"; max-width: 16ch; }
       .copy > p { margin: 0 0 1.1rem; font: 500 1.05rem/1.4 "Segoe UI"; opacity: 0.92; max-width: 28rem; }
       .pills { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1rem; }
       .pills span {
         border: 1px solid rgba(196,160,53,0.55); background: rgba(15,36,51,0.65);
-        color: ${COLORS.goldLite}; border-radius: 999px; padding: 0.25rem 0.7rem;
+        color: ${COLORS.orangeLight}; border-radius: 999px; padding: 0.25rem 0.7rem;
         font: 650 12px/1.2 "Segoe UI";
       }
-      .trust { font: 600 0.9rem/1.3 "Segoe UI" !important; color: #9ec9e6 !important; opacity: 1 !important; }
+      .trust { font: 600 0.9rem/1.3 "Segoe UI" !important; color: #ff9a66 !important; opacity: 1 !important; }
       .preview {
         background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
         border-radius: 8px; padding: 0.75rem; box-shadow: 0 18px 40px rgba(0,0,0,0.35);
@@ -650,7 +650,7 @@ App Server: APPSRV-DEMO</pre>
         padding: 0.2rem 0.45rem; border-radius: 3px; border: 1px solid #fbbf24;
         font: 600 12px/1.3 ui-monospace, Consolas, monospace;
       }
-      .goldbar { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: ${COLORS.gold}; }
+      .orangebar { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: ${COLORS.orange}; }
       `,
     ),
   },
@@ -664,16 +664,16 @@ App Server: APPSRV-DEMO</pre>
       `
       .icon {
         width: 100%; height: 100%;
-        background: linear-gradient(180deg, ${COLORS.navy} 0%, ${COLORS.navyDeep} 100%);
+        background: linear-gradient(180deg, ${COLORS.black} 0%, ${COLORS.blackDeep} 100%);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        gap: 0.55rem; border-top: 6px solid ${COLORS.gold}; border-bottom: 6px solid ${COLORS.gold};
+        gap: 0.55rem; border-top: 6px solid ${COLORS.orange}; border-bottom: 6px solid ${COLORS.orange};
       }
       .m {
         font: 800 34px/1 "Segoe UI", system-ui, sans-serif; letter-spacing: 0.06em;
         color: ${COLORS.cream};
       }
       .line {
-        display: block; width: 58px; height: 8px; border-radius: 1px; background: ${COLORS.goldLite};
+        display: block; width: 58px; height: 8px; border-radius: 1px; background: ${COLORS.orangeLight};
       }
       `,
     ),
@@ -758,8 +758,8 @@ function fill(png: PNG, color: [number, number, number], x0 = 0, y0 = 0, x1 = pn
 
 function fallbackPng(path: string, w: number, h: number) {
   const png = new PNG({ width: w, height: h });
-  fill(png, [31, 58, 77]);
-  fill(png, [196, 160, 53], 0, h - Math.max(8, Math.floor(h * 0.04)), w, h);
+  fill(png, [26, 26, 26]);
+  fill(png, [238, 78, 18], 0, h - Math.max(8, Math.floor(h * 0.04)), w, h);
   writeFileSync(path, PNG.sync.write(png));
 }
 
@@ -779,6 +779,10 @@ function main() {
     if (only?.length && !only.includes(rel)) continue;
 
     const outPath = resolve(outDir, rel);
+    if (rel === "store-icon-128.png" && existsSync(resolve(outDir, "mpu-peoplesoft-icon-v4.png"))) {
+      console.log("Skipping approved store icon; use npm run generate:icons to resize the source artwork");
+      continue;
+    }
     const isScreenshot = rel.startsWith("screenshots/");
     if (
       isScreenshot &&

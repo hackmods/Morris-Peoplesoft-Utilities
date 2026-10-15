@@ -23,6 +23,7 @@
       <button type="button" class="tab" role="tab" data-tab="tracing" aria-selected="false" id="tab-tracing" aria-controls="panel-tracing">Tracing</button>
       <button type="button" class="tab" role="tab" data-tab="environments" aria-selected="false" id="tab-environments" aria-controls="panel-environments">Environments</button>
       <button type="button" class="tab" role="tab" data-tab="allowlist" aria-selected="false" id="tab-allowlist" aria-controls="panel-allowlist">Host allowlist</button>
+      <button type="button" class="tab" role="tab" data-tab="agents" aria-selected="false" id="tab-agents" aria-controls="panel-agents">Agents</button>
       <button type="button" class="tab" role="tab" data-tab="about" aria-selected="false" id="tab-about" aria-controls="panel-about">About</button>
     </nav>
     <main id="main">
@@ -250,6 +251,49 @@
         <div class="panel-actions">
           <button type="button" class="primary" id="save-allowlist">Save allowlist</button>
         </div>
+      </section>
+
+      <section id="panel-agents" class="panel hidden" data-panel="agents" role="tabpanel" aria-labelledby="tab-agents" hidden>
+        <header class="panel-head">
+          <h2>PeopleSoft agent prompts</h2>
+          <p class="panel-lede">Find a specialist prompt for your next PeopleSoft task.</p>
+        </header>
+        <p id="agent-pack-version"></p>
+        <p>Use these prompts in Visual Studio Copilot, Claude, Codex or another approved AI tool. MPU does not run an AI model or send your PeopleSoft page data to these services.</p>
+        <p class="help">Links open public GitHub documentation in a new tab. Share only sanitized information your organization permits. The prompts require review; source checks do not establish real-system compatibility.</p>
+        <p class="agent-resource-links">
+          <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Setup and full prompt pack on GitHub</a>
+          <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Published release downloads</a>
+        </p>
+        <div class="agent-filters">
+          <label for="agent-search">Search prompts
+            <input type="search" id="agent-search" placeholder="Try Fluid, SQL or testing" autocomplete="off" aria-describedby="agent-results" />
+          </label>
+          <label for="agent-family">Task type
+            <select id="agent-family">
+              <option value="all">All tasks</option>
+              <option value="assist">Authoring and troubleshooting</option>
+              <option value="review">Review</option>
+              <option value="design">Design and testing</option>
+              <option value="guide">Learning and local expertise</option>
+            </select>
+          </label>
+        </div>
+        <section id="agent-brief-panel" aria-labelledby="agent-brief-heading" hidden>
+          <h3 id="agent-brief-heading">Prepare a task brief</h3>
+          <p>Choose a prompt below to create a blank request. Fill in only approved, sanitized information, and load that prompt or skill in your AI tool first.</p>
+          <label for="agent-brief">Task brief</label>
+          <textarea id="agent-brief" rows="10" spellcheck="false" aria-describedby="agent-brief-status"></textarea>
+          <button type="button" id="agent-brief-copy">Copy task brief</button>
+          <p id="agent-brief-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+        <p id="agent-results" role="status" aria-live="polite" aria-atomic="true"></p>
+        <ul id="agent-list" class="agent-list" aria-label="PeopleSoft prompts"></ul>
+        <section aria-labelledby="agent-templates-title">
+          <h3 id="agent-templates-title">Private pillar specialists</h3>
+          <p>Tailor these HCM, FSCM and Campus Solutions templates privately with verified local definitions and policies before using them.</p>
+          <ul id="agent-templates"></ul>
+        </section>
       </section>
 
       <section id="panel-about" class="panel hidden" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>

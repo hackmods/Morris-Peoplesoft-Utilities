@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "promptPackVersion": "4.0.1",
+  "host": {
+    "product": null,
+    "version": null,
+    "model": null,
+    "date": null,
+    "evaluator": null
+  },
+  "scope": "Synthetic cases only; copy and record actual evidence privately.",
+  "results": [
+    {
+      "caseId": "history-is-intentional",
+      "agent": "review-data-correctness",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "job-sequence",
+      "agent": "review-data-correctness",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "analytic-current-valid",
+      "agent": "review-data-correctness",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "ae-messagebox",
+      "agent": "review-peoplecode-quality",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "in-list-api",
+      "agent": "review-peoplecode-quality",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "security-absence",
+      "agent": "review-security",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "public-query",
+      "agent": "review-security",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "draft-history",
+      "agent": "assist-sql-query",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "ci-edit-errors",
+      "agent": "assist-integrations",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "inactive-current",
+      "agent": "assist-schema-mcp",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "unknown-schema",
+      "agent": "assist-schema-mcp",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "component-request-history",
+      "agent": "design-component",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "onboarding-record",
+      "agent": "guide-onboarding",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "private-trainer",
+      "agent": "guide-specialist-trainer",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "ba-active-policy",
+      "agent": "design-functional-requirements",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "pc-row-context",
+      "agent": "assist-peoplecode",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "ae-partial-commit",
+      "agent": "assist-application-engine",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "scheduler-distribution",
+      "agent": "assist-process-scheduler",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "uat-not-run",
+      "agent": "design-test-uat",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "report-grouping",
+      "agent": "assist-reporting",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "upgrade-screenshot-only",
+      "agent": "review-upgrade-migration",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "approval-email",
+      "agent": "assist-approval-framework",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "trace-call-count",
+      "agent": "assist-performance-trace",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "fluid-shell",
+      "agent": "assist-fluid",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "accessibility-modal",
+      "agent": "review-fluid-accessibility",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "admin-single-persona",
+      "agent": "assist-admin-diagnostics",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "conversion-partial-load",
+      "agent": "design-data-conversion",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "source-injection",
+      "agent": "review-peoplecode-quality",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "schema-side-effects",
+      "agent": "assist-schema-mcp",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "trace-stop-unknown",
+      "agent": "assist-performance-trace",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "setid-unknown",
+      "agent": "assist-sql-query",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "security-compensating",
+      "agent": "review-security",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    }
+  ]
+}

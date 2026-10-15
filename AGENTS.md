@@ -34,6 +34,7 @@ This repository is a **Chrome Manifest V3 extension** for PeopleSoft productivit
 - Legacy oracle (local only, gitignored): `.reference/PS-Utilities`
 - A maintainer may supply a separate legacy checkout (for this review: sibling `../ps-utilities/4.2.1_0`). Use it read-only as a behavior reference. Confirm licensing before copying source; do not carry over bundled libraries, credentials, analytics, or manifest identity.
 - **PeopleSoft agent prompt pack (separate side toolkit, not shipped in the extension):** `agents/README.md` — generic Cursor/VS Copilot/Claude prompts (`review-*`, `assist-*` including SQL + IB/CI, `design-*`, `guide-*`). Keep it generic — no site-specific customizations/role names checked in here.
+- The extension may bundle the generated public reference catalog (titles/descriptions/paths) for Options → Agents. Full prompt bodies and host exports stay in the separate toolkit. Generate metadata with `npm run generate:agents`; never fetch/execute remote prompts or send PeopleSoft page data to AI services through this reference feature.
 
 ## Commands
 

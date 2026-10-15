@@ -122,6 +122,83 @@ test.describe("MPU extension UI", () => {
     }
   });
 
+  test("Agents library filters locally, preserves keyboard navigation and passes rendered axe", async ({ extensionContext, extensionId }) => {
+    test.setTimeout(60_000);
+    const page = await extensionContext.newPage();
+    const externalRequests: string[] = [];
+    page.on("request", (request) => { if (/^https?:/.test(request.url())) externalRequests.push(request.url()); });
+    await page.goto(`chrome-extension://${extensionId}/options.html#agents`);
+    await expect(page.getByRole("tab", { name: "Agents", exact: true })).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#agent-list > li")).toHaveCount(22);
+    await expect(page.locator("#agent-templates a")).toHaveCount(3);
+    const before = await page.evaluate(() => chrome.storage.local.get("mpuSettings"));
+    const search = page.getByRole("searchbox", { name: "Search prompts" });
+    await search.fill("fluid accessibility");
+    await expect(page.locator("#agent-list > li")).toHaveCount(1);
+    await expect(search).toBeFocused();
+    const link = page.locator("#agent-list a");
+    await expect(link).toHaveAttribute("href", "https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/review-fluid-accessibility/AGENT.md");
+    await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    await page.getByRole("button", { name: "Prepare task brief for PeopleSoft Fluid and Classic accessibility reviewer" }).click();
+    const brief = page.getByRole("textbox", { name: "Task brief", exact: true });
+    await expect(brief).toBeFocused();
+    await expect(brief).toHaveValue(/ps-review-fluid-accessibility/);
+    expect(await brief.evaluate((element) => {
+      const area = element as HTMLTextAreaElement;
+      return { caret: area.selectionStart, scroll: area.scrollTop };
+    })).toEqual({ caret: 0, scroll: 0 });
+    expect(await brief.inputValue()).not.toContain("127.0.0.1");
+    await page.getByRole("button", { name: "Copy task brief", exact: true }).click();
+    await expect(page.locator("#agent-brief-status")).toContainText(/copied|selected/);
+    await page.evaluate(() => Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async () => { throw new Error("Synthetic clipboard denial"); } },
+    }));
+    await page.getByRole("button", { name: "Copy task brief", exact: true }).click();
+    await expect(page.locator("#agent-brief-status")).toContainText("The brief is selected");
+    await expect(brief).toBeFocused();
+    expect(await brief.evaluate((element) => {
+      const area = element as HTMLTextAreaElement;
+      return area.selectionEnd - area.selectionStart;
+    })).toBe((await brief.inputValue()).length);
+    await audit(page);
+    await page.emulateMedia({ colorScheme: "dark" });
+    await audit(page);
+    await page.setViewportSize({ width: 320, height: 600 });
+    await audit(page);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    await search.fill("nonexistent");
+    await expect(page.locator("#agent-results")).toContainText("No prompts match");
+    await page.locator("#tab-agents").focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tab-about")).toBeFocused();
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("#tab-agents")).toBeFocused();
+    const after = await page.evaluate(() => chrome.storage.local.get("mpuSettings"));
+    expect(after).toEqual(before);
+    expect(externalRequests).toEqual([]);
+    await page.close();
+  });
+
+  test("popup and side panel reference the local library; Help exposes only public documentation", async ({ extensionContext, extensionId, fluidPage }) => {
+    for (const path of ["popup.html", "sidepanel.html"]) {
+      const page = await extensionContext.newPage();
+      await page.goto(`chrome-extension://${extensionId}/${path}`);
+      await expect(page.locator("#open-agents")).toHaveAttribute("href", `chrome-extension://${extensionId}/options.html#agents`);
+      const [library] = await Promise.all([extensionContext.waitForEvent("page"), page.locator("#open-agents").click()]);
+      await expect(library.locator("#panel-agents")).toBeVisible();
+      await library.close();
+      await page.close();
+    }
+    await fluidPage.locator("#mpu-help").click();
+    const link = fluidPage.locator("#mpu-agent-help a");
+    await expect(link).toHaveAttribute("href", "https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents");
+    await expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.keyboard.press("Escape");
+    await expect(fluidPage.locator("#mpu-help")).toBeFocused();
+  });
+
   test("disabling the host cancels shortcuts and Page Info snapshots", async ({ fluidPage, extensionContext }) => {
     const sw = extensionContext.serviceWorkers()[0];
     await sw.evaluate(async () => {

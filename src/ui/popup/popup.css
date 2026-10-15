@@ -1,20 +1,4 @@
-:root {
-  --bg: #f3f6f8;
-  --fg: #15202b;
-  --accent: #1f3a4d;
-  --gold: #b8922a;
-  --focus: #0b57d0;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #121a22;
-    --fg: #e8eef2;
-    --accent: #7eb0d0;
-    --gold: #e0c15a;
-    --focus: #8ab4f8;
-  }
-}
+@import "../brand.css";
 
 * {
   box-sizing: border-box;
@@ -69,7 +53,7 @@ legend {
 input[type="checkbox"] {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: var(--gold);
+  accent-color: var(--brand);
 }
 
 input:focus-visible,

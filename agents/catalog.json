@@ -1,0 +1,613 @@
+{
+  "schemaVersion": 1,
+  "version": "4.0.1",
+  "target": "PeopleTools 8.62 (application release/PUM confirmed separately)",
+  "reviewedDate": "2026-10-14",
+  "hostValidation": "not-run",
+  "entries": [
+    {
+      "id": "assist-admin-diagnostics",
+      "title": "PeopleSoft administration diagnostics advisor",
+      "description": "Triage PeopleSoft PIA, web/application domains, Process Scheduler and IB boundaries using sanitized logs and configuration evidence.",
+      "kind": "agent",
+      "audience": "PeopleSoft admin, operations support",
+      "source": "assist-admin-diagnostics/AGENT.md",
+      "sources": [
+        "catalog",
+        "scheduler",
+        "ib"
+      ],
+      "handoffs": [
+        "assist-process-scheduler",
+        "assist-integrations",
+        "assist-performance-trace",
+        "review-security"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-application-engine",
+      "title": "Application Engine batch specialist",
+      "description": "Design and troubleshoot PeopleSoft AE programs, state records, temporary tables, commit/restart boundaries and concurrent execution.",
+      "kind": "agent",
+      "audience": "Batch developer, admin",
+      "source": "assist-application-engine/AGENT.md",
+      "sources": [
+        "ae",
+        "peoplecode",
+        "scheduler"
+      ],
+      "handoffs": [
+        "assist-sql-query",
+        "review-peoplecode-quality",
+        "assist-process-scheduler",
+        "assist-performance-trace"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-approval-framework",
+      "title": "PeopleSoft Approval Framework advisor",
+      "description": "Design and troubleshoot PeopleSoft approval routing, participant resolution, delegation, escalation and transaction controls.",
+      "kind": "agent",
+      "audience": "BA, functional consultant, approval developer",
+      "source": "assist-approval-framework/AGENT.md",
+      "sources": [
+        "workflow",
+        "catalog",
+        "security",
+        "approvals"
+      ],
+      "handoffs": [
+        "review-security",
+        "assist-peoplecode",
+        "design-functional-requirements",
+        "design-test-uat"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-fluid",
+      "title": "PeopleSoft Fluid design and troubleshooting specialist",
+      "description": "Design and troubleshoot PeopleSoft Fluid components, layouts, search, tiles, navigation collections and modal behavior.",
+      "kind": "agent",
+      "audience": "Fluid developer, BA, portal admin",
+      "source": "assist-fluid/AGENT.md",
+      "sources": [
+        "fluid",
+        "peoplecode",
+        "security"
+      ],
+      "handoffs": [
+        "design-component",
+        "review-fluid-accessibility",
+        "assist-peoplecode",
+        "review-upgrade-migration"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-integrations",
+      "title": "PeopleSoft Integration Broker and CI specialist",
+      "description": "Design and troubleshoot PeopleSoft IB and Component Interfaces, including security, CI event timing, error collections and safe replay.",
+      "kind": "agent",
+      "audience": "Integration developer, admin, BA",
+      "source": "assist-integrations/AGENT.md",
+      "sources": [
+        "ib",
+        "ci",
+        "peoplecode"
+      ],
+      "handoffs": [
+        "review-peoplecode-quality",
+        "review-security",
+        "assist-application-engine",
+        "assist-approval-framework"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-peoplecode",
+      "title": "PeopleCode solution author",
+      "description": "Draft PeopleCode and application-class solutions with explicit caller, event, buffer context, dependencies and validation.",
+      "kind": "agent",
+      "audience": "PeopleSoft developer",
+      "source": "assist-peoplecode/AGENT.md",
+      "sources": [
+        "peoplecode",
+        "api",
+        "ae",
+        "ci"
+      ],
+      "handoffs": [
+        "review-peoplecode-quality",
+        "review-data-correctness",
+        "assist-integrations",
+        "assist-application-engine"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-performance-trace",
+      "title": "PeopleSoft performance and trace analyst",
+      "description": "Analyze scrubbed PeopleSoft SQL, PeopleCode and AE traces, timings, plans and lock evidence; design bounded diagnostic capture.",
+      "kind": "agent",
+      "audience": "Developer, DBA, admin",
+      "source": "assist-performance-trace/AGENT.md",
+      "sources": [
+        "ae",
+        "peoplecode",
+        "scheduler",
+        "catalog"
+      ],
+      "handoffs": [
+        "assist-sql-query",
+        "assist-application-engine",
+        "review-data-correctness",
+        "assist-admin-diagnostics"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-process-scheduler",
+      "title": "Process Scheduler operations analyst",
+      "description": "Triage PeopleSoft process execution, run controls, scheduling dependencies and report distribution from sanitized monitor evidence.",
+      "kind": "agent",
+      "audience": "Admin, BA, batch support",
+      "source": "assist-process-scheduler/AGENT.md",
+      "sources": [
+        "scheduler",
+        "ae",
+        "catalog"
+      ],
+      "handoffs": [
+        "assist-application-engine",
+        "assist-admin-diagnostics",
+        "assist-reporting",
+        "review-security"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-reporting",
+      "title": "PeopleSoft reporting specialist",
+      "description": "Design and troubleshoot BI Publisher, Query/Connected Query and existing SQR report data, templates, reconciliation and distribution.",
+      "kind": "agent",
+      "audience": "BA, reporting analyst, developer",
+      "source": "assist-reporting/AGENT.md",
+      "sources": [
+        "reporting",
+        "query",
+        "scheduler",
+        "catalog"
+      ],
+      "handoffs": [
+        "assist-sql-query",
+        "review-data-correctness",
+        "assist-process-scheduler",
+        "review-security"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-schema-mcp",
+      "title": "PeopleSoft schema and bounded data assistant",
+      "description": "Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions.",
+      "kind": "agent",
+      "audience": "BA, developer, reporting analyst",
+      "source": "assist-schema-mcp/AGENT.md",
+      "sources": [
+        "security",
+        "query",
+        "catalog"
+      ],
+      "handoffs": [
+        "assist-sql-query",
+        "review-data-correctness",
+        "review-security"
+      ],
+      "resources": [
+        "assist-schema-mcp/TOOL-CONTRACT.md"
+      ],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-sql-query",
+      "title": "PeopleSoft SQL and Query author",
+      "description": "Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax.",
+      "kind": "agent",
+      "audience": "BA, reporting analyst, developer",
+      "source": "assist-sql-query/AGENT.md",
+      "sources": [
+        "query",
+        "ae",
+        "peoplecode",
+        "security"
+      ],
+      "handoffs": [
+        "review-data-correctness",
+        "assist-schema-mcp",
+        "assist-reporting",
+        "review-security"
+      ],
+      "resources": [],
+      "legacyCursor": "assist-sql-query/cursor.mdc"
+    },
+    {
+      "id": "design-component",
+      "title": "PeopleSoft component design advisor",
+      "description": "Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs.",
+      "kind": "agent",
+      "audience": "BA, solution designer, developer",
+      "source": "design-component/AGENT.md",
+      "sources": [
+        "peoplecode",
+        "fluid",
+        "security",
+        "lifecycle"
+      ],
+      "handoffs": [
+        "design-functional-requirements",
+        "assist-fluid",
+        "assist-peoplecode",
+        "review-fluid-accessibility",
+        "review-upgrade-migration"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "design-data-conversion",
+      "title": "PeopleSoft data conversion designer",
+      "description": "Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover.",
+      "kind": "agent",
+      "audience": "Conversion BA, developer, data owner",
+      "source": "design-data-conversion/AGENT.md",
+      "sources": [
+        "ci",
+        "ib",
+        "ae",
+        "lifecycle"
+      ],
+      "handoffs": [
+        "assist-integrations",
+        "assist-application-engine",
+        "review-data-correctness",
+        "design-test-uat"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "design-functional-requirements",
+      "title": "PeopleSoft functional requirements designer",
+      "description": "Develop PeopleSoft BA requirements, process maps, configuration fit/gap, business rules and testable acceptance criteria.",
+      "kind": "agent",
+      "audience": "BA, functional consultant, product owner",
+      "source": "design-functional-requirements/AGENT.md",
+      "sources": [
+        "catalog",
+        "lifecycle",
+        "query"
+      ],
+      "handoffs": [
+        "design-component",
+        "design-test-uat",
+        "assist-approval-framework",
+        "assist-reporting"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "design-test-uat",
+      "title": "PeopleSoft testing and UAT designer",
+      "description": "Create traceable PeopleSoft unit, integration, security, UAT and upgrade regression plans, including PTF where suitable.",
+      "kind": "agent",
+      "audience": "BA, tester, developer, release owner",
+      "source": "design-test-uat/AGENT.md",
+      "sources": [
+        "ptf",
+        "query",
+        "ci",
+        "fluid"
+      ],
+      "handoffs": [
+        "review-fluid-accessibility",
+        "review-upgrade-migration",
+        "review-security",
+        "assist-integrations"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "guide-onboarding",
+      "title": "PeopleSoft onboarding mentor",
+      "description": "Teach PeopleSoft concepts and safe first tasks for BAs, developers and administrators with pillar-specific learning routes.",
+      "kind": "agent",
+      "audience": "New BA, developer, admin, reporting analyst",
+      "source": "guide-onboarding/AGENT.md",
+      "sources": [
+        "catalog",
+        "query",
+        "peoplecode",
+        "fluid"
+      ],
+      "handoffs": [
+        "design-functional-requirements",
+        "assist-sql-query",
+        "design-test-uat",
+        "assist-process-scheduler",
+        "guide-specialist-trainer"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "guide-specialist-trainer",
+      "title": "Local PeopleSoft specialist builder",
+      "description": "Create and maintain private HCM, FSCM or Campus Solutions specialists from verified local definitions, policies, incidents and acceptance cases.",
+      "kind": "guide",
+      "audience": "Functional/technical owner, team mentor",
+      "source": "guide-specialist-trainer/GUIDE.md",
+      "sources": [
+        "catalog",
+        "lifecycle",
+        "ptf"
+      ],
+      "handoffs": [
+        "guide-onboarding",
+        "review-data-correctness",
+        "review-peoplecode-quality",
+        "review-security",
+        "design-test-uat"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "review-data-correctness",
+      "title": "PeopleSoft data correctness reviewer",
+      "description": "Review existing PeopleSoft SQL, Query, PeopleCode SQL, AE or SQR for result grain, effective dating, keys, joins and data sources.",
+      "kind": "agent",
+      "audience": "Developer, BA, reporting analyst",
+      "source": "review-data-correctness/AGENT.md",
+      "sources": [
+        "query",
+        "peoplecode",
+        "security"
+      ],
+      "handoffs": [
+        "assist-sql-query",
+        "assist-schema-mcp",
+        "review-peoplecode-quality",
+        "review-security"
+      ],
+      "resources": [],
+      "legacyCursor": "review-data-correctness/cursor.mdc"
+    },
+    {
+      "id": "review-fluid-accessibility",
+      "title": "PeopleSoft Fluid and Classic accessibility reviewer",
+      "description": "Review rendered PeopleSoft Fluid and Classic tasks for keyboard, focus, semantics, errors, contrast, zoom and assistive-technology barriers.",
+      "kind": "agent",
+      "audience": "Tester, accessibility specialist, BA, UI developer",
+      "source": "review-fluid-accessibility/AGENT.md",
+      "sources": [
+        "accessibility",
+        "fluid",
+        "wcag"
+      ],
+      "handoffs": [
+        "assist-fluid",
+        "design-test-uat",
+        "design-component"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "review-peoplecode-quality",
+      "title": "PeopleCode quality reviewer",
+      "description": "Review PeopleCode APIs, SQL construction, buffer access, event placement, error handling and reusable application classes.",
+      "kind": "agent",
+      "audience": "PeopleSoft developer",
+      "source": "review-peoplecode-quality/AGENT.md",
+      "sources": [
+        "peoplecode",
+        "ae",
+        "ci",
+        "api"
+      ],
+      "handoffs": [
+        "review-data-correctness",
+        "assist-peoplecode",
+        "assist-integrations",
+        "assist-application-engine"
+      ],
+      "resources": [],
+      "legacyCursor": "review-peoplecode-quality/cursor.mdc"
+    },
+    {
+      "id": "review-security",
+      "title": "PeopleSoft security reviewer",
+      "description": "Review effective PeopleSoft page, row, Query, process, CI and integration access and evidence-based segregation of duties.",
+      "kind": "agent",
+      "audience": "Security admin, BA, auditor, developer",
+      "source": "review-security/AGENT.md",
+      "sources": [
+        "security",
+        "ci",
+        "ib",
+        "scheduler"
+      ],
+      "handoffs": [
+        "assist-integrations",
+        "assist-approval-framework",
+        "design-test-uat"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
+      "id": "review-upgrade-migration",
+      "title": "PeopleSoft upgrade and migration reviewer",
+      "description": "Review PeopleTools/application updates, object compares, customization impact and controlled object/configuration migration plans.",
+      "kind": "agent",
+      "audience": "Release owner, admin, developer, BA",
+      "source": "review-upgrade-migration/AGENT.md",
+      "sources": [
+        "lifecycle",
+        "ptf",
+        "catalog"
+      ],
+      "handoffs": [
+        "design-test-uat",
+        "assist-integrations",
+        "assist-admin-diagnostics",
+        "review-security"
+      ],
+      "resources": [],
+      "legacyCursor": null
+    }
+  ],
+  "templates": [
+    {
+      "id": "hcm",
+      "title": "HCM local specialist",
+      "source": "local-templates/hcm/SKILL.md"
+    },
+    {
+      "id": "fscm",
+      "title": "FSCM local specialist",
+      "source": "local-templates/fscm/SKILL.md"
+    },
+    {
+      "id": "campus-solutions",
+      "title": "Campus Solutions local specialist",
+      "source": "local-templates/campus-solutions/SKILL.md"
+    }
+  ],
+  "sources": [
+    {
+      "id": "catalog",
+      "title": "PeopleTools 8.62 PeopleBooks catalog",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/index.html"
+    },
+    {
+      "id": "query",
+      "title": "PeopleTools 8.62 Query",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpsq-b112025.pdf"
+    },
+    {
+      "id": "peoplecode",
+      "title": "PeopleTools 8.62 PeopleCode Developer's Guide",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpcd-b112025.pdf"
+    },
+    {
+      "id": "api",
+      "title": "PeopleTools 8.62 Rowset class methods",
+      "url": "https://docs.oracle.com/cd/G23954_01/pt862pbr1/eng/pt/tpcr/RowsetClassMethods-c07c55.html"
+    },
+    {
+      "id": "ae",
+      "title": "PeopleTools 8.62 Application Engine",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tape-b112025.pdf"
+    },
+    {
+      "id": "ci",
+      "title": "PeopleTools 8.62 Component Interfaces",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tcpi-b112025.pdf"
+    },
+    {
+      "id": "ib",
+      "title": "PeopleTools 8.62 Integration Broker",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibr-b112025.pdf"
+    },
+    {
+      "id": "security",
+      "title": "PeopleTools 8.62 row-level and Query security records",
+      "url": "https://docs.oracle.com/cd/G23954_01/pt862pbr1/eng/pt/tsec/DefiningRow-LevelSecurityandQuerySecurityRecords-c077b2.html"
+    },
+    {
+      "id": "fluid",
+      "title": "PeopleTools 8.62 Fluid User Interface Developer's Guide",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tflu-b112025.pdf"
+    },
+    {
+      "id": "scheduler",
+      "title": "PeopleTools 8.62 Process Scheduler",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tprs-b042025.pdf"
+    },
+    {
+      "id": "reporting",
+      "title": "PeopleTools 8.62 BI Publisher",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862txml-b042025.pdf"
+    },
+    {
+      "id": "workflow",
+      "title": "PeopleTools 8.62 Workflow Technology",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862twfl-b042025.pdf"
+    },
+    {
+      "id": "ptf",
+      "title": "PeopleTools 8.62 Test Framework",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tptf-b042025.pdf"
+    },
+    {
+      "id": "lifecycle",
+      "title": "PeopleTools 8.62 Lifecycle Management",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tlcm-b042025.pdf"
+    },
+    {
+      "id": "wcag",
+      "title": "W3C WCAG 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/"
+    },
+    {
+      "id": "copilot",
+      "title": "Visual Studio Copilot prompt files",
+      "url": "https://learn.microsoft.com/en-us/visualstudio/ide/copilot-chat-context?view=vs-2022"
+    },
+    {
+      "id": "codex",
+      "title": "Official OpenAI skill documentation",
+      "url": "https://learn.chatgpt.com/docs/build-skills"
+    },
+    {
+      "id": "claude",
+      "title": "Claude Code skills",
+      "url": "https://code.claude.com/docs/en/skills"
+    },
+    {
+      "id": "claude-agents",
+      "title": "Claude Code custom agents",
+      "url": "https://code.claude.com/docs/en/sub-agents"
+    },
+    {
+      "id": "cursor",
+      "title": "Cursor rules",
+      "url": "https://prod.cursor.com/docs/rules"
+    },
+    {
+      "id": "accessibility",
+      "title": "PeopleTools 8.62 Accessibility Guide",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tacs-b042025.pdf"
+    },
+    {
+      "id": "approvals",
+      "title": "FSCM 9.2.056 Approval Framework configuration example (confirm target application/PUM)",
+      "url": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.056/application-fundamentals/configuring-approval-framework-business-requests.html"
+    }
+  ]
+}

@@ -19,6 +19,25 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Next build — 1.0.28
+
+- Adopt the UnionOps-inspired black/orange palette across Options, popup, side panel, injected bar/dialogs and future promo generation. Use shared accessible UI tokens and a versioned recolour of the existing PS icon; preserve prior artwork and genuine Store captures.
+- Add audience search and a blank editable task brief for each agent reference, with explicit copy and manual-copy fallback. No PeopleSoft page context is captured or persisted.
+- Reject stale prompt/reference exports at build time, and add a private host-evaluation worksheet that starts every prompt case as not run. Prompt maintenance revision: 4.0.1.
+
+- Add Options → Agents: local search/filtering for 22 PeopleSoft prompt references and three private pillar templates, with entry links from popup, side panel and Help. Public documentation links omit referrer/page context; no AI execution, remote fetching or new permissions.
+- Keep the reference catalog generated from prompt-pack metadata and update privacy/store disclosures. Preserve selected-tab/button contrast in dark mode.
+
+- Expand the PeopleSoft prompt pack to content v4.0.0: 22 complete workflows, including BA requirements, PeopleCode authoring, AE/Scheduler, reporting, UAT, upgrades, approvals, trace/performance, Fluid development/accessibility, administration and conversion.
+- Correct effective-date/status, PeopleCode meta-SQL/noninteractive and evidence-based security guidance; define a bounded read-only schema connector contract.
+- Add private-tailoring HCM, FSCM and Campus Solutions templates; generate complete Copilot prompts, Cursor rules, Codex/Claude skills and restricted Claude agent definitions.
+- Validate prompt catalogs, sources, links, export parity and evaluation coverage before packaging an explicit public file list. Host/model/real-system trials remain separately recorded as not run.
+
+## [1.0.27] — 2026-10-13
+
+- Replace the extension and store icons with the approved navy-and-gold PS artwork.
+- Generate all Chrome icon sizes from the same source and protect the approved store icon from mock asset generation.
+
 ## [1.0.26] — 2026-08-07
 
 ### Added

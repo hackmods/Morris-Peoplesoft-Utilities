@@ -21,10 +21,13 @@ Morris PeopleSoft Utilities (MPU) helps college business analysts and technical 
 • Field Inspector to reveal RECORD.FIELD identities on Classic, Fluid, and Classic pages hosted inside Fluid menus/nav collections
 • New Window / deep-link workflows
 • Customization upgrade watch (UI fingerprint baseline + drift check)
+• Agent reference library for PeopleCode, SQL, batch, Fluid, accessibility and BA workflows; open reusable prompts for your approved AI tool
+• Prepare a blank task brief locally before using an installed prompt or skill
 
 **Privacy & compliance**
 • Settings stored only on your device (`chrome.storage.local`)
 • No password storage and no telemetry
+• Agent links open public documentation; MPU does not run AI agents or send page data to an AI service
 • Optional host allowlist if your organization wants tighter scope
 
 **Accessibility**

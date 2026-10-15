@@ -1,12 +1,12 @@
 {
   "name": "morris-peoplesoft-utilities",
-  "version": "1.0.26",
+  "version": "1.0.28",
   "private": true,
   "description": "Morris PeopleSoft Utilities — Chrome extension for PeopleSoft Classic and Fluid productivity",
   "type": "module",
   "scripts": {
     "dev": "vite build --watch --mode development",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run check:agents && tsc --noEmit && vite build",
     "lint": "eslint . && tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit tests/integration tests/smoke",
@@ -22,6 +22,8 @@
     "audit": "npm run audit:a11y && npm run audit:store && npm run audit:compliance",
     "test:all": "npm run lint && npm run test:coverage && npm run audit && npm run build && npm run audit:store",
     "package": "npm run build && npm run audit:store && tsx scripts/package-zip.ts",
+    "generate:agents": "tsx scripts/generate-agent-pack.ts",
+    "check:agents": "tsx scripts/generate-agent-pack.ts --check",
     "package:agents": "tsx scripts/package-agents-zip.ts",
     "release:check": "npm run lint && npm run test:coverage && npm run audit && npm run package && npm run package:agents",
     "generate:icons": "tsx scripts/generate-icons.ts",

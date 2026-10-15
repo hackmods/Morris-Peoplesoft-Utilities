@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-10-11
+**Last updated:** 2026-10-14
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome extension)
 
@@ -30,7 +30,11 @@ Settings are stored only in Chrome’s `chrome.storage.local` on your profile, i
 
 ## Network activity
 
-MPU may make requests **only to the PeopleSoft site you are already using** (same origin/session), for example to toggle delivered PeopleCode/SQL trace components when you click Trace. Those requests use your existing authenticated PeopleSoft session cookies. MPU never sends that traffic to hackmods or other third parties.
+MPU's authenticated feature requests go **only to the PeopleSoft site you are already using** (same origin/session), for example to toggle delivered PeopleCode/SQL trace components when you click Trace. Those requests use your existing authenticated PeopleSoft session cookies. MPU never sends that traffic to hackmods or other third parties.
+
+The Agents reference library is a packaged catalog of public PeopleSoft prompts. Rendering or searching it makes no external requests and does not retain your search. Prepare task brief creates a blank editable request; it does not read the active page or save your edits. Copy task brief writes only that displayed text to your clipboard when requested. When you choose a documentation or release link, Chrome opens the public GitHub page in a new tab. Those links omit referrer information and contain no PeopleSoft page URL, field values, business keys or session tokens. GitHub handles that ordinary page visit under its own policies.
+
+MPU does not execute these agents, connect to an AI service or upload PeopleSoft data to Copilot, Claude, Codex or another provider. If you later copy information into your chosen AI tool, that sharing is controlled by you and your organization's policy, outside MPU.
 
 ## Page access, clipboard and exports
 

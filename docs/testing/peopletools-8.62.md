@@ -16,6 +16,7 @@ Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser v
 | Host allowlist / inactive environment | No bar, keyboard action, Page Info snapshot, or delayed search mutation; side panel cannot navigate disabled hosts | Real-system test needed |
 | Multi-tab / session | No storage churn; environment settings and favorites survive concurrent edits; sign-out/sign-in does not imply a verified trace state | Real-system test needed |
 | Keyboard / screen reader | Tab and Shift+Tab stay in dialogs; Escape works after typing; focus returns; 200% zoom, contrast, forced colors, and live announcements | Real-system test needed |
+| Agent reference entry points | Help opens public documentation without page/session context; local library filtering works with no external requests and no persisted search; popup/side-panel links and assistive technology remain usable | Real-system/AT check needed |
 
 The browser cannot confirm App Designer definitions, PeopleCode scroll paths, security entitlements, or server-side customization correctness. Treat generated code and DOM metadata as aids for a developer to verify.
 

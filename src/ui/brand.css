@@ -1,0 +1,36 @@
+/* UnionOps-inspired identity, observed 2026-10-14. No remote assets or styles. */
+:root {
+  --bg: #f7f6f5;
+  --card: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #525252;
+  --accent: #9a3412;
+  --brand: #ee4e12;
+  --action: #d14510;
+  --on-action: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--card));
+  --brand-soft: color-mix(in srgb, var(--brand) 14%, var(--card));
+  --careful: #9a3412;
+  --careful-soft: color-mix(in srgb, var(--careful) 12%, var(--card));
+  --focus: #9a3412;
+  --border: #cfcac7;
+  --shadow: 0 10px 28px rgb(26 26 26 / 8%);
+  --radius: 10px;
+  --font: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111111;
+    --card: #1a1a1a;
+    --fg: #f8f8f8;
+    --muted: #bdbdbd;
+    --accent: #ff9a66;
+    --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--card));
+    --careful: #ff9a66;
+    --focus: #ff9a66;
+    --border: #525252;
+    --shadow: 0 12px 32px rgb(0 0 0 / 35%);
+  }
+}

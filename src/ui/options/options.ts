@@ -28,6 +28,7 @@ import {
   type TracePresetId,
 } from "../../features/trace-presets";
 import { upsertWatch } from "../../features/upgrade-watch";
+import { bindAgentLibrary } from "../../features/agent-references";
 
 const toast = document.getElementById("toast")!;
 let toastTimer = 0;
@@ -111,6 +112,12 @@ function wireTabs(): void {
       selectTab(tabs[next]);
     });
   });
+  const selectFromHash = () => {
+    const tab = tabs.find((candidate) => candidate.dataset.tab === window.location.hash.slice(1));
+    if (tab) selectTab(tab);
+  };
+  selectFromHash();
+  window.addEventListener("hashchange", selectFromHash);
 }
 
 function renderFeatures(settings: MpuSettings): void {
@@ -437,7 +444,7 @@ function renderEnvs(settings: MpuSettings): void {
     active.checked = env.active === "Yes";
     const color = document.createElement("input");
     color.type = "color";
-    color.value = env.color || "#b8922a";
+    color.value = env.color || "#ee4e12";
     color.setAttribute("aria-label", "Accent color");
     const save = document.createElement("button");
     save.type = "button";
@@ -775,4 +782,5 @@ async function init(): Promise<void> {
   });
 }
 
+bindAgentLibrary(document);
 void init();

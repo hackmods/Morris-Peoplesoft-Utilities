@@ -110,7 +110,7 @@ describe("field inspector", () => {
     const icons = Array.from(document.querySelectorAll(".mpu-recfield-icon"));
     expect(icons.length).toBe(2);
     expect(icons.every((el) => el.namespaceURI === "http://www.w3.org/2000/svg")).toBe(true);
-    expect(icons.every((el) => el.querySelector("circle[stroke='#E36B22']"))).toBe(true);
+    expect(icons.every((el) => el.querySelector("circle[stroke='#EE4E12']"))).toBe(true);
     expect(document.querySelector(".mpu-recfield-area")).toBeTruthy();
     expect(document.querySelector("a#ICSave")?.closest(".mpu-recfield-area")).toBeNull();
     stopFieldInspector(document);

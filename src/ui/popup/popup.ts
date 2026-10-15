@@ -5,6 +5,8 @@ import type { YesNo } from "../../storage/schema";
 const list = document.getElementById("toggle-list")!;
 const status = document.getElementById("status")!;
 const optionsLink = document.getElementById("open-options") as HTMLAnchorElement;
+const agentsLink = document.getElementById("open-agents") as HTMLAnchorElement;
+agentsLink.href = chrome.runtime.getURL("options.html#agents");
 
 optionsLink.addEventListener("click", (e) => {
   e.preventDefault();

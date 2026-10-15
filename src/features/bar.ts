@@ -1,4 +1,5 @@
 import { bindModalDialog } from "./dialog";
+import { appendAgentHelp } from "./agent-references";
 import { isVisible } from "../adapters/dom";
 import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings } from "../storage/schema";
 import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
@@ -1929,6 +1930,10 @@ function showHelpDialog(doc: Document): void {
         });
       }
 
+      const agentHelp = doc.createElement("section");
+      agentHelp.id = "mpu-agent-help";
+      appendAgentHelp(doc, agentHelp);
+      dialog.querySelector("#mpu-dialog-close")?.before(agentHelp);
       dialog.querySelector("#mpu-dialog-close")?.addEventListener("click", close);
     },
   });

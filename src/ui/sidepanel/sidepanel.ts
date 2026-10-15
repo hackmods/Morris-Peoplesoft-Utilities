@@ -6,6 +6,8 @@ const favEmpty = document.getElementById("fav-empty")!;
 const favFilter = document.getElementById("fav-filter") as HTMLInputElement;
 const pageInfo = document.getElementById("page-info")!;
 const toast = document.getElementById("toast")!;
+const agentsLink = document.getElementById("open-agents") as HTMLAnchorElement;
+agentsLink.href = chrome.runtime.getURL("options.html#agents");
 
 function say(msg: string): void {
   toast.textContent = msg;
