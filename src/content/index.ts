@@ -1,5 +1,5 @@
 import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta, formatFavoriteDescriptionTemplate, formatPageInfoPlain } from "../adapters/ps-page";
-import { loadSettings, originAllowed, updateSettings } from "../storage/settings";
+import { loadSettings, originAllowed, updateSettings, SettingsSaveError } from "../storage/settings";
 import { featureAllowedForUi, isYes, pushRecentComponent, type MpuSettings } from "../storage/schema";
 import {
   mountBar,
@@ -25,6 +25,10 @@ import { toggleTrace } from "../features/trace";
 import { runSearchOptions, stopSearchOptions } from "../features/search";
 import { clearEligibilityPreview, clearSessionBuffer } from "../features/field-entry";
 import "../content/content.css";
+
+window.addEventListener("unhandledrejection", (event) => {
+  if (event.reason instanceof SettingsSaveError) { event.preventDefault(); announce(document, event.reason.message); }
+});
 
 function resolveEnv(settings: MpuSettings, href: string): { label: string; index: number } {
   const parsed = parsePsUrl(href);
@@ -230,6 +234,13 @@ async function refreshPage(): Promise<void> {
 
   settings = await ensureEnvRegistration(settings, location.href);
   const { label, index } = resolveEnv(settings, location.href);
+  if (loginMode && index >= 0 && settings.environments[index]?.traceRequest && settings.environments[index].traceRequest?.status !== "unknown") {
+    settings = await updateSettings((s) => {
+      const request = s.environments[index]?.traceRequest;
+      if (request) s.environments[index].traceRequest = { ...request, status: "unknown" };
+      return s;
+    });
+  }
   const traceRunning =
     index >= 0 && isYes(settings.environments[index]?.trcProfRunning);
 
@@ -262,6 +273,10 @@ async function refreshPage(): Promise<void> {
     },
   };
   activeSettings = loginMode ? null : effective;
+  if ((!isYes(effective.features.traceOption) && document.getElementById("mpu-trace-title")) ||
+      (!isYes(effective.features.pageInfoOption) && document.getElementById("mpu-pi-title"))) {
+    document.getElementById("mpu-dialog")?.remove();
+  }
   if (!isYes(effective.features.fieldEntryOption)) {
     clearSessionBuffer();
     clearEligibilityPreview(document);
@@ -319,6 +334,7 @@ async function refreshPage(): Promise<void> {
     fieldInspectorActive: isFieldInspectorActive(),
     lockedFieldName: getLockedFieldName(),
     traceRunning,
+    traceRequest: index >= 0 ? settings.environments[index]?.traceRequest : undefined,
     traceLocked,
     traceSettings: effective.traceSettings,
     loginMode,
@@ -331,6 +347,11 @@ async function refreshPage(): Promise<void> {
           "Trace locked — missing security access to UTILITIES PeopleCode/SQL Trace components",
         );
       }
+      await refresh();
+    },
+    onTraceRequest: async (turnOn) => {
+      const result = await toggleTrace(await loadSettings(), parsed, index, turnOn);
+      traceLocked = result.locked;
       await refresh();
     },
     onPageInfo: () => showPageInfoDialog(document, parsed, getLockedFieldName(), label),

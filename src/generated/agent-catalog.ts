@@ -1,5 +1,5 @@
 // Generated from agents/catalog.json. Run npm run generate:agents; do not edit.
-export const AGENT_PACK_VERSION = "4.0.1";
+export const AGENT_PACK_VERSION = "4.1.0";
 export const AGENT_REFERENCES = [
   {
     "id": "assist-admin-diagnostics",
@@ -58,6 +58,14 @@ export const AGENT_REFERENCES = [
     "audience": "Developer, DBA, admin"
   },
   {
+    "id": "assist-portal-branding",
+    "title": "PeopleSoft portal and branding specialist",
+    "description": "Design and troubleshoot PeopleSoft portal registry navigation, CREFs, homepages, tiles and branding themes with verified configuration and rendered evidence.",
+    "kind": "agent",
+    "source": "assist-portal-branding/AGENT.md",
+    "audience": "Portal administrator, Fluid developer, UX designer, BA"
+  },
+  {
     "id": "assist-process-scheduler",
     "title": "Process Scheduler operations analyst",
     "description": "Triage PeopleSoft process execution, run controls, scheduling dependencies and report distribution from sanitized monitor evidence.",
@@ -80,6 +88,14 @@ export const AGENT_REFERENCES = [
     "kind": "agent",
     "source": "assist-schema-mcp/AGENT.md",
     "audience": "BA, developer, reporting analyst"
+  },
+  {
+    "id": "assist-search-framework",
+    "title": "PeopleSoft Search Framework specialist",
+    "description": "Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence.",
+    "kind": "agent",
+    "source": "assist-search-framework/AGENT.md",
+    "audience": "Search administrator, PeopleSoft developer, BA, security analyst"
   },
   {
     "id": "assist-sql-query",

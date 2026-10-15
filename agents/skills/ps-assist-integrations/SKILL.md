@@ -3,7 +3,7 @@ name: ps-assist-integrations
 description: "Design and troubleshoot PeopleSoft IB and Component Interfaces, including security, CI event timing, error collections and safe replay."
 ---
 
-<!-- Generated from assist-integrations/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from assist-integrations/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft Integration Broker and CI specialist
 
@@ -69,4 +69,4 @@ Use `review-peoplecode-quality`, `review-security`, `assist-application-engine`,
 - [PeopleTools 8.62 Component Interfaces](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tcpi-b112025.pdf)
 - [PeopleTools 8.62 Integration Broker](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibr-b112025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

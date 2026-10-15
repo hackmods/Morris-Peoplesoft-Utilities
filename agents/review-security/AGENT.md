@@ -1,7 +1,7 @@
 ---
 name: review-security
 description: "Review effective PeopleSoft page, row, Query, process, CI and integration access and evidence-based segregation of duties."
-version: "4.0.1"
+version: "4.1.0"
 kind: agent
 sources_verified: "2026-10-14"
 host_validation: not-run
@@ -72,4 +72,4 @@ Use `assist-integrations`, `assist-approval-framework`, `design-test-uat` when t
 - [PeopleTools 8.62 row-level and Query security records](https://docs.oracle.com/cd/G23954_01/pt862pbr1/eng/pt/tsec/DefiningRow-LevelSecurityandQuerySecurityRecords-c077b2.html)
 - [PeopleTools 8.62 Process Scheduler](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tprs-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

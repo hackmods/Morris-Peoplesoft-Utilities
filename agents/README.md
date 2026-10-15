@@ -1,10 +1,10 @@
 # PeopleSoft Agent Prompt Pack
 
-Content version **4.0.1** · **22 complete prompts** (21 task agents and one specialist-building guide) · **3 local pillar templates**.
+Content version **4.1.0** · **24 complete prompts** (23 task agents and one specialist-building guide) · **3 local pillar templates**.
 
 Portable knowledge for PeopleSoft on **PeopleTools 8.62**. Confirm the application release/PUM and Tools patch separately. The pack supports HCM, FSCM and Campus Solutions workflows; it stays separate from the Morris PeopleSoft Utilities Chrome extension.
 
-Every prompt includes intake, workflow, output, synthetic examples, validation and handoffs. Definitions are self-contained. No MCP server is required or implemented. Source links were reviewed on 2026-10-14; IDE, model-behavior and real-system trials are **not run**.
+Every prompt includes intake, workflow, output, synthetic examples, validation and handoffs. Definitions are self-contained. No MCP server is required or implemented. Each definition retains its actual source-review date; the two new specialist sources were reviewed on 2026-10-15. IDE, model-behavior and real-system trials are **not run**.
 
 The extension's Options → Agents page provides a searchable reference catalog, role/audience hints and links to these public files. Prepare task brief creates an editable blank request for a selected prompt; it reads no PeopleSoft page context and is not saved. Load the actual prompt/skill in your AI tool before using the brief. Only public reference metadata is bundled in the extension; full definitions, skills and templates remain in this separate toolkit. The extension does not execute agents or send page data to an AI service.
 
@@ -16,6 +16,7 @@ The extension's Options → Agents page provides a searchable reference catalog,
 - **Batch/operations:** assist-application-engine, assist-process-scheduler, assist-admin-diagnostics, assist-performance-trace.
 - **Integrations/approvals:** assist-integrations, assist-approval-framework, review-security.
 - **UI:** assist-fluid plus review-fluid-accessibility; design-component for transaction/search structure.
+- **Search/portal:** assist-search-framework for indexing/results/security; assist-portal-branding for registry navigation and themes.
 - **Change/conversion:** review-upgrade-migration, design-data-conversion and design-test-uat.
 - **Learning/local expertise:** guide-onboarding and guide-specialist-trainer.
 
@@ -30,9 +31,11 @@ The extension's Options → Agents page provides a searchable reference catalog,
 | [assist-integrations](assist-integrations/AGENT.md) | agent | Design and troubleshoot PeopleSoft IB and Component Interfaces, including security, CI event timing, error collections and safe replay. |
 | [assist-peoplecode](assist-peoplecode/AGENT.md) | agent | Draft PeopleCode and application-class solutions with explicit caller, event, buffer context, dependencies and validation. |
 | [assist-performance-trace](assist-performance-trace/AGENT.md) | agent | Analyze scrubbed PeopleSoft SQL, PeopleCode and AE traces, timings, plans and lock evidence; design bounded diagnostic capture. |
+| [assist-portal-branding](assist-portal-branding/AGENT.md) | agent | Design and troubleshoot PeopleSoft portal registry navigation, CREFs, homepages, tiles and branding themes with verified configuration and rendered evidence. |
 | [assist-process-scheduler](assist-process-scheduler/AGENT.md) | agent | Triage PeopleSoft process execution, run controls, scheduling dependencies and report distribution from sanitized monitor evidence. |
 | [assist-reporting](assist-reporting/AGENT.md) | agent | Design and troubleshoot BI Publisher, Query/Connected Query and existing SQR report data, templates, reconciliation and distribution. |
 | [assist-schema-mcp](assist-schema-mcp/AGENT.md) | agent | Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions. |
+| [assist-search-framework](assist-search-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence. |
 | [assist-sql-query](assist-sql-query/AGENT.md) | agent | Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax. |
 | [design-component](design-component/AGENT.md) | agent | Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs. |
 | [design-data-conversion](design-data-conversion/AGENT.md) | agent | Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover. |
@@ -87,7 +90,7 @@ npm run check:agents
 npm run package:agents
 ```
 
-Run these commands in a repository clone; a downloaded prompt ZIP is ready to copy into your chosen host. Edit canonical definitions and catalog metadata, then generate. Exports and README/wiki inventories must match exactly. Packaging validates links/catalog/export parity and includes only an explicit file list plus LICENSE/NOTICE, excluding private/untracked files. The ZIP uses the extension release number; content revision is independently recorded as 4.0.1.
+Run these commands in a repository clone; a downloaded prompt ZIP is ready to copy into your chosen host. Edit canonical definitions and catalog metadata, then generate. Exports and README/wiki inventories must match exactly. Packaging validates links/catalog/export parity and includes only an explicit file list plus LICENSE/NOTICE, excluding private/untracked files. The ZIP uses the extension release number; content revision is independently recorded as 4.1.0.
 
 [Browse source](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · [release downloads](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) · [wiki adoption guide](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/wiki/AI-Agent-Prompts.md).
 

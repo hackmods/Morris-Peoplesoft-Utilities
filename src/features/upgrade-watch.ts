@@ -7,11 +7,12 @@ import {
   type PageMeta,
 } from "../adapters/ps-page";
 import type { CustomizationWatch, PageFingerprint } from "../storage/schema";
+import { CUSTOMIZATION_WATCH_LIMIT, normalizeWatchHistory } from "../storage/schema";
 import { collectFluidStructure } from "./fluid-structure";
 
 export type { CustomizationWatch, PageFingerprint };
 
-export const CUSTOMIZATION_WATCH_LIMIT = 50;
+export { CUSTOMIZATION_WATCH_LIMIT, BASELINES_PER_ENVIRONMENT } from "../storage/schema";
 export const FIELD_ID_CAP = 200;
 
 export type DriftSeverity = "clean" | "tools-only" | "drifted";
@@ -186,10 +187,11 @@ export function createWatchFromFingerprint(input: {
   label?: string;
   notes?: string;
   envLabel?: string;
+  scope?: string;
   now?: number;
 }): CustomizationWatch {
   const fp = input.fingerprint;
-  const id = `${watchKey(fp.menu, fp.component, fp.market)}-${input.now ?? Date.now()}`;
+  const id = `${watchKey(fp.menu, fp.component, fp.market)}-${input.now ?? Date.now()}-${crypto.randomUUID()}`;
   return {
     id,
     label:
@@ -202,6 +204,7 @@ export function createWatchFromFingerprint(input: {
     baseline: fp,
     capturedAt: input.now ?? Date.now(),
     envLabel: input.envLabel?.trim() || "",
+    ...(input.scope ? { scope: input.scope } : {}),
   };
 }
 
@@ -210,16 +213,48 @@ export function upsertWatch(
   watch: CustomizationWatch,
   limit = CUSTOMIZATION_WATCH_LIMIT,
 ): CustomizationWatch[] {
-  const key = watchKey(watch.menu, watch.component, watch.market);
-  const rest = list.filter((w) => watchKey(w.menu, w.component, w.market) !== key);
-  return [watch, ...rest].slice(0, limit);
+  return normalizeWatchHistory([watch, ...list.filter((w) => w.id !== watch.id)], limit);
+}
+
+export function watchScope(parsed: ParsedPsUrl): string {
+  try { return `${new URL(parsed.baseURL).origin}/${parsed.siteNormalized}`; }
+  catch { return ""; }
+}
+
+export function listWatchesForParsed(list: CustomizationWatch[], parsed: ParsedPsUrl): CustomizationWatch[] {
+  const key = watchKey(parsed.menu || "", parsed.component || "", parsed.market || "GBL");
+  return list.filter((w) => watchKey(w.menu, w.component, w.market) === key).sort((a, b) => b.capturedAt - a.capturedAt);
 }
 
 export function findWatchForParsed(
   list: CustomizationWatch[],
   parsed: ParsedPsUrl,
+  envLabel?: string,
 ): CustomizationWatch | undefined {
   if (!parsed.menu || !parsed.component) return undefined;
-  const key = watchKey(parsed.menu, parsed.component, parsed.market || "GBL");
-  return list.find((w) => watchKey(w.menu, w.component, w.market) === key);
+  const matches = listWatchesForParsed(list, parsed);
+  return matches.find((w) => w.scope && w.scope === watchScope(parsed))
+    ?? matches.find((w) => !w.scope && (envLabel === undefined || w.envLabel === envLabel));
+}
+
+/** A reviewable document only; this does not create or run a CA project. */
+export function formatDriftHandoffMarkdown(watch: CustomizationWatch, report: DriftReport, targetEnv = "unspecified"): string {
+  const text = (value: string) => value.replace(/[\r\n]/g, " ").replace(/[\\`*_{}[\]<>#|]/g, "\\$&");
+  return [
+    "# Upgrade validation handoff", "",
+    `Object: ${text(`${watch.menu}.${watch.component}.${watch.market}`)}`,
+    `Baseline: ${text(watch.envLabel || "unspecified")} — ${new Date(watch.capturedAt).toISOString()}`,
+    `Target: ${text(targetEnv)}`,
+    `PeopleTools: ${text(watch.baseline.toolsRel || "unknown")} → ${text(report.current.toolsRel || "unknown")}`,
+    `UI comparison: ${report.severity}`, "",
+    "## Observed UI differences", "",
+    ...(report.findings.length ? report.findings.map((finding) => `- ${text(finding.message)}`) : ["- No differences in the captured UI fingerprint."]), "",
+    "## Reviewer completion", "",
+    "- Application release / PUM and patch: [confirm]",
+    "- App Designer Compare Report / Change Assistant project: [attach verified evidence]",
+    "- Dependencies, configuration migration and manual steps: [review]",
+    "- Regression / accessibility tests and actual outcomes: [record]",
+    "- Rollback plan, owner and approval: [complete]", "",
+    "MPU compared browser UI fingerprints only. This does not establish PeopleCode equivalence, certify an upgrade, or authorize deployment.",
+  ].join("\n");
 }

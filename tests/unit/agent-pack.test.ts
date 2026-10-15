@@ -28,7 +28,9 @@ afterEach(() => {
   }
 });
 
-describe("PeopleSoft prompt distributions", () => {
+// The suite copies and checks the complete multi-host pack on disk. Windows
+// filesystem/antivirus latency can exceed the default five-second budget.
+describe("PeopleSoft prompt distributions", { timeout: 30_000 }, () => {
   it("ships complete sources/resources in every host export with correct skill metadata", () => {
     const catalog = loadCatalog();
     const exports = buildExports(process.cwd(), catalog);
@@ -103,7 +105,7 @@ describe("PeopleSoft prompt distributions", () => {
 
   it("validates the maintained pack without claiming host execution", () => {
     const result = validatePack();
-    expect(result.catalog.entries).toHaveLength(22);
+    expect(result.catalog.entries).toHaveLength(24);
     expect(result.catalog.templates).toHaveLength(3);
     expect(result.catalog.hostValidation).toBe("not-run");
   });

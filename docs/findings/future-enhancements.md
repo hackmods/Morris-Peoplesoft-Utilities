@@ -194,9 +194,9 @@
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | UG-01 | ~~**Customization upgrade watch**~~ — capture UI fingerprint (tabs, structure hosts, field ids) + post-upgrade drift check | BA, Dev, Admin | Faster regression triage after upgrades | Page Info + Options → Upgrade; not PeopleCode |
-| UG-02 | **Change Assistant handoff export** — structured notes from drift report for CA project docs | Admin | Ops workflow | Deferred — file/export only |
+| UG-02 | ~~**Change Assistant handoff export**~~ — reviewed Markdown UI-drift notes with manual evidence/test/rollback sections | Admin | Ops workflow | Done in 1.0.29; no project creation/deployment |
 | UG-03 | **PeopleCode compare integration** | Dev | Full override detection | **N/A in browser** — use App Designer Compare Report |
-| UG-04 | **Multi-baseline history** per object (last N captures) | Dev | Track drift across envs | Deferred |
+| UG-04 | ~~**Multi-baseline history**~~ per component/environment | Dev | Track drift across envs | Done in 1.0.29; five per scope, 50 total, explicit baseline selection |
 | UG-05 | **Bar Upgrade chip** when watch exists for current component | BA | Faster re-check | Nice-to-have; Page Info buttons sufficient |
 
 ---
@@ -234,3 +234,9 @@ AG-01 implemented (Unreleased): Options → Agents with a local, generated publi
 AG-02 implemented for 1.0.28 (Unreleased): audience discovery and blank, editable task briefs with explicit clipboard copy/manual fallback; no page-context capture or persistence. Build-time catalog/export validation prevents stale references. Prompt maintenance 4.0.1 adds a private evaluation worksheet; host/model trials remain unexecuted.
 
 BR-01 implemented for 1.0.28 (Unreleased): UnionOps-inspired black/orange shared UI tokens and versioned PS artwork. Preserve semantic/environment state cues and prior assets. Release priority remains real 8.62/assistive-technology evidence and genuine updated Store captures; do not add speculative features to bypass those gates.
+
+## Reliability and diagnostics — 2026-10-15
+
+Implemented for 1.0.29: serialized settings edits with stale-form conflict protection; scoped/datable trace request evidence and explicit On/Off actions; allowlisted diagnostics preview with explicit export; dated upgrade baseline selection/history and Markdown handoff (UG-02/UG-04). History is capped at five per component/environment and 50 total, including imports. ADR: [0010](../adr/0010-settings-coordination-and-local-evidence.md).
+
+Prompt pack 4.1.0 adds Search Framework and portal/branding specialists: 24 prompts and 36 unexecuted evaluation cases. Actual host/model trials and private HCM/FSCM/Campus Solutions tailoring need the selected host and verified local evidence; generic templates remain unfilled. Store captures and real 8.62/assistive-technology validation remain outstanding.

@@ -4,6 +4,8 @@ import {
   compareFingerprints,
   createWatchFromFingerprint,
   findWatchForParsed,
+  listWatchesForParsed,
+  formatDriftHandoffMarkdown,
   upsertWatch,
   watchKey,
 } from "@/features/upgrade-watch";
@@ -54,7 +56,7 @@ describe("upgrade-watch", () => {
     expect(report.findings.some((f) => f.code === "tabs")).toBe(true);
   });
 
-  it("upserts by menu.component.market key", () => {
+  it("retains dated history rather than overwriting the previous baseline", () => {
     const a = createWatchFromFingerprint({
       fingerprint: fp({}),
       label: "First",
@@ -66,9 +68,23 @@ describe("upgrade-watch", () => {
       now: 2,
     });
     const list = upsertWatch(upsertWatch([], a), b);
-    expect(list).toHaveLength(1);
+    expect(list).toHaveLength(2);
     expect(list[0].label).toBe("Second");
     expect(watchKey("menu", "comp", "gbl")).toBe("MENU.COMP.GBL");
+  });
+
+  it("caps history per environment and requires an explicit cross-environment comparison", () => {
+    let list: ReturnType<typeof createWatchFromFingerprint>[] = [];
+    for (let index = 1; index <= 7; index++) list = upsertWatch(list, createWatchFromFingerprint({ fingerprint: fp({}), scope: "https://dev.example/ps", envLabel: "DEV", now: index }));
+    const qa = createWatchFromFingerprint({ fingerprint: fp({ toolsRel: "8.62" }), scope: "https://qa.example/ps", envLabel: "QA", now: 8 });
+    list = upsertWatch(list, qa);
+    expect(list).toHaveLength(6);
+    const parsed = { baseURL: "https://qa.example", siteNormalized: "ps", menu: "MENU", component: "COMP", market: "GBL" } as ParsedPsUrl;
+    expect(findWatchForParsed(list, parsed)?.id).toBe(qa.id);
+    expect(listWatchesForParsed(list, parsed)).toHaveLength(6);
+    expect(findWatchForParsed(list, { ...parsed, baseURL: "https://prod.example" })).toBeUndefined();
+    const report = compareFingerprints(qa.baseline, fp({ toolsRel: "8.63" }));
+    expect(formatDriftHandoffMarkdown(qa, report, "TEST")).toContain("App Designer Compare Report / Change Assistant project: [attach verified evidence]");
   });
 
   it("finds watch for parsed URL", () => {

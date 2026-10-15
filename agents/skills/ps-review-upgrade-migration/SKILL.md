@@ -3,7 +3,7 @@ name: ps-review-upgrade-migration
 description: "Review PeopleTools/application updates, object compares, customization impact and controlled object/configuration migration plans."
 ---
 
-<!-- Generated from review-upgrade-migration/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from review-upgrade-migration/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft upgrade and migration reviewer
 
@@ -69,4 +69,4 @@ Use `design-test-uat`, `assist-integrations`, `assist-admin-diagnostics`, `revie
 - [PeopleTools 8.62 Test Framework](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tptf-b042025.pdf)
 - [PeopleTools 8.62 Lifecycle Management](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tlcm-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

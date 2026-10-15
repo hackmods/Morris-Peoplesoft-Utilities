@@ -3,6 +3,7 @@ import { isHtmlElement, isVisible } from "../adapters/dom";
 /** Shared keyboard/focus lifecycle, including replacement and external removal. */
 export function bindModalDialog(doc: Document, backdrop: HTMLElement, dialog: HTMLElement, onClose?: () => void): () => void {
   const previous = doc.activeElement;
+  const barInvokerId = previous && isHtmlElement(previous) && previous.closest("#mpu-bar") ? previous.id : "";
   let closed = false;
   const focusables = () => Array.from(dialog.querySelectorAll<HTMLElement>(
     'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]',
@@ -14,7 +15,9 @@ export function bindModalDialog(doc: Document, backdrop: HTMLElement, dialog: HT
     doc.removeEventListener("keydown", keydown, true);
     backdrop.remove();
     onClose?.();
-    if (previous && isHtmlElement(previous) && previous.isConnected && !doc.getElementById("mpu-dialog")) previous.focus();
+    const replacement = barInvokerId ? doc.getElementById(barInvokerId) : null;
+    const target = previous?.isConnected ? previous : replacement && doc.getElementById("mpu-bar")?.contains(replacement) ? replacement : null;
+    if (target && isHtmlElement(target) && !doc.getElementById("mpu-dialog")) target.focus();
   };
   const keydown = (event: KeyboardEvent) => {
     if (!backdrop.isConnected) { close(); return; }

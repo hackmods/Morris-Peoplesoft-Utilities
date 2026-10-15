@@ -1,9 +1,12 @@
-import { loadSettings, saveSettings } from "../../storage/settings";
+import { loadSettings, saveSettings, SettingsSaveError } from "../../storage/settings";
 import { FEATURE_LABELS } from "../../storage/feature-labels";
 import type { YesNo } from "../../storage/schema";
 
 const list = document.getElementById("toggle-list")!;
 const status = document.getElementById("status")!;
+window.addEventListener("unhandledrejection", (event) => {
+  if (event.reason instanceof SettingsSaveError) { event.preventDefault(); status.textContent = event.reason.message; }
+});
 const optionsLink = document.getElementById("open-options") as HTMLAnchorElement;
 const agentsLink = document.getElementById("open-agents") as HTMLAnchorElement;
 agentsLink.href = chrome.runtime.getURL("options.html#agents");

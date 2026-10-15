@@ -4,7 +4,7 @@ description: "Review rendered PeopleSoft Fluid and Classic tasks for keyboard, f
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 
-<!-- Generated from review-fluid-accessibility/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from review-fluid-accessibility/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft Fluid and Classic accessibility reviewer
 
@@ -70,4 +70,4 @@ Use `assist-fluid`, `design-test-uat`, `design-component` when their specialty i
 - [W3C WCAG 2.2](https://www.w3.org/TR/WCAG22/)
 - [PeopleTools 8.62 Accessibility Guide](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tacs-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

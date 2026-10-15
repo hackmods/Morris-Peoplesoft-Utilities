@@ -4,7 +4,7 @@ description: "Review PeopleCode APIs, SQL construction, buffer access, event pla
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 
-<!-- Generated from review-peoplecode-quality/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from review-peoplecode-quality/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleCode quality reviewer
 
@@ -70,4 +70,4 @@ Use `review-data-correctness`, `assist-peoplecode`, `assist-integrations`, `assi
 - [PeopleTools 8.62 Application Engine](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tape-b112025.pdf)
 - [PeopleTools 8.62 Component Interfaces](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tcpi-b112025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

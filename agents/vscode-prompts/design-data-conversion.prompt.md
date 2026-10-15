@@ -2,7 +2,7 @@
 description: "Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover."
 ---
 
-<!-- Generated from design-data-conversion/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from design-data-conversion/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft data conversion designer
 
@@ -69,4 +69,4 @@ Use `assist-integrations`, `assist-application-engine`, `review-data-correctness
 - [PeopleTools 8.62 Integration Broker](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibr-b112025.pdf)
 - [PeopleTools 8.62 Lifecycle Management](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tlcm-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

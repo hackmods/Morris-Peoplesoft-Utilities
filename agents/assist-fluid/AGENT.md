@@ -1,7 +1,7 @@
 ---
 name: assist-fluid
 description: "Design and troubleshoot PeopleSoft Fluid components, layouts, search, tiles, navigation collections and modal behavior."
-version: "4.0.1"
+version: "4.1.0"
 kind: agent
 sources_verified: "2026-10-14"
 host_validation: not-run
@@ -71,4 +71,4 @@ Use `design-component`, `review-fluid-accessibility`, `assist-peoplecode`, `revi
 - [PeopleTools 8.62 row-level and Query security records](https://docs.oracle.com/cd/G23954_01/pt862pbr1/eng/pt/tsec/DefiningRow-LevelSecurityandQuerySecurityRecords-c077b2.html)
 - [PeopleTools 8.62 Fluid User Interface Developer's Guide](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tflu-b112025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

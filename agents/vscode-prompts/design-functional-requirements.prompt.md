@@ -2,7 +2,7 @@
 description: "Develop PeopleSoft BA requirements, process maps, configuration fit/gap, business rules and testable acceptance criteria."
 ---
 
-<!-- Generated from design-functional-requirements/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from design-functional-requirements/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft functional requirements designer
 
@@ -68,4 +68,4 @@ Use `design-component`, `design-test-uat`, `assist-approval-framework`, `assist-
 - [PeopleTools 8.62 Query](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpsq-b112025.pdf)
 - [PeopleTools 8.62 Lifecycle Management](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tlcm-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

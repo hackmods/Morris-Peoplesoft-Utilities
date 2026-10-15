@@ -17,6 +17,9 @@ Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser v
 | Multi-tab / session | No storage churn; environment settings and favorites survive concurrent edits; sign-out/sign-in does not imply a verified trace state | Real-system test needed |
 | Keyboard / screen reader | Tab and Shift+Tab stay in dialogs; Escape works after typing; focus returns; 200% zoom, contrast, forced colors, and live announcements | Real-system test needed |
 | Agent reference entry points | Help opens public documentation without page/session context; local library filtering works with no external requests and no persisted search; popup/side-panel links and assistive technology remain usable | Real-system/AT check needed |
+| Concurrent edits | Two Options tabs merge independent preferences; conflicting stale environment/favorite edits report a conflict and preserve saved data; recent visits do not cause write loops | Real-system test needed |
+| Trace request evidence | Explicit On/Off requests; requested/acknowledged/unknown labels do not assert live state; disabling between GET and POST prevents the POST; observed login/logout invalidates confidence | Real-system test needed |
+| Diagnostics and upgrade history | Review allowlisted diagnostics before copy/download; no automatic values/tokens/hostnames; choose dated/environment baselines and review handoff; dialog focus returns after toolbar rebuild | Real-system/AT check needed |
 
 The browser cannot confirm App Designer definitions, PeopleCode scroll paths, security entitlements, or server-side customization correctness. Treat generated code and DOM metadata as aids for a developer to verify.
 

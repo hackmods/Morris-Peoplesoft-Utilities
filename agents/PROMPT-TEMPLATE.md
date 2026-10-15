@@ -6,7 +6,7 @@ Use one definition in a stable review-/assist-/design-/guide- folder. Metadata m
 ---
 name: assist-domain
 description: "Specific PeopleSoft task and trigger; distinguish neighboring workflows."
-version: "4.0.1"
+version: "4.1.0"
 kind: agent
 sources_verified: "2026-10-14"
 host_validation: not-run

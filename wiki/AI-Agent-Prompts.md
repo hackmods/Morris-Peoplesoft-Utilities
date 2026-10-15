@@ -1,6 +1,6 @@
 # AI agent prompts for PeopleSoft work
 
-The [PeopleSoft prompt pack](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) is a separate toolkit, outside the Chrome extension. Content v4.0.1 includes 22 complete prompts, three private-tailoring templates and an unexecuted evaluation-results worksheet. Target PeopleTools 8.62; confirm application release/PUM separately.
+The [PeopleSoft prompt pack](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) is a separate toolkit, outside the Chrome extension. Content v4.1.0 includes 24 complete prompts, three private-tailoring templates and an unexecuted evaluation-results worksheet. Target PeopleTools 8.62; confirm application release/PUM separately.
 
 ## Adoption
 
@@ -21,9 +21,11 @@ Full [setup, workflow routes and validation instructions](https://github.com/hac
 | [assist-integrations](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-integrations/AGENT.md) | agent | Design and troubleshoot PeopleSoft IB and Component Interfaces, including security, CI event timing, error collections and safe replay. |
 | [assist-peoplecode](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-peoplecode/AGENT.md) | agent | Draft PeopleCode and application-class solutions with explicit caller, event, buffer context, dependencies and validation. |
 | [assist-performance-trace](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-performance-trace/AGENT.md) | agent | Analyze scrubbed PeopleSoft SQL, PeopleCode and AE traces, timings, plans and lock evidence; design bounded diagnostic capture. |
+| [assist-portal-branding](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-portal-branding/AGENT.md) | agent | Design and troubleshoot PeopleSoft portal registry navigation, CREFs, homepages, tiles and branding themes with verified configuration and rendered evidence. |
 | [assist-process-scheduler](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-process-scheduler/AGENT.md) | agent | Triage PeopleSoft process execution, run controls, scheduling dependencies and report distribution from sanitized monitor evidence. |
 | [assist-reporting](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-reporting/AGENT.md) | agent | Design and troubleshoot BI Publisher, Query/Connected Query and existing SQR report data, templates, reconciliation and distribution. |
 | [assist-schema-mcp](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-schema-mcp/AGENT.md) | agent | Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions. |
+| [assist-search-framework](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-search-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence. |
 | [assist-sql-query](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-sql-query/AGENT.md) | agent | Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax. |
 | [design-component](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-component/AGENT.md) | agent | Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs. |
 | [design-data-conversion](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-data-conversion/AGENT.md) | agent | Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover. |

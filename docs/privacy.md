@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome extension)
 
@@ -15,10 +15,10 @@ Settings are stored only in Chrome’s `chrome.storage.local` on your profile, i
 - Feature on/off preferences
 - Favorites (may include menu/component names and optional URL parameters)
 - The last 12 component identifiers visited for recent shortcuts (not full browsing history)
-- Customization watch notes and baseline UI fingerprints (field IDs, tab/structure labels, component identifiers and detected Tools version)
+- Customization watch notes and dated baseline UI fingerprints (field IDs, tab/structure labels, component identifiers, environment/origin-site scope and detected Tools version); up to five per component/environment and 50 overall
 - Optional **Field Entry** named profiles (field values you choose to save; may include business keys such as EmplIDs or department IDs — never passwords; session clipboard is not persisted)
 - Environment labels and URL/site mappings
-- Trace flag preferences
+- Trace flag preferences and last-request evidence (origin/site scope, target, timestamp and save-request outcome), which does not establish current server/session trace state
 - Optional host allowlist origins (Phase 2, off by default)
 
 ## Data MPU does not collect
@@ -43,6 +43,8 @@ MPU reads relevant PeopleSoft page content locally to display the signed-in user
 Copy and export actions put the selected information in your clipboard or a downloaded file. Settings backups include recent components, saved profiles and watch notes. You control those files and any later sharing; MPU does not upload them. Compare clipboard actions read text only when requested.
 
 ## Retention and deletion
+
+Preview diagnostics builds an allowlisted local configuration summary without page/field values, hostnames, user IDs, object names or session tokens. You can review/edit it before explicitly copying or downloading it. The preview is not saved or uploaded. Upgrade handoffs are likewise previewed local text and may contain technical component/field names; review them before sharing. Files and clipboard contents remain under your control after export.
 
 The Field Entry session buffer lasts until cleared, disabled, or the page unloads. Saved preferences, favorites, profiles and watch baselines remain in local extension storage until removed or replaced through Options, or the extension is uninstalled. Uninstalling does not remove files you exported or clear your operating system clipboard.
 

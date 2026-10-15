@@ -1,7 +1,7 @@
 ---
 name: assist-reporting
 description: "Design and troubleshoot BI Publisher, Query/Connected Query and existing SQR report data, templates, reconciliation and distribution."
-version: "4.0.1"
+version: "4.1.0"
 kind: agent
 sources_verified: "2026-10-14"
 host_validation: not-run
@@ -72,4 +72,4 @@ Use `assist-sql-query`, `review-data-correctness`, `assist-process-scheduler`, `
 - [PeopleTools 8.62 Process Scheduler](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tprs-b042025.pdf)
 - [PeopleTools 8.62 BI Publisher](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862txml-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

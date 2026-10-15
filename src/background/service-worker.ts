@@ -1,4 +1,7 @@
-import { loadSettings, saveSettings } from "../storage/settings";
+import { configureSettingsTransport, loadSettings, saveSettings } from "../storage/settings";
+import { coordinateSettingsWrite, type SettingsWrite } from "../storage/coordinator";
+
+configureSettingsTransport(coordinateSettingsWrite);
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   const existing = await chrome.storage.local.get("mpuSettings");
@@ -9,10 +12,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     }
     await saveSettings(defaults);
   } else if (details.reason === "install") {
-    await saveSettings({
-      ...(await loadSettings()),
-      showOnboarding: "Yes",
-    });
+    const settings = await loadSettings();
+    settings.showOnboarding = "Yes";
+    await saveSettings(settings);
   }
 
   // Strip any leftover legacy credential blobs if present
@@ -37,7 +39,12 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "mpu-write-settings") {
+    if (sender.id !== chrome.runtime.id) { sendResponse({ ok: false, error: "Untrusted settings sender" }); return false; }
+    void coordinateSettingsWrite(message as SettingsWrite).then(sendResponse);
+    return true;
+  }
   if (message?.type === "mpu-trace-sync" || message?.type === "mpu-refresh") {
     void chrome.tabs.query({}, (tabs) => {
       for (const tab of tabs) {

@@ -1,7 +1,7 @@
 import { bindModalDialog } from "./dialog";
 import { appendAgentHelp } from "./agent-references";
 import { isVisible } from "../adapters/dom";
-import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings } from "../storage/schema";
+import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings, TraceRequest } from "../storage/schema";
 import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
 import {
@@ -40,14 +40,19 @@ import {
   formatProcessPackPlain,
 } from "./process-pack";
 import { formatTraceBarHint, summarizeActiveTraceFlags } from "./trace-presets";
+import { describeTraceRequest } from "./trace-status";
+import { currentPageAccess } from "./access";
+import { buildDiagnosticReport } from "./diagnostics";
 import { loadSettings, saveSettings } from "../storage/settings";
 import {
   capturePageFingerprint,
   compareFingerprints,
   createWatchFromFingerprint,
   findWatchForParsed,
-  formatDriftReportPlain,
   upsertWatch,
+  listWatchesForParsed,
+  watchScope,
+  formatDriftHandoffMarkdown,
 } from "./upgrade-watch";
 import {
   clearBufferAndPreview,
@@ -64,6 +69,8 @@ export interface BarContext {
   parsed: ParsedPsUrl;
   envLabel: string;
   onTraceToggle: () => void;
+  onTraceRequest?: (turnOn: boolean) => void;
+  traceRequest?: TraceRequest;
   onPageInfo: () => void;
   onFieldInspector: () => void;
   onNewWindow: () => void;
@@ -1470,18 +1477,20 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   if (!loginOnly && isYes(f.traceOption)) {
     const traceHint = formatTraceBarHint(ctx.settings.traceSettings);
     const traceSummary = summarizeActiveTraceFlags(ctx.settings.traceSettings);
-    let label = ctx.traceLocked ? "Trace 🔒" : ctx.traceRunning ? "Trace ON" : "Trace OFF";
-    if (!ctx.traceLocked && traceHint) {
-      label = ctx.traceRunning ? `Trace ON · ${traceHint}` : `Trace · ${traceHint}`;
-    }
+    const evidence = describeTraceRequest(ctx.traceRequest, ctx.parsed);
+    const label = ctx.traceLocked ? "Trace 🔒 · unknown" : `${evidence.label}${traceHint ? ` · ${traceHint}` : ""}`;
     const title = ctx.traceLocked
       ? "Trace locked — your user likely lacks access to UTILITIES PeopleCode/SQL Trace components (see FAQ)"
       : traceHint
-        ? `Toggle PeopleCode/SQL trace — active flags: ${traceSummary}`
-        : "Toggle PeopleCode/SQL trace";
-    const t = btn("mpu-trace", label, title, ctx.traceRunning);
-    if (ctx.traceLocked && !ctx.traceRunning) t.disabled = true;
-    t.addEventListener("click", () => ctx.onTraceToggle());
+        ? `${evidence.detail} Configured flags: ${traceSummary}`
+        : evidence.detail;
+    const t = btn("mpu-trace", label, title);
+    t.disabled = evidence.status === "requested";
+    t.setAttribute("aria-haspopup", "dialog");
+    t.addEventListener("click", () => {
+      if (ctx.onTraceRequest) showTraceRequestDialog(doc, ctx);
+      else ctx.onTraceToggle();
+    });
     bar.appendChild(t);
   }
 
@@ -1939,6 +1948,30 @@ function showHelpDialog(doc: Document): void {
   });
 }
 
+/** Explicit requests never infer live server state from the saved boolean. */
+function showTraceRequestDialog(doc: Document, ctx: BarContext): void {
+  openModalDialog(doc, {
+    labelledBy: "mpu-trace-title", initialFocus: "#mpu-trace-close",
+    build: (dialog, close) => {
+      dialog.innerHTML = `<h2 id="mpu-trace-title">Trace requests</h2>
+        <p id="mpu-trace-evidence"></p>
+        <p>On applies your configured flags. Off requests that both PeopleCode and SQL tracing stop. Verify in PeopleSoft after either request.</p>
+        <div class="mpu-dialog-actions">
+          <button type="button" class="mpu-btn" id="mpu-trace-on">Request trace on</button>
+          <button type="button" class="mpu-btn" id="mpu-trace-off">Request trace off</button>
+          <button type="button" class="mpu-btn" id="mpu-trace-close">Close</button>
+        </div>`;
+      dialog.querySelector("#mpu-trace-evidence")!.textContent = describeTraceRequest(ctx.traceRequest, ctx.parsed).detail;
+      for (const target of ["on", "off"] as const) dialog.querySelector(`#mpu-trace-${target}`)!.addEventListener("click", async () => {
+        if (!await currentPageAccess(ctx.parsed, "traceOption") || !dialog.isConnected) { close(); return; }
+        close();
+        ctx.onTraceRequest?.(target === "on");
+      });
+      dialog.querySelector("#mpu-trace-close")!.addEventListener("click", close);
+    },
+  });
+}
+
 /** CSP-safe Pages list from delivered links (SP-01). */
 export function showPageTabsDialog(doc: Document): void {
   openModalDialog(doc, {
@@ -2016,10 +2049,24 @@ export function showPageInfoDialog(
       <label class="mpu-dialog-label">Notes (optional)
         <input type="text" class="mpu-dialog-input" id="mpu-pi-watch-notes" autocomplete="off" />
       </label>
+      <label class="mpu-dialog-label">Baseline for comparison
+        <select id="mpu-pi-baseline" class="mpu-dialog-input"><option value="">Choose a saved baseline</option></select>
+      </label>
       <div class="mpu-dialog-actions">
-        <button type="button" class="mpu-btn" id="mpu-pi-watch-save">Watch customization</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-watch-save">Capture baseline</button>
         <button type="button" class="mpu-btn" id="mpu-pi-check-drift">Check upgrade drift</button>
+        <button type="button" class="mpu-btn" id="mpu-pi-copy-handoff" hidden>Copy upgrade handoff</button>
       </div>
+      <p class="mpu-dialog-hint">Retains up to five baselines per component/environment and 50 total. Review the selected environment and date before comparing.</p>
+    </div>
+    <div class="mpu-dialog-section">
+      <button type="button" class="mpu-btn" id="mpu-pi-diagnostics">Preview diagnostics</button>
+      <section id="mpu-diagnostics-preview" hidden aria-label="Diagnostic report preview">
+        <p>Review and edit this local summary before sharing. No field values, hostnames, user IDs or session tokens are included automatically.</p>
+        <label class="mpu-dialog-label">Diagnostic report<textarea id="mpu-diagnostic-report" class="mpu-dialog-input" rows="10"></textarea></label>
+        <div class="mpu-dialog-actions"><button type="button" class="mpu-btn" id="mpu-diagnostic-copy">Copy diagnostic report</button>
+        <button type="button" class="mpu-btn" id="mpu-diagnostic-download">Download diagnostic report</button></div>
+      </section>
     </div>
     <div class="mpu-dialog-actions mpu-dialog-actions-stack">
       <div class="mpu-action-group" role="group" aria-label="Copy page info">
@@ -2039,6 +2086,51 @@ export function showPageInfoDialog(
     </div>
   `;
       (dialog.querySelector("#mpu-pi-body") as HTMLElement).textContent = text;
+      const baselineSelect = dialog.querySelector("#mpu-pi-baseline") as HTMLSelectElement;
+      let handoff = "";
+      const resetHandoff = () => { handoff = ""; (dialog.querySelector("#mpu-pi-copy-handoff") as HTMLElement).hidden = true; };
+      baselineSelect.addEventListener("change", resetHandoff);
+      const refreshBaselines = async (selectedId?: string) => {
+        const settings = await currentPageAccess(parsed, "pageInfoOption");
+        if (!settings || !dialog.isConnected) return;
+        baselineSelect.replaceChildren();
+        const blank = doc.createElement("option"); blank.value = ""; blank.textContent = "Choose a saved baseline";
+        baselineSelect.append(blank);
+        for (const watch of listWatchesForParsed(settings.customizationWatches, parsed)) {
+          const option = doc.createElement("option"); option.value = watch.id;
+          option.textContent = `${watch.envLabel || "Unlabelled"} · ${new Date(watch.capturedAt).toLocaleString()} · Tools ${watch.baseline.toolsRel || "unknown"}`;
+          baselineSelect.append(option);
+        }
+        baselineSelect.value = selectedId || findWatchForParsed(settings.customizationWatches, parsed, envLabel)?.id || "";
+        resetHandoff();
+      };
+      void refreshBaselines();
+      dialog.querySelector("#mpu-pi-diagnostics")!.addEventListener("click", async () => {
+        const settings = await currentPageAccess(parsed, "pageInfoOption");
+        if (!settings || !dialog.isConnected) return;
+        const envId = settings.urlSites[parsed.baseURL]?.[parsed.siteNormalized]?.envId;
+        const request = envId === undefined ? undefined : settings.environments[envId]?.traceRequest;
+        const area = dialog.querySelector("#mpu-diagnostic-report") as HTMLTextAreaElement;
+        area.value = buildDiagnosticReport(settings, { version: chrome.runtime.getManifest().version,
+          toolsRel: meta.toolsRel, uiMode: detectUiModel(doc), traceStatus: describeTraceRequest(request, parsed).status });
+        (dialog.querySelector("#mpu-diagnostics-preview") as HTMLElement).hidden = false;
+        area.focus(); area.setSelectionRange(0, 0); area.scrollTop = 0;
+      });
+      dialog.querySelector("#mpu-diagnostic-copy")!.addEventListener("click", async () => {
+        if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
+        await copyText(doc, (dialog.querySelector("#mpu-diagnostic-report") as HTMLTextAreaElement).value, "Reviewed diagnostic report copied");
+      });
+      dialog.querySelector("#mpu-diagnostic-download")!.addEventListener("click", async () => {
+        if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
+        const contents = (dialog.querySelector("#mpu-diagnostic-report") as HTMLTextAreaElement).value;
+        const url = URL.createObjectURL(new Blob([contents], { type: "text/plain" }));
+        const link = doc.createElement("a"); link.href = url; link.download = "mpu-diagnostics.txt";
+        link.click(); setTimeout(() => URL.revokeObjectURL(url), 0);
+        announce(doc, "Reviewed diagnostic report downloaded");
+      });
+      dialog.querySelector("#mpu-pi-copy-handoff")!.addEventListener("click", async () => {
+        if (handoff && await currentPageAccess(parsed, "pageInfoOption") && dialog.isConnected) await copyText(doc, handoff, "Upgrade handoff copied");
+      });
       dialog.querySelector("#mpu-pi-close")?.addEventListener("click", close);
       dialog.querySelector("#mpu-pi-copy")?.addEventListener("click", () => {
         void copyText(doc, text, "Page information copied");
@@ -2120,6 +2212,7 @@ export function showPageInfoDialog(
       });
 
       dialog.querySelector("#mpu-pi-watch-save")?.addEventListener("click", async () => {
+        if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
         if (!parsed.menu || !parsed.component) {
           announce(doc, "Open a component page to watch customization");
           return;
@@ -2132,10 +2225,12 @@ export function showPageInfoDialog(
           fingerprint,
           notes,
           envLabel,
+          scope: watchScope(parsed),
         });
         const settings = await loadSettings();
         settings.customizationWatches = upsertWatch(settings.customizationWatches, watch);
         await saveSettings(settings);
+        await refreshBaselines(watch.id);
         announce(
           doc,
           `Watching ${watch.menu}.${watch.component}.${watch.market} — baseline saved`,
@@ -2143,19 +2238,22 @@ export function showPageInfoDialog(
       });
 
       dialog.querySelector("#mpu-pi-check-drift")?.addEventListener("click", async () => {
+        if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
         const diffEl = dialog.querySelector("#mpu-pi-diff") as HTMLElement;
         const settings = await loadSettings();
-        const watch = findWatchForParsed(settings.customizationWatches, parsed);
+        const watch = listWatchesForParsed(settings.customizationWatches, parsed).find((entry) => entry.id === baselineSelect.value);
         if (!watch) {
           announce(
             doc,
-            "No upgrade watch for this component — use Watch customization first",
+            "Choose a saved baseline for this component, or capture one first",
           );
           return;
         }
         const current = capturePageFingerprint(doc, parsed, meta);
         const report = compareFingerprints(watch.baseline, current);
-        const out = formatDriftReportPlain(watch, report);
+        const out = formatDriftHandoffMarkdown(watch, report, envLabel);
+        handoff = out;
+        (dialog.querySelector("#mpu-pi-copy-handoff") as HTMLElement).hidden = false;
         diffEl.hidden = false;
         diffEl.textContent = out;
         const severityMsg =

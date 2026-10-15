@@ -28,3 +28,8 @@ Reviewed 2026-10-14. These are source references, not a compatibility certificat
 The approvals reference is an application example at the named FSCM release, not a universal Tools configuration. Obtain the matching application/PUM documentation for local rules. WCAG mapping uses the standard agreed for the task; this pack does not certify legal conformance. Host installation guidance is version-sensitive and must be checked in the installed host.
 
 Catalog status: source links reviewed; host invocation, model behavior, target compilation, UAT and real-system checks not run. Record those separately when performed.
+
+Added source context on 2026-10-15 (existing per-prompt review dates are retained):
+
+- **search** — [PeopleTools 8.62 Search Technology](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpst-b112025.pdf): source types, document security and indexing administration. New workflow/evaluation cases are authored guidance, not Oracle certification.
+- **portal** — [PeopleTools 8.62 Portal Technology](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tprt-b042025.pdf): portal registry and branding context. The public Oracle index/search extract was available; direct PDF retrieval was unavailable during this review. Confirm full target-patch details before applying a configuration change.

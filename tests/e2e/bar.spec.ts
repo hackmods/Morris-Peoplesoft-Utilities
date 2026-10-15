@@ -46,6 +46,90 @@ const test = base.extend<Fixtures>({
 });
 
 test.describe("MPU extension UI", () => {
+  test("two Options tabs preserve independent edits and report conflicting environment drafts", async ({ extensionContext, extensionId }) => {
+    test.setTimeout(120_000);
+    const first = await extensionContext.newPage();
+    const second = await extensionContext.newPage();
+    const url = `chrome-extension://${extensionId}/options.html`;
+    await Promise.all([first.goto(url), second.goto(url)]);
+    await first.locator("#greetingOption").uncheck();
+    await second.locator("#traceOption").check();
+    await Promise.all([first.locator("#save-features").click(), second.locator("#save-features").click()]);
+    const read = () => extensionContext.serviceWorkers()[0].evaluate(async () => (await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings);
+    await expect.poll(async () => (await read()).features.greetingOption).toBe("No");
+    await expect.poll(async () => (await read()).features.traceOption).toBe("Yes");
+    await first.getByRole("tab", { name: "Environments", exact: true }).click();
+    await second.getByRole("tab", { name: "Environments", exact: true }).click();
+    await first.getByRole("textbox", { name: "Environment 1 name" }).fill("DEV A");
+    await second.getByRole("textbox", { name: "Environment 1 name" }).fill("DEV B");
+    await first.locator("#env-list").getByRole("button", { name: "Save", exact: true }).click();
+    await expect.poll(async () => (await read()).environments[0].label).toBe("DEV A");
+    await second.locator("#env-list").getByRole("button", { name: "Save", exact: true }).click();
+    await expect(second.locator("#toast")).toContainText("Settings changed in another tab");
+    expect((await read()).environments[0].label).toBe("DEV A");
+    await first.close(); await second.close();
+  });
+
+  test("diagnostics are previewed before export and upgrade baselines retain selectable history", async ({ fluidPage }) => {
+    test.setTimeout(120_000);
+    await fluidPage.locator("#mpu-pageinfo").click();
+    await fluidPage.locator("#mpu-pi-diagnostics").click();
+    const preview = fluidPage.getByRole("textbox", { name: "Diagnostic report", exact: true });
+    await expect(preview).toBeFocused();
+    const contents = await preview.inputValue();
+    expect(JSON.parse(contents).report).toBe("MPU local diagnostics");
+    for (const excluded of ["127.0.0.1", "ICSID", "JOB_EMPLID", "EMPLOYEE/HRMS"]) expect(contents).not.toContain(excluded);
+    await audit(fluidPage, "#mpu-dialog");
+    await preview.fill(`${contents}\nReviewed reproduction: synthetic test only.`);
+    const downloaded = fluidPage.waitForEvent("download");
+    await fluidPage.locator("#mpu-diagnostic-download").click();
+    expect((await downloaded).suggestedFilename()).toBe("mpu-diagnostics.txt");
+    await fluidPage.locator("#mpu-pi-watch-save").click();
+    const baselines = fluidPage.locator("#mpu-pi-baseline");
+    await expect(baselines.locator("option")).toHaveCount(2);
+    const original = await baselines.inputValue();
+    await fluidPage.evaluate(() => { const field = document.createElement("input"); field.id = "SYNTHETIC_NEWFIELD$0"; document.body.append(field); });
+    await fluidPage.locator("#mpu-pi-watch-save").click();
+    await expect(baselines.locator("option")).toHaveCount(3);
+    await baselines.selectOption(original);
+    await fluidPage.locator("#mpu-pi-check-drift").click();
+    await expect(fluidPage.locator("#mpu-pi-diff")).toContainText("# Upgrade validation handoff");
+    await expect(fluidPage.locator("#mpu-pi-diff")).toContainText("SYNTHETIC");
+    await expect(fluidPage.locator("#mpu-pi-copy-handoff")).toBeVisible();
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.setViewportSize({ width: 320, height: 600 });
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.keyboard.press("Escape");
+    await expect(fluidPage.locator("#mpu-pageinfo")).toBeFocused();
+  });
+
+  test("trace shows request evidence and closes its action dialog when disabled", async ({ extensionContext, fluidPage }) => {
+    test.setTimeout(120_000);
+    const sw = extensionContext.serviceWorkers()[0];
+    await sw.evaluate(async () => {
+      const settings = (await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings;
+      settings.features.traceOption = "Yes";
+      settings.environments[0].traceRequest = { origin: "http://127.0.0.1:4173", site: "ps", at: Date.now(), target: "on", status: "confirmed" };
+      await chrome.storage.local.set({ mpuSettings: settings });
+    });
+    await expect(fluidPage.locator("#mpu-trace")).toContainText("last ON");
+    await fluidPage.locator("#mpu-trace").click();
+    await expect(fluidPage.locator("#mpu-trace-evidence")).toContainText("not a live server query");
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.keyboard.press("Escape");
+    await expect(fluidPage.locator("#mpu-trace")).toBeFocused();
+    await fluidPage.locator("#mpu-trace").click();
+    await sw.evaluate(async () => {
+      const settings = (await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings;
+      settings.features.traceOption = "No";
+      await chrome.storage.local.set({ mpuSettings: settings });
+    });
+    await expect(fluidPage.locator("#mpu-trace-title")).toHaveCount(0);
+    await expect(fluidPage.locator("#mpu-trace")).toHaveCount(0);
+    await fluidPage.goto(`${fluidPage.url()}?cmd=logout`);
+    await expect.poll(() => sw.evaluate(async () => ((await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings).environments[0].traceRequest?.status)).toBe("unknown");
+  });
+
   test("rendered bar, flyouts, and dialogs pass browser axe including contrast", async ({ fluidPage }) => {
     test.setTimeout(60_000);
     await audit(fluidPage, "#mpu-bar");
@@ -129,7 +213,7 @@ test.describe("MPU extension UI", () => {
     page.on("request", (request) => { if (/^https?:/.test(request.url())) externalRequests.push(request.url()); });
     await page.goto(`chrome-extension://${extensionId}/options.html#agents`);
     await expect(page.getByRole("tab", { name: "Agents", exact: true })).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#agent-list > li")).toHaveCount(22);
+    await expect(page.locator("#agent-list > li")).toHaveCount(24);
     await expect(page.locator("#agent-templates a")).toHaveCount(3);
     const before = await page.evaluate(() => chrome.storage.local.get("mpuSettings"));
     const search = page.getByRole("searchbox", { name: "Search prompts" });

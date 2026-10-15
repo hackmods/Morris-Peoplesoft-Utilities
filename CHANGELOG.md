@@ -19,6 +19,14 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Next build — 1.0.29
+
+- Serialize settings writes in the service worker; merge independent edits and report conflicting stale drafts without redirecting collection indices. Retry functional updates against fresh state and preserve read-only recovery of malformed settings.
+- Replace trace On/Off assertions with scoped, dated request evidence and explicit On/Off actions. Revalidate access before delayed network steps; incomplete results remain unknown.
+- Add an editable diagnostics preview with an allowlisted configuration summary and explicit copy/download, without automatically including page values, hostnames or session context.
+- Retain five upgrade baselines per component/environment (50 overall), offer explicit dated baseline selection, and preview/copy a Markdown upgrade handoff.
+- Add complete Search Framework and portal/branding specialists across all host exports. Prompt pack 4.1.0 has 24 prompts and 36 unexecuted evaluation cases; existing source-review dates remain truthful.
+
 ### Next build — 1.0.28
 
 - Adopt the UnionOps-inspired black/orange palette across Options, popup, side panel, injected bar/dialogs and future promo generation. Use shared accessible UI tokens and a versioned recolour of the existing PS icon; preserve prior artwork and genuine Store captures.

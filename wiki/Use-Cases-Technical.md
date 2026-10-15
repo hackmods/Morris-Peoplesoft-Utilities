@@ -1,8 +1,8 @@
 # Use cases — Technical
 
-- **Agent references:** Options → Agents searches 22 PeopleSoft prompt descriptions and links to public setup/source pages and three private pillar templates. Popup/Side Panel open the local library; Help links to the toolkit. Use prompts in your approved Copilot/Claude/Codex tool; MPU does not run agents or send page data to AI services.
+- **Agent references:** Options → Agents searches 24 PeopleSoft prompt descriptions and links to public setup/source pages and three private pillar templates, including Search Framework and portal/branding specialists. Popup/Side Panel open the local library; Help links to the toolkit. Use prompts in your approved Copilot/Claude/Codex tool; MPU does not run agents or send page data to AI services.
 
-- **Trace:** Configure PeopleCode/SQL flags (or named presets: Off / Default / SQL / PeopleCode / Verbose) in Options → Tracing, then toggle Trace on the bar. The bar shows the active preset or flag count (e.g. `Trace ON · SQL`). Options includes a short guide on when to use SQL binds vs PeopleCode vs Verbose. Requires security access to delivered trace components. Cross-tab sync updates other tabs. 🔒 means UTILITIES access is missing.
+- **Trace:** Configure PeopleCode/SQL flags in Options → Tracing, then choose an explicit On or Off request from the bar. The bar distinguishes requested, last-confirmed save requests and unknown state, with the configured preset/flag count. This is request history, not live server/session status. Stale/incomplete requests and observed login/logout lose confidence; verify tracing in PeopleSoft. Requires access to delivered trace components. Partial failures never claim that trace stopped.
 - **Field Inspector:** Orange icons beside fields on Classic and Fluid (`ps_box-*`), including Fluid menus/nav collections that host Classic pages in nested iframes; each field is wrapped tightly (not a shared container); viewport-scoped on large grids; Rec/Fld/Row (+ Label / Work / **Ctx** chips for Prompt, Display, Deferred / HTML type chips); high-contrast borders under forced-colors; click locks and copies PeopleCode formats (`RECORD.FIELD` / `&Record.FIELD` / `GetField` / `GetRowset…GetField`); Escape exits; Alt+Shift+C copies again.
 - **Field Entry:** Opt-in **Entry** menu writes visible editable values only (eligibility preview first). Capture → Paste, From sheet (**multi-row grids**, with missing rows added manually in PeopleSoft), Find/Replace, named profiles. Discovers fields in Classic TargetContent, Fluid shells, and same-origin **modal/popup** frames (`ptModFrame`, dialog hosts). Soft-calls Classic `addchg_` when present; never auto-saves; skips passwords.
 - **Page Info / Page Tabs / Tips:** ToolsRel, DB, portal/node/site, UI mode, **CREF path**, **theme**, page-token present (boolean only); ToolsRel context tips; Markdown copy; **object pack** (plain + Markdown) with **Compare object pack**; Compare clipboard; **Copy process pack** on Process Monitor pages; IB breadcrumb line when on Integration Broker pages; Page Tabs from delivered multi-page links; **Customization upgrade watch** — capture UI fingerprint before upgrade and **Check upgrade drift** after (tabs, structure hosts, field ids — not PeopleCode).
@@ -18,9 +18,13 @@
 ## Customization upgrade watch (UG-01)
 
 1. Before a PeopleTools upgrade, open the customized component and **Page Info**.
-2. Optionally enter notes, then **Watch customization** — saves a local UI fingerprint (tabs, Fluid/classic structure hosts, visible field ids, ToolsRel).
-3. After upgrade (or on another env), open the same component and **Check upgrade drift** — results appear in the dialog diff area; severity is announced (clean / tools-only / drifted).
+2. Optionally enter notes, then **Capture baseline** — saves a dated local UI fingerprint, retaining up to five per component/environment and 50 overall.
+3. After upgrade (or on another env), select the baseline/environment/date explicitly and **Check upgrade drift**. Review the Markdown handoff before choosing **Copy upgrade handoff**; its manual evidence/test/rollback sections remain unfilled.
 4. Manage baselines in **Options → Upgrade** — list, delete, export/import JSON. PeopleCode-only overrides still need App Designer Compare Report or Change Assistant.
+
+**Support diagnostics:** Page Info → Preview diagnostics creates an editable configuration summary without automatically including hostnames, field values, user IDs or session tokens. Review before explicit copy/download. It makes no network request and is not saved.
+
+**Concurrent edits:** Independent settings edits from current extension tabs merge. Conflicting collection/form edits report a conflict and preserve the other tab's saved data; reload the view and reapply the intended change.
 
 ## AI agent prompts (side toolkit)
 

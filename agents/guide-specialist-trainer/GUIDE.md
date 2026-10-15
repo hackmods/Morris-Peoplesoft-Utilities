@@ -1,7 +1,7 @@
 ---
 name: guide-specialist-trainer
 description: "Create and maintain private HCM, FSCM or Campus Solutions specialists from verified local definitions, policies, incidents and acceptance cases."
-version: "4.0.1"
+version: "4.1.0"
 kind: guide
 sources_verified: "2026-10-14"
 host_validation: not-run
@@ -71,4 +71,4 @@ Use `guide-onboarding`, `review-data-correctness`, `review-peoplecode-quality`, 
 - [PeopleTools 8.62 Test Framework](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tptf-b042025.pdf)
 - [PeopleTools 8.62 Lifecycle Management](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tlcm-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Host/real-system validation not run. Revalidate private facts after application/configuration changes.
+Content v4.1.0, reviewed 2026-10-14. Host/real-system validation not run. Revalidate private facts after application/configuration changes.

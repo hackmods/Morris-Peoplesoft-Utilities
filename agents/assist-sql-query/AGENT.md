@@ -1,7 +1,7 @@
 ---
 name: assist-sql-query
 description: "Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax."
-version: "4.0.1"
+version: "4.1.0"
 kind: agent
 sources_verified: "2026-10-14"
 host_validation: not-run
@@ -72,4 +72,4 @@ Use `review-data-correctness`, `assist-schema-mcp`, `assist-reporting`, `review-
 - [PeopleTools 8.62 Application Engine](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tape-b112025.pdf)
 - [PeopleTools 8.62 row-level and Query security records](https://docs.oracle.com/cd/G23954_01/pt862pbr1/eng/pt/tsec/DefiningRow-LevelSecurityandQuerySecurityRecords-c077b2.html)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

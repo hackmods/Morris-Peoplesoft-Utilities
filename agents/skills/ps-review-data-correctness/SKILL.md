@@ -3,7 +3,7 @@ name: ps-review-data-correctness
 description: "Review existing PeopleSoft SQL, Query, PeopleCode SQL, AE or SQR for result grain, effective dating, keys, joins and data sources."
 ---
 
-<!-- Generated from review-data-correctness/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from review-data-correctness/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft data correctness reviewer
 
@@ -81,4 +81,4 @@ Use `assist-sql-query`, `assist-schema-mcp`, `review-peoplecode-quality`, `revie
 - [PeopleTools 8.62 PeopleCode Developer's Guide](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpcd-b112025.pdf)
 - [PeopleTools 8.62 row-level and Query security records](https://docs.oracle.com/cd/G23954_01/pt862pbr1/eng/pt/tsec/DefiningRow-LevelSecurityandQuerySecurityRecords-c077b2.html)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

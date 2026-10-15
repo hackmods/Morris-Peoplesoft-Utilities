@@ -79,6 +79,14 @@ describe("trace masks", () => {
 });
 
 describe("applyTraceComponent", () => {
+  it("cancels before POST when access is disabled after the GET", async () => {
+    const fetchImpl = vi.fn(async () => ({ ok: true, status: 200, text: async () => traceHtml(PC_IDS) })) as unknown as typeof fetch;
+    const guard = vi.fn().mockResolvedValueOnce(true).mockResolvedValue(false);
+    const result = await applyTraceComponent(parsed.baseURL, "ps", "EMPLOYEE", "HRMS", "UTILITIES.PEOPLECODE_TRACE.GBL",
+      [{ elId: PC_IDS[0], selected: true }], fetchImpl, guard);
+    expect(result).toBe("fail");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
   it("rejects cross-origin form actions before posting session state", async () => {
     const fetchImpl = vi.fn(async () => ({ ok: true, status: 200,
       text: async () => traceHtml(PC_IDS).replace('action="/psc/', 'action="https://other.example/psc/'),
@@ -150,10 +158,19 @@ describe("applyTraceComponent", () => {
 });
 
 describe("toggleTrace", () => {
+  it("does not contact PeopleSoft when tracing is disabled", async () => {
+    const settings = createDefaultSettings();
+    settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "Yes" }];
+    resetChromeStorage({ mpuSettings: settings });
+    const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
+    expect((await toggleTrace(settings, parsed, 0, false)).running).toBe(true);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
   it("preserves the running indicator and warns when Stop fails", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 500 })));
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "Yes" }];
+    settings.features.traceOption = "Yes";
     resetChromeStorage({ mpuSettings: settings });
     const result = await toggleTrace(settings, parsed, 0, false);
     expect(result.running).toBe(true);
@@ -178,6 +195,8 @@ describe("toggleTrace", () => {
 
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No" }];
+    settings.features.traceOption = "Yes";
+    resetChromeStorage({ mpuSettings: settings });
 
     const result = await toggleTrace(settings, parsed, 0, true);
     expect(result.running).toBe(true);
@@ -195,6 +214,8 @@ describe("toggleTrace", () => {
     );
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No" }];
+    settings.features.traceOption = "Yes";
+    resetChromeStorage({ mpuSettings: settings });
     const result = await toggleTrace(settings, parsed, 0, true);
     expect(result.locked).toBe(true);
     expect(result.running).toBe(false);

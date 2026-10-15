@@ -1,0 +1,66 @@
+import { isSettingsBackup, normalizeStoredSettings } from "./backup";
+import type { MpuSettings } from "./schema";
+
+export const SETTINGS_CONFLICT = "Settings changed in another tab. Reload this view and reapply your edit.";
+export type SettingsWrite = { type: "mpu-write-settings"; next: MpuSettings; base?: MpuSettings; initialize?: boolean };
+export type SettingsReply = { ok: true; settings: MpuSettings } | { ok: false; error: string; conflict?: boolean };
+
+const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+const object = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
+
+/** Three-way merge independent object properties. Collections are atomic: a
+ * concurrent reorder/delete must never redirect an edit to another row. */
+export function mergeSettingsEdit(base: unknown, next: unknown, current: unknown): unknown {
+  if (equal(base, next) || equal(next, current)) return current;
+  if (equal(base, current)) return next;
+  if (object(base) && object(next) && object(current)) {
+    const merged: Record<string, unknown> = {};
+    // Environment positions and URL mappings form one index namespace. A
+    // concurrent mapping addition must not survive a deletion with stale IDs.
+    let environmentGroup: Record<string, unknown> | undefined;
+    if (Array.isArray(base.environments) && Array.isArray(next.environments) && Array.isArray(current.environments) &&
+        (!equal(base.environments, next.environments) || !equal(base.environments, current.environments))) {
+      const before = { environments: base.environments, urlSites: base.urlSites };
+      const edited = { environments: next.environments, urlSites: next.urlSites };
+      const latest = { environments: current.environments, urlSites: current.urlSites };
+      if (equal(before, edited) || equal(edited, latest)) environmentGroup = latest;
+      else if (equal(before, latest)) environmentGroup = edited;
+      else throw new Error(SETTINGS_CONFLICT);
+    }
+    for (const key of new Set([...Object.keys(base), ...Object.keys(next), ...Object.keys(current)])) {
+      if (["__proto__", "constructor", "prototype"].includes(key)) throw new Error("Invalid settings property");
+      const value = environmentGroup && (key === "environments" || key === "urlSites") ? environmentGroup[key] : mergeSettingsEdit(base[key], next[key], current[key]);
+      if (value !== undefined) merged[key] = value;
+    }
+    return merged;
+  }
+  throw new Error(SETTINGS_CONFLICT);
+}
+
+let pending: Promise<unknown> = Promise.resolve();
+
+/** Only the service worker calls this in production. Each message is a single
+ * awaited read/merge/write; failures do not poison subsequent requests. */
+export function coordinateSettingsWrite(message: SettingsWrite): Promise<SettingsReply> {
+  const task = pending.then(async (): Promise<SettingsReply> => {
+    try {
+      if (!isSettingsBackup(message.next) || (message.base !== undefined && !isSettingsBackup(message.base))) {
+        return { ok: false, error: "Invalid settings edit" };
+      }
+      const raw = await chrome.storage.local.get(null);
+      const exists = Object.hasOwn(raw, "mpuSettings");
+      const current = normalizeStoredSettings(exists ? raw.mpuSettings : message.next);
+      if (message.initialize && exists) return { ok: true, settings: current };
+      const merged = message.initialize ? message.next : mergeSettingsEdit(message.base, message.next, exists ? current : message.base);
+      if (!isSettingsBackup(merged)) return { ok: false, error: "Invalid merged settings" };
+      const settings = normalizeStoredSettings(merged);
+      if (!exists || !equal(current, settings)) await chrome.storage.local.set({ mpuSettings: settings });
+      return { ok: true, settings };
+    } catch (error) {
+      const conflict = error instanceof Error && error.message === SETTINGS_CONFLICT;
+      return { ok: false, error: conflict ? SETTINGS_CONFLICT : "Settings could not be saved. Please retry.", conflict };
+    }
+  });
+  pending = task.catch(() => undefined);
+  return task;
+}

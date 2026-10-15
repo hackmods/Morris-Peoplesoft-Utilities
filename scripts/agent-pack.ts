@@ -104,7 +104,12 @@ export function buildExports(root: string, catalog: PackCatalog): Map<string, st
   for (const entry of catalog.entries) {
     const { metadata, body } = parsePrompt(readFileSync(safePackPath(root, entry.source), "utf8"));
     requireCondition(metadata.name === entry.id && metadata.description === entry.description && metadata.version === catalog.version, `Canonical metadata drift: ${entry.id}`);
-    requireCondition(metadata.kind === entry.kind && metadata.sources_verified === catalog.reviewedDate && metadata.host_validation === catalog.hostValidation, `Canonical status drift: ${entry.id}`);
+    // Retain the actual per-prompt source review date when adding new agents;
+    // a pack revision must not silently claim an older prompt was reverified.
+    const reviewDate = metadata.sources_verified;
+    const validDate = /^\d{4}-\d{2}-\d{2}$/.test(reviewDate) && Number.isFinite(Date.parse(reviewDate)) &&
+      new Date(reviewDate).toISOString().slice(0, 10) === reviewDate && reviewDate <= catalog.reviewedDate;
+    requireCondition(metadata.kind === entry.kind && validDate && metadata.host_validation === catalog.hostValidation, `Canonical status drift: ${entry.id}`);
     const resources = entry.resources.map((path) => readFileSync(safePackPath(root, path), "utf8").replace(/\r\n/g, "\n").trimEnd());
     const complete = [body.trimEnd(), ...resources].join("\n\n") + "\n";
     const note = `<!-- Generated from ${entry.source}; pack ${catalog.version}. Edit canonical sources and run npm run generate:agents. -->\n\n`;

@@ -26,6 +26,8 @@ Or in one step: `npm run test:e2e` (builds first).
 - Page Info dialog
 - Shortcuts flyout
 - Options + popup pages
+- Two Options tabs: independent feature edits merge; conflicting environment drafts report a conflict without overwriting or redirecting an edit
+- Trace request-evidence dialog and disable cleanup; diagnostics preview/explicit download and selectable upgrade baseline history, including rendered axe checks
 - Agent library filtering/deep links, blank task briefs and explicit copy with keyboard fallback, no rendering/search requests or storage changes, Help focus return, light/dark rendered contrast and 320 px reflow
 - **Field Entry** (`field-entry.spec.ts`): Fluid + modal capture/paste/apply; From sheet; Find/Replace; Classic multi-row grid after the user clicks Add Row; Preview never adds rows
 - Rendered axe checks with contrast enabled: extension pages, bar/flyouts, primary dialogs, Field Entry previews/profile dialogs (all reported WCAG 2A/2AA/2.1AA violations fail)

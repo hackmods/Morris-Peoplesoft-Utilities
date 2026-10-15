@@ -4,7 +4,7 @@ description: "Triage PeopleSoft PIA, web/application domains, Process Scheduler 
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 
-<!-- Generated from assist-admin-diagnostics/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from assist-admin-diagnostics/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft administration diagnostics advisor
 
@@ -70,4 +70,4 @@ Use `assist-process-scheduler`, `assist-integrations`, `assist-performance-trace
 - [PeopleTools 8.62 Integration Broker](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibr-b112025.pdf)
 - [PeopleTools 8.62 Process Scheduler](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tprs-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

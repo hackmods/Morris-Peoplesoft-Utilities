@@ -7,9 +7,10 @@
  */
 import type { MpuSettings, TraceSettings, YesNo } from "../storage/schema";
 import type { ParsedPsUrl } from "../adapters/ps-page";
-import { updateSettings } from "../storage/settings";
+import { originAllowed, updateSettings } from "../storage/settings";
 import { announce } from "./bar";
 import { isYes } from "../storage/schema";
+import { currentPageAccess } from "./access";
 
 type TraceOpt = { key: keyof TraceSettings; elId: string };
 
@@ -106,7 +107,9 @@ export async function applyTraceComponent(
   menuComp: string,
   opts: Array<{ elId: string; selected: boolean }>,
   fetchImpl: typeof fetch = fetch,
+  canContinue: () => Promise<boolean> = async () => true,
 ): Promise<TraceApplyResult> {
+  if (!await canContinue()) return "fail";
   const openUrl = `${baseURL}/psc/${siteNormalized}_newwin/${portal}/${node}/c/${menuComp}`;
   let getRes: Response;
   try {
@@ -163,6 +166,7 @@ export async function applyTraceComponent(
   }
 
   let postRes: Response;
+  if (!await canContinue()) return "fail";
   try {
     postRes = await fetchImpl(formAction, {
       method: "POST",
@@ -197,6 +201,24 @@ export async function toggleTrace(
     return { running: false, locked: false };
   }
 
+  const canContinue = async () => {
+    const current = await currentPageAccess(parsed, "traceOption");
+    if (!current || !originAllowed(parsed.baseURL, current)) return false;
+    const mapping = current.urlSites[parsed.baseURL]?.[parsed.siteNormalized];
+    return (!mapping || mapping.envId === envIndex) && (envIndex < 0 || isYes(current.environments[envIndex]?.active));
+  };
+  if (!await canContinue()) {
+    announce(document, "Trace request cancelled — this page or feature is disabled.");
+    return { running: isYes(settings.environments[envIndex]?.trcProfRunning), locked: false };
+  }
+  const request = { origin: new URL(parsed.baseURL).origin, site: parsed.siteNormalized,
+    at: Date.now(), target: turnOn ? "on" as const : "off" as const, status: "requested" as const };
+  if (envIndex >= 0) await updateSettings((s) => {
+    if (!s.environments[envIndex]) return s;
+    s.environments[envIndex].traceRequest = request;
+    return s;
+  });
+
   const pcOpts = selectedOpts(settings.traceSettings, PC_OPTS, turnOn);
   const sqlOpts = selectedOpts(settings.traceSettings, SQL_OPTS, turnOn);
 
@@ -207,6 +229,8 @@ export async function toggleTrace(
     parsed.node,
     "UTILITIES.PEOPLECODE_TRACE.GBL",
     pcOpts,
+    fetch,
+    canContinue,
   );
   const sql = await applyTraceComponent(
     parsed.baseURL,
@@ -215,6 +239,8 @@ export async function toggleTrace(
     parsed.node,
     "UTILITIES.TRACE_SQL.GBL",
     sqlOpts,
+    fetch,
+    canContinue,
   );
 
   const locked = pc === "locked" || sql === "locked";
@@ -226,10 +252,12 @@ export async function toggleTrace(
 
   if (envIndex >= 0 && envIndex < settings.environments.length) {
     await updateSettings((s) => {
+      if (!s.environments[envIndex] || (s.urlSites[parsed.baseURL]?.[parsed.siteNormalized]?.envId ?? envIndex) !== envIndex) return s;
       const environments = [...s.environments];
       environments[envIndex] = {
         ...environments[envIndex],
         trcProfRunning: running ? "Yes" : "No",
+        traceRequest: { ...request, at: Date.now(), status: succeeded ? "confirmed" : "incomplete" },
       };
       return { ...s, environments };
     });
@@ -245,7 +273,7 @@ export async function toggleTrace(
     document,
     !succeeded
       ? "Trace request incomplete — tracing may still be active. Verify PeopleCode and SQL trace settings in PeopleSoft."
-      : running ? "Trace started" : "Trace stopped",
+      : `Trace ${running ? "ON" : "OFF"} save requests acknowledged. Verify the current state in PeopleSoft.`,
   );
 
   return { running, locked };

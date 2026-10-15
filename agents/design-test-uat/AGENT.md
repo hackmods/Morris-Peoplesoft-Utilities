@@ -1,7 +1,7 @@
 ---
 name: design-test-uat
 description: "Create traceable PeopleSoft unit, integration, security, UAT and upgrade regression plans, including PTF where suitable."
-version: "4.0.1"
+version: "4.1.0"
 kind: agent
 sources_verified: "2026-10-14"
 host_validation: not-run
@@ -72,4 +72,4 @@ Use `review-fluid-accessibility`, `review-upgrade-migration`, `review-security`,
 - [PeopleTools 8.62 Fluid User Interface Developer's Guide](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tflu-b112025.pdf)
 - [PeopleTools 8.62 Test Framework](https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tptf-b042025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

@@ -118,7 +118,7 @@ Full prompts, skills and templates are distributed separately from the extension
 - **Browse:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · guide [`agents/README.md`](agents/README.md) · wiki [AI agent prompts](wiki/AI-Agent-Prompts.md)
 - **Download:** each GitHub Release attaches `morris-peoplesoft-agents-v*.zip` (or run `npm run package:agents`)
 
-Content v4.0.1 targets PeopleTools 8.62 (confirm application release and PUM image separately): 22 workflows for BA requirements, PeopleCode/SQL, IB/CI, AE/Scheduler, reporting, testing, upgrades, approvals, performance/trace, Fluid/accessibility, conversion, onboarding and specialist training. Complete Copilot, Claude/Codex skill and Cursor exports, three private pillar templates and a private host-evaluation worksheet are included. Options can prepare a blank task brief; it reads no page context.
+Content v4.1.0 targets PeopleTools 8.62 (confirm application release and PUM image separately): 24 workflows for BA requirements, PeopleCode/SQL, IB/CI, AE/Scheduler, reporting, testing, upgrades, approvals, performance/trace, Fluid/accessibility, Search Framework, portal/branding, conversion, onboarding and specialist training. Complete Copilot, Claude/Codex skill and Cursor exports, three private pillar templates and a private host-evaluation worksheet are included. Options can prepare a blank task brief; it reads no page context.
 
 ## Releases
 

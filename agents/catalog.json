@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "4.0.1",
+  "version": "4.1.0",
   "target": "PeopleTools 8.62 (application release/PUM confirmed separately)",
-  "reviewedDate": "2026-10-14",
+  "reviewedDate": "2026-10-15",
   "hostValidation": "not-run",
   "entries": [
     {
@@ -156,6 +156,28 @@
       "legacyCursor": null
     },
     {
+      "id": "assist-portal-branding",
+      "title": "PeopleSoft portal and branding specialist",
+      "description": "Design and troubleshoot PeopleSoft portal registry navigation, CREFs, homepages, tiles and branding themes with verified configuration and rendered evidence.",
+      "audience": "Portal administrator, Fluid developer, UX designer, BA",
+      "sources": [
+        "portal",
+        "fluid"
+      ],
+      "handoffs": [
+        "assist-fluid",
+        "review-fluid-accessibility",
+        "review-security",
+        "assist-search-framework",
+        "review-upgrade-migration",
+        "assist-admin-diagnostics"
+      ],
+      "kind": "agent",
+      "source": "assist-portal-branding/AGENT.md",
+      "resources": [],
+      "legacyCursor": null
+    },
+    {
       "id": "assist-process-scheduler",
       "title": "Process Scheduler operations analyst",
       "description": "Triage PeopleSoft process execution, run controls, scheduling dependencies and report distribution from sanitized monitor evidence.",
@@ -218,6 +240,29 @@
       "resources": [
         "assist-schema-mcp/TOOL-CONTRACT.md"
       ],
+      "legacyCursor": null
+    },
+    {
+      "id": "assist-search-framework",
+      "title": "PeopleSoft Search Framework specialist",
+      "description": "Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence.",
+      "audience": "Search administrator, PeopleSoft developer, BA, security analyst",
+      "sources": [
+        "search",
+        "catalog"
+      ],
+      "handoffs": [
+        "assist-sql-query",
+        "review-data-correctness",
+        "review-security",
+        "assist-process-scheduler",
+        "assist-integrations",
+        "assist-performance-trace",
+        "assist-portal-branding"
+      ],
+      "kind": "agent",
+      "source": "assist-search-framework/AGENT.md",
+      "resources": [],
       "legacyCursor": null
     },
     {
@@ -608,6 +653,16 @@
       "id": "approvals",
       "title": "FSCM 9.2.056 Approval Framework configuration example (confirm target application/PUM)",
       "url": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.056/application-fundamentals/configuring-approval-framework-business-requests.html"
+    },
+    {
+      "id": "search",
+      "title": "PeopleTools 8.62 Search Technology",
+      "url": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpst-b112025.pdf"
+    },
+    {
+      "id": "portal",
+      "title": "PeopleTools 8.62 Portal Technology",
+      "url": "https://docs.oracle.com/cd/G23955_01/psft/pdf/pt862tprt-b042025.pdf"
     }
   ]
 }

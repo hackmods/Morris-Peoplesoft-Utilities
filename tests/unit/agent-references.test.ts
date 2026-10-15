@@ -42,7 +42,7 @@ describe("public agent references", () => {
     const doc = document;
     doc.body.innerHTML = '<input id="agent-search"><select id="agent-family"><option value="all">All</option><option value="review">Review</option></select><ul id="agent-list"></ul><p id="agent-results"></p><ul id="agent-templates"></ul><p id="agent-pack-version"></p><section id="agent-brief-panel" hidden><textarea id="agent-brief"></textarea><button id="agent-brief-copy">Copy</button><p id="agent-brief-status"></p></section>';
     bindAgentLibrary(doc);
-    expect(doc.querySelectorAll("#agent-list > li")).toHaveLength(22);
+    expect(doc.querySelectorAll("#agent-list > li")).toHaveLength(24);
     expect(doc.querySelectorAll("#agent-templates a")).toHaveLength(3);
     const search = doc.getElementById("agent-search") as HTMLInputElement;
     search.focus(); search.value = "fluid accessibility"; search.dispatchEvent(new Event("input"));

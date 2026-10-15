@@ -99,6 +99,16 @@ describe("review regressions: imports and modal keyboard", () => {
     expect(parseSheetPaste('JOB.DESCR\n"unfinished').error).toBeTruthy();
     expect(parseSheetPaste("JOB.DEPTID,JOB.DESCR\n,\n200,Second").rows[2].occurrence).toBe("1");
   });
+  it("returns focus to the corresponding toolbar button after a settings-driven rebuild", () => {
+    document.body.innerHTML = '<div id="mpu-bar"><button id="mpu-pageinfo">Page Info</button></div><div id="mpu-dialog"><div role="dialog"><button>Close</button></div></div>';
+    const opener = document.getElementById("mpu-pageinfo") as HTMLButtonElement;
+    opener.focus();
+    const close = bindModalDialog(document, document.getElementById("mpu-dialog")!, document.querySelector('[role="dialog"]') as HTMLElement);
+    document.getElementById("mpu-bar")!.innerHTML = '<button id="mpu-pageinfo">Page Info</button>';
+    close();
+    expect(document.activeElement).toBe(document.getElementById("mpu-pageinfo"));
+  });
+
   it("traps focus and closes on Escape after typing, restoring the opener", () => {
     document.body.innerHTML = '<button id="opener">Open</button><div id="mpu-dialog"><div role="dialog"><input><button>Close</button></div></div>';
     const opener = document.getElementById("opener")!; opener.focus();

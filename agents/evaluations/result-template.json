@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "promptPackVersion": "4.0.1",
+  "promptPackVersion": "4.1.0",
   "host": {
     "product": null,
     "version": null,
@@ -292,6 +292,42 @@
     {
       "caseId": "security-compensating",
       "agent": "review-security",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "search-valid-security-denial",
+      "agent": "assist-search-framework",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "search-stale-incremental",
+      "agent": "assist-search-framework",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "portal-valid-theme-override",
+      "agent": "assist-portal-branding",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "portal-missing-tile",
+      "agent": "assist-portal-branding",
       "status": "not-run",
       "responseEvidence": null,
       "observedActions": [],

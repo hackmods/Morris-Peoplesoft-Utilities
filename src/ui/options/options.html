@@ -177,7 +177,8 @@
             Replace existing watches on import
           </label>
         </div>
-        <p id="watch-empty" class="empty-state" hidden>No watches yet — open Page Info on a component and choose Watch customization.</p>
+        <p class="help">Retains up to five baselines per component/environment and 50 total. Page Info lets you select a dated baseline, compare UI drift and copy a reviewed upgrade handoff.</p>
+        <p id="watch-empty" class="empty-state" hidden>No baselines yet — open Page Info on a component and choose Capture baseline.</p>
         <div class="table-wrap">
           <table id="watch-table">
             <thead>
@@ -198,7 +199,7 @@
       <section id="panel-tracing" class="panel hidden" data-panel="tracing" role="tabpanel" aria-labelledby="tab-tracing" hidden>
         <header class="panel-head">
           <h2>Tracing profiles</h2>
-          <p class="panel-lede">Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+          <p class="panel-lede">Flags applied by an explicit On request from the bar. Requires access to delivered trace components. The bar shows request history, not live server trace status; verify in PeopleSoft.</p>
         </header>
         <p class="help">
           <strong>When to use which flags:</strong>

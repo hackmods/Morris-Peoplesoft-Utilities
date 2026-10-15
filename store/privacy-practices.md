@@ -8,6 +8,8 @@ Increase productivity on PeopleSoft Classic and Fluid pages for business analyst
 
 The Agents reference library supports that purpose with local search of reusable PeopleSoft prompt descriptions and user-selected public GitHub documentation/release links. It provides no general chatbot, AI service connection or automatic data transfer.
 
+Previewed diagnostics contains an allowlisted configuration summary and is copied/downloaded only by the user. Upgrade histories and trace request evidence stay in local storage. No diagnostic or handoff report is automatically uploaded or shared with the developer.
+
 ## Does this extension collect or use user data?
 
 **Local data use; no developer-side collection.** MPU reads PeopleSoft website content for its visible features and stores preferences, favorites, recent component identifiers, customization fingerprints/notes, and optional Field Entry profiles locally. Do not interpret “no telemetry” as “no access to user data.”

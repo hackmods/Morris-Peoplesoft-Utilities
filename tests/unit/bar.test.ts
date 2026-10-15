@@ -389,7 +389,7 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
     });
     const trace = document.getElementById("mpu-trace") as HTMLButtonElement;
-    expect(trace.disabled).toBe(true);
+    expect(trace.disabled).toBe(false);
     expect(trace.textContent).toContain("🔒");
   });
 
@@ -412,7 +412,7 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
     });
     const trace = document.getElementById("mpu-trace");
-    expect(trace?.textContent).toContain("Trace ON");
+    expect(trace?.textContent).toContain("Trace · unknown");
     expect(trace?.textContent).toContain("SQL");
   });
 

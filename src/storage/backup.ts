@@ -1,10 +1,11 @@
-import { createDefaultSettings, type MpuSettings } from "./schema";
+import { createDefaultSettings, normalizeWatchHistory, type MpuSettings } from "./schema";
 
 type Check = (v: unknown) => boolean;
 const object = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === "object" && !Array.isArray(v);
 const str: Check = (v) => typeof v === "string";
 const num: Check = (v) => typeof v === "number" && Number.isFinite(v) && v >= 0;
+const timestamp: Check = (v) => num(v) && Number.isFinite(new Date(v as number).getTime());
 const yn: Check = (v) => v === "Yes" || v === "No";
 const oneOf = (...values: string[]): Check => (v) => typeof v === "string" && values.includes(v);
 const array = (check: Check): Check => (v) => Array.isArray(v) && v.every(check);
@@ -25,8 +26,17 @@ const fingerprint = shape({
 });
 const watch = shape({
   ...strings(["id", "label", "notes", "menu", "component", "market", "envLabel"]),
-  capturedAt: num, baseline: fingerprint,
-});
+  capturedAt: timestamp, baseline: fingerprint, scope: (v) => {
+    try { const url = new URL(v as string); return typeof v === "string" && /^https?:$/.test(url.protocol) && !url.username && !url.password && !url.search && !url.hash; }
+    catch { return false; }
+  },
+}, ["id", "label", "notes", "menu", "component", "market", "envLabel", "capturedAt", "baseline"]);
+const origin: Check = (v) => {
+  try { return typeof v === "string" && /^https?:\/\//.test(v) && new URL(v).origin === v; }
+  catch { return false; }
+};
+const traceRequest = shape({ origin,
+  site: str, at: timestamp, target: oneOf("on", "off"), status: oneOf("requested", "confirmed", "incomplete", "unknown") });
 const defaults = createDefaultSettings();
 const checks: Record<keyof MpuSettings, Check> = {
   features: shape(Object.fromEntries(Object.keys(defaults.features).map((k) => [k, yn])), []),
@@ -35,7 +45,7 @@ const checks: Record<keyof MpuSettings, Check> = {
   favorites: array(favorite),
   recentComponents: array(shape({ ...strings(["Menu", "Component", "Market", "Portal", "Node", "Site"]), Servlet: oneOf("psp", "psc"), visitedAt: num })),
   customizationWatches: array(watch),
-  environments: array(shape({ label: str, active: yn, trcProfRunning: yn, color: str }, ["label", "active", "trcProfRunning"])),
+  environments: array(shape({ label: str, active: yn, trcProfRunning: yn, color: str, traceRequest }, ["label", "active", "trcProfRunning"])),
   urlSites: (v) => object(v) && Object.entries(v).every(([origin, sites]) =>
     /^https?:\/\//.test(origin) && object(sites) && Object.entries(sites).every(([site, mapping]) =>
       !["__proto__", "constructor", "prototype"].includes(site) &&
@@ -102,6 +112,7 @@ export function normalizeStoredSettings(value: unknown): MpuSettings {
       }
     } else if (Array.isArray(result[key]) && Array.isArray(stored)) {
       Object.assign(result, { [key]: stored.filter((entry) => checks[key]([entry])) });
+      if (key === "customizationWatches") result.customizationWatches = normalizeWatchHistory(result.customizationWatches);
     } else if (checks[key](stored)) {
       Object.assign(result, { [key]: stored });
     }

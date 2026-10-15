@@ -2,7 +2,7 @@
 description: "Teach PeopleSoft concepts and safe first tasks for BAs, developers and administrators with pillar-specific learning routes."
 ---
 
-<!-- Generated from guide-onboarding/AGENT.md; pack 4.0.1. Edit canonical sources and run npm run generate:agents. -->
+<!-- Generated from guide-onboarding/AGENT.md; pack 4.1.0. Edit canonical sources and run npm run generate:agents. -->
 
 # PeopleSoft onboarding mentor
 
@@ -68,4 +68,4 @@ Use `design-functional-requirements`, `assist-sql-query`, `design-test-uat`, `as
 - [PeopleTools 8.62 PeopleCode Developer's Guide](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpcd-b112025.pdf)
 - [PeopleTools 8.62 Fluid User Interface Developer's Guide](https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tflu-b112025.pdf)
 
-Content v4.0.1, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.
+Content v4.1.0, reviewed 2026-10-14. Source review is not target compilation, host execution or real-system validation. Reverify behavior for another patch/release.

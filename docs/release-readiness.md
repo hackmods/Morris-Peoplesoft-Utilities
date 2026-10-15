@@ -2,9 +2,9 @@
 
 Status for shipping Morris PeopleSoft Utilities as an official Chrome extension.
 
-**As of:** 2026-10-14
+**As of:** 2026-10-15
 **Repo:** https://github.com/hackmods/Morris-Peoplesoft-Utilities
-**Next local package:** 1.0.28 (black/orange identity, Agents library and task briefs); build locally with `npm run prep:store`. This does not assert a published tag or Store version.
+**Next local package:** 1.0.29 (coordinated settings, trace request evidence, previewed diagnostics, upgrade history and agent pack 4.1.0); build locally with `npm run prep:store`. This does not assert a published tag or Store version.
 
 Code, CI, audits, privacy docs, Store asset pack, and GitHub product surface are in place. See the [repository review](findings/repo-review-2026-10-11.md) for fixes and unresolved release checks. Real PeopleTools 8.62 sign-off remains required.
 
