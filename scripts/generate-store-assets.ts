@@ -25,23 +25,25 @@ const outDir = resolve(root, "store/assets");
 const shotDir = resolve(outDir, "screenshots");
 const mockDir = resolve(outDir, "_mock");
 
+const iconData = `data:image/png;base64,${readFileSync(resolve(outDir, "mpu-peoplesoft-icon-v5.png")).toString("base64")}`;
+
 const COLORS = {
   black: "#1a1a1a",
   blackDeep: "#111111",
   blackDark: "#111111",
-  orange: "#ee4e12",
-  orangeLight: "#ff9a66",
-  cream: "#f4f7fa",
-  pageBg: "#eef2f5",
+  orange: "#FF5C00",
+  orangeLight: "#FF5C00",
+  cream: "#ffffff",
+  pageBg: "#eeeeee",
   card: "#ffffff",
-  fg: "#14202b",
-  muted: "#5a6b78",
-  psBlue: "#005a9c",
-  psHeader: "#003b70",
-  border: "#c5d0d8",
-  tipBg: "#111827",
-  amber: "#d97706",
-  green: "#15803d",
+  fg: "#1a1a1a",
+  muted: "#525252",
+  psBlue: "#333333",
+  psHeader: "#111111",
+  border: "#cccccc",
+  tipBg: "#111111",
+  amber: "#FF5C00",
+  green: "#525252",
 };
 
 const SHARED_CSS = `
@@ -63,10 +65,10 @@ const SHARED_CSS = `
     letter-spacing: 0.04em; padding: 0.15rem 0.4rem;
     border: 1px solid ${COLORS.orange}; border-radius: 2px;
   }
-  .mpu-env { padding: 0.15rem 0.35rem; border-bottom: 3px solid #e05a3c; }
+  .mpu-env { padding: 0.15rem 0.35rem; border-bottom: 3px solid #FF5C00; }
   .mpu-user { opacity: 0.95; font-weight: 500; }
   .mpu-btn {
-    appearance: none; border: 1px solid #8aa0b0; background: #243f52;
+    appearance: none; border: 1px solid #808080; background: #292929;
     color: ${COLORS.cream}; border-radius: 3px; padding: 0.25rem 0.5rem;
     font: inherit; cursor: default;
   }
@@ -75,7 +77,7 @@ const SHARED_CSS = `
   }
   .mpu-select {
     max-width: 14rem; font: inherit; border-radius: 3px;
-    border: 1px solid #8aa0b0; background: ${COLORS.blackDark};
+    border: 1px solid #808080; background: ${COLORS.blackDark};
     color: ${COLORS.cream}; padding: 0.2rem 0.35rem;
   }
   .ps-chrome {
@@ -93,7 +95,7 @@ const SHARED_CSS = `
     min-width: 11rem;
   }
   .ps-nav {
-    background: #f0f4f8; border-bottom: 1px solid ${COLORS.border};
+    background: #eeeeee; border-bottom: 1px solid ${COLORS.border};
     padding: 0.35rem 0.85rem; font: 500 12px/1.4 "Segoe UI"; color: ${COLORS.muted};
   }
   .ps-nav strong { color: ${COLORS.psBlue}; }
@@ -112,12 +114,12 @@ const SHARED_CSS = `
   }
   .ps-grid label { color: ${COLORS.muted}; text-align: right; }
   .ps-input {
-    border: 1px solid #9aa8b4; border-radius: 2px; padding: 0.3rem 0.45rem;
+    border: 1px solid #aaaaaa; border-radius: 2px; padding: 0.3rem 0.45rem;
     font: inherit; background: #fff; width: 100%; max-width: 18rem;
   }
   .ps-actions { margin-top: 1rem; display: flex; gap: 0.45rem; }
   .ps-actions button {
-    border: 1px solid #8aa0b0; background: #f7f9fb; border-radius: 3px;
+    border: 1px solid #808080; background: #fafafa; border-radius: 3px;
     padding: 0.35rem 0.85rem; font: 600 12px "Segoe UI"; color: ${COLORS.fg};
   }
   .ps-actions .primary {
@@ -125,7 +127,7 @@ const SHARED_CSS = `
   }
   .caption {
     position: absolute; left: 1rem; bottom: 0.85rem;
-    background: rgba(20,32,43,0.88); color: #fff; padding: 0.35rem 0.65rem;
+    background: rgba(26,26,26,0.88); color: #fff; padding: 0.35rem 0.65rem;
     border-radius: 4px; font: 600 12px/1.3 "Segoe UI"; letter-spacing: 0.02em;
   }
   .mpu-dialog-backdrop {
@@ -133,7 +135,7 @@ const SHARED_CSS = `
     display: flex; align-items: center; justify-content: center; z-index: 200;
   }
   .mpu-dialog {
-    background: #f7f9fb; color: #15202b; max-width: 28rem; width: 90%;
+    background: #fafafa; color: #1a1a1a; max-width: 28rem; width: 90%;
     border-radius: 6px; padding: 1rem 1.25rem;
     box-shadow: 0 8px 28px rgba(0,0,0,0.35); border: 1px solid ${COLORS.border};
   }
@@ -151,12 +153,12 @@ const SHARED_CSS = `
     position: absolute; z-index: 250; background: ${COLORS.tipBg}; color: #f9fafb;
     padding: 0.25rem 0.5rem; border-radius: 3px;
     font: 600 12px/1.3 ui-monospace, Consolas, monospace;
-    border: 1px solid #fbbf24; pointer-events: none;
+    border: 1px solid #FF5C00; pointer-events: none;
   }
   .fav-open {
     position: absolute; top: 2.55rem; left: 11.5rem; z-index: 150;
     background: ${COLORS.blackDark}; color: ${COLORS.cream};
-    border: 1px solid #8aa0b0; border-radius: 3px; min-width: 14rem;
+    border: 1px solid #808080; border-radius: 3px; min-width: 14rem;
     box-shadow: 0 6px 18px rgba(0,0,0,0.28); padding: 0.2rem 0;
     font: 500 12px/1.4 "Segoe UI";
   }
@@ -164,7 +166,7 @@ const SHARED_CSS = `
   .fav-open .sel { background: ${COLORS.orange}; color: #1a1a1a; font-weight: 650; }
   .mpu-bar-row2 {
     display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem;
-    padding: 0.25rem 0.6rem; background: #1a3344; color: ${COLORS.cream};
+    padding: 0.25rem 0.6rem; background: #292929; color: ${COLORS.cream};
     font: 600 11px/1.3 ui-monospace, Consolas, monospace;
     border-bottom: 1px solid ${COLORS.orange};
   }
@@ -216,11 +218,11 @@ function mpuBar(opts: {
     : `<button class="mpu-btn">Inspect</button>`;
   const trace = opts.traceOn
     ? `<button class="mpu-btn" aria-pressed="true">Trace ON</button>`
-    : `<button class="mpu-btn">Trace OFF</button>`;
+    : `<button class="mpu-btn">Trace</button>`;
   return `
   <div class="mpu-bar" role="toolbar" aria-label="Morris PeopleSoft Utilities">
     <span class="mpu-brand">MPU</span>
-    <span class="mpu-env">HRDEV</span>
+    <span class="mpu-env">DEMO</span>
     <span class="mpu-user">User: JSMITH</span>
     <button class="mpu-btn">★</button>
     <select class="mpu-select" aria-label="Open favorite">
@@ -254,8 +256,8 @@ function mpuBarRoles(opts: {
   return `
   <div class="mpu-bar" role="toolbar" aria-label="Morris PeopleSoft Utilities">
     <span class="mpu-brand">MPU</span>
-    <span class="mpu-env" style="border-color:#6b9fd4">CLASSIC</span>
-    <span class="mpu-env">HRDEV</span>
+    <span class="mpu-env" style="border-color:#FF5C00">CLASSIC</span>
+    <span class="mpu-env">DEMO</span>
     <button class="mpu-btn">Shortcuts</button>
     <select class="mpu-select" aria-label="Recent pages"><option>Recent…</option></select>
     <span style="flex:1"></span>
@@ -482,8 +484,8 @@ App Server: APPSRV-DEMO</pre>
       800,
       `
       .opts {
-        --bg: #111111; --card: #1a1a1a; --fg: #f8f8f8; --accent: #ff9a66;
-        --brand: #ee4e12; --border: #525252;
+        --bg: #111111; --card: #1a1a1a; --fg: #f8f8f8; --accent: #FF5C00;
+        --brand: #FF5C00; --border: #525252;
         min-height: 100%; background:
           radial-gradient(ellipse 80% 50% at 0% -10%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 55%),
           var(--bg);
@@ -534,7 +536,7 @@ App Server: APPSRV-DEMO</pre>
     h: 280,
     html: shell(
       `<div class="promo">
-        <div class="mark">MPU</div>
+        <img class="mark" alt="PS" src="${iconData}" />
         <h1>Morris PeopleSoft Utilities</h1>
         <p>Classic &amp; Fluid productivity for analysts and technical staff</p>
         <ul>
@@ -552,7 +554,7 @@ App Server: APPSRV-DEMO</pre>
         color: ${COLORS.cream}; position: relative;
       }
       .mark {
-        display: inline-block; border: 1px solid ${COLORS.orange}; border-radius: 2px;
+        display: block; width: 48px; height: 48px; object-fit: contain;
         padding: 0.15rem 0.45rem; font: 700 13px/1 "Segoe UI"; letter-spacing: 0.06em;
         color: ${COLORS.orangeLight}; margin-bottom: 0.65rem;
       }
@@ -574,7 +576,7 @@ App Server: APPSRV-DEMO</pre>
     html: shell(
       `<div class="mq">
         <div class="copy">
-          <div class="mark">MPU</div>
+          <img class="mark" alt="PS" src="${iconData}" />
           <h1>Morris PeopleSoft Utilities</h1>
           <p>Know your environment. Jump to favorites. Inspect fields — without leaving PeopleSoft.</p>
           <div class="pills">
@@ -585,11 +587,11 @@ App Server: APPSRV-DEMO</pre>
         <div class="preview">
           <div class="mpu-bar" style="border-radius:4px 4px 0 0;">
             <span class="mpu-brand">MPU</span>
-            <span class="mpu-env">HRDEV</span>
+            <span class="mpu-env">DEMO</span>
             <span class="mpu-user">User: JSMITH</span>
             <button class="mpu-btn">★</button>
             <select class="mpu-select"><option>User Profiles</option></select>
-            <button class="mpu-btn">Trace OFF</button>
+            <button class="mpu-btn">Trace</button>
             <button class="mpu-btn">Page Info</button>
             <button class="mpu-btn" aria-pressed="true">Inspect ON</button>
           </div>
@@ -613,7 +615,7 @@ App Server: APPSRV-DEMO</pre>
         color: ${COLORS.cream}; position: relative;
       }
       .mark {
-        display: inline-block; border: 1px solid ${COLORS.orange}; border-radius: 2px;
+        display: block; width: 48px; height: 48px; object-fit: contain;
         padding: 0.2rem 0.55rem; font: 700 14px/1 "Segoe UI"; letter-spacing: 0.08em;
         color: ${COLORS.orangeLight}; margin-bottom: 0.85rem;
       }
@@ -621,11 +623,11 @@ App Server: APPSRV-DEMO</pre>
       .copy > p { margin: 0 0 1.1rem; font: 500 1.05rem/1.4 "Segoe UI"; opacity: 0.92; max-width: 28rem; }
       .pills { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1rem; }
       .pills span {
-        border: 1px solid rgba(196,160,53,0.55); background: rgba(15,36,51,0.65);
+        border: 1px solid rgba(255,92,0,0.55); background: rgba(26,26,26,0.65);
         color: ${COLORS.orangeLight}; border-radius: 999px; padding: 0.25rem 0.7rem;
         font: 650 12px/1.2 "Segoe UI";
       }
-      .trust { font: 600 0.9rem/1.3 "Segoe UI" !important; color: #ff9a66 !important; opacity: 1 !important; }
+      .trust { font: 600 0.9rem/1.3 "Segoe UI" !important; color: #FF5C00 !important; opacity: 1 !important; }
       .preview {
         background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
         border-radius: 8px; padding: 0.75rem; box-shadow: 0 18px 40px rgba(0,0,0,0.35);
@@ -641,13 +643,13 @@ App Server: APPSRV-DEMO</pre>
       }
       .mini-row span { color: ${COLORS.muted}; text-align: right; }
       .mini-row b {
-        font-weight: 600; background: #fff; border: 1px solid #9aa8b4;
+        font-weight: 600; background: #fff; border: 1px solid #aaaaaa;
         border-radius: 2px; padding: 0.25rem 0.45rem; display: inline-block; min-width: 10rem;
       }
       .hi { outline: 2px solid ${COLORS.green}; outline-offset: 1px; }
       .tip {
         position: absolute; left: 9.5rem; top: 4.4rem; background: ${COLORS.tipBg}; color: #f9fafb;
-        padding: 0.2rem 0.45rem; border-radius: 3px; border: 1px solid #fbbf24;
+        padding: 0.2rem 0.45rem; border-radius: 3px; border: 1px solid #FF5C00;
         font: 600 12px/1.3 ui-monospace, Consolas, monospace;
       }
       .orangebar { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: ${COLORS.orange}; }
@@ -759,7 +761,7 @@ function fill(png: PNG, color: [number, number, number], x0 = 0, y0 = 0, x1 = pn
 function fallbackPng(path: string, w: number, h: number) {
   const png = new PNG({ width: w, height: h });
   fill(png, [26, 26, 26]);
-  fill(png, [238, 78, 18], 0, h - Math.max(8, Math.floor(h * 0.04)), w, h);
+  fill(png, [255, 92, 0], 0, h - Math.max(8, Math.floor(h * 0.04)), w, h);
   writeFileSync(path, PNG.sync.write(png));
 }
 
@@ -779,7 +781,7 @@ function main() {
     if (only?.length && !only.includes(rel)) continue;
 
     const outPath = resolve(outDir, rel);
-    if (rel === "store-icon-128.png" && existsSync(resolve(outDir, "mpu-peoplesoft-icon-v4.png"))) {
+    if (rel === "store-icon-128.png" && existsSync(resolve(outDir, "mpu-peoplesoft-icon-v5.png"))) {
       console.log("Skipping approved store icon; use npm run generate:icons to resize the source artwork");
       continue;
     }

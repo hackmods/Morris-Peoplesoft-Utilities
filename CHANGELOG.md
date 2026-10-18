@@ -19,6 +19,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### 1.0.30 — 2026-10-18
+
+- Use the supplied October 18 PS/form icon, recolored in orange, black and white, at every Chrome icon size.
+- Refresh both promotional tiles and all five store screenshots from actual extension UI.
+- Standardize the extension on #FF5C00 and neutral grays, with dark text on orange actions and distinct outline patterns for field states. Preserve saved environment colors.
+
 ### Next build — 1.0.29
 
 - Serialize settings writes in the service worker; merge independent edits and report conflicting stale drafts without redirecting collection indices. Retry functional updates against fresh state and preserve read-only recovery of malformed settings.

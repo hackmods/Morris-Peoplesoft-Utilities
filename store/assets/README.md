@@ -1,26 +1,41 @@
-# Store assets
+# Store assets — 1.0.30
 
-The current icon source is `mpu-peoplesoft-icon-v4.png` (white PS lettering on black,
-orange form rows and checkmark), recoloured for the requested UnionOps palette.
-The previous navy/gold v3 artwork remains as a historical source. Run `npm run generate:icons` to resize v4 to the store
-128px icon and the extension's 16/32/48/128px icons while preserving transparency.
-The store asset generator preserves this approved icon.
+Current artwork uses `#FF5C00`, black, neutral grays and white.
+The icon source is `mpu-peoplesoft-icon-v5.png`, recolored from the user-supplied
+`ChatGPT Image Oct 18, 2026, 04_21_16 PM.png`. Previous v3/v4 images are historical
+sources, not current release assets. `npm run generate:icons` produces all Chrome
+icon sizes and the 128px store icon from v5, preserving transparency.
 
-| File | Size | Role |
-|------|------|------|
-| `store-icon-128.png` | 128×128 | Store listing icon |
-| `promo-small-440x280.png` | 440×280 | Required small promo tile |
-| `promo-marquee-1400x560.png` | 1400×560 | Optional marquee promo |
-| `screenshots/01-utilities-bar.png` | 1280×800 | MPU bar on PeopleSoft |
-| `screenshots/02-favorites.png` | 1280×800 | Favorites / Shortcuts |
-| `screenshots/03-page-info.png` | 1280×800 | Page Information |
-| `screenshots/04-field-inspector.png` | 1280×800 | Field Inspector |
-| `screenshots/05-options.png` | 1280×800 | Options → Features |
+The two promotional tiles are marketing illustrations (the marquee includes a
+clearly fictional demo), not compatibility evidence. Regenerate only promos with
+`GENERATE_STORE_ONLY=promo-small-440x280.png,promo-marquee-1400x560.png` when running
+`npm run generate:store-assets`.
 
-## Live captures vs mocks
+## Genuine screenshots
 
-- **Import live PNGs:** drop files in [`../incoming/`](../incoming/README.md), run `npm run import:store-screenshots`.
-- **Regenerate mocks/promo only:** `npm run generate:store-assets` (skips screenshots when `screenshots/.live-captures` exists).
-- **Extension toolbar icons:** `npm run generate:icons` (uses the versioned v4 source).
+Run `npm run build` then `npx tsx scripts/capture-orange-release.ts`. The five
+1280×800 images are actual packaged Options UI captures in a fresh Chromium
+profile, without personal records. Legacy filenames remain for tooling stability:
 
-`npm run audit:store` warns if listing screenshots still match generated mock hashes.
+| Filename | Actual content |
+|---|---|
+| screenshots/01-utilities-bar.png | Features |
+| screenshots/02-favorites.png | Favorites |
+| screenshots/03-page-info.png | Tracing |
+| screenshots/04-field-inspector.png | Agents |
+| screenshots/05-options.png | Host allowlist |
+
+`submission/1.0.30/` contains matching captures plus light/dark visual QA views.
+These screenshots demonstrate extension UI, not real PeopleTools compatibility.
+The `.live-captures` marker prevents mock generation from replacing them.
+
+## Icon edit provenance
+
+Built-in image generation, October 18, 2026. Prompt: "Edit only the colors of the
+supplied icon. Preserve exact PS lettering, two form rows, checkmark,
+rounded-square geometry, composition, and transparent outer margin. Replace navy
+blue tile with near-black #111111, cream PS letters with pure white #FFFFFF, and
+ALL gold/yellow form outlines, field marks, horizontal lines and checkmark with
+vivid orange #FF5C00. Flat clean colors, no blue, no yellow, no new objects or
+lettering. This is the same icon recolored for the user's approved
+orange/black/gray/white app palette."

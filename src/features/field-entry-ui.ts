@@ -77,7 +77,7 @@ function renderEligibilityBody(report: FieldEntryEligibilityReport): string {
       : "";
   return `
     <p class="mpu-dialog-hint">${escapeHtml(summarizeEligibility(report))}</p>
-    <p class="mpu-dialog-hint">Amber = will write · green = unchanged · gray dashed = skipped. Review highlights on the page, then Apply.</p>
+    <p class="mpu-dialog-hint">Orange dashed = will write · gray double = unchanged · gray dashed = skipped. Review highlights on the page, then Apply.</p>
     <ul class="mpu-fe-elig-list">${lines || "<li>Nothing to report</li>"}</ul>
     ${more}
   `;

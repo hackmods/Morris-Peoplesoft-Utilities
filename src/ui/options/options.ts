@@ -442,7 +442,7 @@ function renderEnvs(settings: MpuSettings): void {
     active.checked = env.active === "Yes";
     const color = document.createElement("input");
     color.type = "color";
-    color.value = env.color || "#ee4e12";
+    color.value = env.color || "#FF5C00";
     color.setAttribute("aria-label", "Accent color");
     const save = document.createElement("button");
     save.type = "button";

@@ -110,7 +110,7 @@ describe("field inspector", () => {
     const icons = Array.from(document.querySelectorAll(".mpu-recfield-icon"));
     expect(icons.length).toBe(2);
     expect(icons.every((el) => el.namespaceURI === "http://www.w3.org/2000/svg")).toBe(true);
-    expect(icons.every((el) => el.querySelector("circle[stroke='#EE4E12']"))).toBe(true);
+    expect(icons.every((el) => el.querySelector("circle[stroke='#FF5C00']"))).toBe(true);
     expect(document.querySelector(".mpu-recfield-area")).toBeTruthy();
     expect(document.querySelector("a#ICSave")?.closest(".mpu-recfield-area")).toBeNull();
     stopFieldInspector(document);
@@ -153,7 +153,7 @@ describe("field inspector", () => {
     expect(getLockedFieldName()).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
     expect(getLockedParsedRecField()?.record).toBe("NC_REHIRE_ELIG");
     expect(getLockedParsedRecField()?.field).toBe("TO_DATE");
-    expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#5DA027");
+    expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#525252");
     expect(writeText).toHaveBeenCalledWith("NC_REHIRE_ELIG.TO_DATE");
 
     stopFieldInspector(document);

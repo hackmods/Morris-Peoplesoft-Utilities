@@ -7,10 +7,10 @@ import type { FieldCopyFormat } from "../storage/schema";
 
 const AREA = "mpu-recfield-area";
 const ICON = "mpu-recfield-icon";
-const LOCKED_BORDER = "solid 2px #5DA027";
-const ACTIVE_BORDER = "solid 2px #EE4E12";
-const ORANGE = "#EE4E12";
-const GREEN = "#5DA027";
+const LOCKED_BORDER = "double 3px #525252";
+const ACTIVE_BORDER = "solid 2px #FF5C00";
+const ORANGE = "#FF5C00";
+const LOCKED_COLOR = "#525252";
 const STYLE_ID = "mpu-field-inspector-style";
 
 /** Match Classic + Fluid PeopleSoft field hosts. */
@@ -707,7 +707,7 @@ function injectIcons(target: Document): number {
           `.${ICON}[data-mpu-field-id="${CSS.escape(lockedId)}"]`,
         );
         if (lockedIcon) {
-          setIconStroke(lockedIcon, GREEN);
+          setIconStroke(lockedIcon, LOCKED_COLOR);
           if (lockedIcon.parentElement) {
             (lockedIcon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
             lockedIcon.parentElement.setAttribute("data-mpu-locked", "true");
@@ -776,7 +776,7 @@ function onIconClick(e: MouseEvent): void {
 
   clearLocks(targetDocRef);
   lockedId = fieldId;
-  setIconStroke(icon, GREEN);
+  setIconStroke(icon, LOCKED_COLOR);
   if (icon.parentElement) {
     (icon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
     icon.parentElement.setAttribute("data-mpu-locked", "true");

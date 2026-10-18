@@ -202,6 +202,8 @@ test.describe("MPU extension UI", () => {
       const page = await extensionContext.newPage();
       await page.goto(`chrome-extension://${extensionId}/${path}`);
       await audit(page);
+      await page.emulateMedia({ colorScheme: "dark" });
+      await audit(page);
       await page.close();
     }
   });

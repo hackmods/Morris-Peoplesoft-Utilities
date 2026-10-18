@@ -3,7 +3,7 @@ import { PNG } from "pngjs";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-const source = PNG.sync.read(readFileSync(resolve("store/assets/mpu-peoplesoft-icon-v4.png")));
+const source = PNG.sync.read(readFileSync(resolve("store/assets/mpu-peoplesoft-icon-v5.png")));
 if (source.width !== source.height) throw new Error("Icon artwork must be square");
 
 /** Area-average premultiplied colors to preserve transparent antialiased edges. */
@@ -84,9 +84,9 @@ for (const size of [16, 32, 48, 128]) {
   writeFileSync(resolve(out, `icon${size}.png`), image);
   if (size === 128) writeFileSync(resolve("store/assets/store-icon-128.png"), image);
 }
-const ORANGE: [number, number, number] = [238, 78, 18];
-const GREEN: [number, number, number] = [93, 160, 39];
-const YELLOW: [number, number, number] = [222, 204, 0];
+const ORANGE: [number, number, number] = [255, 92, 0];
+const GREEN: [number, number, number] = [82, 82, 82];
+const YELLOW: [number, number, number] = [255, 92, 0];
 writeFileSync(resolve(out, "field-inspector-orange.png"), makeInspectorIcon(ORANGE));
 writeFileSync(resolve(out, "field-inspector-green.png"), makeInspectorIcon(GREEN));
 writeFileSync(resolve(out, "field-inspector-yellow.png"), makeInspectorIcon(YELLOW));

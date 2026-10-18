@@ -7,10 +7,7 @@
 body {
   margin: 0;
   font: 16px/1.45 var(--font);
-  background:
-    radial-gradient(ellipse 80% 50% at 0% -10%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 50%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, #efeae7) 0%, var(--bg) 40%);
+  background: var(--bg);
   color: var(--fg);
   min-height: 100vh;
 }

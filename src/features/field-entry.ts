@@ -370,12 +370,12 @@ function ensurePreviewStyles(doc: Document): void {
   style.id = PREVIEW_STYLE_ID;
   style.textContent = `
     [${PREVIEW_ATTR}="willWrite"] {
-      outline: 2px solid #c47a00 !important;
+      outline: 2px dashed #FF5C00 !important;
       outline-offset: 1px;
       box-shadow: 0 0 0 2px rgba(196, 122, 0, 0.25);
     }
     [${PREVIEW_ATTR}="unchanged"] {
-      outline: 2px solid #5a8f5a !important;
+      outline: 3px double #525252 !important;
       outline-offset: 1px;
     }
     [${PREVIEW_ATTR}="skipped"] {

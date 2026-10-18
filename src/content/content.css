@@ -9,7 +9,7 @@
   font: 600 12px/1.3 "Segoe UI", system-ui, sans-serif;
   z-index: 100;
   position: relative;
-  border-bottom: 2px solid #ee4e12;
+  border-bottom: 2px solid #FF5C00;
 }
 
 .mpu-bar-classic {
@@ -37,16 +37,16 @@
 .mpu-brand {
   letter-spacing: 0.04em;
   padding: 0.15rem 0.4rem;
-  border: 1px solid #ee4e12;
+  border: 1px solid #FF5C00;
   border-radius: 2px;
 }
 
 .mpu-env {
   padding: 0.15rem 0.45rem;
   border: none;
-  border-left: 4px solid var(--mpu-env-color, #ee4e12);
-  border-bottom: 2px solid var(--mpu-env-color, #ee4e12);
-  background: color-mix(in srgb, var(--mpu-env-color, #ee4e12) 18%, transparent);
+  border-left: 4px solid var(--mpu-env-color, #FF5C00);
+  border-bottom: 2px solid var(--mpu-env-color, #FF5C00);
+  background: color-mix(in srgb, var(--mpu-env-color, #FF5C00) 18%, transparent);
   border-radius: 0 2px 2px 0;
   color: inherit;
   font: inherit;
@@ -59,11 +59,11 @@ button.mpu-env {
 
 .mpu-env:hover,
 .mpu-env:focus-visible {
-  background: color-mix(in srgb, var(--mpu-env-color, #ee4e12) 28%, transparent);
+  background: color-mix(in srgb, var(--mpu-env-color, #FF5C00) 28%, transparent);
 }
 
 .mpu-env[data-mpu-env-colored="true"] {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mpu-env-color, #ee4e12) 35%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mpu-env-color, #FF5C00) 35%, transparent);
 }
 
 .mpu-env-flyout {
@@ -113,7 +113,7 @@ button.mpu-env {
   font: 600 11px/1.2 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: #ff9a66;
+  color: #FF5C00;
 }
 
 .mpu-fav-wrap {
@@ -149,7 +149,7 @@ button.mpu-env {
 }
 
 .mpu-fav-filter:focus-visible {
-  outline: 2px solid #ff9a66;
+  outline: 2px solid #FF5C00;
 }
 
 .mpu-select {
@@ -175,15 +175,15 @@ button.mpu-env {
 
 .mpu-btn:hover,
 .mpu-btn:focus-visible {
-  outline: 2px solid #ff9a66;
+  outline: 2px solid #FF5C00;
   outline-offset: 1px;
-  background: #3b2a23;
+  background: #292929;
 }
 
 .mpu-btn[aria-pressed="true"] {
-  background: #ee4e12;
+  background: #FF5C00;
   color: #1a1a1a;
-  border-color: #ff9a66;
+  border-color: #FF5C00;
 }
 
 .mpu-btn:disabled {
@@ -192,7 +192,7 @@ button.mpu-env {
 }
 
 .mpu-select:focus-visible {
-  outline: 2px solid #ff9a66;
+  outline: 2px solid #FF5C00;
 }
 
 .mpu-sr-only {
@@ -218,7 +218,7 @@ button.mpu-env {
 }
 
 .mpu-dialog {
-  background: #faf9f8;
+  background: #fafafa;
   color: #1a1a1a;
   max-width: min(40rem, 96vw);
   max-height: min(90vh, 52rem);
@@ -227,7 +227,7 @@ button.mpu-env {
   border-radius: 6px;
   padding: 1rem 1.25rem;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
-  border: 1px solid #cfcac7;
+  border: 1px solid #cccccc;
 }
 
 .mpu-dialog h2 {
@@ -311,7 +311,7 @@ button.mpu-env {
 .mpu-dialog-input {
   font: inherit;
   padding: 0.35rem 0.5rem;
-  border: 1px solid #cfcac7;
+  border: 1px solid #cccccc;
   border-radius: 4px;
 }
 
@@ -332,7 +332,7 @@ button.mpu-env {
 .mpu-goto-form input[type="search"] {
   font: inherit;
   padding: 0.35rem 0.5rem;
-  border: 1px solid #cfcac7;
+  border: 1px solid #cccccc;
   border-radius: 4px;
 }
 
@@ -352,7 +352,7 @@ button.mpu-env {
 
 .mpu-pre {
   white-space: pre-wrap;
-  background: #f1efed;
+  background: #eeeeee;
   padding: 0.75rem;
   border-radius: 4px;
   font: 500 13px/1.4 ui-monospace, Consolas, monospace;
@@ -360,8 +360,8 @@ button.mpu-env {
 
 .mpu-pre-diff {
   margin-top: 0.5rem;
-  background: #fff0e8;
-  border: 1px solid #ee4e12;
+  background: #f2f2f2;
+  border: 1px solid #FF5C00;
 }
 
 .mpu-page-tabs-list {
@@ -412,9 +412,9 @@ button.mpu-env {
   min-width: 0;
   max-width: min(40rem, 55vw);
   overflow: hidden;
-  border: 1px solid #ff9a66;
+  border: 1px solid #FF5C00;
   border-radius: 2px;
-  background: #ff9a66;
+  background: #FF5C00;
   color: #1a1a1a;
   font: 700 13px/1.2 ui-monospace, Consolas, monospace;
   padding: 0.15rem 0.45rem;
@@ -463,7 +463,7 @@ button.mpu-env {
 
 .mpu-flyout-top {
   /* Root menus hang from the MPU bar band (top chrome) */
-  border-top: 2px solid #ee4e12;
+  border-top: 2px solid #FF5C00;
   border-radius: 0 0 3px 3px;
 }
 
@@ -488,7 +488,7 @@ button.mpu-env {
 }
 
 .mpu-menu-has-sub > .mpu-menu-subtrigger[aria-expanded="true"] {
-  background: #3b2a23;
+  background: #292929;
 }
 
 .mpu-menu-row {
@@ -528,7 +528,7 @@ button.mpu-env {
   border: 0;
   border-left: 1px solid #646464;
   background: transparent;
-  color: #ff9a66;
+  color: #FF5C00;
   font: inherit;
   padding: 0.35rem 0.45rem;
   cursor: pointer;
@@ -543,12 +543,12 @@ button.mpu-env {
 .mpu-menu-newwin:hover,
 .mpu-menu-newwin:focus-visible {
   outline: none;
-  background: #3b2a23;
+  background: #292929;
 }
 
 .mpu-menu-current,
 .mpu-menu-open:disabled {
-  background: #ee4e12;
+  background: #FF5C00;
   color: #1a1a1a;
   cursor: default;
 }
@@ -563,7 +563,7 @@ button.mpu-env {
   appearance: none;
   border: 0;
   background: transparent;
-  color: #9a3412;
+  color: #333333;
   text-decoration: underline;
   font: inherit;
   cursor: pointer;
@@ -571,7 +571,7 @@ button.mpu-env {
 }
 
 .mpu-dialog .mpu-linkish {
-  color: #9a3412;
+  color: #333333;
 }
 
 .mpu-page-tabs-list .mpu-menu-current:disabled {
@@ -588,7 +588,7 @@ button.mpu-env {
 .mpu-rf-part + .mpu-rf-part::before {
   content: "·";
   margin-right: 0.45rem;
-  color: #5a210d;
+  color: #333333;
   font-weight: 700;
 }
 
@@ -596,7 +596,7 @@ button.mpu-env {
   font: 600 10px/1.2 system-ui, sans-serif;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #5a210d;
+  color: #333333;
 }
 
 .mpu-rf-val {
@@ -614,7 +614,7 @@ button.mpu-env {
 
 .mpu-ib-crumb {
   font: 600 11px/1.2 system-ui, sans-serif;
-  color: #ff9a66;
+  color: #FF5C00;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -630,6 +630,6 @@ button.mpu-env {
   }
 }
 
-.mpu-dialog a { color: #9a3412; }
-.mpu-dialog .mpu-btn:focus-visible { outline-color: #9a3412; }
+.mpu-dialog a { color: #333333; }
+.mpu-dialog .mpu-btn:focus-visible { outline-color: #333333; }
 .mpu-btn[aria-pressed="true"], .mpu-menu-current { font-weight: 700; }
