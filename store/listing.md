@@ -6,7 +6,7 @@ PeopleSoft Classic & Fluid tools: favorites, page info, field inspector and trac
 
 ## Detailed description
 
-Morris PeopleSoft Utilities (MPU) helps college business analysts and technical staff work faster in Oracle PeopleSoft—on both Classic and Fluid pages.
+Morris PeopleSoft Utilities (MPU) helps business analysts and technical staff work faster in Oracle PeopleSoft—on both Classic and Fluid pages.
 
 **For business analysts**
 • Environment labels so you always know which system you’re in
@@ -17,12 +17,13 @@ Morris PeopleSoft Utilities (MPU) helps college business analysts and technical 
 • Optional Field Entry: preview and paste visible editable values; save local profiles
 
 **For technical staff**
-• One-click PeopleCode/SQL trace using your existing PeopleSoft access
+• PeopleCode/SQL trace controls using your existing PeopleSoft access
 • Field Inspector to reveal RECORD.FIELD identities on Classic, Fluid, and Classic pages hosted inside Fluid menus/nav collections
 • New Window / deep-link workflows
 • Customization upgrade watch (UI fingerprint baseline + drift check)
 • Agent reference library for PeopleCode, SQL, batch, Fluid, accessibility and BA workflows; open reusable prompts for your approved AI tool
 • Prepare a blank task brief locally before using an installed prompt or skill
+• Preview and explicitly export sanitized diagnostics
 
 **Privacy & compliance**
 • Settings stored only on your device (`chrome.storage.local`)
