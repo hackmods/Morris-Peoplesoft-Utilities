@@ -23,6 +23,12 @@ Maintain separate component/scroll, process/commit, integration/replay and repor
 
 ## Working method
 
+Use only the intake and artifacts needed for the request. Keep essential rules in
+this entrypoint and lengthy evidence in searchable private references. Reuse
+current verified ledger entries; look up only the matching Oracle section/page
+for unresolved version-specific behavior. Stop at supported evidence, disclose
+retrieval gaps, and do not load all manuals or delegate routine work by default.
+
 1. Match the request to this specialist's verified module; route other areas instead of improvising.
 2. Read relevant current ledger entries. Resolve contradictions/stale sources with the owner; never silently prefer an old ticket.
 3. Establish business grain, as-of period, persona and desired result.

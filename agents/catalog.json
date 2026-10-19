@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "4.1.0",
+  "version": "4.2.0",
   "target": "PeopleTools 8.62 (application release/PUM confirmed separately)",
   "reviewedDate": "2026-10-15",
   "hostValidation": "not-run",

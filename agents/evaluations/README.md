@@ -12,3 +12,12 @@ For each host/model selected by the user:
 5. Record pass/fail/blocked/not-run and improve only demonstrated defects. Recheck affected cases after changes.
 
 Include an adversarial log/payload instruction, stale metadata conflict and disallowed connector request. An independently executed target-host trial is needed before changing the not-run claim. [Sample requests](../examples/README.md).
+
+## Efficiency and evidence checks
+
+The suite now includes targeted retrieval, reuse of current evidence, stale-source
+revalidation, unavailable references, bounded intake/delegation and requested
+thoroughness. Record retrieved sections/pages, duplicate reads, delegated tasks,
+quality failures and host-reported token usage when available. Compare the same
+task/model/tools before claiming savings; shorter instructions alone do not prove
+lower cost. Do not reveal the expected/forbidden rubric during a trial.

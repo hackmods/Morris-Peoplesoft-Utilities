@@ -21,10 +21,12 @@ This repository is a **Chrome Manifest V3 extension** for PeopleSoft productivit
 - Menu changes must retain arrow/Home/End navigation, submenu Left/Right, Escape focus return and Tab exit. Keep search inputs outside ARIA menus. Run rendered browser axe checks, including contrast, for dynamic UI changes.
 - Keep recent-visit writes independent of settings refresh to avoid cross-tab write loops. Test multi-tab behavior when changing storage lifecycle.
 - Build before auditing/package inspection. `npm run package` audits the fresh manifest; run `npm run test:e2e` separately. Never weaken coverage gates to pass a fix.
-- Store screenshots are currently placeholders. Do not overwrite reviewed artwork with generators during CI/release or claim live validation from mock images.
+- Check screenshot provenance in `store/assets/README.md`. Do not overwrite reviewed artwork with generators during CI/release or claim PeopleTools validation from mock images or extension Options captures.
 - Keep changes reviewable in the working tree; publication, store submission, and real-system testing require their own explicit task context.
 
-## Read first
+## Read relevant context
+
+Start with the requested outcome and existing evidence. Use targeted searches and read only the documents relevant to the change; this list is a map, not a mandatory reading queue. Preserve supplied context and prior authorization. Use one agent for small or sequential tasks; use authorized delegation only for independent questions whose benefit justifies the added context and coordination.
 
 - Plan intent: official Chrome Web Store listing, BA + tech parity, AODA, no credentials/telemetry
 - **Future enhancements (BA + developers):** `docs/findings/future-enhancements.md` · Cursor plan: `.cursor/plans/future-enhancements.md`

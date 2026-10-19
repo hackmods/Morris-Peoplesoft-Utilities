@@ -1,6 +1,6 @@
 # AI agent prompts for PeopleSoft work
 
-The [PeopleSoft prompt pack](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) is a separate toolkit, outside the Chrome extension. Content v4.1.0 includes 24 complete prompts, three private-tailoring templates and an unexecuted evaluation-results worksheet. Target PeopleTools 8.62; confirm application release/PUM separately.
+The [PeopleSoft prompt pack](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) is a separate toolkit, outside the Chrome extension. Content v4.2.0 includes 24 complete prompts, three private-tailoring templates and an unexecuted evaluation-results worksheet. Target PeopleTools 8.62; confirm application release/PUM separately.
 
 ## Adoption
 

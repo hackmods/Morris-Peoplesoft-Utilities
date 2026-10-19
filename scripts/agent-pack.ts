@@ -174,6 +174,17 @@ export function validateLinks(root: string, packPath: string, text: string): voi
 
 export function validatePack(root = process.cwd()): { catalog: PackCatalog; files: string[] } {
   const catalog = loadCatalog(root);
+  const workingMethod = (text: string): string => {
+    const normalized = text.replace(/\r\n/g, "\n");
+    const blocks = [...normalized.matchAll(/<!-- OPERATING-BEGIN -->\n([\s\S]*?)\n<!-- OPERATING-END -->/g)];
+    requireCondition(blocks.length === 1, "Expected exactly one shared working method");
+    return blocks[0][1];
+  };
+  const sharedMethod = workingMethod(readFileSync(safePackPath(root, "PROMPT-TEMPLATE.md"), "utf8"));
+  for (const entry of catalog.entries) {
+    requireCondition(workingMethod(readFileSync(safePackPath(root, entry.source), "utf8")) === sharedMethod,
+      `Shared working method drift: ${entry.id}; update the canonical definition from PROMPT-TEMPLATE.md`);
+  }
   const expected = generatedFiles(root, catalog);
   for (const [path, text] of expected) {
     const absolute = path.startsWith("agents/") ? safePackPath(root, path.slice(7)) : resolve(root, path);
@@ -194,9 +205,11 @@ export function validatePack(root = process.cwd()): { catalog: PackCatalog; file
   }
   const cases = JSON.parse(readFileSync(safePackPath(root, "evaluations/cases.json"), "utf8")) as { id: string; agent: string; request: string; expected: string[]; forbidden: string[] }[];
   const caseIds = new Set<string>();
+  const nonemptyText = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
+  const textList = (value: unknown): boolean => Array.isArray(value) && value.length > 0 && value.every(nonemptyText);
   for (const test of cases) {
-    requireCondition(!caseIds.has(test.id) && catalog.entries.some((entry) => entry.id === test.agent), `Invalid evaluation: ${test.id}`);
-    requireCondition(test.request.length > 0 && test.expected.length > 0 && test.forbidden.length > 0, `Incomplete evaluation: ${test.id}`);
+    requireCondition(nonemptyText(test.id) && !caseIds.has(test.id) && catalog.entries.some((entry) => entry.id === test.agent), `Invalid evaluation: ${test.id}`);
+    requireCondition(nonemptyText(test.request) && textList(test.expected) && textList(test.forbidden), `Incomplete evaluation: ${test.id}`);
     caseIds.add(test.id);
   }
   for (const entry of catalog.entries) requireCondition(cases.some((test) => test.agent === entry.id), `No evaluation case: ${entry.id}`);

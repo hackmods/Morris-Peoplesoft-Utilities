@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "promptPackVersion": "4.1.0",
+  "promptPackVersion": "4.2.0",
   "host": {
     "product": null,
     "version": null,
@@ -328,6 +328,69 @@
     {
       "caseId": "portal-missing-tile",
       "agent": "assist-portal-branding",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "bounded-history-review",
+      "agent": "review-data-correctness",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "oracle-targeted-retrieval",
+      "agent": "assist-peoplecode",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "reuse-verified-evidence",
+      "agent": "assist-peoplecode",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "unavailable-reference",
+      "agent": "assist-peoplecode",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "small-task-no-delegation",
+      "agent": "assist-portal-branding",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "depth-is-requested",
+      "agent": "design-test-uat",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "stale-evidence-revalidation",
+      "agent": "assist-search-framework",
       "status": "not-run",
       "responseEvidence": null,
       "observedActions": [],

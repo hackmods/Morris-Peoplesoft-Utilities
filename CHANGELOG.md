@@ -19,6 +19,12 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Prompt pack 4.2.0
+
+- Add bounded Oracle retrieval, evidence reuse/freshness, proportional intake/output and cost-aware delegation to all standalone specialist instructions.
+- Preserve PeopleSoft domain safeguards and source-review dates; add seven behavioral rubrics without claiming full host validation.
+- Check shared instruction parity and reject unusable evaluation rubrics; regenerate all host exports and public catalog metadata.
+
 ### 1.0.30 — 2026-10-18
 
 - Use the supplied October 18 PS/form icon, recolored in orange, black and white, at every Chrome icon size.

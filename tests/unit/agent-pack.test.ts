@@ -53,6 +53,25 @@ describe("PeopleSoft prompt distributions", { timeout: 30_000 }, () => {
     expect(() => validatePack(root)).toThrow("Stale/missing export");
   });
 
+  it("rejects a divergent shared method even when host exports were regenerated", () => {
+    const root = fixture();
+    const path = join(root, "agents/assist-fluid/AGENT.md");
+    writeFileSync(path, readFileSync(path, "utf8").replace("<!-- OPERATING-END -->", "A conflicting local instruction.\n<!-- OPERATING-END -->"));
+    for (const [exportPath, text] of buildExports(root, loadCatalog(root))) {
+      writeFileSync(join(root, "agents", exportPath), text);
+    }
+    expect(() => validatePack(root)).toThrow("Shared working method drift");
+  });
+
+  it.each(["", " ", 42, [""]])("rejects unusable rubric items: %j", (invalid) => {
+    const root = fixture();
+    const path = join(root, "agents/evaluations/cases.json");
+    const cases = JSON.parse(readFileSync(path, "utf8"));
+    cases[0].expected = [invalid];
+    writeFileSync(path, JSON.stringify(cases));
+    expect(() => validatePack(root)).toThrow("Incomplete evaluation");
+  });
+
   it("rejects unsafe and private catalog paths", () => {
     for (const path of ["../secret.md", "C:/outside.md", "/outside.md", "skills/../../private.md", "private/facts.md", ".env", "skills\\outside.md"]) {
       expect(() => safePackPath(process.cwd(), path)).toThrow();

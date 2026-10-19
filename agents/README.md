@@ -1,10 +1,10 @@
 # PeopleSoft Agent Prompt Pack
 
-Content version **4.1.0** · **24 complete prompts** (23 task agents and one specialist-building guide) · **3 local pillar templates**.
+Content version **4.2.0** · **24 complete prompts** (23 task agents and one specialist-building guide) · **3 local pillar templates**.
 
 Portable knowledge for PeopleSoft on **PeopleTools 8.62**. Confirm the application release/PUM and Tools patch separately. The pack supports HCM, FSCM and Campus Solutions workflows; it stays separate from the Morris PeopleSoft Utilities Chrome extension.
 
-Every prompt includes intake, workflow, output, synthetic examples, validation and handoffs. Definitions are self-contained. No MCP server is required or implemented. Each definition retains its actual source-review date; the two new specialist sources were reviewed on 2026-10-15. IDE, model-behavior and real-system trials are **not run**.
+Every prompt includes intake, workflow, output, synthetic examples, validation and handoffs. Definitions are self-contained. No MCP server is required or implemented. Each definition retains its actual source-review date; the two new specialist sources were reviewed on 2026-10-15. Installed-host evaluation and real-system trials are **not run**. Two limited canonical-prompt trials from the 4.2.0 review are recorded separately in [the review report](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/findings/agent-instructions-4.2-review.md); they do not validate the full suite.
 
 The extension's Options → Agents page provides a searchable reference catalog, role/audience hints and links to these public files. Prepare task brief creates an editable blank request for a selected prompt; it reads no PeopleSoft page context and is not saved. Load the actual prompt/skill in your AI tool before using the brief. Only public reference metadata is bundled in the extension; full definitions, skills and templates remain in this separate toolkit. The extension does not execute agents or send page data to an AI service.
 
@@ -90,10 +90,23 @@ npm run check:agents
 npm run package:agents
 ```
 
-Run these commands in a repository clone; a downloaded prompt ZIP is ready to copy into your chosen host. Edit canonical definitions and catalog metadata, then generate. Exports and README/wiki inventories must match exactly. Packaging validates links/catalog/export parity and includes only an explicit file list plus LICENSE/NOTICE, excluding private/untracked files. The ZIP uses the extension release number; content revision is independently recorded as 4.1.0.
+Run these commands in a repository clone; a downloaded prompt ZIP is ready to copy into your chosen host. Edit canonical definitions and catalog metadata, then generate. Exports and README/wiki inventories must match exactly. Packaging validates links/catalog/export parity and includes only an explicit file list plus LICENSE/NOTICE, excluding private/untracked files. The ZIP uses the extension release number; content revision is independently recorded as 4.2.0.
 
 [Browse source](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · [release downloads](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) · [wiki adoption guide](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/wiki/AI-Agent-Prompts.md).
 
 ## Contributing
 
 Use review-/assist-/design-/guide- prefixes and [PROMPT-TEMPLATE.md](PROMPT-TEMPLATE.md). Add catalog metadata, sources, handoffs and at least one discriminating behavioral case; regenerate every host export. Keep local facts outside package inputs. Repository maintenance guidance is in [AGENTS.md](AGENTS.md); do not install that file as a user persona.
+
+## Efficient use
+
+Start with one specialist and the relevant sanitized task evidence. Oracle links
+are references: retrieve the smallest section needed, reuse still-current verified
+evidence, and expand only to resolve a specific gap. A link alone does not load a
+manual. Repeated full-manual retrieval and unnecessary delegation can increase
+cost; this pack does not claim measured token or monetary savings.
+
+The 4.2.0 working method makes intake, output artifacts and handoffs proportional
+to the request while preserving domain safeguards and requested depth. Every
+export remains self-contained. Installation, model behavior and target-system
+validation must still be recorded separately from structural checks.

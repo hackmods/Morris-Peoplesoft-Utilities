@@ -27,7 +27,7 @@ Reviewed 2026-10-14. These are source references, not a compatibility certificat
 
 The approvals reference is an application example at the named FSCM release, not a universal Tools configuration. Obtain the matching application/PUM documentation for local rules. WCAG mapping uses the standard agreed for the task; this pack does not certify legal conformance. Host installation guidance is version-sensitive and must be checked in the installed host.
 
-Catalog status: source links reviewed; host invocation, model behavior, target compilation, UAT and real-system checks not run. Record those separately when performed.
+Catalog status: source links reviewed; installed-host invocation, full behavioral evaluation, target compilation, UAT and real-system checks not run. Limited canonical-prompt trials are recorded separately in the 4.2.0 review report; they do not certify the pack.
 
 Added source context on 2026-10-15 (existing per-prompt review dates are retained):
 

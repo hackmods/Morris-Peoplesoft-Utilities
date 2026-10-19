@@ -1,5 +1,5 @@
 // Generated from agents/catalog.json. Run npm run generate:agents; do not edit.
-export const AGENT_PACK_VERSION = "4.1.0";
+export const AGENT_PACK_VERSION = "4.2.0";
 export const AGENT_REFERENCES = [
   {
     "id": "assist-admin-diagnostics",
