@@ -83,9 +83,6 @@ function writeManifest() {
     web_accessible_resources: [
       {
         resources: [
-          "inject/adv-search.js",
-          "inject/corr-hist.js",
-          "inject/corr-hist-and-adv-search.js",
           "inject/clear-bcs.js",
           "inject/resize-frame.js",
           "inject/field-entry-write.js",
@@ -116,9 +113,6 @@ export default defineConfig({
         popup: resolve(root, "src/ui/popup/popup.html"),
         options: resolve(root, "src/ui/options/options.html"),
         sidepanel: resolve(root, "src/ui/sidepanel/sidepanel.html"),
-        "inject/adv-search": resolve(root, "src/inject/adv-search.ts"),
-        "inject/corr-hist": resolve(root, "src/inject/corr-hist.ts"),
-        "inject/corr-hist-and-adv-search": resolve(root, "src/inject/corr-hist-and-adv-search.ts"),
         "inject/clear-bcs": resolve(root, "src/inject/clear-bcs.ts"),
         "inject/resize-frame": resolve(root, "src/inject/resize-frame.ts"),
         "inject/field-entry-write": resolve(root, "src/inject/field-entry-write.ts"),

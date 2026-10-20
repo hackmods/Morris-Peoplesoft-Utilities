@@ -164,6 +164,12 @@ export interface PageFingerprint {
   tabLabels: string[];
   structureLabels: string[];
   fieldIds: string[];
+  /** Missing on legacy captures; true only when the whole field scan was retained. */
+  fieldIdsComplete?: boolean;
+  /** Exact unique field-id count, including ids beyond the retention cap. */
+  fieldIdsTotal?: number;
+  structureLabelsComplete?: boolean;
+  pageMetadataComplete?: boolean;
 }
 
 /** User-marked customized object with a baseline fingerprint (local only). */

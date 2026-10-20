@@ -2,6 +2,12 @@
 
 Primary compatibility target: **PeopleTools 8.62**. This is a validation plan, not a certification. Synthetic fixtures and generated screenshots do not establish support on an employer's installation.
 
+On 2026-10-12, the maintainer confirmed in the publishing chat that the extension
+had been tested and requested initial publication before further polish. No
+patch-level or scenario-by-scenario results were supplied, so the detailed matrix
+below remains unverified. This records the maintainer's statement, not an
+independent compatibility certification.
+
 Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser version, UI model, tester/date, and outcome. Keep employer-specific results and sanitized captures outside the public repository.
 
 | Scenario | Acceptance | Status |
@@ -22,5 +28,13 @@ Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser v
 | Diagnostics and upgrade history | Review allowlisted diagnostics before copy/download; no automatic values/tokens/hostnames; choose dated/environment baselines and review handoff; dialog focus returns after toolbar rebuild | Real-system/AT check needed |
 
 The browser cannot confirm App Designer definitions, PeopleCode scroll paths, security entitlements, or server-side customization correctness. Treat generated code and DOM metadata as aids for a developer to verify.
+
+## Fluid collection save-warning report — 2026-10-20
+
+The maintainer reported a save prompt while loading a Fluid side-menu collection; choosing No allowed navigation. Extension attribution has not been confirmed by an on/off comparison.
+
+Version 1.0.32 removes broad More/Expand clicks, requires explicit search-page and control evidence, and limits each automatic action to once per target document. It skips selected/expanded controls and leaves unknown layouts for manual use. Synthetic browser tests cover collection-shell controls and same-origin target frames; they do not reproduce the actual application's dirty-state tracking.
+
+Real-system acceptance remains open: on a fresh unchanged page, compare helpers off/on, open the affected collection and navigate between its pages, then repeat with a genuine unsaved edit. Unedited navigation should not acquire a save prompt from MPU; genuine unsaved changes must still receive PeopleSoft's normal protection. Record the Tools patch and outcome privately. Do not disable save warnings as a workaround.
 
 References: [Oracle PeopleTools 8.62 Fluid guide](https://docs.oracle.com/cd/G35126_01/psft/pdf/pt862tflu-b062025.pdf), [Oracle 8.62 accessibility report](https://docs.oracle.com/en/corporate/accessibility/templates/t2-15706.html). Oracle's report covers its product, not this extension.

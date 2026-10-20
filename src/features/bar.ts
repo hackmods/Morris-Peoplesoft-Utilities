@@ -43,7 +43,7 @@ import { formatTraceBarHint, summarizeActiveTraceFlags } from "./trace-presets";
 import { describeTraceRequest } from "./trace-status";
 import { currentPageAccess } from "./access";
 import { buildDiagnosticReport } from "./diagnostics";
-import { loadSettings, saveSettings } from "../storage/settings";
+import { loadSettings, saveSettings, originAllowed } from "../storage/settings";
 import {
   capturePageFingerprint,
   compareFingerprints,
@@ -1807,6 +1807,22 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(go);
   }
 
+  if (!loginOnly) {
+    const agents = btn("mpu-agents", "Agents", "Open the local Agents reference library");
+    agents.addEventListener("click", () => {
+      // Keep the message in the click's user gesture; the worker validates current settings.
+      const mapping = ctx.settings.urlSites[ctx.parsed.baseURL]?.[ctx.parsed.siteNormalized];
+      if (!bar.isConnected || !originAllowed(ctx.parsed.href, ctx.settings)
+        || (mapping && !isYes(ctx.settings.environments[mapping.envId]?.active))) return;
+      void chrome.runtime.sendMessage({ type: "mpu-open-agents" }).then((result) => {
+        if (bar.isConnected && !result?.ok) announce(doc, "Agents library unavailable; try again after settings finish updating");
+      }).catch(() => {
+        if (bar.isConnected) announce(doc, "Unable to open the Agents library");
+      });
+    });
+    bar.appendChild(agents);
+  }
+
   const help = btn("mpu-help", "?", "Help");
   help.addEventListener("click", () => showHelpDialog(doc));
   bar.appendChild(help);
@@ -2045,7 +2061,7 @@ export function showPageInfoDialog(
     <pre class="mpu-pre mpu-pre-diff" id="mpu-pi-diff" hidden></pre>
     <div class="mpu-dialog-section" id="mpu-pi-watch-section">
       <h3>Customization upgrade watch</h3>
-      <p class="mpu-dialog-hint">Capture a UI fingerprint before a PeopleTools upgrade; check again after to spot tab, structure, or field-id drift. Does not detect PeopleCode-only overrides.</p>
+      <p class="mpu-dialog-hint">Capture a UI fingerprint before a PeopleTools upgrade; check again after to spot tab, structure, or field-id drift. Captures only the current loaded page, up to 200 unique field IDs and 40 structure hosts. Unloaded tabs, PeopleCode, SQL and database changes are not compared.</p>
       <label class="mpu-dialog-label">Notes (optional)
         <input type="text" class="mpu-dialog-input" id="mpu-pi-watch-notes" autocomplete="off" />
       </label>
@@ -2220,7 +2236,7 @@ export function showPageInfoDialog(
         const notes =
           (dialog.querySelector("#mpu-pi-watch-notes") as HTMLInputElement | null)?.value.trim() ||
           "";
-        const fingerprint = capturePageFingerprint(doc, parsed, meta);
+        const fingerprint = capturePageFingerprint(doc, parsed);
         const watch = createWatchFromFingerprint({
           fingerprint,
           notes,
@@ -2249,7 +2265,7 @@ export function showPageInfoDialog(
           );
           return;
         }
-        const current = capturePageFingerprint(doc, parsed, meta);
+        const current = capturePageFingerprint(doc, parsed);
         const report = compareFingerprints(watch.baseline, current);
         const out = formatDriftHandoffMarkdown(watch, report, envLabel);
         handoff = out;
@@ -2258,10 +2274,10 @@ export function showPageInfoDialog(
         diffEl.textContent = out;
         const severityMsg =
           report.severity === "clean"
-            ? "No UI drift detected"
+            ? "No differences in the captured UI fingerprint"
             : report.severity === "tools-only"
               ? "Tools release changed only — review findings"
-              : "UI drift detected — review findings";
+              : "Review capture warnings or UI differences";
         announce(doc, `Upgrade watch: ${severityMsg} (${report.severity})`);
       });
     },

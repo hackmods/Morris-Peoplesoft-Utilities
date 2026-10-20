@@ -46,6 +46,56 @@ const test = base.extend<Fixtures>({
 });
 
 test.describe("MPU extension UI", () => {
+  test("search automation ignores collection controls and never replays target search actions", async ({ extensionContext }) => {
+    await extensionContext.serviceWorkers()[0].evaluate(async () => {
+      const { mpuSettings } = await chrome.storage.local.get("mpuSettings");
+      (mpuSettings as MpuSettings).features.correctHistoryOption = "Yes";
+      await chrome.storage.local.set({ mpuSettings });
+    });
+    const page = await extensionContext.newPage();
+    await page.route("**/c/MENU.COMP.GBL", (route) => route.fulfill({
+      contentType: "text/html",
+      body: `<!doctype html><html><body><div id="pthdr2container"></div>
+        <div class="ps_box-search"></div><aside><button id="PTS_MORE_LESS_OPT" aria-expanded="false">More</button></aside>
+        <iframe id="ptifrmtgtframe" srcdoc='<body class="PSSRCHPAGE"><input type="radio" id="PTS_CFG_CL_WRK_PTS_ACCESS_MODE_C"><button id="PTS_MORE_LESS_OPT" aria-expanded="false">More options</button></body>'></iframe>
+        <script>window.shellClicks=0;document.querySelector("aside button").onclick=()=>window.shellClicks++;
+        document.querySelector("iframe").onload=()=>{const d=document.querySelector("iframe").contentDocument;
+        window.targetClicks={correct:0,advanced:0};d.querySelector("input").onclick=()=>window.targetClicks.correct++;
+        d.querySelector("button").onclick=()=>window.targetClicks.advanced++;};</script></body></html>`,
+    }));
+    await page.goto(`http://127.0.0.1:4173${FLUID_COMPONENT_PATH}`);
+    await expect(page.locator("#mpu-bar")).toBeVisible();
+    const counts = () => page.evaluate(() => {
+      const state = window as unknown as { shellClicks: number; targetClicks: { correct: number; advanced: number } };
+      return { shell: state.shellClicks, ...state.targetClicks };
+    });
+    await expect.poll(counts).toEqual({ shell: 0, correct: 1, advanced: 1 });
+    await page.waitForTimeout(1400); // Cover both delayed retry windows.
+    expect(await counts()).toEqual({ shell: 0, correct: 1, advanced: 1 });
+    await page.close();
+  });
+
+  test("Fluid collection with global search does not trigger automatic navigation clicks", async ({ extensionContext }) => {
+    await extensionContext.serviceWorkers()[0].evaluate(async () => {
+      const { mpuSettings } = await chrome.storage.local.get("mpuSettings");
+      (mpuSettings as MpuSettings).features.correctHistoryOption = "Yes";
+      await chrome.storage.local.set({ mpuSettings });
+    });
+    const page = await extensionContext.newPage();
+    await page.route("**/c/MENU.COMP.GBL", (route) => route.fulfill({
+      contentType: "text/html",
+      body: `<!doctype html><html><body><div id="pthdr2container"></div><div class="ps_box-search"></div>
+        <aside><button>Expand</button><button>More</button><button id="PTS_MORE_LESS_OPT" aria-expanded="false">More options</button>
+        <input type="radio" id="PTS_CFG_CL_WRK_PTS_ACCESS_MODE_C"></aside>
+        <script>window.clicks=0;document.querySelector("aside").onclick=()=>window.clicks++;</script></body></html>`,
+    }));
+    await page.goto(`http://127.0.0.1:4173${FLUID_COMPONENT_PATH}`);
+    await expect(page.locator("#mpu-bar")).toBeVisible();
+    await page.waitForTimeout(1600); // Absence assertion must span retry windows.
+    expect(await page.evaluate(() => (window as unknown as { clicks: number }).clicks)).toBe(0);
+    await page.close();
+  });
+
   test("two Options tabs preserve independent edits and report conflicting environment drafts", async ({ extensionContext, extensionId }) => {
     test.setTimeout(120_000);
     const first = await extensionContext.newPage();
@@ -84,17 +134,36 @@ test.describe("MPU extension UI", () => {
     const downloaded = fluidPage.waitForEvent("download");
     await fluidPage.locator("#mpu-diagnostic-download").click();
     expect((await downloaded).suggestedFilename()).toBe("mpu-diagnostics.txt");
+    await fluidPage.evaluate(() => {
+      const info = document.createElement("div");
+      info.id = "pt_pageinfo";
+      info.setAttribute("data-menu", "MENU");
+      info.setAttribute("data-component", "COMP");
+      info.setAttribute("data-page", "SYNTHETIC_BEFORE");
+      document.body.append(info);
+    });
     await fluidPage.locator("#mpu-pi-watch-save").click();
     const baselines = fluidPage.locator("#mpu-pi-baseline");
     await expect(baselines.locator("option")).toHaveCount(2);
     const original = await baselines.inputValue();
-    await fluidPage.evaluate(() => { const field = document.createElement("input"); field.id = "SYNTHETIC_NEWFIELD$0"; document.body.append(field); });
+    await fluidPage.evaluate(() => {
+      const info = document.getElementById("pt_pageinfo");
+      info?.setAttribute("data-page", "SYNTHETIC_AFTER");
+      const fields = document.createDocumentFragment();
+      for (let index = 0; index < 205; index++) {
+        const field = document.createElement("input");
+        field.id = `SYNTHETIC_NEWFIELD_${index}$0`;
+        fields.append(field);
+      }
+      document.body.append(fields);
+    });
     await fluidPage.locator("#mpu-pi-watch-save").click();
     await expect(baselines.locator("option")).toHaveCount(3);
     await baselines.selectOption(original);
     await fluidPage.locator("#mpu-pi-check-drift").click();
     await expect(fluidPage.locator("#mpu-pi-diff")).toContainText("# Upgrade validation handoff");
-    await expect(fluidPage.locator("#mpu-pi-diff")).toContainText("SYNTHETIC");
+    await expect(fluidPage.locator("#mpu-pi-diff")).toContainText("SYNTHETIC\\_AFTER");
+    await expect(fluidPage.locator("#mpu-pi-diff")).toContainText("current field scan is incomplete (200 retained");
     await expect(fluidPage.locator("#mpu-pi-copy-handoff")).toBeVisible();
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.setViewportSize({ width: 320, height: 600 });
@@ -222,7 +291,7 @@ test.describe("MPU extension UI", () => {
     await search.fill("fluid accessibility");
     await expect(page.locator("#agent-list > li")).toHaveCount(1);
     await expect(search).toBeFocused();
-    const link = page.locator("#agent-list a");
+    const link = page.locator("#agent-list a").first();
     await expect(link).toHaveAttribute("href", "https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/review-fluid-accessibility/AGENT.md");
     await expect(link).toHaveAttribute("rel", "noopener noreferrer");
     await page.getByRole("button", { name: "Prepare task brief for PeopleSoft Fluid and Classic accessibility reviewer" }).click();
@@ -271,6 +340,9 @@ test.describe("MPU extension UI", () => {
       const page = await extensionContext.newPage();
       await page.goto(`chrome-extension://${extensionId}/${path}`);
       await expect(page.locator("#open-agents")).toHaveAttribute("href", `chrome-extension://${extensionId}/options.html#agents`);
+      if (path === "popup.html") await page.evaluate(() => {
+        chrome.sidePanel.open = async () => { throw new Error("Exercise Options fallback"); };
+      });
       const [library] = await Promise.all([extensionContext.waitForEvent("page"), page.locator("#open-agents").click()]);
       await expect(library.locator("#panel-agents")).toBeVisible();
       await library.close();
@@ -283,6 +355,77 @@ test.describe("MPU extension UI", () => {
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
     await expect(fluidPage.locator("#mpu-help")).toBeFocused();
+  });
+
+  test("toolbar Agents click opens the configured panel or its local fallback", async ({ extensionContext, extensionId, fluidPage }) => {
+    const sw = extensionContext.serviceWorkers()[0];
+    await sw.evaluate(() => {
+      const open = chrome.sidePanel.open.bind(chrome.sidePanel);
+      const state = globalThis as unknown as { agentOpenResult: string };
+      state.agentOpenResult = "waiting";
+      chrome.sidePanel.open = async (options) => {
+        try { await open(options); state.agentOpenResult = "opened"; }
+        catch (error) { state.agentOpenResult = "fallback"; throw error; }
+      };
+    });
+    await fluidPage.locator("#mpu-agents").click();
+    await expect.poll(() => sw.evaluate(() => (globalThis as unknown as { agentOpenResult: string }).agentOpenResult)).toMatch(/opened|fallback/);
+    const state = await sw.evaluate(async () => {
+      const tab = (await chrome.tabs.query({})).find((item) => item.url?.includes("/c/MENU.COMP.GBL"))!;
+      return { result: (globalThis as unknown as { agentOpenResult: string }).agentOpenResult, panel: await chrome.sidePanel.getOptions({ tabId: tab.id }) };
+    });
+    expect(state.panel.path).toBe("sidepanel.html#agents");
+    if (state.result === "fallback") await expect.poll(() => extensionContext.pages().some((page) => page.url() === `chrome-extension://${extensionId}/options.html#agents`)).toBe(true);
+  });
+
+  test("agent preferences merge across Options and side panel without saving briefs or capturing the page", async ({ extensionContext, extensionId }) => {
+    const options = await extensionContext.newPage();
+    const panel = await extensionContext.newPage();
+    await panel.addInitScript(() => {
+      Object.defineProperty(window, "pageSnapshotCalls", { value: [] });
+      chrome.tabs.sendMessage = ((...args: unknown[]) => {
+        (window as unknown as { pageSnapshotCalls: unknown[] }).pageSnapshotCalls.push(args);
+        return Promise.reject(new Error("Unexpected snapshot"));
+      }) as typeof chrome.tabs.sendMessage;
+    });
+    await Promise.all([
+      options.goto(`chrome-extension://${extensionId}/options.html#agents`),
+      panel.goto(`chrome-extension://${extensionId}/sidepanel.html#agents`),
+    ]);
+    await expect(panel.locator("#panel-agents")).toBeVisible();
+    await expect(panel.locator("#page-info-view")).toBeHidden();
+    const before = await options.evaluate(() => chrome.storage.local.get("mpuSettings"));
+    const first = options.locator('[data-favorite="assist-peoplecode"]');
+    const second = panel.locator('[data-favorite="review-data-correctness"]');
+    await Promise.all([first.click(), second.click()]);
+    await expect(panel.locator('[data-favorite="assist-peoplecode"]')).toHaveAttribute("aria-pressed", "true");
+    await expect(options.locator('[data-favorite="review-data-correctness"]')).toHaveAttribute("aria-pressed", "true");
+    await panel.locator("#agent-view").selectOption("favorites");
+    await expect(panel.locator("#agent-list > li")).toHaveCount(2);
+    await options.locator('[data-agent-task="peoplecode"]').click();
+    await options.locator("#agent-list .agent-prepare").first().click();
+    await options.locator("#agent-brief").fill("PRIVATE UNSAVED TEST BRIEF");
+    await panel.locator("#agent-view").selectOption("recent");
+    await expect(panel.locator("#agent-list > li")).toHaveCount(1);
+    await panel.locator("#agent-clear-recents").click();
+    await expect(panel.locator("#agent-list > li")).toHaveCount(0);
+    await options.locator("#agent-dismiss-onboarding").click();
+    await expect(panel.locator("#agent-onboarding")).toBeHidden();
+    const saved = await options.evaluate(() => chrome.storage.local.get(null));
+    expect(saved.mpuSettings).toEqual(before.mpuSettings);
+    expect((saved.mpuAgentLibrary as { favoriteIds: string[] }).favoriteIds).toEqual(expect.arrayContaining(["assist-peoplecode", "review-data-correctness"]));
+    expect(JSON.stringify(saved)).not.toContain("PRIVATE UNSAVED TEST BRIEF");
+    expect(await panel.evaluate(() => (window as unknown as { pageSnapshotCalls: unknown[] }).pageSnapshotCalls)).toEqual([]);
+    await panel.locator("#agent-view").selectOption("all");
+    await panel.locator("#agent-audience").selectOption("ba");
+    await expect(panel.locator("#agent-list > li").first()).toBeVisible();
+    await panel.setViewportSize({ width: 320, height: 600 });
+    await audit(panel);
+    await panel.emulateMedia({ colorScheme: "dark" });
+    await audit(panel);
+    expect(await panel.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    await panel.screenshot({ path: "test-results/agents-panel-dark.png", fullPage: true });
+    await options.close(); await panel.close();
   });
 
   test("disabling the host cancels shortcuts and Page Info snapshots", async ({ fluidPage, extensionContext }) => {

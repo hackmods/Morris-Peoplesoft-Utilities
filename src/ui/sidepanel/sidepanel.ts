@@ -1,5 +1,6 @@
 import { loadSettings, originAllowed } from "../../storage/settings";
 import { buildComponentUrl, parsePsUrl } from "../../adapters/ps-page";
+import { bindAgentLibrary } from "../../features/agent-references";
 
 const favList = document.getElementById("fav-list")!;
 const favEmpty = document.getElementById("fav-empty")!;
@@ -97,4 +98,18 @@ document.getElementById("refresh-pi")!.addEventListener("click", () => {
 });
 
 void renderFavorites();
-void refreshPageInfo();
+bindAgentLibrary(document);
+function showView(): void {
+  const route = location.hash.slice(1);
+  const agents = route === "agents";
+  document.getElementById("panel-agents")!.hidden = !agents;
+  document.getElementById("favorites-view")!.hidden = agents || route === "page-info-view";
+  document.getElementById("page-info-view")!.hidden = agents || route === "favorites";
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('nav a')) {
+    if (link.hash === location.hash) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  }
+}
+window.addEventListener("hashchange", showView);
+showView();
+// Reading the active tab is an explicit Page Info action, including on the Agents route.

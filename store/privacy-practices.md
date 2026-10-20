@@ -8,6 +8,8 @@ Increase productivity on PeopleSoft Classic and Fluid pages for business analyst
 
 The Agents reference library supports that purpose with local search of reusable PeopleSoft prompt descriptions and user-selected public GitHub documentation/release links. It provides no general chatbot, AI service connection or automatic data transfer.
 
+Agent favorites, up to six recent reference IDs and welcome dismissal are stored locally in a separate preference key. Search queries and editable task briefs are not saved. Opening the Agents view does not request a PeopleSoft page snapshot.
+
 Previewed diagnostics contains an allowlisted configuration summary and is copied/downloaded only by the user. Upgrade histories and trace request evidence stay in local storage. No diagnostic or handoff report is automatically uploaded or shared with the developer.
 
 ## Does this extension collect or use user data?
@@ -45,7 +47,7 @@ MPU does not request or store passwords. Favorites may include PeopleSoft menu/c
 ## Permissions justification
 
 - **storage** — save feature flags, favorites, environments, and optional allowlist locally.
-- **sidePanel** — optional Side Panel for Favorites browsing and Page Info (opened from the popup).
+- **sidePanel** — optional Side Panel for Favorites, Page Info and the local Agents library (opened from the popup or toolbar).
 - **tabs** — read the active tab URL to confirm a PeopleSoft origin, servlet, site, portal and node before Side Panel navigation. Unrelated tab URLs are not retained.
 
 ## Host access

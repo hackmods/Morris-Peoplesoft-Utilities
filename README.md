@@ -25,6 +25,8 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 
 **Compatibility target:** PeopleTools **8.62**, including Classic/Classic Plus, Fluid, and Classic components hosted inside Fluid. Real-environment sign-off remains required; see [the 8.62 validation checklist](docs/testing/peopletools-8.62.md). Chrome 116 or newer is required.
 
+For the customization upgrade watch workflow, see the [Upgrade watch walkthrough](docs/user-guide/upgrade-watch.md). It compares captured UI fingerprints and does not compare SQL or PeopleCode.
+
 ## Install
 
 ### Chrome Web Store (recommended)
@@ -113,12 +115,12 @@ See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## PeopleSoft agent prompt pack
 
-Full prompts, skills and templates are distributed separately from the extension. Options → Agents bundles only a searchable public reference catalog; popup/side-panel links open the library and Help links to setup documentation. MPU does not run agents or send page data to AI services.
+Full prompts, skills and templates are distributed separately from the extension. The toolbar's Agents button and popup open a searchable side-panel library, also available under Options → Agents. Audience filters and task shortcuts help find a specialist; favorites, six recent references and the welcome dismissal stay on this device. MPU does not run agents or send page data to AI services.
 
 - **Browse:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · guide [`agents/README.md`](agents/README.md) · wiki [AI agent prompts](wiki/AI-Agent-Prompts.md)
 - **Download:** each GitHub Release attaches `morris-peoplesoft-agents-v*.zip` (or run `npm run package:agents`)
 
-Content v4.2.0 targets PeopleTools 8.62 (confirm application release and PUM image separately): 24 workflows for BA requirements, PeopleCode/SQL, IB/CI, AE/Scheduler, reporting, testing, upgrades, approvals, performance/trace, Fluid/accessibility, Search Framework, portal/branding, conversion, onboarding and specialist training. Complete Copilot, Claude/Codex skill and Cursor exports, three private pillar templates and a private host-evaluation worksheet are included. Options can prepare a blank task brief; it reads no page context.
+Content v4.2.0 targets PeopleTools 8.62 (confirm application release and PUM image separately): 24 workflows for BA requirements, PeopleCode/SQL, IB/CI, AE/Scheduler, reporting, testing, upgrades, approvals, performance/trace, Fluid/accessibility, Search Framework, portal/branding, conversion, onboarding and specialist training. Complete Copilot, Claude/Codex skill and Cursor exports, three private pillar templates and a private host-evaluation worksheet are included. The library prepares an editable blank task brief with explicit copy; it reads no page context and saves neither searches nor brief text. The displayed catalog version describes bundled metadata; release downloads are opened only when requested.
 
 ## Releases
 

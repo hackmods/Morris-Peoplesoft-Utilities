@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-19
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome extension)
 
@@ -13,6 +13,7 @@ Morris PeopleSoft Utilities (MPU) is a Manifest V3 Chrome extension that improve
 Settings are stored only in Chrome’s `chrome.storage.local` on your profile, including:
 
 - Feature on/off preferences
+- Agent library favorite IDs, up to six recently opened/prepared agent IDs, and welcome-message dismissal (no task briefs or searches)
 - Favorites (may include menu/component names and optional URL parameters)
 - The last 12 component identifiers visited for recent shortcuts (not full browsing history)
 - Customization watch notes and dated baseline UI fingerprints (field IDs, tab/structure labels, component identifiers, environment/origin-site scope and detected Tools version); up to five per component/environment and 50 overall
@@ -53,7 +54,7 @@ MPU's use of browser/page data is limited to its disclosed PeopleSoft productivi
 ## Permissions
 
 - **storage** — save preferences locally
-- **sidePanel** — optional Side Panel UI for Favorites and Page Info (opened from the popup)
+- **sidePanel** — optional Side Panel UI for Favorites, Page Info and the local Agents library (opened from the popup or toolbar)
 - **tabs** — read the active tab URL to validate PeopleSoft navigation context for the Side Panel. Navigation and Page Info messaging use that tab; MPU does not store unrelated tab URLs or browsing history.
 
 Content scripts run only on PeopleSoft URL patterns (`psp` / `psc` servlet paths).

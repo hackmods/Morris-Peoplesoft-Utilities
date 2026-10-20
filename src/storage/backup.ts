@@ -23,7 +23,11 @@ const profile = shape({ id: str, name: str, updatedAt: num, componentHint: str, 
 const fingerprint = shape({
   ...strings(["menu", "component", "market", "page", "toolsRel", "uiMode"]),
   tabLabels: array(str), structureLabels: array(str), fieldIds: array(str),
-});
+  fieldIdsComplete: (v) => typeof v === "boolean",
+  fieldIdsTotal: (v) => Number.isInteger(v) && (v as number) >= 0,
+  structureLabelsComplete: (v) => typeof v === "boolean",
+  pageMetadataComplete: (v) => typeof v === "boolean",
+}, ["menu", "component", "market", "page", "toolsRel", "uiMode", "tabLabels", "structureLabels", "fieldIds"]);
 const watch = shape({
   ...strings(["id", "label", "notes", "menu", "component", "market", "envLabel"]),
   capturedAt: timestamp, baseline: fingerprint, scope: (v) => {

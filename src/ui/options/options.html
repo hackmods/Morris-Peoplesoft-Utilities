@@ -166,7 +166,7 @@
           <h2>Customization upgrade watch</h2>
           <p class="panel-lede">
             Compares page tabs, structure hosts, and field ids vs a baseline you capture before upgrade.
-            Does <strong>not</strong> detect PeopleCode-only overrides — use App Designer Compare Report for that.
+            Only the current loaded page is captured: up to 200 unique field IDs and 40 structure hosts. Unloaded tabs, PeopleCode, SQL and database changes are not compared — use App Designer Compare Report and your upgrade validation process.
           </p>
         </header>
         <div class="row-actions">
@@ -259,17 +259,39 @@
           <h2>PeopleSoft agent prompts</h2>
           <p class="panel-lede">Find a specialist prompt for your next PeopleSoft task.</p>
         </header>
-        <p id="agent-pack-version"></p>
-        <p>Use these prompts in Visual Studio Copilot, Claude, Codex or another approved AI tool. MPU does not run an AI model or send your PeopleSoft page data to these services.</p>
-        <p class="help">Links open public GitHub documentation in a new tab. Share only sanitized information your organization permits. The prompts require review; source checks do not establish real-system compatibility.</p>
-        <p class="agent-resource-links">
-          <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Setup and full prompt pack on GitHub</a>
-          <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Published release downloads</a>
-        </p>
+        <p class="agent-disclosure">MPU does not run agents or send page data. Search and task briefs stay unsaved.</p>
+        <section id="agent-onboarding" aria-label="Getting started">
+          <h3>Getting started</h3>
+          <p>Choose a specialist, load its skill in your approved AI tool, then prepare a task brief.</p>
+          <button type="button" id="agent-dismiss-onboarding">Dismiss getting started</button>
+        </section>
+        <div class="agent-actions" aria-label="Common tasks">
+          <button type="button" data-agent-task="peoplecode">PeopleCode</button>
+          <button type="button" data-agent-task="sql">SQL</button>
+          <button type="button" data-agent-task="testing">UAT</button>
+          <button type="button" data-agent-task="diagnostics">Diagnosis</button>
+        </div>
+        <details class="agent-setup">
+          <summary>Setup and downloads</summary>
+          <p id="agent-pack-version"></p>
+          <p>Use prompts in Visual Studio Copilot, Claude, Codex or another approved AI tool. Share only sanitized information your organization permits. The prompts require review; source checks do not establish real-system compatibility.</p>
+          <p>Select the agents ZIP in a published release, then follow its setup instructions. Public GitHub links open in a new tab only when selected.</p>
+          <p class="agent-resource-links">
+            <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Setup and full prompt pack on GitHub</a>
+            <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Download skills (release assets)</a>
+          </p>
+        </details>
         <div class="agent-filters">
           <label for="agent-search">Search prompts
             <input type="search" id="agent-search" placeholder="Try Fluid, SQL or testing" autocomplete="off" aria-describedby="agent-results" />
           </label>
+          <label for="agent-audience">Audience
+            <select id="agent-audience"><option value="all">All audiences</option><option value="ba">BA</option><option value="developer">Developer</option><option value="admin">Admin</option></select>
+          </label>
+          <label for="agent-view">Library view
+            <select id="agent-view"><option value="all">All prompts</option><option value="favorites">Favorites</option><option value="recent">Recent</option></select>
+          </label>
+          <button type="button" id="agent-clear-recents">Clear recent prompts</button>
           <label for="agent-family">Task type
             <select id="agent-family">
               <option value="all">All tasks</option>
@@ -285,7 +307,7 @@
           <p>Choose a prompt below to create a blank request. Fill in only approved, sanitized information, and load that prompt or skill in your AI tool first.</p>
           <label for="agent-brief">Task brief</label>
           <textarea id="agent-brief" rows="10" spellcheck="false" aria-describedby="agent-brief-status"></textarea>
-          <button type="button" id="agent-brief-copy">Copy task brief</button>
+          <button type="button" id="agent-brief-copy">Copy task brief</button><button type="button" id="agent-brief-reset">Reset blank brief</button>
           <p id="agent-brief-status" role="status" aria-live="polite" aria-atomic="true"></p>
         </section>
         <p id="agent-results" role="status" aria-live="polite" aria-atomic="true"></p>

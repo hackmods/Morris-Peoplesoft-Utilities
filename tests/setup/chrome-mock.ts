@@ -42,7 +42,7 @@ const local = {
 };
 
 vi.stubGlobal("chrome", {
-  storage: { local },
+  storage: { local, onChanged: { addListener: vi.fn(), removeListener: vi.fn() } },
   runtime: {
     getURL: vi.fn((path: string) => `chrome-extension://mpu-test/${path}`),
     id: "mpu-test",

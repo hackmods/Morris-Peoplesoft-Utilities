@@ -19,6 +19,21 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Next build — 1.0.32
+
+- Restrict automatic search helpers to explicit search-page containers and exact known controls. Skip already-selected Correct History and Advanced Search controls without a confirmed collapsed state.
+- Remove generic More/Expand clicks and prevent action replay across retries or AJAX control replacement in the same document. Stop remaining automation after user edits, and cancel delayed work directly when disabled.
+- Preserve PeopleSoft save warnings. This addresses unsafe automation; the reported live Fluid navigation-collection warning still requires real-system verification. Unrecognized search layouts are left for manual interaction.
+- Make upgrade-watch captures disclose incomplete field scans, cap each capture at 200 unique field IDs, and warn when the current Page Info identity or UI context does not match the selected baseline.
+- Document Page Info capture and comparison plus Options → Upgrade watch import/export. These checks compare browser UI fingerprints only; they do not compare SQL or PeopleCode.
+
+### Next build — 1.0.31
+
+- Open the local Agents library from the PeopleSoft toolbar or popup, with guarded Options fallback.
+- Share audience filters, task shortcuts, favorites, recents and blank task briefs between the side panel and Options.
+- Serialize local preference changes across views; keep brief text and searches unsaved, with no automatic page capture or remote prompt loading.
+- Show the bundled catalog version and explicit instruction/download links.
+
 ### Prompt pack 4.2.0
 
 - Add bounded Oracle retrieval, evidence reuse/freshness, proportional intake/output and cost-aware delegation to all standalone specialist instructions.

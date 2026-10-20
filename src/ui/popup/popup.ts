@@ -10,6 +10,22 @@ window.addEventListener("unhandledrejection", (event) => {
 const optionsLink = document.getElementById("open-options") as HTMLAnchorElement;
 const agentsLink = document.getElementById("open-agents") as HTMLAnchorElement;
 agentsLink.href = chrome.runtime.getURL("options.html#agents");
+agentsLink.addEventListener("click", (event) => {
+  event.preventDefault();
+  const fallback = (): void => {
+    void chrome.tabs.create({ url: chrome.runtime.getURL("options.html#agents") })
+      .catch(() => { status.textContent = "Unable to open the Agents library"; });
+  };
+  if (sidePanelTabId === undefined || !chrome.sidePanel?.open || !chrome.sidePanel?.setOptions) {
+    fallback(); return;
+  }
+  try {
+    // Both API calls stay inside the popup click's activation.
+    const configured = chrome.sidePanel.setOptions({ tabId: sidePanelTabId, path: "sidepanel.html#agents", enabled: true });
+    const opened = chrome.sidePanel.open({ tabId: sidePanelTabId });
+    void Promise.all([configured, opened]).then(() => window.close()).catch(fallback);
+  } catch { fallback(); }
+});
 
 optionsLink.addEventListener("click", (e) => {
   e.preventDefault();
