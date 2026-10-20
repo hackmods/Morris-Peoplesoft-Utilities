@@ -21,4 +21,4 @@ This plan tracks the remaining work toward the 1.0.32 release. Items below are p
 
 Source commit `5ba7eec` is pushed to `main`. GitHub release [v1.0.32](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.32) is published with both ZIPs verified as uploaded.
 
-Chrome Web Store submission is blocked by Google reauthentication. The attempt to cancel the superseded 1.0.31 review failed; refreshing showed “Verify it’s you.” Last verified state: 1.0.30 published, 1.0.31 pending review. Version 1.0.32 has not been uploaded or submitted there. Resume after maintainer sign-in; cancel the superseded review, upload the tested ZIP, and submit with automatic publishing.
+After maintainer reauthentication, the dashboard showed 1.0.31 published. The tested 1.0.32 ZIP (SHA-256 `db446cf7ff11431a122da3efe009bff95215969132a10fcabac98e47a6de5a2b`) was uploaded and successfully submitted for review with automatic publication enabled. The Package page confirms 1.0.32 pending review and 1.0.31 published. Google approval and real-system verification remain outstanding.
