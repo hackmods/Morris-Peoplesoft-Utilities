@@ -16,3 +16,9 @@ This plan tracks the remaining work toward the 1.0.32 release. Items below are p
 - Chromium: 26 tests passed on the full run. The new Upgrade test initially expected an unescaped Markdown underscore; correcting that assertion produced a passing targeted rerun, including rendered axe and narrow viewport checks. All 27 scenarios are verified.
 - Accessibility, store and compliance audits passed. Fresh extension and agents ZIPs built for 1.0.32; prompt content remains 4.2.0.
 - GitHub publication and Chrome submission follow this source checkpoint. Real-system verification remains open as described above.
+
+## Publication checkpoint
+
+Source commit `5ba7eec` is pushed to `main`. GitHub release [v1.0.32](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.32) is published with both ZIPs verified as uploaded.
+
+Chrome Web Store submission is blocked by Google reauthentication. The attempt to cancel the superseded 1.0.31 review failed; refreshing showed “Verify it’s you.” Last verified state: 1.0.30 published, 1.0.31 pending review. Version 1.0.32 has not been uploaded or submitted there. Resume after maintainer sign-in; cancel the superseded review, upload the tested ZIP, and submit with automatic publishing.
