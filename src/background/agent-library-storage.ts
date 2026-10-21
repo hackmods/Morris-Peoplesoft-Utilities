@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import {
   AGENT_LIBRARY_MESSAGE, AGENT_LIBRARY_STORAGE_KEY, isKnownAgentId, loadAgentLibraryPreferences,
   type AgentLibraryMutation, type AgentLibraryReply,
@@ -16,19 +17,19 @@ function validMutation(value: unknown): value is AgentLibraryMutation {
 }
 
 function trustedSender(sender: chrome.runtime.MessageSender): boolean {
-  if (sender.id !== chrome.runtime.id || !sender.url) return false;
+  if (sender.id !== getExtensionApi().runtime.id || !sender.url) return false;
   try {
     const url = new URL(sender.url);
     url.hash = "";
     url.search = "";
-    return ["options.html", "sidepanel.html"].some((page) => url.href === chrome.runtime.getURL(page));
+    return ["options.html", "sidepanel.html"].some((page) => url.href === getExtensionApi().runtime.getURL(page));
   } catch { return false; }
 }
 
 /** A single worker queue serializes intentions from every Options/side-panel view. */
 export function registerAgentLibraryStorage(): void {
   let pending: Promise<unknown> = Promise.resolve();
-  chrome.runtime.onMessage.addListener((message: unknown, sender, respond: (reply: AgentLibraryReply) => void) => {
+  getExtensionApi().runtime.onMessage.addListener((message: unknown, sender, respond: (reply: AgentLibraryReply) => void) => {
     if (!message || typeof message !== "object" || (message as Record<string, unknown>).type !== AGENT_LIBRARY_MESSAGE) return;
     if (!trustedSender(sender) || !validMutation(message)) {
       respond({ ok: false, error: "Invalid agent library request." });
@@ -46,7 +47,7 @@ export function registerAgentLibraryStorage(): void {
           case "dismiss": preferences.onboardingDismissed = true; break;
           case "clear-recents": preferences.recentIds = []; break;
         }
-        await chrome.storage.local.set({ [AGENT_LIBRARY_STORAGE_KEY]: preferences });
+        await getExtensionApi().storage.local.set({ [AGENT_LIBRARY_STORAGE_KEY]: preferences });
         return { ok: true, preferences };
       } catch { return { ok: false, error: "Agent library preferences could not be saved. Please retry." }; }
     });

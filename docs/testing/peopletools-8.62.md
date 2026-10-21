@@ -1,5 +1,7 @@
 # PeopleTools 8.62 validation
 
+Chrome and Firefox are maintained in parity. Record browser name/version with every real-system result and repeat the matrix for each browser. Firefox synthetic extension tests and package validation do not establish real PeopleTools 8.62 compatibility. See [browser support](../browser-support.md).
+
 Primary compatibility target: **PeopleTools 8.62**. This is a validation plan, not a certification. Synthetic fixtures and generated screenshots do not establish support on an employer's installation.
 
 On 2026-10-12, the maintainer confirmed in the publishing chat that the extension
@@ -24,6 +26,8 @@ Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser v
 | Keyboard / screen reader | Tab and Shift+Tab stay in dialogs; Escape works after typing; focus returns; 200% zoom, contrast, forced colors, and live announcements | Real-system test needed |
 | Agent reference entry points | Help opens public documentation without page/session context; local library filtering works with no external requests and no persisted search; popup/side-panel links and assistive technology remain usable | Real-system/AT check needed |
 | Concurrent edits | Two Options tabs merge independent preferences; conflicting stale environment/favorite edits report a conflict and preserve saved data; recent visits do not cause write loops | Real-system test needed |
+| Production awareness and runbooks | Explicitly classify the mapped environment; verify badge placement and per-action consent for Field Entry/trace start, cancellation on disable, normal unsaved-change protection and runbook label associations | Synthetic/browser checks passed; real-system/AT check needed |
+| Environment comparison workspace | Explicitly review/save two snapshots; confirm portal/owning-target scope, dates, Tools/application metadata and incomplete-capture warnings; verify real iframe/modal ownership without treating UI equality as server equivalence | Synthetic/browser checks passed; real-system/AT check needed |
 | Trace request evidence | Explicit On/Off requests; requested/acknowledged/unknown labels do not assert live state; disabling between GET and POST prevents the POST; observed login/logout invalidates confidence | Real-system test needed |
 | Diagnostics and upgrade history | Review allowlisted diagnostics before copy/download; no automatic values/tokens/hostnames; choose dated/environment baselines and review handoff; dialog focus returns after toolbar rebuild | Real-system/AT check needed |
 
@@ -38,3 +42,13 @@ Version 1.0.32 removes broad More/Expand clicks, requires explicit search-page a
 Real-system acceptance remains open: on a fresh unchanged page, compare helpers off/on, open the affected collection and navigate between its pages, then repeat with a genuine unsaved edit. Unedited navigation should not acquire a save prompt from MPU; genuine unsaved changes must still receive PeopleSoft's normal protection. Record the Tools patch and outcome privately. Do not disable save warnings as a workaround.
 
 References: [Oracle PeopleTools 8.62 Fluid guide](https://docs.oracle.com/cd/G35126_01/psft/pdf/pt862tflu-b062025.pdf), [Oracle 8.62 accessibility report](https://docs.oracle.com/en/corporate/accessibility/templates/t2-15706.html). Oracle's report covers its product, not this extension.
+
+## Follow-up evidence — 2026-10-21
+
+Live verification remains open. Browser automation denied creation of a Chrome dashboard tab and desktop control then stopped because it could not determine the current browser URL confidently. No Niagara on/off navigation comparison, live diagnostic, genuine unsaved-change test or new extension-on-public-page screenshot was performed; no Tools patch was established.
+
+K/I implementation has passing synthetic regression and rendered-browser coverage for production consent/cancellation, current activation/scope/environment checks, owning-frame Field Entry hooks, intervening edits, retained dirty-marker state and trace stop availability. Runbook tests cover strict local imports and concurrent drafts. The full browser run passed 36 scenarios, including axe/contrast and narrow layouts; all five K/I scenarios passed again against the final rebuilt trace guard. Simulated hooks and a retained dirty marker do not establish delivered PeopleSoft validation or save-warning behavior. Repeat the real-system acceptance above, including genuine unsaved changes, when access permits.
+
+The subsequent C workspace passed the full 39-scenario synthetic browser run, including reviewed snapshots, value/session-URL exclusion, unknown Classic target scope, disable-during-preview, retained history and concurrent conflicts. This adds no real-system result. The repeated Chrome dashboard access attempt was also blocked; no live Niagara observations or new screenshots were obtained.
+
+The later native local-window attempt followed the user's instruction to avoid the Chrome MCP connector. Chrome accessibility reading succeeded on New Tab, with an MPU toolbar button present but no verified version. Screenshot capture timed out and both navigation attempts failed to activate the captured window; retries stopped. No enabled/disabled comparison, live diagnostic, unsaved-change test, patch identification or genuine extension-on-Niagara capture occurred. G's local file comparisons and synthetic parser samples do not add PeopleTools compatibility evidence.

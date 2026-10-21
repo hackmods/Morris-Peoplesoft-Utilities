@@ -49,7 +49,8 @@ const checks: Record<keyof MpuSettings, Check> = {
   favorites: array(favorite),
   recentComponents: array(shape({ ...strings(["Menu", "Component", "Market", "Portal", "Node", "Site"]), Servlet: oneOf("psp", "psc"), visitedAt: num })),
   customizationWatches: array(watch),
-  environments: array(shape({ label: str, active: yn, trcProfRunning: yn, color: str, traceRequest }, ["label", "active", "trcProfRunning"])),
+  environments: array(shape({ label: str, active: yn, trcProfRunning: yn, color: str, traceRequest,
+    classification: oneOf("unclassified", "non-production", "production") }, ["label", "active", "trcProfRunning"])),
   urlSites: (v) => object(v) && Object.entries(v).every(([origin, sites]) =>
     /^https?:\/\//.test(origin) && object(sites) && Object.entries(sites).every(([site, mapping]) =>
       !["__proto__", "constructor", "prototype"].includes(site) &&

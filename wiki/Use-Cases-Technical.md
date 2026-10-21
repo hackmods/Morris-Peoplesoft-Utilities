@@ -1,5 +1,11 @@
 # Use cases — Technical
 
+- **Configuration comparison:** Options → Compare configuration accepts sanitized local INI-style or JSON files, masks sensitive pairs and requires report review before export. No server access or configuration writes. [Supported formats and limits](Configuration-Comparisons).
+
+- **Environment comparisons:** Page Info → Prepare environment snapshot → review → Save reviewed snapshot. Repeat in the other environment, then open Options → Compare environments and select both snapshots explicitly. Review the report before saving, copying or downloading. [Walkthrough](Environment-Comparisons).
+
+- **Production awareness and runbooks:** Explicitly classify environments in Options → Environments. Production adds a persistent badge and confirms MPU Field Entry writes and trace start, with access checks after confirmation. Keep component/environment procedures in local runbooks; preview team imports and resolve concurrent-edit conflicts. See [Environments](Environments) for limits and separate export instructions.
+
 - **Agent references:** Options → Agents searches 24 PeopleSoft prompt descriptions and links to public setup/source pages and three private pillar templates, including Search Framework and portal/branding specialists. Popup/Side Panel open the local library; Help links to the toolkit. Use prompts in your approved Copilot/Claude/Codex tool; MPU does not run agents or send page data to AI services.
 
 - **Trace:** Configure PeopleCode/SQL flags in Options → Tracing, then choose an explicit On or Off request from the bar. The bar distinguishes requested, last-confirmed save requests and unknown state, with the configured preset/flag count. This is request history, not live server/session status. Stale/incomplete requests and observed login/logout lose confidence; verify tracing in PeopleSoft. Requires access to delivered trace components. Partial failures never claim that trace stopped.

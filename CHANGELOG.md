@@ -2,6 +2,8 @@
 
 ## Unreleased — repository review / PeopleTools 8.62
 
+- Add Firefox desktop 140+ alongside Chrome 116+: shared MV3 manifest generation/version, browser API/sidebar adapter, separate validated browser packages, runtime asset parity audit, actual Firefox extension tests, and dual-browser CI/release checks. Future features and fixes must maintain both browsers in parity; Mozilla signing/publication and real-system PeopleTools verification remain separate steps.
+
 - Fix Classic iframe Field Entry, page tabs, structure and upgrade fingerprints; notify the actual field document's change hooks.
 - Enforce allowlist/environment/feature guards for shortcuts and page snapshots; cancel delayed search retries and prevent multi-tab recent-history loops.
 - Make sheet preview read-only, preserve quoted multiline and empty CSV/TSV cells, reject ambiguous/unsafe targets, and revalidate fields before Apply.
@@ -18,6 +20,25 @@
 All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
+
+### Roadmap increment G — working tree, outside the prepared store candidate
+
+- Add Options → Compare configuration for explicitly selected, bounded INI-style and JSON files. Reject duplicate keys and unsupported formats; retain source-line and type/missing evidence.
+- Mask sensitive pairs before comparison, omit filenames, and require report review before copy/download. Inputs and reports remain in tab memory with explicit clear, no server access, storage or configuration writes.
+- Document supported subsets and synthetic fixture provenance. Real export compatibility remains unverified; the prepared J/A/D/K/I 1.0.33 ZIP is unchanged.
+
+### Roadmap increment C — working tree, outside the prepared store candidate
+
+- Add explicit Page Info snapshot preparation and review, followed by Options → Compare environments with two user-selected captures, saved comparison history and reviewed text copy/download.
+- Preserve portal/target origin and site, dates, versions and capture limits; warn about unknown PUM, incomplete captures and mismatched objects/UI. Browser metadata cannot establish server object or database equivalence.
+- Keep comparisons in bounded separate local storage with revision conflicts and current-page/activation checks. Saved comparisons retain their own snapshot copies. Exclude MPU controls from page fingerprints.
+
+### Roadmap increment K / I — working tree
+
+- Add explicit environment classification and a persistent production badge, independent of greeting/color. Production keeps the toolbar at document top and sticky.
+- Confirm each production Field Entry Apply and trace start; recheck current access, UI scope, classification and environment after consent. Revalidate field targets and values at Apply; keep trace stop available without production confirmation.
+- Add Options → Environments local runbooks with bounded notes and approved HTTPS links, manual environment/component association, full JSON import preview, collision rejection and revision checks across views. Keep runbooks separate from settings/recent visits and export them separately.
+- Preserve action/failure announcements through toolbar refresh. No version change or new permission. A 1.0.33 candidate containing K/I was prepared on 2026-10-21 after the release request; Chrome submission remains blocked by browser access. C is not in that candidate.
 
 ### Next build — 1.0.33
 

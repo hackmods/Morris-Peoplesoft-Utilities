@@ -1,16 +1,16 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-21
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
-**Product:** Morris PeopleSoft Utilities (Chrome extension)
+**Product:** Morris PeopleSoft Utilities (Chrome and Firefox extension)
 
 ## Summary
 
-Morris PeopleSoft Utilities (MPU) is a Manifest V3 Chrome extension that improves productivity on PeopleSoft Classic and Fluid pages. **MPU does not collect, transmit, sell, or share personal data with the developer or any third party.**
+Morris PeopleSoft Utilities (MPU) is a Manifest V3 extension for Chrome and Firefox that improves productivity on PeopleSoft Classic and Fluid pages. **MPU does not collect, transmit, sell, or share personal data with the developer or any third party.**
 
 ## Data stored on your device
 
-Settings are stored only in Chrome’s `chrome.storage.local` on your profile, including:
+Settings are stored only in extension-local storage (`chrome.storage.local` in Chrome, `browser.storage.local` in Firefox) in your browser profile. Each browser keeps its own data; MPU does not sync settings between browsers. This includes:
 
 - Feature on/off preferences
 - Agent library favorite IDs, up to six recently opened/prepared agent IDs, and welcome-message dismissal (no task briefs or searches)
@@ -18,7 +18,9 @@ Settings are stored only in Chrome’s `chrome.storage.local` on your profile, i
 - The last 12 component identifiers visited for recent shortcuts (not full browsing history)
 - Customization watch notes and dated baseline UI fingerprints (field IDs, tab/structure labels, component identifiers, environment/origin-site scope and detected Tools version); up to five per component/environment and 50 overall
 - Optional **Field Entry** named profiles (field values you choose to save; may include business keys such as EmplIDs or department IDs — never passwords; session clipboard is not persisted)
-- Environment labels and URL/site mappings
+- Environment labels, explicit production/non-production classification and URL/site mappings
+- Environment runbooks in a separate local key: manually entered environment/component labels, titles, notes, approved HTTPS links and update timestamps (up to 100 entries and a 256,000-byte serialized cap)
+- Explicitly reviewed environment snapshots and saved comparisons in a separate local key: field identifiers and UI labels, portal/target origins and sites, environment labels, dates, extension/Tools/application version metadata and capture warnings. Up to 50 snapshots and 25 comparison records, within a 1,000,000-byte serialized cap; comparison records retain their own two snapshot copies
 - Trace flag preferences and last-request evidence (origin/site scope, target, timestamp and save-request outcome), which does not establish current server/session trace state
 - Optional host allowlist origins (Phase 2, off by default)
 
@@ -38,6 +40,12 @@ The Agents reference library is a packaged catalog of public PeopleSoft prompts.
 MPU does not execute these agents, connect to an AI service or upload PeopleSoft data to Copilot, Claude, Codex or another provider. If you later copy information into your chosen AI tool, that sharing is controlled by you and your organization's policy, outside MPU.
 
 ## Page access, clipboard and exports
+
+Configuration comparison reads only the two files you explicitly select, after you request a preview. Raw file content, parsed entries and reports remain in that Options tab's memory; they are not saved in extension storage, backed up or transmitted. Clear the workspace or reload to remove selections and reports. Sanitize files before selecting them: conservative masking cannot detect all secrets or business identifiers. Masked pairs are not compared. Source filenames are omitted. Copy/download is available only after reviewing the preview and checking its review box. Exported files and clipboard contents remain under your control after clearing or uninstalling.
+
+Environment comparison snapshots are prepared only when you choose the Page Info action, and are saved only after review. They exclude field values and full page/session URLs. Snapshot labels, technical UI labels and origins may contain business context. Two snapshots must be selected explicitly for a report; copy/download requires a visible reviewed report. MPU does not upload comparison data or automatically retrieve other environments. Delete source snapshots and saved comparisons separately in Options → Compare environments: deleting a source snapshot does not remove the copy retained in an existing saved comparison. These records are separate from the settings backup; downloaded reports remain under your control after deletion or uninstall.
+
+Runbooks do not read the active PeopleSoft page or automatically fetch their links. Choosing a saved HTTPS link opens that destination without a referrer or added page context; the destination handles the ordinary visit under its own policies. Team runbook imports are previewed locally before saving, and exports are separate files that may contain business context. MPU does not upload runbooks. Delete individual entries in Options → Environments; uninstalling removes their local extension storage but does not remove exported files.
 
 MPU reads relevant PeopleSoft page content locally to display the signed-in user ID, page/system metadata, field identities, process details and Integration Broker context. Field Entry, when enabled, reads editable values into memory and writes reviewed values back to the open page; those values may be personal or business data. It does not automatically save the PeopleSoft transaction. The normal PeopleSoft field-change processing and subsequent user save may send changes to your PeopleSoft server.
 

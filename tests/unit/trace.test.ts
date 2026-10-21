@@ -1,3 +1,4 @@
+// @vitest-environment-options {"url":"https://hr.example.edu/psp/ps/EMPLOYEE/HRMS/c/MENU.COMP.GBL"}
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
   computePeopleCodeMask,
@@ -158,9 +159,34 @@ describe("applyTraceComponent", () => {
 });
 
 describe("toggleTrace", () => {
+  it("requires production consent and cancels POST when classification changes after GET", async () => {
+    for (const revoke of [false, true]) {
+      const settings = createDefaultSettings();
+      settings.features.traceOption = "Yes";
+      settings.environments = [{ label: "Production", active: "Yes", trcProfRunning: "No", classification: "production" }];
+      settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
+      resetChromeStorage({ mpuSettings: settings });
+      const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (!init?.method || init.method === "GET") {
+          if (revoke) { settings.environments[0].classification = "non-production"; resetChromeStorage({ mpuSettings: settings }); }
+          return { ok: true, status: 200, text: async () => traceHtml(String(input).includes("TRACE_SQL") ? SQL_IDS : PC_IDS) };
+        }
+        return { ok: true, status: 200, text: async () => "processing_win0(2,1);" };
+      });
+      vi.stubGlobal("fetch", fetchMock);
+      const pending = toggleTrace(settings, parsed, 0, true);
+      await vi.waitFor(() => expect(document.getElementById("mpu-production-confirm")).toBeTruthy());
+      expect(fetchMock).not.toHaveBeenCalled();
+      document.getElementById("mpu-production-confirm")!.click();
+      expect((await pending).running).toBe(!revoke);
+      expect(fetchMock).toHaveBeenCalledTimes(revoke ? 1 : 4);
+      if (revoke) expect(fetchMock.mock.calls.some(([, init]) => init?.method === "POST")).toBe(false);
+    }
+  });
   it("does not contact PeopleSoft when tracing is disabled", async () => {
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "Yes" }];
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     resetChromeStorage({ mpuSettings: settings });
     const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
     expect((await toggleTrace(settings, parsed, 0, false)).running).toBe(true);
@@ -171,6 +197,7 @@ describe("toggleTrace", () => {
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "Yes" }];
     settings.features.traceOption = "Yes";
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     resetChromeStorage({ mpuSettings: settings });
     const result = await toggleTrace(settings, parsed, 0, false);
     expect(result.running).toBe(true);
@@ -196,6 +223,7 @@ describe("toggleTrace", () => {
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No" }];
     settings.features.traceOption = "Yes";
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     resetChromeStorage({ mpuSettings: settings });
 
     const result = await toggleTrace(settings, parsed, 0, true);
@@ -215,6 +243,7 @@ describe("toggleTrace", () => {
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No" }];
     settings.features.traceOption = "Yes";
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     resetChromeStorage({ mpuSettings: settings });
     const result = await toggleTrace(settings, parsed, 0, true);
     expect(result.locked).toBe(true);

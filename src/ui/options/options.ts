@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../../platform/browser";
 import { loadSettings, saveSettings, settingsDraft, SettingsSaveError } from "../../storage/settings";
 import { mergeSettingsBackup } from "../../storage/backup";
 import { FEATURE_LABELS, FEATURE_TOGGLE_GROUPS } from "../../storage/feature-labels";
@@ -30,6 +31,11 @@ import {
 import { upsertWatch } from "../../features/upgrade-watch";
 import { bindAgentLibrary } from "../../features/agent-references";
 import { bindOracleDocs } from "../../features/oracle-docs-ui";
+import { bindRunbooksUI } from "../../features/runbooks-ui";
+import { bindEnvironmentComparisonUI } from "../../features/environment-comparison-ui";
+import { bindConfigurationComparisonUI } from "../../features/configuration-comparison-ui";
+
+const runbookEnvironmentLabels: string[] = [];
 
 const toast = document.getElementById("toast")!;
 let toastTimer = 0;
@@ -51,7 +57,7 @@ function say(msg: string): void {
 }
 
 function broadcast(): void {
-  chrome.runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
+  getExtensionApi().runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
 }
 
 const SCOPE_LABELS: Array<{ key: keyof FeatureUiScopes; label: string }> = [
@@ -424,6 +430,7 @@ function renderFavorites(settings: MpuSettings): void {
 }
 
 function renderEnvs(settings: MpuSettings): void {
+  runbookEnvironmentLabels.splice(0, runbookEnvironmentLabels.length, ...new Set(settings.environments.map(env => env.label)));
   const root = document.getElementById("env-list")!;
   root.replaceChildren();
   if (!settings.environments.length) {
@@ -438,6 +445,12 @@ function renderEnvs(settings: MpuSettings): void {
     const name = document.createElement("input");
     name.value = env.label;
     name.setAttribute("aria-label", `Environment ${index + 1} name`);
+    const classification = document.createElement("select");
+    classification.setAttribute("aria-label", `Environment ${index + 1} classification`);
+    for (const [value, label] of [["unclassified", "Unclassified"], ["non-production", "Non-production"], ["production", "Production"]]) {
+      classification.add(new Option(label, value));
+    }
+    classification.value = env.classification || "unclassified";
     const active = document.createElement("input");
     active.type = "checkbox";
     active.checked = env.active === "Yes";
@@ -455,6 +468,7 @@ function renderEnvs(settings: MpuSettings): void {
         label: name.value.trim() || s.environments[index].label,
         active: active.checked ? "Yes" : "No",
         color: color.value,
+        classification: classification.value as NonNullable<typeof env.classification>,
       };
       await saveSettings(s);
       renderEnvs(s);
@@ -473,7 +487,7 @@ function renderEnvs(settings: MpuSettings): void {
     });
     const activeLab = document.createElement("label");
     activeLab.append(active, document.createTextNode(" Active on this browser"));
-    card.append(name, activeLab, color, save, del);
+    card.append(name, classification, activeLab, color, save, del);
     root.appendChild(card);
   });
 }
@@ -541,6 +555,7 @@ async function init(): Promise<void> {
   renderFavorites(settings);
   renderUpgradeWatches(settings);
   renderEnvs(settings);
+  bindRunbooksUI(document, document.getElementById("environment-runbooks")!, runbookEnvironmentLabels);
   renderAllowlist(settings);
   renderFieldEntryProfiles(settings);
 
@@ -788,5 +803,7 @@ async function init(): Promise<void> {
 }
 
 bindAgentLibrary(document);
+bindEnvironmentComparisonUI(document, document.getElementById("environment-comparison-workspace")!);
+bindConfigurationComparisonUI(document, document.getElementById("configuration-comparison-workspace")!);
 bindOracleDocs(document, document.getElementById("oracle-docs")!, new URLSearchParams(location.search).get("tools")?.slice(0, 30));
 void init();

@@ -12,7 +12,7 @@ npm run generate:icons
 npm run release:check
 ```
 
-Upload **`morris-peoplesoft-utilities-v<version>.zip`** from the repo root (not `dist/` unpacked).
+Run `npm run test:e2e` separately, then upload **`morris-peoplesoft-utilities-chrome-v<version>.zip`** from the repo root (not `dist/` unpacked). The Firefox ZIP is for Mozilla review/signing; see [browser distribution](../docs/browser-support.md).
 
 Or download the same artifact from the latest [GitHub Release](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases).
 

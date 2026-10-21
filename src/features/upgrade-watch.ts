@@ -52,6 +52,7 @@ function collectFieldIdBasesWithCompleteness(doc: Document, cap: number): { fiel
   const set = new Set<string>();
   for (const el of Array.from(target.querySelectorAll(FIELD_SCAN_SELECTOR))) {
     if (!(isHtmlElement(el)) || !el.id) continue;
+    if (el.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil")) continue;
     const base = fieldBaseId(el.id);
     if (!base || base.length < 3) continue;
     set.add(base);

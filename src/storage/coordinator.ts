@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import { isSettingsBackup, normalizeStoredSettings } from "./backup";
 import type { MpuSettings } from "./schema";
 
@@ -47,14 +48,14 @@ export function coordinateSettingsWrite(message: SettingsWrite): Promise<Setting
       if (!isSettingsBackup(message.next) || (message.base !== undefined && !isSettingsBackup(message.base))) {
         return { ok: false, error: "Invalid settings edit" };
       }
-      const raw = await chrome.storage.local.get(null);
+      const raw = await getExtensionApi().storage.local.get(null);
       const exists = Object.hasOwn(raw, "mpuSettings");
       const current = normalizeStoredSettings(exists ? raw.mpuSettings : message.next);
       if (message.initialize && exists) return { ok: true, settings: current };
       const merged = message.initialize ? message.next : mergeSettingsEdit(message.base, message.next, exists ? current : message.base);
       if (!isSettingsBackup(merged)) return { ok: false, error: "Invalid merged settings" };
       const settings = normalizeStoredSettings(merged);
-      if (!exists || !equal(current, settings)) await chrome.storage.local.set({ mpuSettings: settings });
+      if (!exists || !equal(current, settings)) await getExtensionApi().storage.local.set({ mpuSettings: settings });
       return { ok: true, settings };
     } catch (error) {
       const conflict = error instanceof Error && error.message === SETTINGS_CONFLICT;

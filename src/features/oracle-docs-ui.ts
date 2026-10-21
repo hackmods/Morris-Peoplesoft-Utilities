@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import { filterOracleDocs, getManualFamilyLinks, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_HELP_URL, ORACLE_PEOPLETOOLS_LIBRARY_URL, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
 
 const FAVORITE_KEY = "mpuOracleDocsFavorite:";
@@ -106,12 +107,12 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
       savingFavorite = true;
       favorite.setAttribute("aria-disabled", "true");
       const next = favorites.get(entry.id) !== true;
-      void chrome.storage.local.set({ [`${FAVORITE_KEY}${entry.id}`]: next }).then(() => {
+      void getExtensionApi().storage.local.set({ [`${FAVORITE_KEY}${entry.id}`]: next }).then(() => {
         if (!live) return; favorites.set(entry.id, next); render();
       }).catch(() => { savingFavorite = false; favorite.removeAttribute("aria-disabled"); status.textContent = "Unable to save the manual favorite."; });
     });
     title.addEventListener("click", () => {
-      void chrome.storage.local.set({ [`${RECENT_KEY}${entry.id}`]: Date.now() }).then(() => {
+      void getExtensionApi().storage.local.set({ [`${RECENT_KEY}${entry.id}`]: Date.now() }).then(() => {
         if (!live) return; recents.set(entry.id, Date.now()); render();
       }).catch(() => { /* The manual still opens if recent-history storage is unavailable. */ });
     });
@@ -132,9 +133,9 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     }
     favorites = nextFavorites; recents = nextRecents; render();
   };
-  chrome.storage.onChanged.addListener(onStorageChanged);
+  getExtensionApi().storage.onChanged.addListener(onStorageChanged);
   render();
-  void chrome.storage.local.get(ORACLE_DOCS.flatMap((entry) => [FAVORITE_KEY + entry.id, RECENT_KEY + entry.id])).then((raw) => {
+  void getExtensionApi().storage.local.get(ORACLE_DOCS.flatMap((entry) => [FAVORITE_KEY + entry.id, RECENT_KEY + entry.id])).then((raw) => {
     if (!live) return;
     const loadedFavorites = safeRead(raw, FAVORITE_KEY, "boolean");
     const loadedRecents = safeRead(raw, RECENT_KEY, "number");
@@ -142,7 +143,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     for (const [id, value] of loadedRecents) if (!touched.has(RECENT_KEY + id)) recents.set(id, value);
     render();
   }).catch(() => { if (live) status.textContent = "Manuals are available, but saved favorites and recent history could not be loaded."; });
-  const cleanup = () => { if (!live) return; live = false; chrome.storage.onChanged.removeListener(onStorageChanged); };
+  const cleanup = () => { if (!live) return; live = false; getExtensionApi().storage.onChanged.removeListener(onStorageChanged); };
   doc.defaultView?.addEventListener("pagehide", cleanup, { once: true });
   return cleanup;
 }

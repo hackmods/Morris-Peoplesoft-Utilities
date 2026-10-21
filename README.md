@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-coming%20soon-lightgrey)](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/store/SUBMISSION_CHECKLIST.md)
 
-**Morris PeopleSoft Utilities (MPU)** is a modern Manifest V3 Chrome extension that helps college business analysts and technical staff work faster in PeopleSoft **Classic** and **Fluid**—with privacy-first defaults and AODA-oriented accessibility.
+**Morris PeopleSoft Utilities (MPU)** is a Manifest V3 extension for Chrome and Firefox that helps college business analysts and technical staff work faster in PeopleSoft **Classic** and **Fluid**—with privacy-first defaults and AODA-oriented accessibility.
 
 Maintained by **[hackmods](https://github.com/hackmods)** (Ryan Morris).
 
@@ -23,7 +23,7 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 | Advanced Search & Correct History helpers | Settings JSON backup |
 | Quiet mode for env prompts | |
 
-**Compatibility target:** PeopleTools **8.62**, including Classic/Classic Plus, Fluid, and Classic components hosted inside Fluid. Real-environment sign-off remains required; see [the 8.62 validation checklist](docs/testing/peopletools-8.62.md). Chrome 116 or newer is required.
+**Compatibility target:** PeopleTools **8.62**, including Classic/Classic Plus, Fluid, and Classic components hosted inside Fluid. Chrome 116+ and Firefox desktop 140+ share one source and version; all future changes must maintain both builds in parity. See [browser support, builds, and Firefox installation](docs/browser-support.md). Real-environment sign-off remains required separately for each browser; see [the 8.62 validation checklist](docs/testing/peopletools-8.62.md).
 
 For the customization upgrade watch workflow, see the [Upgrade watch walkthrough](docs/user-guide/upgrade-watch.md). It compares captured UI fingerprints and does not compare SQL or PeopleCode.
 
@@ -54,9 +54,13 @@ npm run build
 
 Or download the latest zip from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases).
 
+### Firefox (development / review)
+
+Run `npm run build`, open `about:debugging#/runtime/this-firefox`, select **Load Temporary Add-on**, and choose `dist/firefox/manifest.json`. Firefox desktop 140+ is supported. The Firefox release ZIP is unsigned; normal installation requires Mozilla signing. See [Firefox packaging, tests, and distribution](docs/browser-support.md).
+
 ## Privacy
 
-- Settings stay in `chrome.storage.local` on your device
+- Settings stay in extension-local storage on your device, separately in each browser profile
 - **No passwords**, **no analytics**, **no developer phone-home**
 - Full policy: [`docs/privacy.md`](docs/privacy.md)
 
@@ -82,6 +86,9 @@ Automated gates run locally and in CI:
 |---|---|
 | `npm test` | Unit, integration, smoke, and a11y Vitest suites |
 | `npm run test:coverage` | Same + V8 coverage (thresholds enforced) |
+| `npm run build` | Chrome + Firefox builds and runtime/manifest parity audit |
+| `npm run audit:firefox` | Mozilla validation of the built Firefox extension |
+| `npm run test:e2e` | Actual Chromium and Firefox extension browser suites |
 | `npm run test:a11y` | axe WCAG 2A/2AA on popup/options markup |
 | `npm run audit` | a11y + Store lint + compliance scan |
 | `npm run test:all` | lint + coverage + audits + production build |
@@ -124,7 +131,7 @@ Content v4.2.0 targets PeopleTools 8.62 (confirm application release and PUM ima
 
 ## Releases
 
-Tagged versions (`v*`) publish the Chrome Web Store zip **and** the agents prompt zip via GitHub Actions. Prefer installing the extension from the Store once live; use Release artifacts for review builds.
+Tagged versions (`v*`) attach separate Chrome and Firefox ZIPs **and** the agents prompt ZIP via GitHub Actions after both browser suites pass. The Firefox ZIP is unsigned; Mozilla signing is required for normal installation. See [browser distribution and parity policy](docs/browser-support.md).
 
 Latest: tag **`v1.0.26`** after merge, or run `npm run prep:store` for a local upload zip. Previous: [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25).
 

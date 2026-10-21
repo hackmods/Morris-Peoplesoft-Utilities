@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../../platform/browser";
 import { loadSettings, originAllowed } from "../../storage/settings";
 import { buildComponentUrl, parsePsUrl } from "../../adapters/ps-page";
 import { bindAgentLibrary } from "../../features/agent-references";
@@ -9,7 +10,7 @@ const favFilter = document.getElementById("fav-filter") as HTMLInputElement;
 const pageInfo = document.getElementById("page-info")!;
 const toast = document.getElementById("toast")!;
 const agentsLink = document.getElementById("open-agents") as HTMLAnchorElement;
-agentsLink.href = chrome.runtime.getURL("options.html#agents");
+agentsLink.href = getExtensionApi().runtime.getURL("options.html#agents");
 
 function say(msg: string): void {
   toast.textContent = msg;
@@ -34,7 +35,7 @@ async function renderFavorites(query = ""): Promise<void> {
     b.textContent = fav.Description || `${fav.Menu}.${fav.Component}`;
     b.title = fav.Notes || `${fav.Menu}.${fav.Component}.${fav.Market}`;
     b.addEventListener("click", async () => {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const [tab] = await getExtensionApi().tabs.query({ active: true, currentWindow: true });
       if (!tab?.url || !tab.id) {
         say("No active PeopleSoft tab");
         return;
@@ -60,7 +61,7 @@ async function renderFavorites(query = ""): Promise<void> {
         parameters: fav.Parameters || "",
       });
       if (!url) return;
-      await chrome.tabs.update(tab.id, { url });
+      await getExtensionApi().tabs.update(tab.id, { url });
       say(`Opening ${fav.Menu}.${fav.Component}`);
     });
     li.appendChild(b);
@@ -69,13 +70,13 @@ async function renderFavorites(query = ""): Promise<void> {
 }
 
 async function refreshPageInfo(): Promise<void> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const [tab] = await getExtensionApi().tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) {
     pageInfo.textContent = "No active tab";
     return;
   }
   try {
-    const resp = await chrome.tabs.sendMessage(tab.id, { type: "mpu-page-info-snapshot" });
+    const resp = await getExtensionApi().tabs.sendMessage(tab.id, { type: "mpu-page-info-snapshot" });
     pageInfo.textContent =
       (resp as { text?: string } | undefined)?.text ||
       "MPU did not respond — open a PeopleSoft page with the bar visible.";
@@ -87,7 +88,7 @@ async function refreshPageInfo(): Promise<void> {
 
 document.getElementById("open-options")!.addEventListener("click", (e) => {
   e.preventDefault();
-  chrome.runtime.openOptionsPage();
+  getExtensionApi().runtime.openOptionsPage();
 });
 
 favFilter.addEventListener("input", () => {

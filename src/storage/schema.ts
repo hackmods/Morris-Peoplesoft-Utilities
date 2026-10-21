@@ -109,6 +109,8 @@ export function pushRecentComponent(
 
 export interface Environment {
   label: string;
+  /** Explicit user choice; missing legacy values are unclassified. Never infer from color/name. */
+  classification?: "unclassified" | "non-production" | "production";
   active: YesNo;
   trcProfRunning: YesNo;
   /** Optional AA-safe accent (hex). Empty = default */

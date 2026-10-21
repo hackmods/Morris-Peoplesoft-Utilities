@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import { AGENT_PACK_VERSION, AGENT_REFERENCES, LOCAL_SPECIALIST_REFERENCES } from "../generated/agent-catalog";
 import { AGENT_LIBRARY_STORAGE_KEY, normalizeAgentLibraryPreferences, loadAgentLibraryPreferences, setAgentFavorite, recordAgentUse, dismissAgentOnboarding, clearAgentRecents, type AgentLibraryPreferences } from "../storage/agent-library";
 
@@ -350,8 +351,8 @@ export function bindAgentLibrary(doc: Document): void {
     if (onboarding) onboarding.hidden = preferences.onboardingDismissed;
     render();
   };
-  chrome.storage.onChanged.addListener(synchronize);
-  doc.defaultView?.addEventListener("pagehide", () => chrome.storage.onChanged.removeListener(synchronize), { once: true });
+  getExtensionApi().storage.onChanged.addListener(synchronize);
+  doc.defaultView?.addEventListener("pagehide", () => getExtensionApi().storage.onChanged.removeListener(synchronize), { once: true });
   void loadAgentLibraryPreferences().then((value) => {
     if (preferencesRevision) return;
     preferences = value;

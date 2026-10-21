@@ -1,4 +1,6 @@
-# E2E UI tests (Playwright)
+# E2E UI tests (Chrome and Firefox)
+
+`npm run test:e2e` builds and exercises both installed extensions. The suite in this directory uses Playwright + Chromium; `tests/firefox/` uses Selenium + actual Firefox with Playwright reporting. Firefox must be installed; Selenium Manager obtains geckodriver, or set `FIREFOX_BINARY` / `GECKODRIVER`. Browser-specific commands are `npm run test:e2e:chrome` and `npm run test:e2e:firefox`. See [browser parity policy](../../docs/browser-support.md).
 
 These tests load the **unpacked Chrome extension** from `dist/` against local PeopleSoft-shaped fixture URLs so Manifest V3 `content_scripts` match.
 

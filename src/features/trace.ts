@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 /**
  * Toggle PeopleCode + SQL session trace using delivered UTILITIES components.
  * Classic PeopleSoft protocol (parity with PS Utilities):
@@ -11,6 +12,7 @@ import { originAllowed, updateSettings } from "../storage/settings";
 import { announce } from "./bar";
 import { isYes } from "../storage/schema";
 import { currentPageAccess } from "./access";
+import { authorizeWriteAction } from "./production-awareness";
 
 type TraceOpt = { key: keyof TraceSettings; elId: string };
 
@@ -201,11 +203,24 @@ export async function toggleTrace(
     return { running: false, locked: false };
   }
 
+  const approval = turnOn ? await authorizeWriteAction(document, parsed, "traceOption", "Start PeopleCode and SQL trace") : null;
+  if (turnOn && !approval) {
+    announce(document, "Trace start cancelled — access or environment changed, or confirmation was cancelled.");
+    return { running: isYes(settings.environments[envIndex]?.trcProfRunning), locked: false };
+  }
+  if (approval) settings = approval.settings;
+
   const canContinue = async () => {
+    if (document.location.href !== parsed.href) return false;
+    if (approval) {
+      const approvedIndex = approval.settings.urlSites[parsed.baseURL]?.[parsed.siteNormalized]?.envId ?? -1;
+      return approvedIndex === envIndex && await approval.canContinue();
+    }
     const current = await currentPageAccess(parsed, "traceOption");
     if (!current || !originAllowed(parsed.baseURL, current)) return false;
     const mapping = current.urlSites[parsed.baseURL]?.[parsed.siteNormalized];
-    return (!mapping || mapping.envId === envIndex) && (envIndex < 0 || isYes(current.environments[envIndex]?.active));
+    return document.location.href === parsed.href && (mapping?.envId ?? -1) === envIndex &&
+      (envIndex < 0 || isYes(current.environments[envIndex]?.active));
   };
   if (!await canContinue()) {
     announce(document, "Trace request cancelled — this page or feature is disabled.");
@@ -263,7 +278,7 @@ export async function toggleTrace(
     });
   }
 
-  chrome.runtime.sendMessage({
+  getExtensionApi().runtime.sendMessage({
     type: "mpu-trace-sync",
     envIndex,
     running,

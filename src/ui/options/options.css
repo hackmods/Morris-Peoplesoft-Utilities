@@ -581,3 +581,18 @@ a {
 .oracle-docs :focus-visible, #agent-brief-intake :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .oracle-docs, .oracle-docs a, #agent-brief-intake { overflow-wrap: anywhere; min-width: 0; }
 #agent-brief-switch-confirm { border-left: 4px solid #ff5c00; padding: .7rem; }
+
+.mpu-runbooks { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; overflow-wrap: anywhere; min-width: 0; }
+.mpu-runbooks label { display: block; margin: .75rem 0; font-weight: 600; }
+.mpu-runbooks input, .mpu-runbooks select, .mpu-runbooks textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); padding: .55rem; border-radius: 5px; }
+.mpu-runbooks button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; margin: .3rem; }
+.mpu-runbooks pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.mpu-runbooks :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.mpu-comparison { overflow-wrap: anywhere; min-width: 0; }
+.mpu-comparison label { display: block; margin: .75rem 0; font-weight: 600; }
+.mpu-comparison input, .mpu-comparison select, .mpu-comparison textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); padding: .55rem; border-radius: 5px; }
+.mpu-comparison button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; margin: .3rem; }
+.mpu-comparison :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.mpu-config-comparison fieldset { min-width: 0; margin: 1rem 0; border: 1px solid var(--border); border-radius: 6px; }
+.mpu-config-comparison input[type="checkbox"] { width: auto; display: inline-block; }

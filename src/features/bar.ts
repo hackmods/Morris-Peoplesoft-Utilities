@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import { bindModalDialog } from "./dialog";
 import { appendAgentHelp } from "./agent-references";
 import { isVisible } from "../adapters/dom";
@@ -19,6 +20,8 @@ import {
   toolsRelTips,
 } from "../adapters/ps-page";
 import { buildEnvContextRows, formatEnvContextPlain } from "../adapters/env-context";
+import { environmentForPage } from "./production-awareness";
+import { showComparisonCaptureDialog } from "./environment-comparison-ui";
 import {
   buildFavoriteTree,
   favoriteDisplayLabel,
@@ -927,11 +930,11 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
 
       const resources = doc.createElement("p");
       const promptLink = doc.createElement("a");
-      promptLink.href = chrome.runtime.getURL("options.html#agents");
+      promptLink.href = getExtensionApi().runtime.getURL("options.html#agents");
       promptLink.target = "_blank"; promptLink.rel = "noopener noreferrer";
       promptLink.textContent = "Prepare a PeopleCode task with an agent";
       const docsLink = doc.createElement("a");
-      docsLink.href = chrome.runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
+      docsLink.href = getExtensionApi().runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
       docsLink.target = "_blank"; docsLink.rel = "noopener noreferrer";
       docsLink.textContent = "Find PeopleCode API and language documentation";
       resources.append(promptLink, " · ", docsLink);
@@ -1238,11 +1241,14 @@ function watchBarLayoutForClassicResize(bar: HTMLElement, doc: Document): void {
 }
 
 export function mountBar(ctx: BarContext, doc: Document = document): void {
+  const previousAnnouncement = doc.getElementById("mpu-live")?.textContent;
   removeBar(doc);
   const f = ctx.settings.features;
   const loginOnly = Boolean(ctx.loginMode);
-  const placement = ctx.settings.barPlacement === "documentTop" ? "documentTop" : "aboveContent";
-  const sticky = isYes(ctx.settings.barSticky);
+  const environment = environmentForPage(ctx.settings, ctx.parsed).environment;
+  const production = environment?.classification === "production";
+  const placement = production || ctx.settings.barPlacement === "documentTop" ? "documentTop" : "aboveContent";
+  const sticky = production || isYes(ctx.settings.barSticky);
   const mount = findHeaderMount(doc, { loginMode: loginOnly });
   if (!mount) return;
 
@@ -1269,6 +1275,14 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   brand.textContent = "MPU";
 
   bar.appendChild(brand);
+  if (!loginOnly) {
+    const badge = doc.createElement("span");
+    badge.id = "mpu-environment-classification";
+    badge.className = production ? "mpu-production-badge" : "mpu-mode";
+    badge.textContent = production ? "PRODUCTION" : environment?.classification === "non-production" ? "Non-production" : "Unclassified";
+    badge.title = "Explicit environment classification in Options → Environments";
+    bar.append(badge);
+  }
 
   if (!loginOnly) {
     const mode = document.createElement("span");
@@ -1295,7 +1309,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     );
     env.setAttribute("aria-haspopup", "dialog");
     env.setAttribute("aria-expanded", "false");
-    const color = ctx.settings.environments.find((e) => e.label === ctx.envLabel)?.color;
+    const color = environment?.color;
     if (color) {
       env.style.setProperty("--mpu-env-color", color);
       env.setAttribute("data-mpu-env-colored", "true");
@@ -1844,7 +1858,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       const mapping = ctx.settings.urlSites[ctx.parsed.baseURL]?.[ctx.parsed.siteNormalized];
       if (!bar.isConnected || !originAllowed(ctx.parsed.href, ctx.settings)
         || (mapping && !isYes(ctx.settings.environments[mapping.envId]?.active))) return;
-      void chrome.runtime.sendMessage({ type: "mpu-open-agents" }).then((result) => {
+      void getExtensionApi().runtime.sendMessage({ type: "mpu-open-agents" }).then((result) => {
         if (bar.isConnected && !result?.ok) announce(doc, "Agents library unavailable; try again after settings finish updating");
       }).catch(() => {
         if (bar.isConnected) announce(doc, "Unable to open the Agents library");
@@ -1897,7 +1911,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   }
 
   doc.body.appendChild(live);
-  announce(doc, "Morris PeopleSoft Utilities bar ready");
+  announce(doc, previousAnnouncement || "Morris PeopleSoft Utilities bar ready");
 }
 
 function viewRaf(doc: Document, fn: () => void): void {
@@ -1991,7 +2005,7 @@ function showHelpDialog(doc: Document): void {
       dialog.querySelector("#mpu-dialog-close")?.before(agentHelp);
       const docsHelp = doc.createElement("p");
       const docsLink = doc.createElement("a");
-      docsLink.href = chrome.runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
+      docsLink.href = getExtensionApi().runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
       docsLink.target = "_blank"; docsLink.rel = "noopener noreferrer";
       docsLink.textContent = "Oracle documentation hub (PeopleTools version-aware)";
       docsHelp.append(docsLink);
@@ -2098,6 +2112,8 @@ export function showPageInfoDialog(
     <pre class="mpu-pre mpu-pre-diff" id="mpu-pi-diff" hidden></pre>
     <div class="mpu-dialog-section" id="mpu-pi-watch-section">
       <h3>Customization upgrade watch</h3>
+      <button type="button" class="mpu-btn" id="mpu-pi-prepare-comparison">Prepare environment snapshot</button>
+      <p class="mpu-dialog-hint">Review before saving locally, then select two snapshots in Options → Compare environments. This compares captured browser UI metadata only.</p>
       <p class="mpu-dialog-hint">Capture a UI fingerprint before a PeopleTools upgrade; check again after to spot tab, structure, or field-id drift. Captures only the current loaded page, up to 200 unique field IDs and 40 structure hosts. Unloaded tabs, PeopleCode, SQL and database changes are not compared.</p>
       <label class="mpu-dialog-label">Notes (optional)
         <input type="text" class="mpu-dialog-input" id="mpu-pi-watch-notes" autocomplete="off" />
@@ -2164,7 +2180,7 @@ export function showPageInfoDialog(
         const envId = settings.urlSites[parsed.baseURL]?.[parsed.siteNormalized]?.envId;
         const request = envId === undefined ? undefined : settings.environments[envId]?.traceRequest;
         const area = dialog.querySelector("#mpu-diagnostic-report") as HTMLTextAreaElement;
-        area.value = buildDiagnosticReport(settings, { version: chrome.runtime.getManifest().version,
+        area.value = buildDiagnosticReport(settings, { version: getExtensionApi().runtime.getManifest().version,
           toolsRel: meta.toolsRel, uiMode: detectUiModel(doc), traceStatus: describeTraceRequest(request, parsed).status });
         (dialog.querySelector("#mpu-diagnostics-preview") as HTMLElement).hidden = false;
         area.focus(); area.setSelectionRange(0, 0); area.scrollTop = 0;
@@ -2264,6 +2280,12 @@ export function showPageInfoDialog(
         }
       });
 
+      dialog.querySelector("#mpu-pi-prepare-comparison")?.addEventListener("click", async () => {
+        if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
+        close();
+        try { await showComparisonCaptureDialog(doc, parsed); }
+        catch { announce(doc, "Snapshot preview could not be prepared. Reopen Page Info and retry."); }
+      });
       dialog.querySelector("#mpu-pi-watch-save")?.addEventListener("click", async () => {
         if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
         if (!parsed.menu || !parsed.component) {
@@ -2409,7 +2431,7 @@ export function showGoToComponentDialog(doc: Document, parsed: ParsedPsUrl): voi
 }
 
 function injectClearBcs(doc: Document): void {
-  const url = chrome.runtime.getURL("inject/clear-bcs.js");
+  const url = getExtensionApi().runtime.getURL("inject/clear-bcs.js");
   const s = doc.createElement("script");
   s.src = url;
   s.onload = () => s.remove();
@@ -2417,7 +2439,7 @@ function injectClearBcs(doc: Document): void {
 }
 
 function injectResizeFrame(doc: Document, after?: () => void): void {
-  const url = chrome.runtime.getURL("inject/resize-frame.js");
+  const url = getExtensionApi().runtime.getURL("inject/resize-frame.js");
   const s = doc.createElement("script");
   s.src = url;
   s.onload = () => {
