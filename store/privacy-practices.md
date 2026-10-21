@@ -55,3 +55,7 @@ MPU does not request or store passwords. Favorites may include PeopleSoft menu/c
 Content scripts match PeopleSoft `psp`/`psc` URL patterns. The optional allowlist disables features outside listed origins (off by default); it does not revoke Chrome's manifest permissions. Chrome site-access settings control browser-level access.
 
 See [Chrome's disclosure requirements](https://developer.chrome.com/docs/webstore/program-policies/disclosure-requirements) and [Limited Use policy](https://developer.chrome.com/docs/webstore/program-policies/limited-use). Keep listing, Dashboard answers, and [privacy policy](../docs/privacy.md) consistent.
+
+### Local reference and diagnostic additions (1.0.33 preparation)
+
+Oracle documentation favorites use catalog IDs and local last-opened timestamps. Searches and guided agent evidence are not persisted or transmitted. The Fluid navigation diagnostic is explicit and structural; no page values/tokens/URLs are exported. Permissions are unchanged; popup status queries only whether the scoped content script is active.

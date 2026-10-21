@@ -1,6 +1,7 @@
 import { loadSettings, saveSettings, SettingsSaveError } from "../../storage/settings";
 import { FEATURE_LABELS } from "../../storage/feature-labels";
 import type { YesNo } from "../../storage/schema";
+import { parsePsUrl } from "../../adapters/ps-page";
 
 const list = document.getElementById("toggle-list")!;
 const status = document.getElementById("status")!;
@@ -48,6 +49,17 @@ function broadcastRefresh(): void {
 async function init(): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   sidePanelTabId = tab?.id;
+  const activation = document.getElementById("activation-status")!;
+  if (!tab?.url || parsePsUrl(tab.url).kind === "unknown") {
+    activation.textContent = "Inactive on this tab — no supported PeopleSoft URL detected.";
+  } else if (tab.id !== undefined) {
+    try {
+      const reply = await chrome.tabs.sendMessage(tab.id, { type: "mpu-activation-status" }) as { active?: boolean; loginOnly?: boolean } | undefined;
+      activation.textContent = reply?.active === true ? "Active — MPU is running on this PeopleSoft page."
+        : reply?.loginOnly === true ? "Login page — limited MPU display; page helpers are inactive."
+        : "PeopleSoft URL detected — MPU page helpers are inactive.";
+    } catch { activation.textContent = "PeopleSoft URL detected — MPU has not responded. Check site access, allowlist, or reload the page."; }
+  }
   const settings = await loadSettings();
   list.replaceChildren();
 

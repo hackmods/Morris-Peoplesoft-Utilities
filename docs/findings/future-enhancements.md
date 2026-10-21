@@ -240,3 +240,7 @@ BR-01 implemented for 1.0.28 (Unreleased): UnionOps-inspired black/orange shared
 Implemented for 1.0.29: serialized settings edits with stale-form conflict protection; scoped/datable trace request evidence and explicit On/Off actions; allowlisted diagnostics preview with explicit export; dated upgrade baseline selection/history and Markdown handoff (UG-02/UG-04). History is capped at five per component/environment and 50 total, including imports. ADR: [0010](../adr/0010-settings-coordination-and-local-evidence.md).
 
 Prompt pack 4.1.0 adds Search Framework and portal/branding specialists: 24 prompts and 36 unexecuted evaluation cases. Actual host/model trials and private HCM/FSCM/Campus Solutions tailoring need the selected host and verified local evidence; generic templates remain unfilled. Store captures and real 8.62/assistive-technology validation remain outstanding.
+
+## 2026-10-20 developer/admin roadmap
+
+See [the ordered multi-session plan](developer-admin-roadmap.md). Current implementation scope: J guided agent handoffs, A Oracle documentation hub, and user-promoted D Fluid navigation debugger. Production awareness, runbooks, comparisons and local log/trace analysis remain later increments. See [public PeopleSoft candidate registry](../testing/public-peoplesoft-pages.md) for user-supplied references and observed evidence; URLs do not establish compatibility.

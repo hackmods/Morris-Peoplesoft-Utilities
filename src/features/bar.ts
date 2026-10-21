@@ -5,6 +5,7 @@ import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSett
 import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
 import {
+  parsePsUrl,
   collectPageMeta,
   collectPageTabs,
   detectUiModel,
@@ -31,6 +32,7 @@ import {
   formatObjectPackPlain,
 } from "./peoplecode-aids";
 import { collectFluidStructure, formatFluidStructurePlain } from "./fluid-structure";
+import { collectFluidDebugSnapshot, formatFluidDebugSnapshot } from "./fluid-debugger";
 import { groupAdminJumps, type AdminJump } from "./admin-jumps";
 import { getLockedParsedRecField } from "./field-inspector";
 import { scanMessageKeys, formatMessageKeysPlain } from "./message-keys";
@@ -916,12 +918,24 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
       const hint = doc.createElement("p");
       hint.className = "mpu-dialog-hint";
       if (hasField) {
-        hint.textContent = `Ready to paste into App Designer for ${locked!.record}.${locked!.field}. These are starter snippets only — MPU does not read or edit PeopleCode on the server.`;
+        hint.textContent = `Starter examples for ${locked!.record}.${locked!.field}. Verify the event, owning record and row/scroll context before adapting them in App Designer. MPU cannot read or edit server PeopleCode.`;
       } else {
         hint.textContent =
           "Copy starter snippets into App Designer. Tip: Inspect → click a field icon to lock it, then open PCode again so RECORD.FIELD is filled in. Until then, stubs use placeholders (RECORD / FIELD).";
       }
       dialog.appendChild(hint);
+
+      const resources = doc.createElement("p");
+      const promptLink = doc.createElement("a");
+      promptLink.href = chrome.runtime.getURL("options.html#agents");
+      promptLink.target = "_blank"; promptLink.rel = "noopener noreferrer";
+      promptLink.textContent = "Prepare a PeopleCode task with an agent";
+      const docsLink = doc.createElement("a");
+      docsLink.href = chrome.runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
+      docsLink.target = "_blank"; docsLink.rel = "noopener noreferrer";
+      docsLink.textContent = "Find PeopleCode API and language documentation";
+      resources.append(promptLink, " · ", docsLink);
+      dialog.appendChild(resources);
 
       if (hasField) {
         const lockedLine = doc.createElement("p");
@@ -933,7 +947,7 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
           doc.createTextNode(
             `${locked!.record}.${locked!.field}${
               locked!.occurrence != null && locked!.occurrence !== ""
-                ? ` (row ${locked!.occurrence})`
+                ? ` (DOM occurrence ${locked!.occurrence}; not a PeopleCode row path)`
                 : ""
             }`,
           ),
@@ -1085,6 +1099,7 @@ export function showStructureDialog(doc: Document): void {
     <pre class="mpu-pre" id="mpu-structure-body"></pre>
     <div class="mpu-dialog-actions">
       <button type="button" class="mpu-btn" id="mpu-structure-copy">Copy</button>
+      <button type="button" class="mpu-btn" id="mpu-fluid-debug">Diagnose Fluid navigation</button>
       <button type="button" class="mpu-btn" id="mpu-structure-close">Close</button>
     </div>
   `;
@@ -1092,6 +1107,21 @@ export function showStructureDialog(doc: Document): void {
       dialog.querySelector("#mpu-structure-close")?.addEventListener("click", close);
       dialog.querySelector("#mpu-structure-copy")?.addEventListener("click", () => {
         void copyText(doc, text, "Page structure copied");
+      });
+      dialog.querySelector("#mpu-fluid-debug")?.addEventListener("click", async () => {
+        const parsed = parsePsUrl(doc.location.href);
+        if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
+        close();
+        const output = formatFluidDebugSnapshot(collectFluidDebugSnapshot(doc));
+        openModalDialog(doc, {
+          labelledBy: "mpu-fluid-debug-title", initialFocus: "#mpu-fluid-debug-close",
+          build: (debugDialog, closeDebug) => {
+            debugDialog.innerHTML = '<h2 id="mpu-fluid-debug-title">Fluid navigation debugger</h2><p>Read-only frame and modal ownership clues. This does not determine whether PeopleSoft has unsaved changes.</p><pre class="mpu-pre" id="mpu-fluid-debug-output"></pre><div class="mpu-dialog-actions"><button type="button" class="mpu-btn" id="mpu-fluid-debug-copy">Copy diagnostic</button><button type="button" class="mpu-btn" id="mpu-fluid-debug-close">Close</button></div>';
+            debugDialog.querySelector("#mpu-fluid-debug-output")!.textContent = output;
+            debugDialog.querySelector("#mpu-fluid-debug-copy")!.addEventListener("click", () => { void copyText(doc, output, "Fluid diagnostic copied"); });
+            debugDialog.querySelector("#mpu-fluid-debug-close")!.addEventListener("click", closeDebug);
+          },
+        });
       });
     },
   });
@@ -1959,6 +1989,13 @@ function showHelpDialog(doc: Document): void {
       agentHelp.id = "mpu-agent-help";
       appendAgentHelp(doc, agentHelp);
       dialog.querySelector("#mpu-dialog-close")?.before(agentHelp);
+      const docsHelp = doc.createElement("p");
+      const docsLink = doc.createElement("a");
+      docsLink.href = chrome.runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
+      docsLink.target = "_blank"; docsLink.rel = "noopener noreferrer";
+      docsLink.textContent = "Oracle documentation hub (PeopleTools version-aware)";
+      docsHelp.append(docsLink);
+      dialog.querySelector("#mpu-dialog-close")?.before(docsHelp);
       dialog.querySelector("#mpu-dialog-close")?.addEventListener("click", close);
     },
   });

@@ -46,6 +46,80 @@ const test = base.extend<Fixtures>({
 });
 
 test.describe("MPU extension UI", () => {
+  test("Oracle hub filters locally, handles versions, and synchronizes favorites", async ({ extensionContext, extensionId }) => {
+    const options = await extensionContext.newPage();
+    const panel = await extensionContext.newPage();
+    const externalRequests: string[] = [];
+    for (const page of [options, panel]) page.on("request", request => { if (/^https?:/.test(request.url())) externalRequests.push(request.url()); });
+    await options.goto(`chrome-extension://${extensionId}/options.html#docs`);
+    await panel.goto(`chrome-extension://${extensionId}/sidepanel.html#docs`);
+    await expect(options.locator(".oracle-docs-item")).toHaveCount(45);
+    await options.getByLabel("Search PeopleTools manuals").fill("fluid");
+    await expect(options.locator(".oracle-docs-item")).toHaveCount(1);
+    await options.locator(".oracle-docs-favorite").click();
+    await expect(options.locator(".oracle-docs-favorite")).toBeFocused();
+    await panel.getByLabel("Manual list").selectOption("favorites");
+    await expect(panel.locator(".oracle-docs-item")).toHaveCount(1);
+    await expect(panel.locator(".oracle-docs-item a")).toHaveAttribute("referrerpolicy", "no-referrer");
+    await options.getByLabel("PeopleTools version", { exact: true }).fill("8.61");
+    await expect(options.locator(".oracle-docs-item")).toHaveCount(0);
+    await expect(options.locator("#oracle-docs")).toContainText("will not substitute");
+    await options.getByLabel("PeopleTools version", { exact: true }).fill("8.62.06");
+    await expect(options.locator(".oracle-docs-item")).toHaveCount(1);
+    await options.getByLabel("Application manual family").selectOption("hcm");
+    await expect(options.getByRole("link", { name: "Open Human Capital Management documentation index" })).toHaveAttribute("href", /human-capital-management/);
+    await audit(options); await panel.setViewportSize({ width: 320, height: 700 }); await audit(panel);
+    expect(await panel.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    expect(externalRequests).toEqual([]);
+    await options.close(); await panel.close();
+  });
+
+  test("guided handoffs preserve edits and do not persist user evidence", async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
+    await page.goto(`chrome-extension://${extensionId}/options.html#agents`);
+    const prepare = page.locator(".agent-prepare");
+    await prepare.first().click();
+    await page.getByLabel("Desired outcome", { exact: true }).fill("SYNTHETIC_HANDOFF_EVIDENCE");
+    await page.getByRole("button", { name: "Generate / update preview" }).click();
+    await expect(page.locator("#agent-brief")).toHaveValue(/SYNTHETIC_HANDOFF_EVIDENCE/);
+    await page.locator("#agent-brief").fill("SYNTHETIC_MANUAL_EDIT");
+    await prepare.first().click();
+    await expect(page.locator("#agent-brief")).toHaveValue("SYNTHETIC_MANUAL_EDIT");
+    await prepare.nth(1).click();
+    await expect(page.getByRole("group", { name: "Unsaved task brief" })).toBeVisible();
+    await page.getByRole("button", { name: "Keep editing" }).click();
+    await expect(page.locator("#agent-brief")).toHaveValue("SYNTHETIC_MANUAL_EDIT");
+    await page.setViewportSize({ width: 320, height: 700 }); await audit(page);
+    const stored = await page.evaluate(() => chrome.storage.local.get(null));
+    expect(JSON.stringify(stored)).not.toMatch(/SYNTHETIC_HANDOFF_EVIDENCE|SYNTHETIC_MANUAL_EDIT/);
+    await prepare.nth(1).click(); await page.getByRole("button", { name: "Discard and switch" }).click();
+    await expect(page.locator("#agent-brief")).not.toHaveValue("SYNTHETIC_MANUAL_EDIT");
+    await page.close();
+  });
+
+  test("Fluid debugger opens read-only structural diagnostics with accessible controls", async ({ fluidPage }) => {
+    await fluidPage.locator("#mpu-structure").click();
+    await fluidPage.locator("#mpu-fluid-debug").click();
+    await expect(fluidPage.locator("#mpu-fluid-debug-output")).toContainText("active target:");
+    await expect(fluidPage.locator("#mpu-fluid-debug-output")).toContainText("dialogs=0");
+    await expect(fluidPage.locator("#mpu-fluid-debug-output")).not.toContainText("127.0.0.1");
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.keyboard.press("Escape");
+    await expect(fluidPage.locator("#mpu-structure")).toBeFocused();
+  });
+
+  test("popup reports inactive on ordinary sites without requesting a page snapshot", async ({ extensionContext, extensionId }) => {
+    const popup = await extensionContext.newPage();
+    await popup.addInitScript(() => {
+      chrome.tabs.query = (async () => [{ id: 42, url: "https://example.org/news" }]) as unknown as typeof chrome.tabs.query;
+      chrome.tabs.sendMessage = (() => { throw new Error("Must not contact non-PeopleSoft page"); }) as typeof chrome.tabs.sendMessage;
+    });
+    await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+    await expect(popup.locator("#activation-status")).toContainText("Inactive on this tab");
+    await audit(popup);
+    await popup.close();
+  });
+
   test("search automation ignores collection controls and never replays target search actions", async ({ extensionContext }) => {
     await extensionContext.serviceWorkers()[0].evaluate(async () => {
       const { mpuSettings } = await chrome.storage.local.get("mpuSettings");

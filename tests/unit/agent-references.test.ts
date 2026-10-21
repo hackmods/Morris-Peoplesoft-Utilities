@@ -23,13 +23,30 @@ describe("public agent references", () => {
     const brief = buildAgentTaskBrief("assist-integrations")!;
     expect(brief).toContain("ps-assist-integrations");
     expect(brief).toContain("Desired outcome: [describe the task]");
-    expect(brief).toContain("Approved sanitized evidence: [paste only the artifacts needed]");
+    expect(brief).toContain("User-provided evidence (sanitize before pasting; MPU does not redact): [paste only the artifacts needed]");
     expect(brief).not.toContain(location.href);
     expect(buildAgentTaskBrief("invented-agent")).toBeNull();
     expect(buildAgentTaskBrief("review-data-correctness")).toContain("SQL evidence:");
     expect(buildAgentTaskBrief("assist-peoplecode")).toContain("PeopleCode event and owning row");
     expect(brief).not.toContain("Business grain / as-of date");
     expect(brief).toContain("Oracle PeopleTools 8.62 topic");
+  });
+
+  it("bounds supplied intake text and includes only explicit user context", () => {
+    const brief = buildAgentTaskBrief("assist-integrations", {
+      desiredOutcome: "Map the failing integration", toolsPatch: "8.62.12",
+      applicationReleasePum: "HCM 9.2, PUM 49", executionContext: "IB, Fluid",
+      expectedResult: "Message completes", actualResult: "It times out",
+      sanitizedEvidence: "Trace excerpt without tokens",
+    })!;
+    expect(brief).toContain("Desired outcome: Map the failing integration");
+    expect(brief).toContain("PeopleTools patch: 8.62.12");
+    expect(brief).toContain("Application pillar / release / PUM: HCM 9.2, PUM 49");
+    expect(brief).toContain("Expected result: Message completes");
+    expect(brief).toContain("Actual result: It times out");
+    expect(brief).toContain("Trace excerpt without tokens");
+    expect(buildAgentTaskBrief("unknown", { desiredOutcome: "secret" })).toBeNull();
+    expect(buildAgentTaskBrief("assist-integrations", { desiredOutcome: "x".repeat(3000) })!.split("\n").find((line) => line.startsWith("Desired outcome:"))!.length).toBe(2000 + "Desired outcome: ".length);
   });
 
   it("allows only public catalog sources and never adds page/session context", () => {
@@ -73,5 +90,28 @@ describe("public agent references", () => {
     expect(doc.getElementById("agent-brief-panel")!.hidden).toBe(false);
     search.value = "not a task"; search.dispatchEvent(new Event("input"));
     expect(doc.getElementById("agent-results")!.textContent).toContain("No prompts match");
+  });
+
+  it("preserves manual preview edits and asks before switching prompts with unsaved intake", () => {
+    Object.defineProperty(chrome.storage, "onChanged", { configurable: true, value: { addListener: vi.fn(), removeListener: vi.fn(), hasListener: vi.fn(), hasListeners: vi.fn() } });
+    document.body.innerHTML = '<input id="agent-search"><select id="agent-family"><option value="all">All</option></select><ul id="agent-list"></ul><p id="agent-results"></p><ul id="agent-templates"></ul><section id="agent-brief-panel" hidden><textarea id="agent-brief"></textarea><button id="agent-brief-copy">Copy</button><button id="agent-brief-reset">Reset</button><p id="agent-brief-status"></p></section>';
+    bindAgentLibrary(document);
+    const prepares = () => Array.from(document.querySelectorAll<HTMLButtonElement>(".agent-prepare"));
+    prepares()[0].click();
+    const field = document.getElementById("agent-brief-desiredOutcome") as HTMLTextAreaElement;
+    field.value = "Inspect the import failure";
+    document.getElementById("agent-brief-generate")!.click();
+    const preview = document.getElementById("agent-brief") as HTMLTextAreaElement;
+    expect(preview.value).toContain("Desired outcome: Inspect the import failure");
+    preview.value += "\nManual reviewer note";
+    field.value = "new intake edit";
+    const nextId = prepares()[1].dataset.agentFocus;
+    prepares()[1].click();
+    expect(document.getElementById("agent-brief-switch-confirm")!.hidden).toBe(false);
+    expect(preview.value).toContain("Manual reviewer note");
+    document.querySelector<HTMLButtonElement>("#agent-brief-switch-confirm button:last-child")!.click();
+    expect(preview.value).toContain("Manual reviewer note");
+    expect((document.activeElement as HTMLElement).id).toBe("agent-brief");
+    expect(nextId).toBeTruthy();
   });
 });

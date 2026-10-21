@@ -19,6 +19,14 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Next build — 1.0.33
+
+- Add guided, unsaved agent intake with editable preview and explicit draft-discard handling.
+- Add the Oracle documentation hub: 45 official PeopleTools 8.62 PDF links, local search/topic filters, manual favorites/recents and explicit version fallback; application-family indexes stay separate.
+- Add Structure → Fluid navigation debugger with bounded read-only frame/modal ownership clues and uncertainty labels.
+- Show popup activation status; clarify URL scoping and lack of traffic interception. Link PCode starters to agent/docs workflows and correct row-context wording.
+- Record a multi-session roadmap and public PeopleSoft test candidate registry. Live save-warning and extension-on-public-page screenshot verification remain open.
+
 ### Next build — 1.0.32
 
 - Restrict automatic search helpers to explicit search-page containers and exact known controls. Skip already-selected Correct History and Advanced Search controls without a confirmed collapsed state.

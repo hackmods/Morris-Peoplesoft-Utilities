@@ -1,6 +1,7 @@
 import { loadSettings, originAllowed } from "../../storage/settings";
 import { buildComponentUrl, parsePsUrl } from "../../adapters/ps-page";
 import { bindAgentLibrary } from "../../features/agent-references";
+import { bindOracleDocs } from "../../features/oracle-docs-ui";
 
 const favList = document.getElementById("fav-list")!;
 const favEmpty = document.getElementById("fav-empty")!;
@@ -99,12 +100,15 @@ document.getElementById("refresh-pi")!.addEventListener("click", () => {
 
 void renderFavorites();
 bindAgentLibrary(document);
+bindOracleDocs(document, document.getElementById("oracle-docs")!);
 function showView(): void {
   const route = location.hash.slice(1);
   const agents = route === "agents";
+  const docs = route === "docs";
+  document.getElementById("panel-docs")!.hidden = !docs;
   document.getElementById("panel-agents")!.hidden = !agents;
-  document.getElementById("favorites-view")!.hidden = agents || route === "page-info-view";
-  document.getElementById("page-info-view")!.hidden = agents || route === "favorites";
+  document.getElementById("favorites-view")!.hidden = agents || docs || route === "page-info-view";
+  document.getElementById("page-info-view")!.hidden = agents || docs || route === "favorites";
   for (const link of document.querySelectorAll<HTMLAnchorElement>('nav a')) {
     if (link.hash === location.hash) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");

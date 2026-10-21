@@ -39,3 +39,11 @@ Not in the Chrome extension — use while coding in Cursor / VS Copilot / Claude
 P3 Wave 5 items (SP-01…SP-08) shipped in **1.0.13**. Wave 6 (PC-01…03, FL-01, AD-01) shipped in **1.0.15**. Wave 6.1 (PC-04/05, FL-02/03, AD-02..04, TR-04/05) shipped in **1.0.16**. Wave 7 UG-01 (customization upgrade watch) shipped in **1.0.17**. Field Inspector Classic/Fluid/Classic-in-Fluid highlight fixes shipped in **1.0.18**. Shortcuts/Admin nested flyout fix shipped in **1.0.19**. Options Features QOL regroup + PCode starter clarity shipped in **1.0.20**. Agent prompt pack v3 shipped in **1.0.25**. Further ideas:
 
 - [`docs/findings/future-enhancements.md`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/findings/future-enhancements.md)
+
+## Documentation, agent handoffs and Fluid debugging
+
+- **Options / side panel → Oracle docs:** search the 45-manual PeopleTools 8.62 reference catalog, select topics, keep local favorites, and open official PDFs or HTML help. Other Tools versions fall back explicitly to Oracle's index. Verify application release/PUM separately.
+- **Agents → Prepare task brief:** enter outcome, confirmed versions/context and sanitized evidence; Generate/update the preview, review/edit, then Copy. Nothing is sent automatically. Switching specialists preserves drafts unless you explicitly discard them.
+- **Structure → Diagnose Fluid navigation:** inspect a bounded frame/target/modal map and copy its structural diagnostic. Unknown ownership remains unknown; this is not a save-warning bypass or server-state inspector.
+- **PCode:** starter examples require event/row-context review. Use the linked agent and Oracle reference workflows for actual development assistance.
+- **Popup:** see whether helpers are active on the current supported PeopleSoft URL. Use the host allowlist and Chrome site-access controls for stronger restrictions.

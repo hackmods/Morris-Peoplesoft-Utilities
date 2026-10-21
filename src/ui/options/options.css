@@ -568,3 +568,16 @@ a {
 .agent-disclosure { font-size: .9rem; margin: .5rem 0; }
 #agent-onboarding h3 { font-size: 1rem; margin: 0 0 .35rem; }
 #agent-onboarding p { margin: .35rem 0 .6rem; }
+
+/* Shared local documentation and guided intake layouts. */
+.oracle-docs label, #agent-brief-intake label { display: block; font-weight: 600; margin-top: .8rem; }
+.oracle-docs input, .oracle-docs select, #agent-brief-intake textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: .55rem; margin: .35rem 0; }
+.oracle-docs-list { list-style: none; padding: 0; display: grid; gap: .65rem; }
+.oracle-docs-item { border: 1px solid var(--border); padding: .75rem; border-radius: 6px; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.oracle-docs-item a { flex: 1 1 12rem; }
+.oracle-docs-category { flex: 1 1 100%; color: var(--muted); font-size: .9rem; }
+.oracle-docs button, #agent-brief-intake button { font: inherit; padding: .5rem; color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; }
+.oracle-docs button[aria-pressed="true"] { background: #ff5c00; color: #111; }
+.oracle-docs :focus-visible, #agent-brief-intake :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.oracle-docs, .oracle-docs a, #agent-brief-intake { overflow-wrap: anywhere; min-width: 0; }
+#agent-brief-switch-confirm { border-left: 4px solid #ff5c00; padding: .7rem; }

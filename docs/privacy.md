@@ -75,3 +75,11 @@ https://github.com/hackmods/Morris-Peoplesoft-Utilities/issues
 ## Changes
 
 Material changes to this policy will be reflected in this document and noted in the project CHANGELOG.
+
+## Documentation hub and guided intake
+
+Options and the side panel include a local catalog of official Oracle manual titles, topics and public links. Search, Tools-version selection and application-family selection are not stored. Favorite manual IDs and last-opened timestamps are stored locally, independently of settings; no PDF contents or external browsing history are collected. Links open only on explicit selection with no referrer. Nothing is fetched for an AI model automatically.
+
+Guided agent handoffs contain only information you type. The form and editable preview remain in page memory and are not saved. Copying is explicit. MPU does not redact pasted evidence or send it to an AI service.
+
+The Fluid navigation debugger collects bounded structural frame/modal clues only on request. Its diagnostic omits page text, field values, arbitrary identifiers, tokens and URLs; it does not inspect server state or determine whether a transaction has unsaved changes. Popup activation status uses a boolean response, not a page snapshot. The extension does not intercept network traffic.

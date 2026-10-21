@@ -89,3 +89,5 @@ a {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
 }
+#activation-status { border-left: 4px solid #ff5c00; padding: .6rem; font-weight: 600; }
+.activation-note { font-size: .85rem; line-height: 1.4; color: var(--muted); }

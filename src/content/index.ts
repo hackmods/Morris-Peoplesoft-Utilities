@@ -446,6 +446,10 @@ function onMpuShortcut(e: KeyboardEvent): void {
 }
 
 chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }, _sender, sendResponse) => {
+  if (msg.type === "mpu-activation-status" && _sender.id === chrome.runtime.id) {
+    sendResponse({ active: !!activeSettings && !!document.getElementById("mpu-bar"), loginOnly: !activeSettings && !!document.getElementById("mpu-bar") });
+    return false;
+  }
   if (msg.type === "mpu-refresh" || msg.command === "refresh") {
     void refresh();
   }

@@ -29,6 +29,7 @@ import {
 } from "../../features/trace-presets";
 import { upsertWatch } from "../../features/upgrade-watch";
 import { bindAgentLibrary } from "../../features/agent-references";
+import { bindOracleDocs } from "../../features/oracle-docs-ui";
 
 const toast = document.getElementById("toast")!;
 let toastTimer = 0;
@@ -787,4 +788,5 @@ async function init(): Promise<void> {
 }
 
 bindAgentLibrary(document);
+bindOracleDocs(document, document.getElementById("oracle-docs")!, new URLSearchParams(location.search).get("tools")?.slice(0, 30));
 void init();
