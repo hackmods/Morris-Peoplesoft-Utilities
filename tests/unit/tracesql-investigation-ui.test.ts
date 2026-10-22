@@ -104,6 +104,16 @@ describe("session-only Trace SQL UI", () => {
     filter.value = parseTraceSql(text).statements[0].sqlId;
     filter.dispatchEvent(new Event("input"));
     expect(cells().slice(0, 6)).toEqual(["SELECT", "PS_JOB A", "1", "1.000", "0.000", "1.000"]);
+    root.querySelector<HTMLButtonElement>("#mpu-tracesql-from tbody button")!.click();
+    const hits = Array.from(root.querySelectorAll("#mpu-tracesql-occurrences li"), (item) => item.textContent ?? "");
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toContain(parseTraceSql(text).statements[0].sqlId);
+    expect(hits[0]).not.toContain(parseTraceSql(text).statements[1].sqlId);
+    root.querySelector<HTMLButtonElement>("#mpu-tracesql-occ-close")!.click();
+    filter.value = "no-such-sqlid";
+    filter.dispatchEvent(new Event("input"));
+    expect(root.querySelector("#mpu-tracesql-from")?.textContent).toMatch(/No SQLIDs match this filter/);
+    expect(root.querySelector("#mpu-tracesql-chart-sql")?.hasAttribute("hidden")).toBe(true);
     const target = root.querySelector<HTMLElement>("#mpu-tracesql-line-3")!;
     expect(target.textContent).toContain("SELECT A.EMPLID");
     target.scrollIntoView = vi.fn();
@@ -117,6 +127,7 @@ describe("session-only Trace SQL UI", () => {
     const file = select(sample, () => new Promise((resolve) => { finish = resolve; }));
     button("preview").click();
     await vi.waitFor(() => expect(button("cancel").disabled).toBe(false));
+    expect(status().textContent).toMatch(/Cancel to stop/);
     button("cancel").click();
     expect(status().textContent).toMatch(/cancelled/i);
     expect(report().value).toBe("");
@@ -133,6 +144,7 @@ describe("session-only Trace SQL UI", () => {
     await vi.waitFor(() => expect(report().value).toContain("SQLID "));
     expect(root.querySelector("#mpu-tracesql-chart-sql")?.getAttribute("aria-label")).toMatch(/SQL duration/);
     expect(root.querySelector("#mpu-tracesql-internal")?.textContent).toMatch(/Application|Name\.Field\.Event/);
+    expect(root.querySelector("#mpu-tracesql-external")?.textContent).toMatch(/None in this excerpt/);
     root.querySelector<HTMLButtonElement>("#mpu-tracesql-where tbody button")!.click();
     expect(root.querySelector("#mpu-tracesql-occurrences")).toBeTruthy();
     root.querySelector<HTMLButtonElement>("#mpu-tracesql-occ-close")!.click();
@@ -142,6 +154,7 @@ describe("session-only Trace SQL UI", () => {
     reviewed().dispatchEvent(new Event("change"));
     button("copy-sql").click();
     await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalled());
+    expect(status().textContent).toMatch(/Options → Agents → assist-tracesql-hotspots/);
     const sql = vi.mocked(navigator.clipboard.writeText).mock.calls.at(-1)?.[0] ?? "";
     expect(sql).toContain("MPU Trace SQL statements only");
     expect(sql).not.toContain("DURATION CHART");

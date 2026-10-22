@@ -173,7 +173,13 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   let sqlOnly = "";
   let closeOccurrences: (() => void) | null = null;
 
-  const fillTable = (table: HTMLTableElement, captionText: string, headers: string[], rows: Array<Array<string | HTMLElement>>) => {
+  const fillTable = (
+    table: HTMLTableElement,
+    captionText: string,
+    headers: string[],
+    rows: Array<Array<string | HTMLElement>>,
+    emptyText: string,
+  ) => {
     const caption = make("caption", captionText);
     const head = make("thead");
     const headRow = make("tr");
@@ -184,6 +190,13 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     }
     head.append(headRow);
     const body = make("tbody");
+    if (!rows.length) {
+      const row = make("tr");
+      const cell = make("td", emptyText);
+      cell.colSpan = headers.length;
+      row.append(cell);
+      body.append(row);
+    }
     for (const values of rows) {
       const row = make("tr");
       for (const value of values) {
@@ -206,6 +219,8 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", `${title}: ${rows.map((row) => `${row.label} ${row.duration.toFixed(3)} seconds`).join("; ") || "none"}`);
+    if (rows.length) svg.removeAttribute("hidden");
+    else svg.setAttribute("hidden", "");
     svg.replaceChildren();
     const heading = doc.createElementNS(ns, "title");
     heading.textContent = title;
@@ -308,10 +323,13 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     const needle = filter.trim().toLowerCase();
     const match = (sqlId: string) => !needle || sqlId.toLowerCase().includes(needle);
     const statements = report.statements.filter((statement) => match(statement.sqlId));
+    const emptySql = needle
+      ? "No SQLIDs match this filter. Clear Find by SQLID to see all rows."
+      : "None in this excerpt.";
     const occurrences = (predicate: (statement: TraceSqlStatement) => boolean, title: string) => {
       const node = button("Occurrences", "");
       node.removeAttribute("id");
-      node.addEventListener("click", () => openOccurrences(title, report.statements.filter(predicate)));
+      node.addEventListener("click", () => openOccurrences(title, statements.filter(predicate)));
       return node;
     };
     const fromRows = aggregateByTable(statements).map((row) => [
@@ -333,19 +351,21 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
       row.where.slice(0, 120),
       occurrences((statement) => statement.sqlId === row.sqlId, `Occurrences for SQLID ${row.sqlId}`),
     ]);
-    fillTable(fromTable, "SQL by exact FROM text", ["Kind", "FROM text", "Calls", "Exec", "Fetch", "Total", "Detail"], fromRows);
-    fillTable(whereTable, "SQL by WHERE / SQLID", ["SQLID", "FROM text", "Calls", "Exec", "Fetch", "Total", "WHERE", "Detail"], whereRows);
+    fillTable(fromTable, "SQL by exact FROM text", ["Kind", "FROM text", "Calls", "Exec", "Fetch", "Total", "Detail"], fromRows, emptySql);
+    fillTable(whereTable, "SQL by WHERE / SQLID", ["SQLID", "FROM text", "Calls", "Exec", "Fetch", "Total", "WHERE", "Detail"], whereRows, emptySql);
     fillTable(
       internalTable,
       "Internal PeopleCode ends",
       ["Line", "Name", "PeopleCode", "Duration"],
       timedPeopleCodeEnds(report, false).map((event) => [String(event.line), event.name, event.peopleCode, event.duration.toFixed(3)]),
+      "None in this excerpt.",
     );
     fillTable(
       externalTable,
       "External PeopleCode ends",
       ["Line", "Name", "PeopleCode", "Duration"],
       timedPeopleCodeEnds(report, true).map((event) => [String(event.line), event.name, event.peopleCode, event.duration.toFixed(3)]),
+      "None in this excerpt.",
     );
     paintChart(sqlChart, "SQL duration by FROM", aggregateByTable(statements).map((row) => ({ label: `${row.kind} ${row.table}`, duration: row.duration })));
     paintChart(
@@ -459,7 +479,9 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     cancel.disabled = false;
     abort = new AbortController();
     const signal = abort.signal;
-    status.textContent = selected.length ? "Reading selected excerpt(s) locally…" : "Preparing pasted excerpt locally…";
+    status.textContent = selected.length
+      ? "Reading selected excerpt(s) locally… Cancel to stop without a report."
+      : "Preparing pasted excerpt locally… Cancel to stop without a report.";
     void (async () => {
       const texts = selected.length
         ? await Promise.all(selected.map((file) => file.arrayBuffer().then((buffer) => new TextDecoder("utf-8", { fatal: true }).decode(buffer))))
@@ -475,7 +497,12 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
           await parseTraceSqlAsync(text, {
             signal,
             onProgress: (line, total) => {
-              if (generation === revision) status.textContent = `Parsing excerpt ${index + 1} of ${texts.length}: line ${line} of ${total}…`;
+              if (generation !== revision) return;
+              const prefix = `Parsing excerpt ${index + 1} of ${texts.length}`;
+              status.textContent =
+                line > 0
+                  ? `${prefix}: line ${line} of ${total}. Cancel to stop without a report.`
+                  : `${prefix}… Cancel to stop without a report.`;
             },
           }),
         );
@@ -549,7 +576,10 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
       void Promise.resolve()
         .then(() => navigator.clipboard.writeText(sqlOnly))
         .then(() => {
-          if (generation === revision) status.textContent = "Reviewed SQL statements copied (no stats).";
+          if (generation === revision) {
+            status.textContent =
+              "Reviewed SQL statements copied (no stats). Next: Options → Agents → assist-tracesql-hotspots with this sanitized text only.";
+          }
         })
         .catch(() => {
           if (generation === revision) status.textContent = "Copy unavailable. Download the SQL-only file instead.";
@@ -562,7 +592,8 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     link.download = "mpu-tracesql-statements.sql.txt";
     link.click();
     URL.revokeObjectURL(url);
-    status.textContent = "Reviewed SQL statements downloaded (no stats).";
+    status.textContent =
+      "Reviewed SQL statements downloaded (no stats). Next: Options → Agents → assist-tracesql-hotspots with this sanitized text only.";
   };
   copySql.addEventListener("click", () => exportSql(true));
   downloadSql.addEventListener("click", () => exportSql(false));
