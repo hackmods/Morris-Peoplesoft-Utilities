@@ -106,6 +106,14 @@ export const AGENT_REFERENCES = [
     "audience": "BA, reporting analyst, developer"
   },
   {
+    "id": "assist-tracesql-hotspots",
+    "title": "PeopleSoft tracesql hotspot analyst",
+    "description": "Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries.",
+    "kind": "agent",
+    "source": "assist-tracesql-hotspots/AGENT.md",
+    "audience": "Developer, DBA, admin, BA supporting performance tickets"
+  },
+  {
     "id": "design-component",
     "title": "PeopleSoft component design advisor",
     "description": "Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs.",

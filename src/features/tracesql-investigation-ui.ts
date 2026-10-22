@@ -30,11 +30,33 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   );
   const scope = make(
     "p",
-    `Supported parser: ${TRACESQL_FORMAT}. UTF-8 plain text only: one file or paste, at most ${TRACESQL_LIMITS.maxBytes.toLocaleString()} bytes, ${TRACESQL_LIMITS.maxLines.toLocaleString()} lines, ${TRACESQL_LIMITS.maxLineChars.toLocaleString()} characters per line. Recognizes Trace Magic-style markers (COM STMT=SELECT/INSERT/UPDATE/DELETE, Dur=, Bind-, >>> start / <<< end, call). SELECT without PS_/PS tables is ignored. Synthetic samples do not verify real-log compatibility.`,
+    `Supported parser: ${TRACESQL_FORMAT}. UTF-8 plain text only: one file or paste, at most ${TRACESQL_LIMITS.maxBytes.toLocaleString()} bytes, ${TRACESQL_LIMITS.maxLines.toLocaleString()} lines, ${TRACESQL_LIMITS.maxLineChars.toLocaleString()} characters per line. Recognizes clean-room PeopleSoft tracesql markers (COM STMT=SELECT/INSERT/UPDATE/DELETE, Dur=, Bind-, >>> start / <<< end, call). SELECT without PS_/PS tables is ignored. Synthetic samples do not verify real-log compatibility.`,
   );
   const privacy = make(
     "p",
     "Sanitize binds and PII before selecting a file or pasting. Report cells use JSON string escaping; review every unmasked SQL string before copy or download. Filenames are omitted from the report.",
+  );
+  const agents = make("p");
+  agents.append(
+    doc.createTextNode("After Preview, paste the reviewed report into the "),
+    (() => {
+      const a = make("a", "assist-tracesql-hotspots");
+      a.href = "https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents/assist-tracesql-hotspots";
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.referrerPolicy = "no-referrer";
+      return a;
+    })(),
+    doc.createTextNode(" prompt (sanitized text only). Do not upload Trace Magic binaries or unsanitized dumps to AI hosts. Full pack: "),
+    (() => {
+      const a = make("a", "agents on GitHub");
+      a.href = "https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents";
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.referrerPolicy = "no-referrer";
+      return a;
+    })(),
+    doc.createTextNode("."),
   );
   const files = make("input");
   files.type = "file";
@@ -65,6 +87,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     intro,
     scope,
     privacy,
+    agents,
     field("Sanitized tracesql / trc excerpt", files, "mpu-tracesql-files"),
     field("Sanitized tracesql paste (optional if no file)", paste, "mpu-tracesql-paste"),
     status,

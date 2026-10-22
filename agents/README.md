@@ -1,6 +1,6 @@
 # PeopleSoft Agent Prompt Pack
 
-Content version **4.2.0** · **24 complete prompts** (23 task agents and one specialist-building guide) · **3 local pillar templates**.
+Content version **4.2.0** · **25 complete prompts** (24 task agents and one specialist-building guide) · **3 local pillar templates**.
 
 Portable knowledge for PeopleSoft on **PeopleTools 8.62**. Confirm the application release/PUM and Tools patch separately. The pack supports HCM, FSCM and Campus Solutions workflows; it stays separate from the Morris PeopleSoft Utilities Chrome extension.
 
@@ -13,7 +13,7 @@ The extension's Options → Agents page provides a searchable reference catalog,
 - **BA work:** design-functional-requirements → design-component/assist-fluid → design-test-uat.
 - **SQL/reporting:** assist-schema-mcp (or paste metadata) → assist-sql-query → review-data-correctness → assist-reporting.
 - **PeopleCode:** assist-peoplecode → review-peoplecode-quality and review-data-correctness where data logic is involved.
-- **Batch/operations:** assist-application-engine, assist-process-scheduler, assist-admin-diagnostics, assist-performance-trace.
+- **Batch/operations:** assist-application-engine, assist-process-scheduler, assist-admin-diagnostics, assist-performance-trace, assist-tracesql-hotspots (sanitized `.tracesql` hotspots; clean-room markers only).
 - **Integrations/approvals:** assist-integrations, assist-approval-framework, review-security.
 - **UI:** assist-fluid plus review-fluid-accessibility; design-component for transaction/search structure.
 - **Search/portal:** assist-search-framework for indexing/results/security; assist-portal-branding for registry navigation and themes.
@@ -37,6 +37,7 @@ The extension's Options → Agents page provides a searchable reference catalog,
 | [assist-schema-mcp](assist-schema-mcp/AGENT.md) | agent | Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions. |
 | [assist-search-framework](assist-search-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence. |
 | [assist-sql-query](assist-sql-query/AGENT.md) | agent | Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax. |
+| [assist-tracesql-hotspots](assist-tracesql-hotspots/AGENT.md) | agent | Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries. |
 | [design-component](design-component/AGENT.md) | agent | Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs. |
 | [design-data-conversion](design-data-conversion/AGENT.md) | agent | Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover. |
 | [design-functional-requirements](design-functional-requirements/AGENT.md) | agent | Develop PeopleSoft BA requirements, process maps, configuration fit/gap, business rules and testable acceptance criteria. |

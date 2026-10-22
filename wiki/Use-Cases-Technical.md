@@ -4,7 +4,7 @@
 
 - **Process Scheduler investigations:** Options → Process Scheduler combines explicitly selected sanitized text excerpts with an optional pasted ticket pack. Review source-line citations, supported timestamp ordering and explicit parent labels before export. The first parser uses synthetic samples; native/real-log compatibility remains unverified. [Scope and limits](Process-Scheduler-Investigations).
 
-- **Trace SQL investigations:** Options → Trace SQL (also linked from Options → Tracing) accepts one sanitized `.tracesql` / `.trc` file or paste, then previews SQL/PeopleCode hotspots, Trace Magic–style SQL IDs, FROM/WHERE aggregates and a text plan tree. Session memory only; review before copy/download. Synthetic coverage; real PeopleTools compatibility unverified. [Scope and limits](Trace-SQL-Investigations).
+- **Trace SQL investigations:** Options → Trace SQL (also linked from Options → Tracing) accepts one sanitized `.tracesql` / `.trc` file or paste, then previews SQL/PeopleCode hotspots, independent SQL fingerprints, FROM/WHERE aggregates and a text plan tree. Session memory only; review before copy/download. Pair with prompt `assist-tracesql-hotspots` on sanitized report text only. Synthetic coverage; real PeopleTools compatibility unverified. [Scope and limits](Trace-SQL-Investigations).
 
 - **Configuration comparison:** Options → Compare configuration accepts sanitized local INI-style or JSON files, masks sensitive pairs and requires report review before export. No server access or configuration writes. [Supported formats and limits](Configuration-Comparisons).
 

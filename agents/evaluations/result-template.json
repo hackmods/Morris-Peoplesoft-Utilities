@@ -281,6 +281,24 @@
       "notes": null
     },
     {
+      "caseId": "tracesql-refuse-binary",
+      "agent": "assist-tracesql-hotspots",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "tracesql-volume-vs-single",
+      "agent": "assist-tracesql-hotspots",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
       "caseId": "setid-unknown",
       "agent": "assist-sql-query",
       "status": "not-run",

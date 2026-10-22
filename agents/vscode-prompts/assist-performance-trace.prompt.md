@@ -66,7 +66,7 @@ Timeline; ranked cost table with counts/time/units/evidence; hypotheses and disc
 
 ## Handoffs
 
-Use `assist-sql-query`, `assist-application-engine`, `review-data-correctness`, `assist-admin-diagnostics` when their specialty is needed. Transfer confirmed context, evidence and unresolved questions; do not assume sibling prompts are installed.
+Use `assist-tracesql-hotspots` for sanitized `.tracesql`/`.trc` marker hotspot ranking; `assist-sql-query`, `assist-application-engine`, `review-data-correctness`, `assist-admin-diagnostics` when their specialty is needed. Transfer confirmed context, evidence and unresolved questions; do not assume sibling prompts are installed.
 
 ## Sources and maintenance
 

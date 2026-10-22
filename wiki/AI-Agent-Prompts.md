@@ -1,6 +1,6 @@
 # AI agent prompts for PeopleSoft work
 
-The [PeopleSoft prompt pack](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) is a separate toolkit, outside the Chrome extension. Content v4.2.0 includes 24 complete prompts, three private-tailoring templates and an unexecuted evaluation-results worksheet. Target PeopleTools 8.62; confirm application release/PUM separately.
+The [PeopleSoft prompt pack](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) is a separate toolkit, outside the Chrome extension. Content v4.2.0 includes 25 complete prompts, three private-tailoring templates and an unexecuted evaluation-results worksheet. Target PeopleTools 8.62; confirm application release/PUM separately.
 
 ## Adoption
 
@@ -27,6 +27,7 @@ Full [setup, workflow routes and validation instructions](https://github.com/hac
 | [assist-schema-mcp](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-schema-mcp/AGENT.md) | agent | Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions. |
 | [assist-search-framework](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-search-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence. |
 | [assist-sql-query](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-sql-query/AGENT.md) | agent | Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax. |
+| [assist-tracesql-hotspots](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/assist-tracesql-hotspots/AGENT.md) | agent | Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries. |
 | [design-component](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-component/AGENT.md) | agent | Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs. |
 | [design-data-conversion](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-data-conversion/AGENT.md) | agent | Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover. |
 | [design-functional-requirements](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/agents/design-functional-requirements/AGENT.md) | agent | Develop PeopleSoft BA requirements, process maps, configuration fit/gap, business rules and testable acceptance criteria. |

@@ -8,20 +8,28 @@ the network.
 
 ## Partial port
 
-This is a **partial** replacement for the legacy Oracle Trace Magic desktop tool.
-MPU today covers core marker parsing plus a text hotspot report with Trace Magic
-SQL IDs, SQL-by-FROM / SQL-by-WHERE aggregates, a nested plan-tree section, and
-accessible duration bars. Still outstanding versus the desktop tool: interactive
-ListView-style grouping UI, clickable source jump, rich charts, multi-file
-compare, and verified real PeopleTools samples. Recovery notes and the remaining
-backlog live in the sibling RETM vault (`../RETM/docs/remaining-parity.md`).
+MPU Options → Trace SQL is a **clean-room** hotspot preview for PeopleSoft
+`.tracesql` / `.trc` text. It covers core marker parsing plus a text report with
+independent SQL fingerprints, SQL-by-FROM / SQL-by-WHERE aggregates, a nested
+plan-tree section, and accessible duration bars. Still outstanding versus fuller
+desktop analyzers: interactive grouping UI, clickable source jump, rich charts,
+multi-file compare, and verified real PeopleTools samples. Remaining backlog:
+sibling RETM vault (`../RETM/docs/remaining-parity.md`). Lawsuit-safe marker
+grammar + agent ideas: `../RETM/docs/peoplesoft-tracesql-marker-reference.md`.
 
 ## Supported parser: PeopleSoft tracesql markers v1
 
-This parser is a **clean reimplementation** of marker rules observed in the
-legacy Oracle Trace Magic desktop tool (RETM). It is **not** a redistribution of
-Trace Magic source. Coverage is synthetic; real PeopleTools patch compatibility
-is unverified.
+This parser is a **clean reimplementation** of markers that appear in
+**PeopleSoft-produced** trace text. It is **not** a redistribution of any
+third-party Trace Magic / CoE desktop product, binaries, or decompiled source.
+Coverage is synthetic; real PeopleTools patch compatibility is unverified.
+
+## AI agents (sanitized pastes only)
+
+- Prompt pack: `assist-tracesql-hotspots` — ranks hotspots from sanitized paste
+  or this report; refuses proprietary binaries.
+- Sibling: `assist-performance-trace` — capture design / waits / plans.
+- Do not upload Trace Magic installers or unsanitized production dumps to AI hosts.
 
 Recognized markers:
 

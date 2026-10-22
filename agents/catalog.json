@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "version": "4.2.0",
   "target": "PeopleTools 8.62 (application release/PUM confirmed separately)",
-  "reviewedDate": "2026-10-15",
+  "reviewedDate": "2026-10-21",
   "hostValidation": "not-run",
   "entries": [
     {
@@ -150,7 +150,8 @@
         "assist-sql-query",
         "assist-application-engine",
         "review-data-correctness",
-        "assist-admin-diagnostics"
+        "assist-admin-diagnostics",
+        "assist-tracesql-hotspots"
       ],
       "resources": [],
       "legacyCursor": null
@@ -286,6 +287,30 @@
       ],
       "resources": [],
       "legacyCursor": "assist-sql-query/cursor.mdc"
+    },
+    {
+      "id": "assist-tracesql-hotspots",
+      "title": "PeopleSoft tracesql hotspot analyst",
+      "description": "Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries.",
+      "kind": "agent",
+      "audience": "Developer, DBA, admin, BA supporting performance tickets",
+      "source": "assist-tracesql-hotspots/AGENT.md",
+      "sources": [
+        "peoplecode",
+        "ae",
+        "catalog"
+      ],
+      "handoffs": [
+        "assist-performance-trace",
+        "assist-sql-query",
+        "review-data-correctness",
+        "assist-application-engine",
+        "assist-admin-diagnostics"
+      ],
+      "resources": [
+        "assist-tracesql-hotspots/MARKER-REFERENCE.md"
+      ],
+      "legacyCursor": null
     },
     {
       "id": "design-component",
