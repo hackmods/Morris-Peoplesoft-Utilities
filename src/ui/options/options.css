@@ -568,3 +568,43 @@ a {
 .agent-disclosure { font-size: .9rem; margin: .5rem 0; }
 #agent-onboarding h3 { font-size: 1rem; margin: 0 0 .35rem; }
 #agent-onboarding p { margin: .35rem 0 .6rem; }
+
+/* Shared local documentation and guided intake layouts. */
+.oracle-docs label, #agent-brief-intake label { display: block; font-weight: 600; margin-top: .8rem; }
+.oracle-docs input, .oracle-docs select, #agent-brief-intake textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: .55rem; margin: .35rem 0; }
+.oracle-docs-list { list-style: none; padding: 0; display: grid; gap: .65rem; }
+.oracle-docs-item { border: 1px solid var(--border); padding: .75rem; border-radius: 6px; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.oracle-docs-item a { flex: 1 1 12rem; }
+.oracle-docs-category { flex: 1 1 100%; color: var(--muted); font-size: .9rem; }
+.oracle-docs button, #agent-brief-intake button { font: inherit; padding: .5rem; color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; }
+.oracle-docs button[aria-pressed="true"] { background: #ff5c00; color: #111; }
+.oracle-docs :focus-visible, #agent-brief-intake :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.oracle-docs, .oracle-docs a, #agent-brief-intake { overflow-wrap: anywhere; min-width: 0; }
+#agent-brief-switch-confirm { border-left: 4px solid #ff5c00; padding: .7rem; }
+
+.mpu-runbooks { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; overflow-wrap: anywhere; min-width: 0; }
+.mpu-runbooks label { display: block; margin: .75rem 0; font-weight: 600; }
+.mpu-runbooks input, .mpu-runbooks select, .mpu-runbooks textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); padding: .55rem; border-radius: 5px; }
+.mpu-runbooks button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; margin: .3rem; }
+.mpu-runbooks pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.mpu-runbooks :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.mpu-comparison { overflow-wrap: anywhere; min-width: 0; }
+.mpu-comparison label { display: block; margin: .75rem 0; font-weight: 600; }
+.mpu-comparison input, .mpu-comparison select, .mpu-comparison textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); padding: .55rem; border-radius: 5px; }
+.mpu-comparison button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; margin: .3rem; }
+.mpu-comparison :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.mpu-config-comparison fieldset { min-width: 0; margin: 1rem 0; border: 1px solid var(--border); border-radius: 6px; }
+.mpu-config-comparison input[type="checkbox"] { width: auto; display: inline-block; }
+.mpu-tracesql input[type="checkbox"] { width: auto; display: inline-block; }
+.mpu-tracesql table { width: 100%; border-collapse: collapse; margin: .5rem 0 1rem; }
+.mpu-tracesql th, .mpu-tracesql td { border: 1px solid var(--border); padding: .35rem; text-align: left; }
+.mpu-tracesql #mpu-tracesql-source { max-height: 16rem; overflow: auto; white-space: pre-wrap; }
+.mpu-tracesql [data-current-line] { outline: 3px solid var(--focus); outline-offset: 2px; }
+.mpu-tracesql #mpu-tracesql-plan { padding-left: 1.2rem; }
+.mpu-tracesql #mpu-tracesql-plan button { margin: .15rem 0; }
+.mpu-scheduler input[type="checkbox"], .mpu-ib-investigation input[type="checkbox"] { width: auto; display: inline-block; }
+.mpu-ib-investigation details, .mpu-scheduler details { min-width: 0; margin: 1rem 0; border: 1px solid var(--border); border-radius: 6px; padding: .7rem; }
+.mpu-ib-builder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .5rem 1rem; }
+.mpu-ib-investigation fieldset { min-width: 0; }
+.mpu-ib-investigation pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }

@@ -1,0 +1,8 @@
+{
+  "runtime": {
+    "mode": "example",
+    "workers": 3,
+    "empty": ""
+  },
+  "features": ["search", "reports"]
+}

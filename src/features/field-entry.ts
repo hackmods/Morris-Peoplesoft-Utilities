@@ -1,7 +1,8 @@
+import { getExtensionApi } from "../platform/browser";
 /**
  * Field Entry toolkit (FE-01..04) — capture / paste / sheet / find-replace
  * for visible editable PeopleSoft fields. Session buffer is in-memory only;
- * named profiles persist in chrome.storage.local with business-key warnings.
+ * named profiles persist in extension-local storage with business-key warnings.
  */
 import { parseDelimited } from "../storage/delimited";
 import { getInspectorContentRoot } from "../adapters/ps-page";
@@ -459,12 +460,12 @@ export function applyEligibilityReport(
 
 function tryInjectFieldEntryWrite(topDoc: Document): void {
   try {
-    if (typeof chrome === "undefined" || !chrome.runtime?.getURL) return;
+    if (!getExtensionApi().runtime?.getURL) return;
     const path = "inject/field-entry-write.js";
     const existing = topDoc.querySelector(`script[data-mpu-inject="${path}"]`);
     existing?.remove();
     const s = topDoc.createElement("script");
-    s.src = chrome.runtime.getURL(path);
+    s.src = getExtensionApi().runtime.getURL(path);
     s.dataset.mpuInject = path;
     s.onload = () => s.remove();
     (topDoc.head || topDoc.documentElement).appendChild(s);

@@ -1,4 +1,6 @@
 import { bindModalDialog } from "./dialog";
+import { parsePsUrl } from "../adapters/ps-page";
+import { authorizeWriteAction } from "./production-awareness";
 /**
  * Field Entry dialogs + eligibility preview UI (FE-01..04).
  */
@@ -119,9 +121,18 @@ export function showEligibilityPreviewDialog(
         close();
       });
       dialog.querySelector("#mpu-fe-elig-apply")?.addEventListener("click", () => {
-        const n = applyEligibilityReport(report, doc);
-        announce(doc, `Applied ${n} field value${n === 1 ? "" : "s"} — save in PeopleSoft when ready`);
+        const apply = dialog.querySelector<HTMLButtonElement>("#mpu-fe-elig-apply")!;
+        if (apply.dataset.pending) return;
+        apply.dataset.pending = "true";
         close();
+        void (async () => {
+          const parsed = parsePsUrl(doc.location.href);
+          const approval = await authorizeWriteAction(doc, parsed, "fieldEntryOption", `Apply ${report.willWrite} field values`);
+          if (!approval) { announce(doc, "Field Entry cancelled — access or environment changed, or confirmation was cancelled."); close(); return; }
+          const n = applyEligibilityReport(report, doc);
+          announce(doc, `Applied ${n} field value${n === 1 ? "" : "s"} — save in PeopleSoft when ready`);
+          close();
+        })().catch(() => { announce(doc, "Field Entry cancelled — settings could not be checked."); close(); });
       });
     },
   });

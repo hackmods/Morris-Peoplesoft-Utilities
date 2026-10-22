@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import { detectUiModel, getTargetDocument, parsePsUrl, collectPageMeta, formatFavoriteDescriptionTemplate, formatPageInfoPlain } from "../adapters/ps-page";
 import { loadSettings, originAllowed, updateSettings, SettingsSaveError } from "../storage/settings";
 import { featureAllowedForUi, isYes, pushRecentComponent, type MpuSettings } from "../storage/schema";
@@ -274,7 +275,7 @@ async function refreshPage(): Promise<void> {
   };
   activeSettings = loginMode ? null : effective;
   if ((!isYes(effective.features.traceOption) && document.getElementById("mpu-trace-title")) ||
-      (!isYes(effective.features.pageInfoOption) && document.getElementById("mpu-pi-title"))) {
+      (!isYes(effective.features.pageInfoOption) && (document.getElementById("mpu-pi-title") || document.getElementById("mpu-comparison-capture-title")))) {
     document.getElementById("mpu-dialog")?.remove();
   }
   if (!isYes(effective.features.fieldEntryOption)) {
@@ -445,7 +446,11 @@ function onMpuShortcut(e: KeyboardEvent): void {
   })();
 }
 
-chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }, _sender, sendResponse) => {
+getExtensionApi().runtime.onMessage.addListener((msg: { type?: string; command?: string }, _sender, sendResponse) => {
+  if (msg.type === "mpu-activation-status" && _sender.id === getExtensionApi().runtime.id) {
+    sendResponse({ active: !!activeSettings && !!document.getElementById("mpu-bar"), loginOnly: !activeSettings && !!document.getElementById("mpu-bar") });
+    return false;
+  }
   if (msg.type === "mpu-refresh" || msg.command === "refresh") {
     void refresh();
   }
@@ -464,7 +469,7 @@ chrome.runtime.onMessage.addListener((msg: { type?: string; command?: string }, 
   }
 });
 
-chrome.storage.onChanged.addListener((changes, area) => {
+getExtensionApi().storage.onChanged.addListener((changes, area) => {
   if (area !== "local" || !changes.mpuSettings) return;
   activeSettings = null;
   lastSearchSettings = null;

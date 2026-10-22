@@ -13,7 +13,7 @@
       <p>Favorites, Page Info and agent prompts.</p>
     </header>
     <main id="main">
-      <nav aria-label="Side panel views"><a href="#favorites">Favorites</a> · <a href="#page-info-view">Page Info</a> · <a href="#agents">Agents</a></nav><section id="favorites-view" aria-labelledby="fav-heading">
+      <nav aria-label="Side panel views"><a href="#favorites">Favorites</a> · <a href="#page-info-view">Page Info</a> · <a href="#agents">Agents</a> · <a href="#docs">Oracle docs</a></nav><section id="favorites-view" aria-labelledby="fav-heading">
         <h2 id="fav-heading">Favorites</h2>
         <input type="search" id="fav-filter" placeholder="Filter…" aria-label="Filter favorites" autocomplete="off" />
         <ul id="fav-list"></ul>
@@ -25,6 +25,7 @@
         <pre id="page-info" class="pre" aria-live="polite">—</pre>
         <button type="button" id="refresh-pi">Refresh from active tab</button>
       </section>
+      <section id="panel-docs" aria-label="Oracle documentation" hidden><div id="oracle-docs"></div></section>
       <section id="panel-agents" aria-label="Agent prompt library" hidden>
         <header class="panel-head">
           <h2>PeopleSoft agent prompts</h2>

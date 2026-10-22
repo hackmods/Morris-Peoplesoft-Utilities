@@ -2,6 +2,8 @@
 
 ## Unreleased — repository review / PeopleTools 8.62
 
+- Add Firefox desktop 140+ alongside Chrome 116+: shared MV3 manifest generation/version, browser API/sidebar adapter, separate validated browser packages, runtime asset parity audit, actual Firefox extension tests, and dual-browser CI/release checks. Future features and fixes must maintain both browsers in parity; Mozilla signing/publication and real-system PeopleTools verification remain separate steps.
+
 - Fix Classic iframe Field Entry, page tabs, structure and upgrade fingerprints; notify the actual field document's change hooks.
 - Enforce allowlist/environment/feature guards for shortcuts and page snapshots; cancel delayed search retries and prevent multi-tab recent-history loops.
 - Make sheet preview read-only, preserve quoted multiline and empty CSV/TSV cells, reject ambiguous/unsafe targets, and revalidate fields before Apply.
@@ -18,6 +20,49 @@
 All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
+
+### Scheduler, Integration Broker and quality consolidation
+
+- Add session-only Scheduler excerpt investigations with cited timeline/parent-label evidence, manual case findings, validated citations and explicit source-scoped process focus. Synthetic parser coverage does not establish native-log compatibility.
+- Add IB evidence preparation/import, strict versioned envelopes, bounded inert JSON/XML/SOAP, explicit two-record comparisons and manual case/checklist findings. Payload detail requires explicit inclusion and review; masked payloads are not compared. Native exports and real-system compatibility remain unverified.
+- Protect runbook drafts and pending saves, keep ProcessPack evidence within one unambiguous process context, and route Help/PCode references through guarded internal destinations. PCode now requires a locked field and verified record/field/event/row context before one explicit preview/copy.
+- Enforce E/G report budgets during assembly and expand installed-Firefox journey coverage, keyboard/focus, rendered accessibility and narrow-layout checks. Preserve both browser builds from the same source/version.
+
+### Trace SQL investigations (Trace Magic marker port)
+
+- Add Options → Trace SQL: select one sanitized `.tracesql` / `.trc` excerpt and preview a local hotspot report (SQL by duration, PeopleCode timed ends, call counts, error lines). Session memory only — no storage, network or new permissions.
+- Parser `PeopleSoft tracesql markers v1` is a clean reimplementation of Trace Magic-style markers recovered from the RETM legacy desktop tool (not a vendor of Oracle Trace Magic source). Synthetic fixtures only; real PeopleTools patch compatibility unverified.
+- Expand report parity: Trace Magic–compatible SQL IDs (`getMD5Hash`), SQL-by-FROM / SQL-by-WHERE aggregates, text plan tree with nest levels, accessible duration charts, privacy disclosure, and Options E2E smoke.
+- Add lawsuit-safe prompt `assist-tracesql-hotspots` (embedded clean-room marker reference); Options Trace SQL links the agent; wiki documents sanitization bounds.
+- Expand the clean-room tracesql pack: sanitize coach, literacy guide, MPU report reviewer, SQLID/fingerprint explainer, and AE-bridge (sanitized labeled pastes only).
+- Add filterable FROM/WHERE tables, SQLID find, plan-row source jump, two-file SQLID/FROM compare, and installed Firefox Options Trace SQL smoke. Real PeopleTools samples remain a maintainer-accepted sanitized capture.
+
+### Roadmap increment G — working tree, outside the prepared store candidate
+
+- Add Options → Compare configuration for explicitly selected, bounded INI-style and JSON files. Reject duplicate keys and unsupported formats; retain source-line and type/missing evidence.
+- Mask sensitive pairs before comparison, omit filenames, and require report review before copy/download. Inputs and reports remain in tab memory with explicit clear, no server access, storage or configuration writes.
+- Document supported subsets and synthetic fixture provenance. Real export compatibility remains unverified; the prepared J/A/D/K/I 1.0.33 ZIP is unchanged.
+
+### Roadmap increment C — working tree, outside the prepared store candidate
+
+- Add explicit Page Info snapshot preparation and review, followed by Options → Compare environments with two user-selected captures, saved comparison history and reviewed text copy/download.
+- Preserve portal/target origin and site, dates, versions and capture limits; warn about unknown PUM, incomplete captures and mismatched objects/UI. Browser metadata cannot establish server object or database equivalence.
+- Keep comparisons in bounded separate local storage with revision conflicts and current-page/activation checks. Saved comparisons retain their own snapshot copies. Exclude MPU controls from page fingerprints.
+
+### Roadmap increment K / I — working tree
+
+- Add explicit environment classification and a persistent production badge, independent of greeting/color. Production keeps the toolbar at document top and sticky.
+- Confirm each production Field Entry Apply and trace start; recheck current access, UI scope, classification and environment after consent. Revalidate field targets and values at Apply; keep trace stop available without production confirmation.
+- Add Options → Environments local runbooks with bounded notes and approved HTTPS links, manual environment/component association, full JSON import preview, collision rejection and revision checks across views. Keep runbooks separate from settings/recent visits and export them separately.
+- Preserve action/failure announcements through toolbar refresh. No version change or new permission. A 1.0.33 candidate containing K/I was prepared on 2026-10-21 after the release request; Chrome submission remains blocked by browser access. C is not in that candidate.
+
+### Next build — 1.0.33
+
+- Add guided, unsaved agent intake with editable preview and explicit draft-discard handling.
+- Add the Oracle documentation hub: 45 official PeopleTools 8.62 PDF links, local search/topic filters, manual favorites/recents and explicit version fallback; application-family indexes stay separate.
+- Add Structure → Fluid navigation debugger with bounded read-only frame/modal ownership clues and uncertainty labels.
+- Show popup activation status; clarify URL scoping and lack of traffic interception. Link PCode starters to agent/docs workflows and correct row-context wording.
+- Record a multi-session roadmap and public PeopleSoft test candidate registry. Live save-warning and extension-on-public-page screenshot verification remain open.
 
 ### Next build — 1.0.32
 

@@ -17,10 +17,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run build
       - run: npm run test:coverage
       - run: npm run audit:a11y
-      - run: npm run build
       - run: npm run audit:store
+      - run: npm run audit:firefox
+      - run: npm run audit:browsers
       - run: npm run audit:compliance
       - name: Upload coverage report
         if: always()
@@ -40,9 +42,34 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npm run test:e2e:chrome
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
+          path: playwright-report/
+
+  firefox:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        firefox: ["140.0", "latest"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - uses: browser-actions/setup-firefox@v1
+        id: firefox
+        with:
+          firefox-version: ${{ matrix.firefox }}
+      - run: npm run test:e2e:firefox
+        env:
+          FIREFOX_BINARY: ${{ steps.firefox.outputs.firefox-path }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: firefox-report-${{ matrix.firefox }}
           path: playwright-report/

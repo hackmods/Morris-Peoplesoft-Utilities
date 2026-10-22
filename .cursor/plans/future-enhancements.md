@@ -45,3 +45,7 @@ Wave 3 plan: `.cursor/plans/implement-wave3.md`
 ## Non-goals
 
 See “Explicitly out of scope” in `docs/findings/future-enhancements.md`.
+
+## Current continuation plan (2026-10-20)
+
+Use [developer-admin-roadmap.md](../../docs/findings/developer-admin-roadmap.md) for the current ordered sessions and saved checkpoint. J/A are the first two increments; user promoted D immediately afterward. Preserve the distinction between synthetic tests, public-page observations, and live extension verification.

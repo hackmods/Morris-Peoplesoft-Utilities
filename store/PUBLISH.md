@@ -1,6 +1,6 @@
 # Publish Morris PeopleSoft Utilities to the Chrome Web Store
 
-One-page checklist after **`v1.0.26`** is on `main`.
+One-page checklist for the current release. [Firefox review/signing and browser parity](../docs/browser-support.md) are documented separately.
 
 ## Before you open the dashboard
 
@@ -9,14 +9,14 @@ One-page checklist after **`v1.0.26`** is on `main`.
    Otherwise use the committed assets under `store/assets/screenshots/` (01, 04, 05 = Roles/Options; 02, 03 = Favorites/Page Info mocks).
 
 2. **Get the extension zip** (pick one):
-   - **GitHub Release:** [Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases) → `v1.0.26` → download `morris-peoplesoft-utilities-v1.0.26.zip`
+   - **GitHub Release:** [Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases) → current tag → download `morris-peoplesoft-utilities-chrome-v<version>.zip` (older releases used browser-neutral names)
    - **Local:**  
      ```bash
      npm ci
      npm run generate:icons
      npm run prep:store
      ```
-     Upload `morris-peoplesoft-utilities-v1.0.26.zip` from the repo root.
+     Run `npm run test:e2e` separately, then upload `morris-peoplesoft-utilities-chrome-v<version>.zip` from the repo root. The other browser package is the unsigned Firefox upload/review ZIP.
 
 3. **Sanity check**
    ```bash

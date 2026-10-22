@@ -124,7 +124,7 @@ describe("PeopleSoft prompt distributions", { timeout: 30_000 }, () => {
 
   it("validates the maintained pack without claiming host execution", () => {
     const result = validatePack();
-    expect(result.catalog.entries).toHaveLength(24);
+    expect(result.catalog.entries).toHaveLength(30);
     expect(result.catalog.templates).toHaveLength(3);
     expect(result.catalog.hostValidation).toBe("not-run");
   });

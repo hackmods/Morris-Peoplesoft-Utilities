@@ -1,5 +1,9 @@
 # Use cases — Business Analysts
 
+- **Compare visible environment evidence:** Prepare and review a Page Info snapshot in each environment, then select both in Options → Compare environments. Saved reports retain dates, origins and limits. Equal browser metadata does not establish equal business rules, security or data. [Walkthrough](Environment-Comparisons).
+
+- **Production awareness and runbooks:** Choose an explicit environment classification in Options → Environments. Production shows a persistent text badge and asks before MPU applies field values or starts trace. Save local component notes and approved links as runbooks; review team JSON imports before saving. [Environment guide](Environments).
+
 - **Stay oriented:** Environment indicator uses a stronger color strip; Classic/Fluid/Nav mode badge shows where you are; first-install onboarding checklist in Options.
 - **Jump faster:** Save Favorites (optional Page Info description template + notes); filter and Category groups; **Recent** components; optional **New win** checkbox; export/import CSV with append or replace (warns about business keys/notes); optional **Side Panel** for Favorites + Page Info.
 - **Document pages:** Page Info copies Menu / Component / Page / ToolsRel / DB / Mode / page-token present; ToolsRel tips; **Copy Markdown**; **Compare clipboard** across envs; includes locked field when Inspect is on; **Page Tabs** for multi-page components.

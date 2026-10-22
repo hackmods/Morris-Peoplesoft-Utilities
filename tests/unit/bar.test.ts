@@ -241,6 +241,7 @@ describe("utilities bar", () => {
 
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No", color: "#2288aa" }];
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     mountBar({
       settings,
       parsed,
@@ -562,6 +563,7 @@ describe("utilities bar", () => {
       },
     ];
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No", color: "#2288aa" }];
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     settings.recentComponents = [
       {
         Servlet: "psp",

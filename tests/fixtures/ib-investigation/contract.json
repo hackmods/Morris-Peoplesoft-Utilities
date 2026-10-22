@@ -1,0 +1,18 @@
+{
+  "format": "mpu-ib-evidence",
+  "version": 1,
+  "records": [
+    {
+      "serviceOperation": "SYNTHETIC_OPERATION",
+      "operationType": "asynchronous",
+      "direction": "outbound",
+      "senderNode": "SYNTHETIC_LOCAL",
+      "receiverNode": "SYNTHETIC_REMOTE",
+      "transactionId": "SYNTHETIC_TRANSACTION",
+      "stage": "publication-contract",
+      "reportedStatus": "Error",
+      "error": "Synthetic example error; original details require local review",
+      "payload": [true, null, "SYNTHETIC-SAMPLE-TEXT"]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # PeopleSoft Agent Prompt Pack
 
-Content version **4.2.0** · **24 complete prompts** (23 task agents and one specialist-building guide) · **3 local pillar templates**.
+Content version **4.2.0** · **30 complete prompts** (28 task agents and two guides) · **3 local pillar templates**.
 
 Portable knowledge for PeopleSoft on **PeopleTools 8.62**. Confirm the application release/PUM and Tools patch separately. The pack supports HCM, FSCM and Campus Solutions workflows; it stays separate from the Morris PeopleSoft Utilities Chrome extension.
 
@@ -13,12 +13,12 @@ The extension's Options → Agents page provides a searchable reference catalog,
 - **BA work:** design-functional-requirements → design-component/assist-fluid → design-test-uat.
 - **SQL/reporting:** assist-schema-mcp (or paste metadata) → assist-sql-query → review-data-correctness → assist-reporting.
 - **PeopleCode:** assist-peoplecode → review-peoplecode-quality and review-data-correctness where data logic is involved.
-- **Batch/operations:** assist-application-engine, assist-process-scheduler, assist-admin-diagnostics, assist-performance-trace.
+- **Batch/operations:** assist-application-engine, assist-process-scheduler, assist-admin-diagnostics, assist-performance-trace, assist-tracesql-hotspots / sanitize / AE-bridge / SQLID fingerprint / report review (clean-room tracesql; sanitized text only).
 - **Integrations/approvals:** assist-integrations, assist-approval-framework, review-security.
 - **UI:** assist-fluid plus review-fluid-accessibility; design-component for transaction/search structure.
 - **Search/portal:** assist-search-framework for indexing/results/security; assist-portal-branding for registry navigation and themes.
 - **Change/conversion:** review-upgrade-migration, design-data-conversion and design-test-uat.
-- **Learning/local expertise:** guide-onboarding and guide-specialist-trainer.
+- **Learning/local expertise:** guide-onboarding, guide-specialist-trainer, guide-tracesql-literacy (synthetic tracesql markers only).
 
 <!-- CATALOG-BEGIN -->
 
@@ -37,16 +37,22 @@ The extension's Options → Agents page provides a searchable reference catalog,
 | [assist-schema-mcp](assist-schema-mcp/AGENT.md) | agent | Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions. |
 | [assist-search-framework](assist-search-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence. |
 | [assist-sql-query](assist-sql-query/AGENT.md) | agent | Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax. |
+| [assist-sqlid-fingerprint](assist-sqlid-fingerprint/AGENT.md) | agent | Explain PeopleSoft tracesql SQL grouping using statement text the user already has: MPU SQLID encoding versus the MPU-only FNV fingerprint, including collisions. |
+| [assist-tracesql-ae-bridge](assist-tracesql-ae-bridge/AGENT.md) | agent | Correlate a sanitized Application Engine step excerpt with a sanitized PeopleSoft tracesql excerpt using clean-room markers; hand AE restart questions to assist-application-engine. |
+| [assist-tracesql-hotspots](assist-tracesql-hotspots/AGENT.md) | agent | Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries. |
+| [assist-tracesql-sanitize](assist-tracesql-sanitize/AGENT.md) | agent | Coach redaction of binds, PII, host paths and tokens in PeopleSoft tracesql excerpts or MPU Trace SQL reports before any AI paste. |
 | [design-component](design-component/AGENT.md) | agent | Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs. |
 | [design-data-conversion](design-data-conversion/AGENT.md) | agent | Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover. |
 | [design-functional-requirements](design-functional-requirements/AGENT.md) | agent | Develop PeopleSoft BA requirements, process maps, configuration fit/gap, business rules and testable acceptance criteria. |
 | [design-test-uat](design-test-uat/AGENT.md) | agent | Create traceable PeopleSoft unit, integration, security, UAT and upgrade regression plans, including PTF where suitable. |
 | [guide-onboarding](guide-onboarding/AGENT.md) | agent | Teach PeopleSoft concepts and safe first tasks for BAs, developers and administrators with pillar-specific learning routes. |
 | [guide-specialist-trainer](guide-specialist-trainer/GUIDE.md) | guide | Create and maintain private HCM, FSCM or Campus Solutions specialists from verified local definitions, policies, incidents and acceptance cases. |
+| [guide-tracesql-literacy](guide-tracesql-literacy/GUIDE.md) | guide | Teach PeopleSoft tracesql marker literacy using synthetic .tracesql excerpts only; not a PeopleTools patch proof or Trace Magic product guide. |
 | [review-data-correctness](review-data-correctness/AGENT.md) | agent | Review existing PeopleSoft SQL, Query, PeopleCode SQL, AE or SQR for result grain, effective dating, keys, joins and data sources. |
 | [review-fluid-accessibility](review-fluid-accessibility/AGENT.md) | agent | Review rendered PeopleSoft Fluid and Classic tasks for keyboard, focus, semantics, errors, contrast, zoom and assistive-technology barriers. |
 | [review-peoplecode-quality](review-peoplecode-quality/AGENT.md) | agent | Review PeopleCode APIs, SQL construction, buffer access, event placement, error handling and reusable application classes. |
 | [review-security](review-security/AGENT.md) | agent | Review effective PeopleSoft page, row, Query, process, CI and integration access and evidence-based segregation of duties. |
+| [review-tracesql-report](review-tracesql-report/AGENT.md) | agent | Critique an MPU Trace SQL investigation report for double-counted durations, missing unknowns, SQLID versus fingerprint overclaim, and sanitization gaps. |
 | [review-upgrade-migration](review-upgrade-migration/AGENT.md) | agent | Review PeopleTools/application updates, object compares, customization impact and controlled object/configuration migration plans. |
 
 <!-- CATALOG-END -->

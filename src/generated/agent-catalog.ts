@@ -106,6 +106,38 @@ export const AGENT_REFERENCES = [
     "audience": "BA, reporting analyst, developer"
   },
   {
+    "id": "assist-sqlid-fingerprint",
+    "title": "PeopleSoft tracesql SQLID and fingerprint explainer",
+    "description": "Explain PeopleSoft tracesql SQL grouping using statement text the user already has: MPU SQLID encoding versus the MPU-only FNV fingerprint, including collisions.",
+    "kind": "agent",
+    "source": "assist-sqlid-fingerprint/AGENT.md",
+    "audience": "Developer, DBA, admin reviewing MPU report IDs"
+  },
+  {
+    "id": "assist-tracesql-ae-bridge",
+    "title": "PeopleSoft AE and tracesql correlation",
+    "description": "Correlate a sanitized Application Engine step excerpt with a sanitized PeopleSoft tracesql excerpt using clean-room markers; hand AE restart questions to assist-application-engine.",
+    "kind": "agent",
+    "source": "assist-tracesql-ae-bridge/AGENT.md",
+    "audience": "Developer, DBA, AE support, admin"
+  },
+  {
+    "id": "assist-tracesql-hotspots",
+    "title": "PeopleSoft tracesql hotspot analyst",
+    "description": "Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries.",
+    "kind": "agent",
+    "source": "assist-tracesql-hotspots/AGENT.md",
+    "audience": "Developer, DBA, admin, BA supporting performance tickets"
+  },
+  {
+    "id": "assist-tracesql-sanitize",
+    "title": "PeopleSoft tracesql sanitization coach",
+    "description": "Coach redaction of binds, PII, host paths and tokens in PeopleSoft tracesql excerpts or MPU Trace SQL reports before any AI paste.",
+    "kind": "agent",
+    "source": "assist-tracesql-sanitize/AGENT.md",
+    "audience": "Developer, DBA, admin, BA supporting performance tickets"
+  },
+  {
     "id": "design-component",
     "title": "PeopleSoft component design advisor",
     "description": "Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs.",
@@ -154,6 +186,14 @@ export const AGENT_REFERENCES = [
     "audience": "Functional/technical owner, team mentor"
   },
   {
+    "id": "guide-tracesql-literacy",
+    "title": "PeopleSoft tracesql literacy guide",
+    "description": "Teach PeopleSoft tracesql marker literacy using synthetic .tracesql excerpts only; not a PeopleTools patch proof or Trace Magic product guide.",
+    "kind": "guide",
+    "source": "guide-tracesql-literacy/GUIDE.md",
+    "audience": "Developer, DBA, admin, BA learning performance tickets"
+  },
+  {
     "id": "review-data-correctness",
     "title": "PeopleSoft data correctness reviewer",
     "description": "Review existing PeopleSoft SQL, Query, PeopleCode SQL, AE or SQR for result grain, effective dating, keys, joins and data sources.",
@@ -184,6 +224,14 @@ export const AGENT_REFERENCES = [
     "kind": "agent",
     "source": "review-security/AGENT.md",
     "audience": "Security admin, BA, auditor, developer"
+  },
+  {
+    "id": "review-tracesql-report",
+    "title": "MPU Trace SQL report reviewer",
+    "description": "Critique an MPU Trace SQL investigation report for double-counted durations, missing unknowns, SQLID versus fingerprint overclaim, and sanitization gaps.",
+    "kind": "agent",
+    "source": "review-tracesql-report/AGENT.md",
+    "audience": "Developer, DBA, admin, BA reviewing a local Options export"
   },
   {
     "id": "review-upgrade-migration",

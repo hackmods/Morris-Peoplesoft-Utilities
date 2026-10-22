@@ -1,6 +1,14 @@
 # Agent guide — Morris PeopleSoft Utilities
 
-This repository is a **Chrome Manifest V3 extension** for PeopleSoft productivity.
+This repository is a **Chrome and Firefox Manifest V3 extension** for PeopleSoft productivity.
+
+## Browser parity — required for future changes
+
+- Maintain Chrome and Firefox together from the same source and package version. Every feature, fix, security boundary, and settings migration must work in both builds; do not create separate browser feature branches or schemas.
+- Use `src/platform/browser.ts` for extension API access and sidebar differences. Keep browser manifest differences in `scripts/extension-manifest.ts`.
+- `npm run build` creates Chrome in `dist/` and Firefox in `dist/firefox/`, then checks shared runtime asset parity. Building Chrome alone clears the nested Firefox output; rebuild both before packaging or auditing parity.
+- Run `npm run audit:firefox` and both browser E2E suites for browser-facing changes. Keep existing coverage gates. Firefox uses Selenium with the actual extension, not Playwright's Firefox engine.
+- Document any unavoidable behavior differences in `docs/browser-support.md` and cover both paths. Store publication/signing and real PeopleTools 8.62 verification remain separate explicit tasks.
 
 ## Compatibility and evidence
 

@@ -8,8 +8,9 @@
 
 - [ ] Live screenshots in `store/assets/screenshots/` (see [`store/incoming/README.md`](incoming/README.md) + `npm run import:store-screenshots`)
 - [ ] `npm run audit:store` — no errors; resolve mock-screenshot **warnings** before public listing
-- [ ] `npm run prep:store` — produces `morris-peoplesoft-utilities-v*.zip` from current `main`
+- [ ] `npm run prep:store` — produces separate browser ZIPs; select `morris-peoplesoft-utilities-chrome-v*.zip` for Chrome Web Store
 - [ ] `npm run release:check` passes (CI gate)
+- [ ] `npm run test:e2e` passes separately for Chromium and Firefox; keep both builds in parity
 - [ ] Manual PeopleSoft parity optional but recommended ([`docs/testing/manual-parity-checklist.md`](../docs/testing/manual-parity-checklist.md))
 
 ## Developer Dashboard (copy/paste)

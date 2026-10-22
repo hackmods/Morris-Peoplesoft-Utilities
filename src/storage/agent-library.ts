@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import { AGENT_REFERENCES } from "../generated/agent-catalog";
 
 export const AGENT_LIBRARY_STORAGE_KEY = "mpuAgentLibrary";
@@ -24,7 +25,7 @@ export function normalizeAgentLibraryPreferences(value: unknown): AgentLibraryPr
 
 export async function loadAgentLibraryPreferences(): Promise<AgentLibraryPreferences> {
   try {
-    const stored = await chrome.storage.local.get(AGENT_LIBRARY_STORAGE_KEY);
+    const stored = await getExtensionApi().storage.local.get(AGENT_LIBRARY_STORAGE_KEY);
     return normalizeAgentLibraryPreferences(stored[AGENT_LIBRARY_STORAGE_KEY]);
   } catch {
     throw new Error("Agent library preferences could not be loaded. Please retry.");
@@ -33,7 +34,7 @@ export async function loadAgentLibraryPreferences(): Promise<AgentLibraryPrefere
 
 async function mutate(message: AgentLibraryMutation): Promise<AgentLibraryPreferences> {
   let reply: AgentLibraryReply;
-  try { reply = await chrome.runtime.sendMessage(message); }
+  try { reply = await getExtensionApi().runtime.sendMessage(message); }
   catch { throw new Error("Agent library preferences could not be saved. Please retry."); }
   if (!reply?.ok) throw new Error(reply?.error || "Agent library preferences could not be saved. Please retry.");
   return normalizeAgentLibraryPreferences(reply.preferences);

@@ -39,3 +39,7 @@ ALL gold/yellow form outlines, field marks, horizontal lines and checkmark with
 vivid orange #FF5C00. Flat clean colors, no blue, no yellow, no new objects or
 lettering. This is the same icon recolored for the user's approved
 orange/black/gray/white app palette."
+
+## Public reference capture — 2026-10-20
+
+`submission/niagara-public-fluid-reference.png` is a genuine in-app browser screenshot of the public Niagara Region Careers Search Jobs page, captured after selecting View All Jobs, without sign-in or application submission. It shows no MPU extension. It is a layout reference only, not a replacement store screenshot or proof of live extension/PeopleTools-patch compatibility. User-reported save-warning reproduction remains distinct from this observation. Capture the actual extension in a browser where it is loaded before creating promotional live-use screenshots from this site.

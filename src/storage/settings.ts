@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 import {
   createDefaultSettings,
   SCHEMA_VERSION,
@@ -12,7 +13,7 @@ import { SETTINGS_CONFLICT, type SettingsReply, type SettingsWrite } from "./coo
 
 const SETTINGS_KEY = "mpuSettings";
 const snapshots = new WeakMap<MpuSettings, MpuSettings>();
-let transport = (message: SettingsWrite): Promise<SettingsReply> => chrome.runtime.sendMessage(message);
+let transport = (message: SettingsWrite): Promise<SettingsReply> => getExtensionApi().runtime.sendMessage(message);
 
 /** Register the worker's local queue without messaging the worker itself. */
 export function configureSettingsTransport(writer: typeof transport): void { transport = writer; }
@@ -97,7 +98,7 @@ export function migrateFromLegacy(legacy: LegacyBlob, base = createDefaultSettin
 }
 
 export async function loadSettings(): Promise<MpuSettings> {
-  const raw = await chrome.storage.local.get(null);
+  const raw = await getExtensionApi().storage.local.get(null);
   if (Object.hasOwn(raw, SETTINGS_KEY)) {
     return settingsDraft(normalizeStoredSettings(raw[SETTINGS_KEY]));
   }

@@ -1,4 +1,6 @@
-# E2E UI tests (Playwright)
+# E2E UI tests (Chrome and Firefox)
+
+`npm run test:e2e` builds and exercises both installed extensions. The suite in this directory uses Playwright + Chromium; `tests/firefox/` uses Selenium + actual Firefox with Playwright reporting. Firefox must be installed; Selenium Manager obtains geckodriver, or set `FIREFOX_BINARY` / `GECKODRIVER`. Browser-specific commands are `npm run test:e2e:chrome` and `npm run test:e2e:firefox`. See [browser parity policy](../../docs/browser-support.md).
 
 These tests load the **unpacked Chrome extension** from `dist/` against local PeopleSoft-shaped fixture URLs so Manifest V3 `content_scripts` match.
 
@@ -33,6 +35,11 @@ Or in one step: `npm run test:e2e` (builds first).
 - Rendered axe checks with contrast enabled: extension pages, bar/flyouts, primary dialogs, Field Entry previews/profile dialogs (all reported WCAG 2A/2AA/2.1AA violations fail)
 - Menu/submenu arrows, Home/End, Escape focus return, Tab exit, modal focus wrap, and 320 CSS-pixel bar/dialog bounds
 - Blocked-host shortcuts/snapshots and multi-tab recent-history stability
+- Process Scheduler excerpt/ticket reports: source citations, explicit timestamp and parent-label evidence, privacy masking, review-gated exports, invalid UTF-8, empty workspace handoff, keyboard and rendered contrast/reflow. The installed Firefox suite also exercises this workspace and its guarded entry point.
+- Trace SQL investigations: one or two sanitized excerpts, SQLID/FROM grouping, plan-to-source jump, two-file compare, review-gated export, invalid UTF-8, no storage/network. Chrome and installed Firefox both smoke the tab.
+- Integration Broker versioned JSON evidence: metadata/stage citations, default payload omission and explicit inclusion/review, sensitive subtree masking, exact numeric tokens, duplicate-key/UTF-8 rejection, no storage/network changes, empty guarded handoff, keyboard and rendered contrast/reflow in both installed browsers; Chromium also checks dark mode.
+- Expanded IB case workflow: form-based draft and explicit payload-file reads, v1/v2 envelopes, inert XML/SOAP and external-entity rejection, distinct JSON/XML tag citations, supplied observation times, selected two-record comparisons, precision/type differences, findings/checklist notes, stale-read cancellation and complete clear/reload. Both browsers render/audit the expanded controls and download the reviewed case report.
+- Consolidation: actual Help/PCode destination loading, locked-field/manual-name/event/row-context preview and invalidation, runbook keep/discard/conflict/focus paths, ambiguous/changed ProcessPack selection, and Scheduler manual findings/citations/source focus. Installed Firefox also covers guided handoff keep/discard, production consent acceptance/revocation, immutable environment comparisons and configuration redaction/review/invalidation.
 
 Synthetic fixtures do not establish real PeopleTools 8.62 compatibility. The narrow viewport is a reflow proxy, not a full browser zoom or screen-reader test. See `docs/testing/peopletools-8.62.md` for remaining release evidence.
 

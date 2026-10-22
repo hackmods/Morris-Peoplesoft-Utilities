@@ -15,10 +15,12 @@ npm run build
 ## Guidelines
 
 - Read ADRs in `docs/adr/` and Cursor rules in `.cursor/rules/`
+- Maintain **Chrome and Firefox parity** in every feature/fix: shared code and version, both manifests/packages, and both browser suites. See [browser support and release policy](docs/browser-support.md).
 - Do not add credential storage or telemetry
 - Keep WAR matches Chrome-valid (origin-only `/*` path); scope PeopleSoft URLs via content scripts; MV3 only
 - Include tests for URL/adapter/storage changes
 - Run `npm run release:check` before release-related PRs
+- Run `npm run test:e2e` separately before releases; it exercises both installed browser extensions.
 
 ## Pull requests
 
