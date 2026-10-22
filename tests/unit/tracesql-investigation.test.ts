@@ -81,7 +81,7 @@ describe("PeopleSoft tracesql markers v1", () => {
     expect(mixed.statements.map((s) => s.kind).sort()).toEqual(["DELETE", "INSERT", "SELECT", "UPDATE"]);
   });
 
-  it("compares two excerpts by SQLID and FROM table", () => {
+  it("compares two excerpts by SQLID and exact FROM text", () => {
     const left = fixture("sample.tracesql");
     const right = "COM Stmt=SELECT B.DEPTID FROM PS_JOB B WHERE B.EMPLID = :1\n Dur=1.000 EXE";
     const text = renderTraceSqlInvestigations([left, right]);
@@ -94,6 +94,17 @@ describe("PeopleSoft tracesql markers v1", () => {
     expect(from.some((row) => row.presence === "left" && row.label.includes("PS_PERSONAL_DATA"))).toBe(true);
     const ids = compareTraceSqlBySqlId(parseTraceSql(left), parseTraceSql(left));
     expect(ids.every((row) => row.presence === "both")).toBe(true);
+  });
+
+  it("keeps alias differences explicit without claiming absent database tables", () => {
+    const left = "COM Stmt=SELECT A.DEPTID FROM PS_JOB A\n Dur=1.000 EXE";
+    const right = "COM Stmt=SELECT B.DEPTID FROM PS_JOB B\n Dur=1.000 EXE";
+    const rows = compareTraceSqlByFrom(parseTraceSql(left), parseTraceSql(right));
+    expect(rows.map((row) => row.presence).sort()).toEqual(["left", "right"]);
+    const report = renderTraceSqlInvestigations([left, right]);
+    expect(report).toContain("including aliases and joins");
+    expect(report).toContain("Different text does not establish missing database tables");
+    expect(report).toContain("COMPARE BY FROM — exact text");
   });
 
   it("aggregates hotspots by duration and nests plan levels", () => {

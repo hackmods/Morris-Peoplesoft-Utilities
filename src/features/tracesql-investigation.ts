@@ -65,8 +65,12 @@ export interface TraceSqlReport {
     selectDuration: number;
     otherSqlDuration: number;
     eventDuration: number;
+    eventInternalDuration: number;
+    eventExternalDuration: number;
     selectCount: number;
     otherSqlCount: number;
+    eventInternalCount: number;
+    eventExternalCount: number;
   };
 }
 
@@ -498,35 +502,19 @@ function tryOtherSql(reader: TraceReader, statements: TraceSqlStatement[], plan:
   return false;
 }
 
-/** Parse one sanitized tracesql / .trc excerpt in memory. */
-export function parseTraceSql(input: string): TraceSqlReport {
-  const text = assertSafeText(input);
-  const reader = new TraceReader(text);
-  const statements: TraceSqlStatement[] = [];
-  const events: TracePeopleCodeEvent[] = [];
-  const calls: TracePeopleCodeEvent[] = [];
-  const plan: TracePlanNode[] = [];
-  const errors: TraceErrorLine[] = [];
-  const nest = { level: 0 };
-
-  while (reader.peek()) {
-    reader.read();
-    if (!reader.current) continue;
-    if (isErrorLine(reader.current)) {
-      errors.push({ line: reader.lineNumber, text: reader.current });
-    }
-    if (
-      tryPeopleCode(reader, events, plan, nest) ||
-      tryCall(reader, calls, plan, nest) ||
-      trySelect(reader, statements, plan, nest) ||
-      tryOtherSql(reader, statements, plan, nest)
-    ) {
-      continue;
-    }
-  }
-
+function finishReport(
+  reader: TraceReader,
+  statements: TraceSqlStatement[],
+  events: TracePeopleCodeEvent[],
+  calls: TracePeopleCodeEvent[],
+  plan: TracePlanNode[],
+  errors: TraceErrorLine[],
+): TraceSqlReport {
   const selects = statements.filter((s) => s.kind === "SELECT");
   const others = statements.filter((s) => s.kind !== "SELECT");
+  const timedEnds = events.filter((e) => e.kind === "end" && e.duration > 0);
+  const internal = timedEnds.filter((e) => !e.external);
+  const external = timedEnds.filter((e) => e.external);
   return {
     statements,
     events,
@@ -538,26 +526,116 @@ export function parseTraceSql(input: string): TraceSqlReport {
       selectDuration: selects.reduce((sum, s) => sum + s.durationExec + s.durationFetch, 0),
       otherSqlDuration: others.reduce((sum, s) => sum + s.durationExec + s.durationFetch, 0),
       eventDuration: events.reduce((sum, e) => sum + e.duration, 0),
+      eventInternalDuration: internal.reduce((sum, e) => sum + e.duration, 0),
+      eventExternalDuration: external.reduce((sum, e) => sum + e.duration, 0),
       selectCount: selects.length,
       otherSqlCount: others.length,
+      eventInternalCount: internal.length,
+      eventExternalCount: external.length,
     },
   };
 }
 
-export function aggregateByTable(statements: TraceSqlStatement[]): Array<{ table: string; kind: string; calls: number; duration: number }> {
-  const map = new Map<string, { table: string; kind: string; calls: number; duration: number }>();
+function consumeCurrentLine(
+  reader: TraceReader,
+  statements: TraceSqlStatement[],
+  events: TracePeopleCodeEvent[],
+  calls: TracePeopleCodeEvent[],
+  plan: TracePlanNode[],
+  errors: TraceErrorLine[],
+  nest: { level: number },
+): void {
+  if (!reader.current) return;
+  if (isErrorLine(reader.current)) errors.push({ line: reader.lineNumber, text: reader.current });
+  tryPeopleCode(reader, events, plan, nest) ||
+    tryCall(reader, calls, plan, nest) ||
+    trySelect(reader, statements, plan, nest) ||
+    tryOtherSql(reader, statements, plan, nest);
+}
+
+/** Parse one sanitized tracesql / .trc excerpt in memory. */
+export function parseTraceSql(input: string): TraceSqlReport {
+  const reader = new TraceReader(assertSafeText(input));
+  const statements: TraceSqlStatement[] = [];
+  const events: TracePeopleCodeEvent[] = [];
+  const calls: TracePeopleCodeEvent[] = [];
+  const plan: TracePlanNode[] = [];
+  const errors: TraceErrorLine[] = [];
+  const nest = { level: 0 };
+  while (reader.peek()) {
+    reader.read();
+    consumeCurrentLine(reader, statements, events, calls, plan, errors, nest);
+  }
+  return finishReport(reader, statements, events, calls, plan, errors);
+}
+
+/** Same parse with abort and progress so Options can cancel large excerpts. */
+export async function parseTraceSqlAsync(
+  input: string,
+  options: { signal?: AbortSignal; onProgress?: (line: number, total: number) => void } = {},
+): Promise<TraceSqlReport> {
+  const reader = new TraceReader(assertSafeText(input));
+  const statements: TraceSqlStatement[] = [];
+  const events: TracePeopleCodeEvent[] = [];
+  const calls: TracePeopleCodeEvent[] = [];
+  const plan: TracePlanNode[] = [];
+  const errors: TraceErrorLine[] = [];
+  const nest = { level: 0 };
+  let steps = 0;
+  while (reader.peek()) {
+    if (options.signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+    reader.read();
+    consumeCurrentLine(reader, statements, events, calls, plan, errors, nest);
+    steps++;
+    if (steps % 400 === 0) {
+      options.onProgress?.(reader.lineNumber, reader.totalLines);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+  }
+  return finishReport(reader, statements, events, calls, plan, errors);
+}
+
+export function aggregateByTable(statements: TraceSqlStatement[]): Array<{
+  table: string;
+  kind: string;
+  calls: number;
+  duration: number;
+  durationExec: number;
+  durationFetch: number;
+}> {
+  const map = new Map<string, { table: string; kind: string; calls: number; duration: number; durationExec: number; durationFetch: number }>();
   for (const stmt of statements) {
     const key = `${stmt.kind}|${stmt.table}`;
-    const row = map.get(key) ?? { table: stmt.table, kind: stmt.kind, calls: 0, duration: 0 };
+    const row = map.get(key) ?? { table: stmt.table, kind: stmt.kind, calls: 0, duration: 0, durationExec: 0, durationFetch: 0 };
     row.calls++;
+    row.durationExec += stmt.durationExec;
+    row.durationFetch += stmt.durationFetch;
     row.duration += stmt.durationExec + stmt.durationFetch;
     map.set(key, row);
   }
   return [...map.values()].sort((a, b) => b.duration - a.duration || a.table.localeCompare(b.table));
 }
 
-export function aggregateByWhere(statements: TraceSqlStatement[]): Array<{ sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }> {
-  const map = new Map<string, { sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }>();
+export function aggregateByWhere(statements: TraceSqlStatement[]): Array<{
+  sql: string;
+  where: string;
+  table: string;
+  calls: number;
+  duration: number;
+  durationExec: number;
+  durationFetch: number;
+  sqlId: string;
+}> {
+  const map = new Map<string, {
+    sql: string;
+    where: string;
+    table: string;
+    calls: number;
+    duration: number;
+    durationExec: number;
+    durationFetch: number;
+    sqlId: string;
+  }>();
   for (const stmt of statements) {
     const row = map.get(stmt.sql) ?? {
       sql: stmt.sql,
@@ -565,13 +643,37 @@ export function aggregateByWhere(statements: TraceSqlStatement[]): Array<{ sql: 
       table: stmt.table,
       calls: 0,
       duration: 0,
+      durationExec: 0,
+      durationFetch: 0,
       sqlId: stmt.sqlId,
     };
     row.calls++;
+    row.durationExec += stmt.durationExec;
+    row.durationFetch += stmt.durationFetch;
     row.duration += stmt.durationExec + stmt.durationFetch;
     map.set(stmt.sql, row);
   }
   return [...map.values()].sort((a, b) => b.duration - a.duration || a.sqlId.localeCompare(b.sqlId));
+}
+
+/** Unique post-bind SQL text only — no durations, charts or filenames. */
+export function renderTraceSqlSqlOnly(report: TraceSqlReport): string {
+  const rows = aggregateByWhere(report.statements);
+  const out = new ReportLines([
+    "MPU Trace SQL statements only",
+    `Parser: ${TRACESQL_FORMAT}`,
+    "No stats, charts or filenames. Review for sensitive literals before sharing.",
+    "",
+  ]);
+  if (!rows.length) out.push("No PeopleSoft SQL statements recognized.");
+  else for (const row of rows) out.push(row.sql);
+  return out.join();
+}
+
+export function timedPeopleCodeEnds(report: TraceSqlReport, external: boolean): TracePeopleCodeEvent[] {
+  return report.events
+    .filter((event) => event.kind === "end" && event.external === external && event.duration > 0)
+    .sort((a, b) => b.duration - a.duration);
 }
 
 function asciiBar(value: number, max: number, width = 24): string {
@@ -680,7 +782,8 @@ export function renderTraceSqlInvestigations(texts: string[]): string {
     `Physical lines: ${right.totalLines} | SELECT ${right.totals.selectCount} Dur ${right.totals.selectDuration.toFixed(3)} | DML ${right.totals.otherSqlCount} Dur ${right.totals.otherSqlDuration.toFixed(3)}`,
   ]);
   renderCompareSection(out, "COMPARE BY SQLID — present in one side or duration delta", compareTraceSqlBySqlId(left, right));
-  renderCompareSection(out, "COMPARE BY FROM — present in one side or duration delta", compareTraceSqlByFrom(left, right));
+  out.push("", "FROM comparison matches exact parsed text, including aliases and joins. Different text does not establish missing database tables.");
+  renderCompareSection(out, "COMPARE BY FROM — exact text present in one side or duration delta", compareTraceSqlByFrom(left, right));
   out.push("", "EXCERPT A — full hotspot report", renderTraceSqlInvestigation(texts[0]), "", "EXCERPT B — full hotspot report", renderTraceSqlInvestigation(texts[1]));
   return out.join();
 }
@@ -734,7 +837,7 @@ export function renderTraceSqlInvestigation(input: string): string {
     }
   }
 
-  out.push("", "AGGREGATE BY TABLE (SQL-by-FROM) — highest duration first");
+  out.push("", "AGGREGATE BY EXACT FROM TEXT (aliases retained) — highest duration first");
   if (!byTable.length) out.push("No PeopleSoft SQL statements recognized.");
   else {
     for (const row of byTable) {

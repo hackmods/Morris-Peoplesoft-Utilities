@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { bindTraceSqlInvestigationUI } from "@/features/tracesql-investigation-ui";
-import { TRACESQL_LIMITS } from "@/features/tracesql-investigation";
+import { parseTraceSql, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
 
 const sample = readFileSync(resolve(process.cwd(), "tests/fixtures/tracesql-investigation/sample.tracesql"), "utf8");
 let root: HTMLElement;
@@ -91,6 +91,25 @@ describe("session-only Trace SQL UI", () => {
     await vi.waitFor(() => expect(report().value).toContain("COMPARE BY SQLID"));
     expect(report().value).toContain("COMPARE BY FROM");
     expect(root.querySelector("#mpu-tracesql-from")?.textContent).toContain("PS_PERSONAL_DATA");
+  });
+
+  it("filters totals to matching SQLIDs and preserves CR-only source line references", async () => {
+    const text = "COM Stmt=SELECT A.DEPTID FROM PS_JOB A\r Dur=1.000 EXE\rCOM Stmt=SELECT A.EMPLID FROM PS_JOB A\r Dur=3.000 EXE";
+    select(text);
+    button("preview").click();
+    await vi.waitFor(() => expect(report().value).toContain("SQLID "));
+    const cells = () => Array.from(root.querySelectorAll("#mpu-tracesql-from tbody td"), (cell) => cell.textContent);
+    expect(cells()).toEqual(["SELECT", "PS_JOB A", "2", "4.000"]);
+    const filter = root.querySelector<HTMLInputElement>("#mpu-tracesql-sqlid")!;
+    filter.value = parseTraceSql(text).statements[0].sqlId;
+    filter.dispatchEvent(new Event("input"));
+    expect(cells()).toEqual(["SELECT", "PS_JOB A", "1", "1.000"]);
+    const target = root.querySelector<HTMLElement>("#mpu-tracesql-line-3")!;
+    expect(target.textContent).toContain("SELECT A.EMPLID");
+    target.scrollIntoView = vi.fn();
+    root.querySelector<HTMLButtonElement>('#mpu-tracesql-plan button[data-line="3"]')!.click();
+    expect(document.activeElement).toBe(target);
+    expect(status().textContent).toContain("Source line 3");
   });
 
   it("exports only reviewed text as mpu-tracesql-investigation.txt", async () => {

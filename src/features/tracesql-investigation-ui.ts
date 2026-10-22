@@ -110,7 +110,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   grouping.append(
     groupingHeading,
     field("Find by SQLID", sqlid, "mpu-tracesql-sqlid"),
-    make("h4", "SQL by FROM"),
+    make("h4", "SQL by exact FROM text (aliases retained)"),
     fromTable,
     make("h4", "SQL by WHERE"),
     whereTable,
@@ -197,14 +197,13 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const renderGrouping = (report: TraceSqlReport, filter: string) => {
     const needle = filter.trim().toLowerCase();
     const match = (sqlId: string) => !needle || sqlId.toLowerCase().includes(needle);
-    const fromRows = aggregateByTable(report.statements)
-      .filter((row) => !needle || report.statements.some((stmt) => stmt.table === row.table && stmt.kind === row.kind && match(stmt.sqlId)))
+    const statements = report.statements.filter((statement) => match(statement.sqlId));
+    const fromRows = aggregateByTable(statements)
       .map((row) => [row.kind, row.table, String(row.calls), row.duration.toFixed(3)]);
-    const whereRows = aggregateByWhere(report.statements)
-      .filter((row) => match(row.sqlId))
+    const whereRows = aggregateByWhere(statements)
       .map((row) => [row.sqlId, row.table, String(row.calls), row.duration.toFixed(3), row.where.slice(0, 120)]);
-    fillTable(fromTable, "SQL by FROM table", ["Kind", "FROM", "Calls", "Duration"], fromRows);
-    fillTable(whereTable, "SQL by WHERE / SQLID", ["SQLID", "FROM", "Calls", "Duration", "WHERE"], whereRows);
+    fillTable(fromTable, "SQL by exact FROM text", ["Kind", "FROM text", "Calls", "Duration"], fromRows);
+    fillTable(whereTable, "SQL by WHERE / SQLID", ["SQLID", "FROM text", "Calls", "Duration", "WHERE"], whereRows);
     renderPlan(report.plan);
   };
 
@@ -291,7 +290,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
       }
       report.value = renderTraceSqlInvestigations(texts);
       parsed = parseTraceSql(texts[0]);
-      sourceLines = texts[0].split(/\r?\n/);
+      sourceLines = texts[0].replace(/^\ufeff/, "").split(/\r\n|\r|\n/);
       renderSource(sourceLines);
       renderGrouping(parsed, sqlid.value);
       grouping.hidden = false;

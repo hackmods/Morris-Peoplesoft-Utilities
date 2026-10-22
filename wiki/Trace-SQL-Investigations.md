@@ -3,7 +3,8 @@
 Open **Options → Trace SQL** (linked from **Options → Tracing** after you capture
 a trace). Select one or two sanitized `.tracesql` / `.trc` files **or** paste sanitized
 text, preview the report, review it, then copy or download. Two files add SQLID and
-FROM compare sections. Filter FROM/WHERE by SQLID and open a plan row to highlight
+FROM compare sections. FROM matching uses exact parsed text, including aliases and joins;
+different text does not establish missing database tables. Filter FROM/WHERE by SQLID and open a plan row to highlight
 the matching source line. Evidence stays in the
 Options tab memory only — nothing is written to extension storage or sent over
 the network.
@@ -14,8 +15,8 @@ MPU Options → Trace SQL is a **clean-room** hotspot preview for PeopleSoft
 `.tracesql` / `.trc` text. It covers core marker parsing plus a text report with
 independent SQL fingerprints, SQL-by-FROM / SQL-by-WHERE aggregates, a nested
 plan-tree section, and accessible duration bars. Still outstanding versus fuller
-desktop analyzers: interactive grouping UI, clickable source jump, rich charts,
-multi-file compare, and verified real PeopleTools samples. Remaining backlog:
+desktop analyzers: richer charts, broader format handling,
+and verified real PeopleTools samples. Remaining backlog:
 sibling RETM vault (`../RETM/docs/remaining-parity.md`). Lawsuit-safe marker
 grammar + agent ideas: `../RETM/docs/peoplesoft-tracesql-marker-reference.md`.
 
