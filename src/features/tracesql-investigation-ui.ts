@@ -38,7 +38,13 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   );
   const agents = make("p");
   agents.append(
-    doc.createTextNode("After Preview, paste the reviewed report into the "),
+    doc.createTextNode("After you review and copy the report, open "),
+    (() => {
+      const a = make("a", "Options → Agents");
+      a.href = "#agents";
+      return a;
+    })(),
+    doc.createTextNode(" and search for "),
     (() => {
       const a = make("a", "assist-tracesql-hotspots");
       a.href = "https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents/assist-tracesql-hotspots";
@@ -47,16 +53,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
       a.referrerPolicy = "no-referrer";
       return a;
     })(),
-    doc.createTextNode(" prompt (sanitized text only). Do not upload Trace Magic binaries or unsanitized dumps to AI hosts. Full pack: "),
-    (() => {
-      const a = make("a", "agents on GitHub");
-      a.href = "https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents";
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.referrerPolicy = "no-referrer";
-      return a;
-    })(),
-    doc.createTextNode("."),
+    doc.createTextNode(" (sanitized text only). Do not upload Trace Magic binaries or unsanitized dumps to AI hosts."),
   );
   const files = make("input");
   files.type = "file";
@@ -188,13 +185,17 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     void Promise.resolve()
       .then(() => navigator.clipboard.writeText(report.value))
       .then(() => {
-        if (generation === revision) status.textContent = "Reviewed Trace SQL report copied.";
+        if (generation === revision) {
+          status.textContent =
+            "Reviewed Trace SQL report copied. Next: Options → Agents → assist-tracesql-hotspots with this sanitized text only.";
+        }
       })
       .catch(() => {
         if (generation === revision) {
           report.focus();
           report.select();
-          status.textContent = "Copy unavailable. Select and copy the reviewed report manually.";
+          status.textContent =
+            "Copy unavailable. Select and copy the reviewed report manually, then open Options → Agents for assist-tracesql-hotspots.";
         }
       });
   });
@@ -207,6 +208,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     link.download = "mpu-tracesql-investigation.txt";
     link.click();
     URL.revokeObjectURL(url);
-    status.textContent = "Reviewed Trace SQL report downloaded.";
+    status.textContent =
+      "Reviewed Trace SQL report downloaded. Next: Options → Agents → assist-tracesql-hotspots with this sanitized text only.";
   });
 }

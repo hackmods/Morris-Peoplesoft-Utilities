@@ -52,6 +52,8 @@ describe("session-only Trace SQL UI", () => {
     reviewed().dispatchEvent(new Event("change"));
     button("copy").click();
     await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(report().value));
+    expect(status().textContent).toMatch(/Options → Agents → assist-tracesql-hotspots/);
+    expect(root.querySelector('a[href="#agents"]')).toBeTruthy();
     expect(vi.mocked(chrome.storage.local.set).mock.calls.length).toBe(writes);
     window.dispatchEvent(new Event("pagehide"));
     expect(report().value).toBe("");

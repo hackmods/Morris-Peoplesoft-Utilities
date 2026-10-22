@@ -15,6 +15,7 @@ describe("public agent references", () => {
     expect(filterAgentReferences("", "guide").map((entry) => entry.id)).toEqual(["guide-onboarding", "guide-specialist-trainer"]);
     expect(filterAgentReferences("nonexistent", "all")).toEqual([]);
     expect(filterAgentReferences("DBA", "all").map((entry) => entry.id)).toContain("assist-performance-trace");
+    expect(filterAgentReferences("tracesql", "all").map((entry) => entry.id)).toContain("assist-tracesql-hotspots");
     expect(filterAgentReferences("", "all", "ba").every((entry) => /\bba\b/i.test(entry.audience))).toBe(true);
     expect(filterAgentReferences("", "all", "admin").map((entry) => entry.id)).toContain("assist-portal-branding");
   });
@@ -78,7 +79,7 @@ describe("public agent references", () => {
     firstPrepare.focus();
     await Promise.resolve();
     expect((doc.activeElement as HTMLElement).dataset.agentFocus).toBe(firstPrepare.dataset.agentFocus);
-    expect(doc.querySelectorAll("#agent-list > li")).toHaveLength(24);
+    expect(doc.querySelectorAll("#agent-list > li")).toHaveLength(AGENT_REFERENCES.length);
     expect(doc.querySelectorAll("#agent-templates a")).toHaveLength(3);
     const search = doc.getElementById("agent-search") as HTMLInputElement;
     search.focus(); search.value = "fluid accessibility"; search.dispatchEvent(new Event("input"));

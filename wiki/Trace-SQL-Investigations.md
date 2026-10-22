@@ -26,8 +26,8 @@ Coverage is synthetic; real PeopleTools patch compatibility is unverified.
 
 ## AI agents (sanitized pastes only)
 
-- Prompt pack: `assist-tracesql-hotspots` — ranks hotspots from sanitized paste
-  or this report; refuses proprietary binaries.
+- After copy/download, open **Options → Agents** and search `tracesql` for
+  `assist-tracesql-hotspots` (sanitized report text only; refuses proprietary binaries).
 - Sibling: `assist-performance-trace` — capture design / waits / plans.
 - Do not upload Trace Magic installers or unsanitized production dumps to AI hosts.
 
