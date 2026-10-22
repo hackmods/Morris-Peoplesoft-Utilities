@@ -4,6 +4,16 @@ Open **Options → Trace SQL**. Select one sanitized `.tracesql` / `.trc` excerp
 preview the report, review it, then copy or download. Files stay in the Options
 tab memory only — nothing is written to extension storage or sent over the network.
 
+## Partial port
+
+This is a **partial** replacement for the legacy Oracle Trace Magic desktop tool.
+MPU today covers core marker parsing and a text hotspot report. Not yet in the
+extension: Trace Magic–compatible SQL IDs, plan trees with source jump, duration
+charts, interactive SQL-by-FROM / SQL-by-WHERE grouping, multi-file compare, E2E
+Options smoke coverage, and verified real PeopleTools samples. Recovery notes and
+the full remaining backlog live in the sibling RETM vault
+(`../RETM/docs/remaining-parity.md`).
+
 ## Supported parser: PeopleSoft tracesql markers v1
 
 This parser is a **clean reimplementation** of marker rules observed in the
