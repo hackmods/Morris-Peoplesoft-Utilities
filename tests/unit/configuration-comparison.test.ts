@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -140,5 +140,15 @@ describe("configuration comparison parser", () => {
     const rendered = renderConfigurationComparison(compareConfigurations(left, left));
     expect(rendered.split("\n").filter(line => line.includes("unchanged |"))).toHaveLength(1);
     expect(rendered).toContain("\\nchanged");
+  });
+
+  it("stops assembling a nested-path report when its byte budget is reached", () => {
+    const key = "x".repeat(240);
+    const parsed = parseConfiguration(`{"${key}":`.repeat(12) + JSON.stringify(Array(1000).fill("value")) + "}".repeat(12), "json");
+    const comparison = compareConfigurations(parsed, parsed);
+    const laterPath = vi.fn(() => "later record");
+    Object.defineProperty(comparison.differences.at(-1)!, "path", { get: laterPath });
+    expect(() => renderConfigurationComparison(comparison)).toThrow("output limit");
+    expect(laterPath).not.toHaveBeenCalled();
   });
 });

@@ -35,6 +35,8 @@ import { bindRunbooksUI } from "../../features/runbooks-ui";
 import { bindEnvironmentComparisonUI } from "../../features/environment-comparison-ui";
 import { bindConfigurationComparisonUI } from "../../features/configuration-comparison-ui";
 import { bindTraceSqlInvestigationUI } from "../../features/tracesql-investigation-ui";
+import { bindSchedulerInvestigationUI } from "../../features/scheduler-investigation-ui";
+import { bindIbInvestigationUI } from "../../features/ib-investigation-ui";
 
 const runbookEnvironmentLabels: string[] = [];
 
@@ -432,6 +434,7 @@ function renderFavorites(settings: MpuSettings): void {
 
 function renderEnvs(settings: MpuSettings): void {
   runbookEnvironmentLabels.splice(0, runbookEnvironmentLabels.length, ...new Set(settings.environments.map(env => env.label)));
+  document.dispatchEvent(new Event("mpu-runbook-environments-changed"));
   const root = document.getElementById("env-list")!;
   root.replaceChildren();
   if (!settings.environments.length) {
@@ -807,5 +810,7 @@ bindAgentLibrary(document);
 bindEnvironmentComparisonUI(document, document.getElementById("environment-comparison-workspace")!);
 bindConfigurationComparisonUI(document, document.getElementById("configuration-comparison-workspace")!);
 bindTraceSqlInvestigationUI(document, document.getElementById("tracesql-investigation-workspace")!);
+bindSchedulerInvestigationUI(document, document.getElementById("scheduler-investigation-workspace")!);
+bindIbInvestigationUI(document, document.getElementById("ib-investigation-workspace")!);
 bindOracleDocs(document, document.getElementById("oracle-docs")!, new URLSearchParams(location.search).get("tools")?.slice(0, 30));
 void init();

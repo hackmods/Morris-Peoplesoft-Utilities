@@ -3,7 +3,7 @@ import { bindModalDialog } from "./dialog";
 import { appendAgentHelp } from "./agent-references";
 import { isVisible } from "../adapters/dom";
 import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings, TraceRequest } from "../storage/schema";
-import { FIELD_COPY_FORMATS, isYes } from "../storage/schema";
+import { featureAllowedForUi, FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
 import {
   parsePsUrl,
@@ -29,11 +29,11 @@ import {
   type FavoriteTreeGroup,
 } from "./favorites-ui";
 import {
-  buildPeopleCodeStubs,
   compareObjectPackToBuffer,
   formatObjectPackMarkdown,
   formatObjectPackPlain,
 } from "./peoplecode-aids";
+import { bindPeopleCodeContextUI } from "./peoplecode-context-ui";
 import { collectFluidStructure, formatFluidStructurePlain } from "./fluid-structure";
 import { collectFluidDebugSnapshot, formatFluidDebugSnapshot } from "./fluid-debugger";
 import { groupAdminJumps, type AdminJump } from "./admin-jumps";
@@ -43,6 +43,7 @@ import { collectIbBreadcrumb, formatIbBreadcrumbPlain } from "./ib-breadcrumb";
 import {
   collectProcessPack,
   formatProcessPackPlain,
+  isProcessMonitorPage,
 } from "./process-pack";
 import { formatTraceBarHint, summarizeActiveTraceFlags } from "./trace-presets";
 import { describeTraceRequest } from "./trace-status";
@@ -896,18 +897,33 @@ function buildAdminFlyoutBody(
   }
 }
 
-export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
-  const meta = collectPageMeta(doc);
+async function pcodeAccess(doc: Document, parsed: ParsedPsUrl): Promise<boolean> {
+  if (doc.location.href !== parsed.href || !doc.getElementById("mpu-bar")?.isConnected) return false;
+  const settings = await loadSettings();
+  const mapping = settings.urlSites[parsed.baseURL]?.[parsed.siteNormalized];
+  return doc.location.href === parsed.href && !!doc.getElementById("mpu-bar")?.isConnected && originAllowed(parsed.href, settings)
+    && (!mapping || isYes(settings.environments[mapping.envId]?.active))
+    && (isYes(settings.features.pageInfoOption) || (isYes(settings.features.recFieldInfoOption)
+      && featureAllowedForUi(settings.featureUiScopes.recFieldInfoOption, detectUiModel(doc))));
+}
+
+function referenceButton(doc: Document, dialog: HTMLElement, parsed: ParsedPsUrl, source: "help" | "pcode", destination: "docs" | "agents", text: string): HTMLButtonElement {
+  const button = doc.createElement("button"); button.type = "button"; button.className = "mpu-btn"; button.textContent = text;
+  button.addEventListener("click", () => {
+    if (!dialog.isConnected || doc.location.href !== parsed.href) return;
+    const tools = collectPageMeta(doc).toolsRel || "";
+    void getExtensionApi().runtime.sendMessage({ type: "mpu-open-reference", source, destination, uiMode: detectUiModel(doc),
+      tools: /^\d{1,2}\.\d{1,2}(?:\.\d{1,3})?$/.test(tools) ? tools : "" }).then(result => {
+      if (dialog.isConnected && !result?.ok) announce(doc, "Reference unavailable; check activation and feature settings or open Options.");
+    }).catch(() => { if (dialog.isConnected) announce(doc, "Unable to open the local reference. Try Options."); });
+  });
+  return button;
+}
+
+export async function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): Promise<void> {
+  if (!await pcodeAccess(doc, parsed)) return;
   const locked = getLockedParsedRecField();
   const hasField = Boolean(locked?.record && locked?.field);
-  const stubs = buildPeopleCodeStubs({
-    record: locked?.record,
-    field: locked?.field,
-    occurrence: locked?.occurrence,
-    menu: meta.menu ?? parsed.menu,
-    component: meta.component ?? parsed.component,
-    page: meta.page,
-  });
 
   openModalDialog(doc, {
     labelledBy: "mpu-pcode-title",
@@ -920,23 +936,17 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
 
       const hint = doc.createElement("p");
       hint.className = "mpu-dialog-hint";
-      if (hasField) {
-        hint.textContent = `Starter examples for ${locked!.record}.${locked!.field}. Verify the event, owning record and row/scroll context before adapting them in App Designer. MPU cannot read or edit server PeopleCode.`;
+      if (locked) {
+        hint.textContent = "Verify the locked field's record, event and owning row/scroll context before adapting an example in App Designer. MPU cannot read or edit server PeopleCode.";
       } else {
         hint.textContent =
-          "Copy starter snippets into App Designer. Tip: Inspect → click a field icon to lock it, then open PCode again so RECORD.FIELD is filled in. Until then, stubs use placeholders (RECORD / FIELD).";
+          "Lock the intended field with Inspect before preparing an example. MPU cannot read or edit server PeopleCode or determine the executing event and row context.";
       }
       dialog.appendChild(hint);
 
       const resources = doc.createElement("p");
-      const promptLink = doc.createElement("a");
-      promptLink.href = getExtensionApi().runtime.getURL("options.html#agents");
-      promptLink.target = "_blank"; promptLink.rel = "noopener noreferrer";
-      promptLink.textContent = "Prepare a PeopleCode task with an agent";
-      const docsLink = doc.createElement("a");
-      docsLink.href = getExtensionApi().runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
-      docsLink.target = "_blank"; docsLink.rel = "noopener noreferrer";
-      docsLink.textContent = "Find PeopleCode API and language documentation";
+      const promptLink = referenceButton(doc, dialog, parsed, "pcode", "agents", "Prepare a PeopleCode task with an agent");
+      const docsLink = referenceButton(doc, dialog, parsed, "pcode", "docs", "Find PeopleCode API and language documentation");
       resources.append(promptLink, " · ", docsLink);
       dialog.appendChild(resources);
 
@@ -958,56 +968,10 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
         dialog.appendChild(lockedLine);
       }
 
-      const how = doc.createElement("ol");
-      how.className = "mpu-dialog-hint mpu-pcode-steps";
-      how.style.cssText = "margin: 0.5rem 0 0.75rem 1.25rem; padding: 0;";
-      for (const step of [
-        "Pick an event below and Copy",
-        "Paste into App Designer on that event",
-        "Replace any placeholders and finish the logic yourself",
-      ]) {
-        const li = doc.createElement("li");
-        li.textContent = step;
-        how.appendChild(li);
-      }
-      dialog.appendChild(how);
-
-      const list = doc.createElement("ul");
-      list.className = "mpu-pcode-list";
-      list.id = "mpu-pcode-list";
-
-      for (const stub of stubs) {
-        const li = doc.createElement("li");
-        li.className = "mpu-pcode-item";
-
-        const stubRow = doc.createElement("div");
-        stubRow.className = "mpu-pcode-row";
-
-        const label = doc.createElement("strong");
-        label.textContent = stub.label;
-        const scope = doc.createElement("span");
-        scope.className = "mpu-dialog-hint";
-        scope.textContent = ` · ${stub.scope}`;
-        stubRow.append(label, scope);
-
-        const copyOne = doc.createElement("button");
-        copyOne.type = "button";
-        copyOne.className = "mpu-btn mpu-pcode-copy";
-        copyOne.textContent = "Copy";
-        copyOne.setAttribute("aria-label", `Copy ${stub.label} starter`);
-        copyOne.addEventListener("click", () => {
-          void copyText(doc, stub.stub, `Copied ${stub.label} starter`);
-        });
-        stubRow.appendChild(copyOne);
-        li.appendChild(stubRow);
-
-        const pre = doc.createElement("pre");
-        pre.className = "mpu-pre mpu-pcode-stub";
-        pre.textContent = stub.stub;
-        li.appendChild(pre);
-        list.appendChild(li);
-      }
-      dialog.appendChild(list);
+      const examples = doc.createElement("section"); examples.id = "mpu-pcode-context-form";
+      dialog.append(examples);
+      bindPeopleCodeContextUI(doc, examples, { record: locked?.record, field: locked?.field, lockedId: locked?.raw },
+        () => pcodeAccess(doc, parsed), text => copyText(doc, text, "Copied contextual PeopleCode example"));
 
       const msgHits = scanMessageKeys(doc);
       const msgsHeading = doc.createElement("h3");
@@ -1038,7 +1002,7 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
           copyMsg.textContent = "Copy";
           copyMsg.setAttribute("aria-label", `Copy ${hit.label}`);
           copyMsg.addEventListener("click", () => {
-            void copyText(doc, hit.copyText, `Copied ${hit.label}`);
+            void pcodeAccess(doc, parsed).then(allowed => { if (allowed && dialog.isConnected) return copyText(doc, hit.copyText, `Copied ${hit.label}`); });
           });
           row.appendChild(copyMsg);
           li.appendChild(row);
@@ -1050,23 +1014,13 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
       const actionRow = doc.createElement("div");
       actionRow.className = "mpu-dialog-actions";
 
-      const copyAll = doc.createElement("button");
-      copyAll.type = "button";
-      copyAll.className = "mpu-btn";
-      copyAll.id = "mpu-pcode-copy-all";
-      copyAll.textContent = "Copy all starters";
-      copyAll.addEventListener("click", () => {
-        const all = stubs.map((s) => s.stub).join("\n\n");
-        void copyText(doc, all, "Copied all PeopleCode starters");
-      });
-
       const copyMsgs = doc.createElement("button");
       copyMsgs.type = "button";
       copyMsgs.className = "mpu-btn";
       copyMsgs.textContent = "Copy all keys";
       copyMsgs.disabled = !msgHits.length;
       copyMsgs.addEventListener("click", () => {
-        void copyText(doc, formatMessageKeysPlain(msgHits), "Copied message keys");
+        void pcodeAccess(doc, parsed).then(allowed => { if (allowed && dialog.isConnected) return copyText(doc, formatMessageKeysPlain(msgHits), "Copied message keys"); });
       });
 
       const closeBtn = doc.createElement("button");
@@ -1076,7 +1030,7 @@ export function showPeopleCodeDialog(doc: Document, parsed: ParsedPsUrl): void {
       closeBtn.textContent = "Close";
       closeBtn.addEventListener("click", close);
 
-      actionRow.append(copyAll, copyMsgs, closeBtn);
+      actionRow.append(copyMsgs, closeBtn);
       dialog.appendChild(actionRow);
     },
   });
@@ -1553,7 +1507,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       "PCode",
       "Copy PeopleCode starters for App Designer (lock a field with Inspect first)",
     );
-    pcode.addEventListener("click", () => showPeopleCodeDialog(doc, ctx.parsed));
+    pcode.addEventListener("click", () => { if (bar.isConnected) void showPeopleCodeDialog(doc, ctx.parsed); });
     bar.appendChild(pcode);
   }
 
@@ -2004,10 +1958,7 @@ function showHelpDialog(doc: Document): void {
       appendAgentHelp(doc, agentHelp);
       dialog.querySelector("#mpu-dialog-close")?.before(agentHelp);
       const docsHelp = doc.createElement("p");
-      const docsLink = doc.createElement("a");
-      docsLink.href = getExtensionApi().runtime.getURL(`options.html?tools=${encodeURIComponent(meta.toolsRel || "")}#docs`);
-      docsLink.target = "_blank"; docsLink.rel = "noopener noreferrer";
-      docsLink.textContent = "Oracle documentation hub (PeopleTools version-aware)";
+      const docsLink = referenceButton(doc, dialog, parsePsUrl(doc.location.href), "help", "docs", "Oracle documentation hub (PeopleTools version-aware)");
       docsHelp.append(docsLink);
       dialog.querySelector("#mpu-dialog-close")?.before(docsHelp);
       dialog.querySelector("#mpu-dialog-close")?.addEventListener("click", close);
@@ -2242,16 +2193,53 @@ export function showPageInfoDialog(
         const ibLine = doc.createElement("p");
         ibLine.className = "mpu-dialog-hint";
         ibLine.textContent = `IB: ${ibCrumb.summary}`;
+        const investigateIb = doc.createElement("button");
+        investigateIb.type = "button";
+        investigateIb.className = "mpu-btn";
+        investigateIb.id = "mpu-pi-ib";
+        investigateIb.textContent = "Investigate sanitized IB samples";
+        investigateIb.addEventListener("click", () => {
+          void (async () => {
+            if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
+            const result = await getExtensionApi().runtime.sendMessage({ type: "mpu-open-ib" });
+            if (!result?.ok && dialog.isConnected) announce(doc, "IB workspace unavailable; try Options → Integration Broker");
+          })().catch(() => { if (dialog.isConnected) announce(doc, "Unable to open the IB workspace"); });
+        });
+        ibLine.append(" ", investigateIb);
         dialog.querySelector("#mpu-pi-body")?.insertAdjacentElement("afterend", ibLine);
       }
 
       const processPack = collectProcessPack(doc, parsed);
       const processBtn = dialog.querySelector("#mpu-pi-copy-process") as HTMLButtonElement | null;
-      if (processPack && processBtn) {
+      if (processBtn && isProcessMonitorPage(doc, parsed)) {
         processBtn.hidden = false;
-        const packText = formatProcessPackPlain(processPack);
+        processBtn.disabled = !processPack;
+        if (!processPack) {
+          const warning = doc.createElement("p"); warning.className = "mpu-dialog-hint";
+          warning.textContent = "No unambiguous process context is available. Select one process row or open its details, then reopen Page Info. Fields from different rows were not combined.";
+          processBtn.insertAdjacentElement("afterend", warning);
+        }
+        const investigate = doc.createElement("button");
+        investigate.type = "button";
+        investigate.className = "mpu-btn";
+        investigate.id = "mpu-pi-scheduler";
+        investigate.textContent = "Investigate sanitized Scheduler logs";
+        investigate.addEventListener("click", () => {
+          void (async () => {
+            if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected) return;
+            const result = await getExtensionApi().runtime.sendMessage({ type: "mpu-open-scheduler" });
+            if (!result?.ok && dialog.isConnected) announce(doc, "Scheduler workspace unavailable; try Options → Process Scheduler");
+          })().catch(() => { if (dialog.isConnected) announce(doc, "Unable to open the Scheduler workspace"); });
+        });
+        processBtn.insertAdjacentElement("afterend", investigate);
+        const packText = processPack ? formatProcessPackPlain(processPack) : "";
         processBtn.addEventListener("click", () => {
-          void copyText(doc, packText, "Process pack copied");
+          void (async () => {
+            if (!await currentPageAccess(parsed, "pageInfoOption") || !dialog.isConnected || doc.location.href !== parsed.href) return;
+            const current = collectProcessPack(doc, parsed);
+            if (!packText || !current || formatProcessPackPlain(current) !== packText) { announce(doc, "Process context changed. Reopen Page Info before copying."); return; }
+            await copyText(doc, packText, "Process pack copied");
+          })().catch(() => { if (dialog.isConnected) announce(doc, "Unable to copy the process pack"); });
         });
       }
 

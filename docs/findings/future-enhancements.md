@@ -10,6 +10,7 @@
 
 ## How to use this doc
 
+- Current priority: [quality consolidation of recent enhancements](recent-enhancements-quality-review.md), before further roadmap expansion. Draft-loss, ProcessPack context and internal-navigation repairs, E/PCode workflow completion and targeted Firefox journeys are implemented; use the current roadmap checkpoint for verification and remaining real-sample/live-system evidence.
 - Prefer items tagged **P1** when picking the next feature after Store readiness work.
 - Each idea lists **who** (BA / Dev), **why**, and **notes** (Classic/Fluid, risks).
 - Do not implement password vaults, remote logging, or advertising SDKs even if requested in issues.
@@ -243,4 +244,13 @@ Prompt pack 4.1.0 adds Search Framework and portal/branding specialists: 24 prom
 
 ## 2026-10-20 developer/admin roadmap
 
-See [the ordered multi-session plan](developer-admin-roadmap.md). Current implementation scope: J guided agent handoffs, A Oracle documentation hub, and user-promoted D Fluid navigation debugger. Production awareness, runbooks, comparisons and local log/trace analysis remain later increments. See [public PeopleSoft candidate registry](../testing/public-peoplesoft-pages.md) for user-supplied references and observed evidence; URLs do not establish compatibility.
+Extended F now supplies the complete local case workflow: form-based evidence drafts,
+compatible version 1/2 envelopes, bounded inert XML/SOAP excerpts with distinct JSON/XML
+citations, supplied-time ordering, explicitly selected record comparisons, original/
+transformed scope context and manual findings/checklist notes. Masked payloads are
+never compared; all edits require a fresh report review. Native exports, larger XML
+and actual PeopleTools/AT verification remain sample-dependent validation work, as
+described in the latest [F checkpoint](developer-admin-roadmap.md) and
+[supported scope](../../wiki/Integration-Broker-Investigations.md). H remains next.
+
+See [the ordered multi-session plan](developer-admin-roadmap.md). J guided agent handoffs, A Oracle documentation hub, and user-promoted D Fluid navigation debugger are saved in `092966e`. K production awareness and I environment runbooks were packaged locally as a 1.0.33 candidate after the explicit release request; subsequent release/submission evidence is recorded in [the release checkpoint](release-finish-plan.md). C environment comparisons and G bounded local INI-style/JSON configuration comparisons were implemented separately from that frozen candidate and later integrated with browser parity. G uses synthetic format samples, conservative masking and explicit report review; real export compatibility remains unverified. E now has an initial session-only Scheduler excerpt/ticket workspace with a named narrow parser, cited timeline/parent-label evidence and reviewed export. Its user-approved synthetic samples establish regression coverage only; native formats and representative real-log compatibility remain open. See [Scheduler scope](../../wiki/Process-Scheduler-Investigations.md). F adds a session-only versioned JSON IB evidence workspace with operation/node/queue/routing/stage citations, default payload omission, masked opt-in payload detail and a manual routing/error checklist. Its synthetic custom envelope is not a native export parser; see [IB scope](../../wiki/Integration-Broker-Investigations.md) and the latest F checkpoint. The [quality consolidation review](recent-enhancements-quality-review.md) now takes precedence over H upgrade evidence and B local trace analysis. Live Niagara comparison, screenshots and actual PeopleTools compatibility evidence remain open. See [public PeopleSoft candidate registry](../testing/public-peoplesoft-pages.md); URLs do not establish compatibility.

@@ -24,6 +24,19 @@ beforeEach(() => {
 });
 
 describe("environment runbooks", () => {
+  it("updates environment choices in place after environment edits without discarding notes", async () => {
+    const labels: string[] = []; const root = document.createElement("div"); document.body.append(root);
+    const cleanup = bindRunbooksUI(document, root, labels);
+    await vi.waitFor(() => expect(root.querySelector("[data-runbook-focus='editor-title']")).not.toBeNull());
+    const notes = root.querySelector<HTMLTextAreaElement>("[data-runbook-focus='editor-notes']")!;
+    notes.value = "Keep this draft";
+    labels.push("QA"); document.dispatchEvent(new Event("mpu-runbook-environments-changed"));
+    const environment = root.querySelector<HTMLSelectElement>("[data-runbook-focus='editor-environment']")!;
+    expect(environment.value).toBe("QA"); expect(notes.isConnected).toBe(true); expect(notes.value).toBe("Keep this draft");
+    labels.splice(0, 1, "New label"); document.dispatchEvent(new Event("mpu-runbook-environments-changed"));
+    expect(environment.value).toBe("QA"); expect([...environment.options].map(option => option.value)).toEqual(["New label", "QA"]);
+    cleanup(); root.remove();
+  });
   it("saves through the editor, renders private links safely, and previews import collisions", async () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
@@ -87,10 +100,143 @@ describe("environment runbooks", () => {
     const reload = [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.includes("Reload runbooks"))!;
     expect(reload.textContent).toContain("discard unsaved edits");
     reload.click();
+    expect(draftInputs[1].value).toBe("Unsaved draft");
+    root.querySelector<HTMLButtonElement>("[aria-label='Unsaved runbook draft'] button")!.click();
     await vi.waitFor(() => expect(root.querySelector("[aria-live='polite']")?.textContent).toContain("Unsaved edits were discarded"));
     expect(root.querySelector("section[aria-label='Runbook editor']")?.querySelectorAll<HTMLInputElement>("input")[1].value).toBe("");
     cleanup();
     root.remove();
+  });
+
+  it("keeps or explicitly discards edits when switching and starting another runbook", async () => {
+    resetChromeStorage({ [RUNBOOK_STORAGE_KEY]: { revision: 1, runbooks: [runbook(), { ...runbook("rb-beta"), title: "Second guide" }] } });
+    const root = document.createElement("div"); document.body.appendChild(root);
+    const cleanup = bindRunbooksUI(document, root, ["Test"]);
+    await vi.waitFor(() => expect(root.querySelectorAll("ul button")).toHaveLength(2));
+    root.querySelector<HTMLButtonElement>("ul button")!.click();
+    const title = root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!;
+    title.value = "Unsaved title"; title.focus();
+    root.querySelectorAll<HTMLButtonElement>("ul button")[1].click();
+    const decision = root.querySelector<HTMLElement>("[aria-label='Unsaved runbook draft']")!;
+    expect(decision.hidden).toBe(false);
+    expect(title.value).toBe("Unsaved title");
+    expect((getChromeStorageSnapshot()[RUNBOOK_STORAGE_KEY] as { revision: number }).revision).toBe(1);
+    [...decision.querySelectorAll("button")].find((button) => button.textContent === "Keep editing")!.click();
+    expect(decision.hidden).toBe(true);
+    expect(document.activeElement).toBe(title);
+    expect(title.value).toBe("Unsaved title");
+    root.querySelectorAll<HTMLButtonElement>("ul button")[1].click();
+    decision.querySelector<HTMLButtonElement>("button")!.click();
+    expect(root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!.value).toBe("Second guide");
+    root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!.value = "Another unsaved title";
+    [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "New runbook")!.click();
+    expect(decision.hidden).toBe(false);
+    expect(root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!.value).toBe("Another unsaved title");
+    decision.querySelector<HTMLButtonElement>("button")!.click();
+    expect(root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!.value).toBe("");
+    cleanup(); root.remove();
+  });
+
+  it("keeps edits on reload cancellation and discards them only after a successful reload", async () => {
+    resetChromeStorage({ [RUNBOOK_STORAGE_KEY]: { revision: 1, runbooks: [runbook()] } });
+    const root = document.createElement("div"); document.body.appendChild(root);
+    const cleanup = bindRunbooksUI(document, root, ["Test"]);
+    await vi.waitFor(() => expect(root.querySelector("ul button")).not.toBeNull());
+    root.querySelector<HTMLButtonElement>("ul button")!.click();
+    const notes = root.querySelector<HTMLTextAreaElement>("[data-runbook-focus='editor-notes']")!;
+    notes.value = "Keep this local draft";
+    await request({ type: RUNBOOK_MESSAGE, action: "save", baseRevision: 1, runbook: runbook("rb-new") });
+    const reload = [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Reload runbooks")!;
+    reload.click();
+    const decision = root.querySelector<HTMLElement>("[aria-label='Unsaved runbook draft']")!;
+    expect(decision.hidden).toBe(false);
+    [...decision.querySelectorAll("button")].find((button) => button.textContent === "Keep editing")!.click();
+    expect(notes.value).toBe("Keep this local draft");
+    reload.click();
+    decision.querySelector<HTMLButtonElement>("button")!.click();
+    await vi.waitFor(() => expect(root.querySelectorAll("ul button")).toHaveLength(2));
+    expect(root.querySelector<HTMLTextAreaElement>("[data-runbook-focus='editor-notes']")!.value).toBe(runbook().notes);
+    expect(document.activeElement).toBe(reload);
+    cleanup(); root.remove();
+  });
+
+  it("keeps a dirty editor through import cancellation or a revision conflict", async () => {
+    const root = document.createElement("div"); document.body.appendChild(root);
+    const cleanup = bindRunbooksUI(document, root, ["Test"]);
+    await vi.waitFor(() => expect(root.querySelector("[aria-live='polite']")?.textContent).toBe("Runbooks loaded."));
+    const title = root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!;
+    title.value = "Draft before import";
+    const importArea = root.querySelector<HTMLTextAreaElement>("textarea[aria-label='Runbook JSON to import']")!;
+    importArea.value = JSON.stringify(exportRunbooks([runbook("rb-import")]));
+    [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Preview import")!.click();
+    root.querySelector<HTMLButtonElement>("[data-runbook-focus='import']")!.click();
+    const decision = root.querySelector<HTMLElement>("[aria-label='Unsaved runbook draft']")!;
+    expect(decision.hidden).toBe(false);
+    expect(getChromeStorageSnapshot()[RUNBOOK_STORAGE_KEY]).toBeUndefined();
+    [...decision.querySelectorAll("button")].find((button) => button.textContent === "Keep editing")!.click();
+    expect(title.value).toBe("Draft before import");
+    await request({ type: RUNBOOK_MESSAGE, action: "save", baseRevision: 0, runbook: runbook("rb-concurrent") });
+    root.querySelector<HTMLButtonElement>("[data-runbook-focus='import']")!.click();
+    decision.querySelector<HTMLButtonElement>("button")!.click();
+    await vi.waitFor(() => expect(root.querySelector("[aria-live='polite']")?.textContent).toMatch(/changed in another view/i));
+    expect(title.value).toBe("Draft before import");
+    expect(title.disabled).toBe(false);
+    expect(root.querySelector<HTMLButtonElement>("[data-runbook-focus='import']")!.disabled).toBe(false);
+    cleanup(); root.remove();
+  });
+
+  it("imports after explicit draft discard and clears the editor on success", async () => {
+    const root = document.createElement("div"); document.body.appendChild(root);
+    const cleanup = bindRunbooksUI(document, root, ["Test"]);
+    await vi.waitFor(() => expect(root.querySelector("[aria-live='polite']")?.textContent).toBe("Runbooks loaded."));
+    const title = root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!;
+    title.value = "Unsaved before successful import";
+    root.querySelector<HTMLTextAreaElement>("textarea[aria-label='Runbook JSON to import']")!.value = JSON.stringify(exportRunbooks([runbook("rb-imported")]));
+    [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Preview import")!.click();
+    root.querySelector<HTMLButtonElement>("[data-runbook-focus='import']")!.click();
+    expect(title.value).toBe("Unsaved before successful import");
+    root.querySelector<HTMLButtonElement>("[aria-label='Unsaved runbook draft'] button")!.click();
+    await vi.waitFor(() => expect((getChromeStorageSnapshot()[RUNBOOK_STORAGE_KEY] as { runbooks: EnvironmentRunbook[] }).runbooks).toHaveLength(1));
+    expect(root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!.value).toBe("");
+    expect(root.querySelector("[aria-live='polite']")?.textContent).toContain("1 runbook(s) imported");
+    cleanup(); root.remove();
+  });
+
+  it("disables the editor during save and restores the draft when save fails", async () => {
+    const root = document.createElement("div"); document.body.appendChild(root);
+    const cleanup = bindRunbooksUI(document, root, ["Test"]);
+    await vi.waitFor(() => expect(root.querySelector("[aria-live='polite']")?.textContent).toBe("Runbooks loaded."));
+    const component = root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-component']")!;
+    const title = root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!;
+    component.value = "HR_JOB_DATA"; title.value = "Pending save draft";
+    let answer!: (reply: RunbookReply) => void;
+    vi.mocked(chrome.runtime.sendMessage).mockImplementation(() => new Promise<RunbookReply>((resolve) => { answer = resolve; }));
+    root.querySelector<HTMLButtonElement>("[data-runbook-focus='save']")!.click();
+    expect(title.disabled).toBe(true);
+    expect(component.disabled).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>("[data-runbook-focus='save']")!.disabled).toBe(true);
+    expect([...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "New runbook")!.disabled).toBe(true);
+    answer({ ok: false, error: "Runbooks changed in another view. Reload and review the latest data before saving.", conflict: true });
+    await vi.waitFor(() => expect(title.disabled).toBe(false));
+    expect(component.value).toBe("HR_JOB_DATA");
+    expect(title.value).toBe("Pending save draft");
+    expect(document.activeElement).toBe(root.querySelector("[data-runbook-focus='save']"));
+    cleanup(); root.remove();
+  });
+
+  it("does not overwrite typing when the initial storage load resolves late", async () => {
+    let finishLoad!: (value: Record<string, unknown>) => void;
+    vi.mocked(chrome.storage.local.get).mockImplementationOnce(() => new Promise((resolve) => { finishLoad = resolve; }));
+    const root = document.createElement("div"); document.body.appendChild(root);
+    const cleanup = bindRunbooksUI(document, root, ["Test"]);
+    [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "New runbook")!.click();
+    const title = root.querySelector<HTMLInputElement>("[data-runbook-focus='editor-title']")!;
+    title.value = "Typed before load";
+    finishLoad({ [RUNBOOK_STORAGE_KEY]: { revision: 1, runbooks: [runbook()] } });
+    await vi.waitFor(() => expect(root.querySelectorAll("ul button")).toHaveLength(1));
+    expect(title.isConnected).toBe(true);
+    expect(title.value).toBe("Typed before load");
+    cleanup(); root.remove();
   });
 
   it("strictly validates plain text, explicit association and approved HTTPS links", () => {

@@ -128,6 +128,17 @@ test("environment classification saves explicitly; runbooks preserve concurrent 
   const link = runbooks.getByRole("link", { name: "Approved guide", exact: true });
   await expect(link).toHaveAttribute("rel", "noopener noreferrer");
   await expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
+  await runbooks.getByLabel("Notes (up to 4000 characters)").fill("Unsaved local draft");
+  await runbooks.getByRole("button", { name: "New runbook", exact: true }).click();
+  await expect(runbooks.getByRole("group", { name: "Unsaved runbook draft", exact: true })).toBeVisible();
+  await audit(options, "#panel-environments");
+  await runbooks.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await expect(runbooks.getByLabel("Notes (up to 4000 characters)")).toHaveValue("Unsaved local draft");
+  await expect(runbooks.getByLabel("Notes (up to 4000 characters)")).toBeFocused();
+  await runbooks.getByRole("button", { name: "New runbook", exact: true }).click();
+  await runbooks.getByRole("button", { name: "Discard draft and start a new runbook", exact: true }).click();
+  await expect(runbooks.getByLabel("Runbook title", { exact: true })).toHaveValue("");
+  await selected.click();
 
   const stale = await extensionContext.newPage();
   await stale.goto(`chrome-extension://${extensionId}/options.html#environments`);
@@ -141,6 +152,7 @@ test("environment classification saves explicitly; runbooks preserve concurrent 
   await expect(staleBooks.locator('[aria-live="polite"]')).toContainText("changed in another view");
   await expect(staleBooks.getByLabel("Notes (up to 4000 characters)")).toHaveValue("Stale draft to preserve");
   await staleBooks.getByRole("button", { name: "Reload runbooks (discard unsaved edits)", exact: true }).click();
+  await staleBooks.getByRole("button", { name: "Discard draft and reload runbooks", exact: true }).click();
   await expect(staleBooks.getByLabel("Notes (up to 4000 characters)")).toHaveValue("Updated in first view");
   const json = JSON.stringify({ format: "mpu-runbooks", version: 1, runbooks: [{ id: "team-example", environment: "Team QA", component: "MENU.COMP", title: "Team procedure", notes: "Review this content.", links: [], updatedAt: 1 }] });
   await runbooks.getByLabel("Runbook JSON to import").fill(json);

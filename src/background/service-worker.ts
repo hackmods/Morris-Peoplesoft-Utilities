@@ -2,7 +2,7 @@ import { configureSidebar, getExtensionApi, openSidebar } from "../platform/brow
 import { configureSettingsTransport, loadSettings, saveSettings, originAllowed } from "../storage/settings";
 import { coordinateSettingsWrite, type SettingsWrite } from "../storage/coordinator";
 import { parsePsUrl } from "../adapters/ps-page";
-import { isYes, type MpuSettings } from "../storage/schema";
+import { featureAllowedForUi, isYes, type MpuSettings } from "../storage/schema";
 import { registerAgentLibraryStorage } from "./agent-library-storage";
 import { registerRunbookStorage } from "../storage/runbooks";
 import { registerEnvironmentComparisonStorage } from "../storage/environment-comparisons";
@@ -97,6 +97,42 @@ getExtensionApi().runtime.onInstalled.addListener(async (details) => {
 });
 
 getExtensionApi().runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "mpu-open-reference") {
+    void (async () => {
+      await agentAccessReady;
+      if (!["help", "pcode"].includes(message.source) || !["docs", "agents"].includes(message.destination)
+        || (message.source === "help" && message.destination !== "docs")
+        || !["classic", "fluid", "navCollection", "unknown"].includes(message.uiMode)
+        || typeof message.tools !== "string" || (message.tools !== "" && !/^\d{1,2}\.\d{1,2}(?:\.\d{1,3})?$/.test(message.tools))) return { ok: false };
+      const allowed = () => agentsSenderAllowed(sender) && (message.source === "help"
+        || isYes(agentAccessSettings?.features.pageInfoOption)
+        || (isYes(agentAccessSettings?.features.recFieldInfoOption)
+          && featureAllowedForUi(agentAccessSettings?.featureUiScopes.recFieldInfoOption, message.uiMode)));
+      if (!allowed()) return { ok: false };
+      const revision = agentAccessRevision;
+      const tab = await getExtensionApi().tabs.get(sender.tab!.id!);
+      if (revision !== agentAccessRevision || tab.url !== sender.url || !allowed()) return { ok: false };
+      const query = message.destination === "docs" ? `?tools=${encodeURIComponent(message.tools)}` : "";
+      await getExtensionApi().tabs.create({ url: getExtensionApi().runtime.getURL(`options.html${query}#${message.destination}`) });
+      return { ok: true };
+    })().then(sendResponse).catch(() => sendResponse({ ok: false }));
+    return true;
+  }
+  if (message?.type === "mpu-open-scheduler" || message?.type === "mpu-open-ib") {
+    const route = message.type === "mpu-open-ib" ? "ib" : "scheduler";
+    void (async () => {
+      await agentAccessReady;
+      if (!agentsSenderAllowed(sender) || !isYes(agentAccessSettings?.features.pageInfoOption)) return { ok: false };
+      const revision = agentAccessRevision;
+      const tab = await getExtensionApi().tabs.get(sender.tab!.id!);
+      if (revision !== agentAccessRevision || tab.url !== sender.url || !agentsSenderAllowed(sender)
+        || !isYes(agentAccessSettings?.features.pageInfoOption)) return { ok: false };
+      // Fixed local route only; no caller-supplied URL, ticket text or page data.
+      await getExtensionApi().tabs.create({ url: getExtensionApi().runtime.getURL(`options.html#${route}`) });
+      return { ok: true };
+    })().then(sendResponse).catch(() => sendResponse({ ok: false }));
+    return true;
+  }
   if (message?.type === "mpu-open-agents") {
     if (!agentAccessSettings) {
       // A cold worker may need storage first. If Chrome expires activation, the

@@ -1,0 +1,4 @@
+Synthetic distribution excerpt; no verified correlation with another source
+2026-10-20T13:00:04Z Process Instance: 90002; Transfer attempt observed
+2026-10-20T13:00:10Z Process Instance: 90002; Parent Process Instance: 90003; Conflicting reported parent
+2026-10-20T13:00:11Z Process Instance: 90002; Endpoint=https://synthetic.invalid/private?token=SYNTHETIC-TOKEN

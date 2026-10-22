@@ -122,4 +122,82 @@ describe("Agents library opening", () => {
     await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false }));
     expect(create).not.toHaveBeenCalled();
   });
+
+  it.each(["scheduler", "ib"])("opens the fixed empty %s route for a trusted Page Info sender", async (route) => {
+    const receive = await start(); const respond = vi.fn();
+    receive({ type: `mpu-open-${route}`, url: "https://untrusted.invalid/", text: "must not be passed" }, sender, respond);
+    await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: true }));
+    expect(create).toHaveBeenCalledWith({ url: `chrome-extension://mpu-test/options.html#${route}` });
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it.each(["scheduler", "ib"])("rejects %s routing for foreign/frame senders, disabled Page Info, blocked hosts and inactive environments", async (route) => {
+    for (const restriction of ["foreign", "frame", "feature", "host", "environment"]) {
+      vi.resetModules(); vi.clearAllMocks(); const settings = createDefaultSettings();
+      if (restriction === "feature") settings.features.pageInfoOption = "No";
+      if (restriction === "host") { settings.features.hostAllowlistEnabled = "Yes"; settings.hostAllowlist = []; }
+      if (restriction === "environment") settings.urlSites["https://hr.example.edu"] = { ps: { envId: 99 } };
+      resetChromeStorage({ mpuSettings: settings }); const receive = await start(); const respond = vi.fn();
+      receive({ type: `mpu-open-${route}` }, { ...sender, ...(restriction === "foreign" ? { id: "other" } : {}), ...(restriction === "frame" ? { frameId: 1 } : {}) }, respond);
+      await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false })); expect(create).not.toHaveBeenCalled();
+    }
+  });
+
+  it.each(["scheduler", "ib"])("cancels pending %s routing after navigation or settings changes", async (route) => {
+    const receive = await start(); const respond = vi.fn();
+    get.mockResolvedValueOnce({ id: 7, url: "https://other.example/" });
+    receive({ type: `mpu-open-${route}` }, sender, respond);
+    await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false })); expect(create).not.toHaveBeenCalled();
+    let finish!: (tab: { id: number; url: string }) => void;
+    get.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; })); respond.mockClear();
+    receive({ type: `mpu-open-${route}` }, sender, respond); await vi.waitFor(() => expect(finish).toBeTypeOf("function"));
+    changed.mock.calls[0][0]({ mpuSettings: { newValue: {} } }, "local"); finish({ id: 7, url });
+    await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false })); expect(create).not.toHaveBeenCalled();
+  });
+
+  it("opens only fixed reference destinations with bounded version context", async () => {
+    const receive = await start();
+    for (const [source, destination] of [["help", "docs"], ["pcode", "docs"], ["pcode", "agents"]]) {
+      const respond = vi.fn();
+      receive({ type: "mpu-open-reference", source, destination, tools: "8.62.06", uiMode: "fluid", url: "https://untrusted.invalid/", text: "PRIVATE-CANARY" }, sender, respond);
+      await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: true }));
+      expect(create).toHaveBeenLastCalledWith({ url: `chrome-extension://mpu-test/options.html${destination === "docs" ? "?tools=8.62.06" : ""}#${destination}` });
+    }
+  });
+
+  it("rejects malformed, revoked and stale reference routes", async () => {
+    const receive = await start();
+    const message = { type: "mpu-open-reference", source: "pcode", destination: "docs", tools: "", uiMode: "fluid" };
+    for (const changes of [{ source: "other" }, { destination: "https://untrusted.invalid" }, { tools: "PRIVATE-TOKEN" }, { uiMode: "other" }]) {
+      const respond = vi.fn(); receive({ ...message, ...changes }, sender, respond);
+      await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false }));
+    }
+    for (const untrusted of [{ ...sender, id: "other" }, { ...sender, frameId: 1 }]) {
+      const respond = vi.fn(); receive(message, untrusted, respond);
+      await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false }));
+    }
+    get.mockResolvedValueOnce({ id: 7, url: "https://other.example/" });
+    const respond = vi.fn(); receive(message, sender, respond);
+    await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false }));
+    let finish!: (tab: { id: number; url: string }) => void;
+    get.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; })); respond.mockClear();
+    receive(message, sender, respond); await vi.waitFor(() => expect(finish).toBeTypeOf("function"));
+    const settings = createDefaultSettings(); settings.features.pageInfoOption = "No"; settings.features.recFieldInfoOption = "No";
+    resetChromeStorage({ mpuSettings: settings }); changed.mock.calls[0][0]({ mpuSettings: { newValue: settings } }, "local");
+    finish({ id: 7, url }); await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false }));
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("honors inspector UI scope and host restrictions for reference routes", async () => {
+    for (const restriction of ["scope", "host", "environment"]) {
+      vi.resetModules(); vi.clearAllMocks(); const settings = createDefaultSettings();
+      settings.features.pageInfoOption = "No"; settings.features.recFieldInfoOption = "Yes";
+      if (restriction === "scope") settings.featureUiScopes.recFieldInfoOption = "classic";
+      if (restriction === "host") { settings.features.hostAllowlistEnabled = "Yes"; settings.hostAllowlist = []; }
+      if (restriction === "environment") settings.urlSites["https://hr.example.edu"] = { ps: { envId: 99 } };
+      resetChromeStorage({ mpuSettings: settings }); const receive = await start(); const respond = vi.fn();
+      receive({ type: "mpu-open-reference", source: "pcode", destination: "agents", tools: "", uiMode: "fluid" }, sender, respond);
+      await vi.waitFor(() => expect(respond).toHaveBeenCalledWith({ ok: false })); expect(create).not.toHaveBeenCalled();
+    }
+  });
 });

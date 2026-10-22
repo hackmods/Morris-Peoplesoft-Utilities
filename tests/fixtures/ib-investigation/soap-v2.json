@@ -1,0 +1,30 @@
+{
+  "format": "mpu-ib-evidence",
+  "version": 2,
+  "records": [
+    {
+      "environmentLabel": "SYNTHETIC_TEST",
+      "serviceOperation": "SYNTHETIC_OPERATION",
+      "operationVersion": "v1",
+      "operationType": "synchronous",
+      "direction": "outbound",
+      "observedAt": "2026-10-21T10:00:00-04:00",
+      "payloadRole": "request",
+      "stage": "operation",
+      "payloadXml": "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\n<s:Header><Authorization>SYNTHETIC-PRIVATE</Authorization></s:Header>\n<s:Body><Example code=\"A\"><Item>one</Item><Item><![CDATA[two]]></Item></Example></s:Body>\n</s:Envelope>"
+    },
+    {
+      "environmentLabel": "SYNTHETIC_TEST",
+      "serviceOperation": "SYNTHETIC_OPERATION",
+      "operationVersion": "v1",
+      "operationType": "synchronous",
+      "direction": "inbound",
+      "observedAt": "2026-10-21T14:00:02Z",
+      "payloadRole": "response",
+      "stage": "gateway",
+      "errorLocation": "manually supplied example stage",
+      "evidenceNote": "Synthetic response observation, not a delivered format",
+      "payloadXml": "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><Example code=\"B\"><Item>one</Item></Example></s:Body></s:Envelope>"
+    }
+  ]
+}

@@ -20,7 +20,7 @@ export async function launchFirefox(): Promise<{ driver: firefox.Driver; origin:
     .setPreference("browser.download.folderList", 2)
     .setPreference("browser.download.dir", downloadDir)
     .setPreference("browser.download.alwaysOpenPanel", false)
-    .setPreference("browser.helperApps.neverAsk.saveToDisk", "application/json,text/csv")
+    .setPreference("browser.helperApps.neverAsk.saveToDisk", "application/json,text/csv,text/plain")
     .setPreference("extensions.webextensions.uuids", JSON.stringify({ [FIREFOX_ID]: uuid }));
   if (process.env.FIREFOX_BINARY) options.setBinary(process.env.FIREFOX_BINARY);
   const builder = new Builder().forBrowser("firefox").setFirefoxOptions(options);

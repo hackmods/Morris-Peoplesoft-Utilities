@@ -21,6 +21,13 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Scheduler, Integration Broker and quality consolidation
+
+- Add session-only Scheduler excerpt investigations with cited timeline/parent-label evidence, manual case findings, validated citations and explicit source-scoped process focus. Synthetic parser coverage does not establish native-log compatibility.
+- Add IB evidence preparation/import, strict versioned envelopes, bounded inert JSON/XML/SOAP, explicit two-record comparisons and manual case/checklist findings. Payload detail requires explicit inclusion and review; masked payloads are not compared. Native exports and real-system compatibility remain unverified.
+- Protect runbook drafts and pending saves, keep ProcessPack evidence within one unambiguous process context, and route Help/PCode references through guarded internal destinations. PCode now requires a locked field and verified record/field/event/row context before one explicit preview/copy.
+- Enforce E/G report budgets during assembly and expand installed-Firefox journey coverage, keyboard/focus, rendered accessibility and narrow-layout checks. Preserve both browser builds from the same source/version.
+
 ### Trace SQL investigations (Trace Magic marker port)
 
 - Add Options → Trace SQL: select one sanitized `.tracesql` / `.trc` excerpt and preview a local hotspot report (SQL by duration, PeopleCode timed ends, call counts, error lines). Session memory only — no storage, network or new permissions.

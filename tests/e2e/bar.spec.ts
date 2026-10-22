@@ -46,6 +46,36 @@ const test = base.extend<Fixtures>({
 });
 
 test.describe("MPU extension UI", () => {
+  test("Help and contextual PCode references open working private Options destinations", async ({ extensionContext, extensionId, fluidPage }) => {
+    await fluidPage.locator("#mpu-help").click();
+    let opened = extensionContext.waitForEvent("page");
+    await fluidPage.getByRole("button", { name: "Oracle documentation hub (PeopleTools version-aware)", exact: true }).click();
+    let target = await opened; await expect(target.locator("#panel-docs")).toBeVisible();
+    await expect(target).toHaveURL(`chrome-extension://${extensionId}/options.html?tools=8.61.15#docs`); await target.close();
+    await fluidPage.keyboard.press("Escape"); await fluidPage.locator("#mpu-pcode").click();
+    await expect(fluidPage.locator("#mpu-pcode-context-form")).toContainText("No field locked");
+    await expect(fluidPage.getByRole("button", { name: "Copy contextual example", exact: true })).toHaveCount(0);
+    for (const [name, panel] of [["Prepare a PeopleCode task with an agent", "agents"], ["Find PeopleCode API and language documentation", "docs"]]) {
+      opened = extensionContext.waitForEvent("page"); await fluidPage.getByRole("button", { name, exact: true }).click();
+      target = await opened; await expect(target.locator(`#panel-${panel}`)).toBeVisible(); await target.close();
+    }
+    await fluidPage.keyboard.press("Escape"); await fluidPage.locator("#mpu-field").click();
+    await fluidPage.locator('.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID"]').click();
+    await fluidPage.locator("#mpu-pcode").click();
+    await fluidPage.getByLabel("Verified record name", { exact: true }).fill("JOB");
+    await fluidPage.getByLabel("Verified field name", { exact: true }).fill("EMPLID");
+    await fluidPage.getByLabel("Intended PeopleCode event", { exact: true }).selectOption("FieldChange");
+    await fluidPage.getByLabel("Verified row/scroll context (up to 500 characters)", { exact: true }).fill("Verified current component row");
+    await fluidPage.getByLabel("I verified this event and row context in App Designer", { exact: true }).check();
+    await fluidPage.getByRole("button", { name: "Preview contextual example", exact: true }).click();
+    const example = fluidPage.getByLabel("Contextual PeopleCode example", { exact: true });
+    await expect(example).toContainText("JOB.EMPLID.FieldChange"); await expect(example).toBeFocused();
+    await expect(fluidPage.getByRole("button", { name: "Copy contextual example", exact: true })).toBeEnabled();
+    await audit(fluidPage, "#mpu-dialog"); await fluidPage.setViewportSize({ width: 320, height: 700 }); await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.getByLabel("Verified row/scroll context (up to 500 characters)", { exact: true }).fill("Changed context");
+    await expect(example).toHaveText(""); await expect(fluidPage.getByRole("button", { name: "Copy contextual example", exact: true })).toBeDisabled();
+    await fluidPage.keyboard.press("Escape"); await expect(fluidPage.locator("#mpu-pcode")).toBeFocused();
+  });
   test("Oracle hub filters locally, handles versions, and synchronizes favorites", async ({ extensionContext, extensionId }) => {
     const options = await extensionContext.newPage();
     const panel = await extensionContext.newPage();

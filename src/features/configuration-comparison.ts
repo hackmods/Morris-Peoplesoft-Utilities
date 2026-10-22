@@ -333,13 +333,15 @@ export function renderConfigurationComparison(report: ConfigurationComparison): 
     "",
     "Status | Path | Before (type, line) | After (type, line)",
   ];
+  let reportBytes = utf8Length(lines.join("\n"));
   for (const item of report.differences) {
     const before = item.before === null ? "[missing]" : item.before;
     const after = item.after === null ? "[missing]" : item.after;
     const status = ["added", "removed", "changed", "type-changed", "unchanged", "not-compared"].includes(item.status) ? item.status : "not-compared";
-    lines.push(`${status} | ${quoted(item.path)} | ${quoted(before)} (${visibleType(item.beforeType)}, ${Number.isInteger(item.leftLine) ? item.leftLine : "—"}) | ${quoted(after)} (${visibleType(item.afterType)}, ${Number.isInteger(item.rightLine) ? item.rightLine : "—"})`);
+    const line = `${status} | ${quoted(item.path)} | ${quoted(before)} (${visibleType(item.beforeType)}, ${Number.isInteger(item.leftLine) ? item.leftLine : "—"}) | ${quoted(after)} (${visibleType(item.afterType)}, ${Number.isInteger(item.rightLine) ? item.rightLine : "—"})`;
+    reportBytes += utf8Length(line) + 1;
+    if (reportBytes > CONFIG_LIMITS.maxReportBytes) fail("Comparison report exceeds the output limit");
+    lines.push(line);
   }
-  const rendered = lines.join("\n");
-  if (utf8Length(rendered) > CONFIG_LIMITS.maxReportBytes) fail("Comparison report exceeds the output limit");
-  return rendered;
+  return lines.join("\n");
 }

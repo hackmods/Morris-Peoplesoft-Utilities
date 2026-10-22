@@ -1,6 +1,6 @@
 # Privacy Policy — Morris PeopleSoft Utilities
 
-**Last updated:** 2026-10-21
+**Last updated:** 2026-10-22
 **Publisher:** [hackmods](https://github.com/hackmods) (Ryan Morris)  
 **Product:** Morris PeopleSoft Utilities (Chrome and Firefox extension)
 
@@ -40,6 +40,10 @@ The Agents reference library is a packaged catalog of public PeopleSoft prompts.
 MPU does not execute these agents, connect to an AI service or upload PeopleSoft data to Copilot, Claude, Codex or another provider. If you later copy information into your chosen AI tool, that sharing is controlled by you and your organization's policy, outside MPU.
 
 ## Page access, clipboard and exports
+
+Scheduler investigations read explicitly selected sanitized excerpts only after Preview, plus optional ticket text and case findings you enter. Integration Broker investigations use manually prepared records or explicitly selected versioned JSON envelopes; optional JSON/XML payload-file reads require a separate button. Raw files, drafts, case notes, selected comparisons/process focus and reports remain in the Options tab's memory. They are not stored, backed up, transmitted or automatically attached from PeopleSoft pages. Clear, page exit or reload removes that work. Source changes retain typed findings with instructions to recheck their scope/citations and invalidate export approval. Conservative masking cannot find every secret or business identifier; sanitize inputs and review all remaining content before explicitly copying/downloading. Source filenames are omitted. Exported files and clipboard contents remain under your control. MPU does not replay, resubmit, cancel or verify server operations through these workspaces.
+
+PCode context preparation keeps the verified names, event, row-context description and example in dialog memory only. The extension does not inspect server PeopleCode, execute generated examples or send them to an AI service. Reference buttons open fixed local destinations; only a bounded PeopleTools version hint can accompany the documentation destination.
 
 Configuration comparison reads only the two files you explicitly select, after you request a preview. Raw file content, parsed entries and reports remain in that Options tab's memory; they are not saved in extension storage, backed up or transmitted. Clear the workspace or reload to remove selections and reports. Sanitize files before selecting them: conservative masking cannot detect all secrets or business identifiers. Masked pairs are not compared. Source filenames are omitted. Copy/download is available only after reviewing the preview and checking its review box. Exported files and clipboard contents remain under your control after clearing or uninstalling.
 

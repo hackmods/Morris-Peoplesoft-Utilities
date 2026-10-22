@@ -1,0 +1,10 @@
+Synthetic scheduler excerpt; not captured from PeopleSoft
+2026-10-20T09:00:00-04:00 Process Instance: 90001; Request observed
+2026-10-20T13:00:03Z Process Instance: 90002; Parent Process Instance: 90001; Start attempt observed
+
+2026-10-20T13:00:05.250Z Process Instance: 90002; Error reported in sanitized sample
+10/20/2026 09:00:06 Process Instance: 90002; Unsupported local timestamp
+unlabelled continuation; no timestamp or instance inherited
+2026-10-20T13:00:07Z Process Instance: 90002; Password=SYNTHETIC-SECRET
+SYNTHETIC-SENSITIVE-CONTINUATION
+2026-10-20T13:00:09Z Process Instance: 90001; End observation; completion unknown
