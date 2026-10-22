@@ -23,6 +23,8 @@
       <button type="button" class="tab" role="tab" data-tab="compare" aria-selected="false" id="tab-compare" aria-controls="panel-compare">Compare environments</button>
       <button type="button" class="tab" role="tab" data-tab="configuration" aria-selected="false" id="tab-configuration" aria-controls="panel-configuration">Compare configuration</button>
       <button type="button" class="tab" role="tab" data-tab="tracesql" aria-selected="false" id="tab-tracesql" aria-controls="panel-tracesql">Trace SQL</button>
+      <button type="button" class="tab" role="tab" data-tab="scheduler" aria-selected="false" id="tab-scheduler" aria-controls="panel-scheduler">Process Scheduler</button>
+      <button type="button" class="tab" role="tab" data-tab="ib" aria-selected="false" id="tab-ib" aria-controls="panel-ib">Integration Broker</button>
       <button type="button" class="tab" role="tab" data-tab="tracing" aria-selected="false" id="tab-tracing" aria-controls="panel-tracing">Tracing</button>
       <button type="button" class="tab" role="tab" data-tab="environments" aria-selected="false" id="tab-environments" aria-controls="panel-environments">Environments</button>
       <button type="button" class="tab" role="tab" data-tab="allowlist" aria-selected="false" id="tab-allowlist" aria-controls="panel-allowlist">Host allowlist</button>
@@ -34,6 +36,8 @@
       <section id="panel-configuration" class="panel hidden" data-panel="configuration" role="tabpanel" aria-labelledby="tab-configuration" hidden><div id="configuration-comparison-workspace"></div></section>
       <section id="panel-compare" class="panel hidden" data-panel="compare" role="tabpanel" aria-labelledby="tab-compare" hidden><div id="environment-comparison-workspace"></div></section>
       <section id="panel-tracesql" class="panel hidden" data-panel="tracesql" role="tabpanel" aria-labelledby="tab-tracesql" hidden><div id="tracesql-investigation-workspace"></div></section>
+      <section id="panel-scheduler" class="panel hidden" data-panel="scheduler" role="tabpanel" aria-labelledby="tab-scheduler" hidden><div id="scheduler-investigation-workspace"></div></section>
+      <section id="panel-ib" class="panel hidden" data-panel="ib" role="tabpanel" aria-labelledby="tab-ib" hidden><div id="ib-investigation-workspace"></div></section>
       <section id="panel-docs" class="panel hidden" data-panel="docs" role="tabpanel" aria-labelledby="tab-docs" hidden><div id="oracle-docs"></div></section>
       <section id="panel-features" class="panel" data-panel="features" role="tabpanel" aria-labelledby="tab-features">
         <header class="panel-head">
@@ -214,6 +218,11 @@
           Start with <strong>SQL Statement + Bind</strong> when a page feels slow or returns wrong data — binds show the literal values sent to the database.
           Add <strong>PeopleCode Assignments</strong> or <strong>Start of programs</strong> when a field change, save, or row event looks wrong but SQL is clean.
           Use <strong>Verbose</strong> only for short, targeted sessions — it adds a lot of log noise. Turn Trace off when you are done.
+        </p>
+        <p class="help">
+          After you capture a sanitized <code>.tracesql</code> / <code>.trc</code> file from the app server,
+          open <a href="#tracesql">Options → Trace SQL</a> to preview hotspots locally (no upload).
+          Trace SQL does not turn tracing on or off — use the presets below and the bar On/Off requests for that.
         </p>
         <div class="trace-presets" role="group" aria-label="Trace presets">
           <span class="trace-presets-label">Presets</span>

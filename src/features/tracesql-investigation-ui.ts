@@ -26,22 +26,27 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const heading = make("h2", "Trace SQL investigation");
   const intro = make(
     "p",
-    "Select one sanitized PeopleSoft .tracesql or .trc excerpt, then preview a hotspot report in this browser tab. The file stays in tab memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network.",
+    "Select one sanitized PeopleSoft .tracesql or .trc excerpt, or paste sanitized text, then preview a hotspot report in this browser tab. Evidence stays in tab memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network.",
   );
   const scope = make(
     "p",
-    `Supported parser: ${TRACESQL_FORMAT}. UTF-8 plain text only: one file, at most ${TRACESQL_LIMITS.maxBytes.toLocaleString()} bytes, ${TRACESQL_LIMITS.maxLines.toLocaleString()} lines, ${TRACESQL_LIMITS.maxLineChars.toLocaleString()} characters per line. Recognizes Trace Magic-style markers (COM STMT=SELECT/INSERT/UPDATE/DELETE, Dur=, Bind-, >>> start / <<< end, call). SELECT without PS_/PS tables is ignored. Synthetic samples do not verify real-log compatibility.`,
+    `Supported parser: ${TRACESQL_FORMAT}. UTF-8 plain text only: one file or paste, at most ${TRACESQL_LIMITS.maxBytes.toLocaleString()} bytes, ${TRACESQL_LIMITS.maxLines.toLocaleString()} lines, ${TRACESQL_LIMITS.maxLineChars.toLocaleString()} characters per line. Recognizes Trace Magic-style markers (COM STMT=SELECT/INSERT/UPDATE/DELETE, Dur=, Bind-, >>> start / <<< end, call). SELECT without PS_/PS tables is ignored. Synthetic samples do not verify real-log compatibility.`,
   );
   const privacy = make(
     "p",
-    "Sanitize binds and PII before selecting a file. Report cells use JSON string escaping; review every unmasked SQL string before copy or download. Filenames are omitted from the report.",
+    "Sanitize binds and PII before selecting a file or pasting. Report cells use JSON string escaping; review every unmasked SQL string before copy or download. Filenames are omitted from the report.",
   );
   const files = make("input");
   files.type = "file";
   files.accept = ".tracesql,.trc,.txt,.log,text/plain";
+  const paste = make("textarea");
+  paste.rows = 8;
+  paste.placeholder = "Optional: paste a sanitized tracesql excerpt when you cannot attach a file";
+  paste.setAttribute("spellcheck", "false");
   const status = make("p");
   status.id = "mpu-tracesql-status";
   status.setAttribute("aria-live", "polite");
+  status.textContent = "Select a sanitized .tracesql / .trc file or paste an excerpt, then Preview.";
   const preview = button("Preview Trace SQL investigation", "mpu-tracesql-preview");
   const clear = button("Clear Trace SQL evidence and report", "mpu-tracesql-clear");
   const report = make("textarea");
@@ -61,6 +66,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     scope,
     privacy,
     field("Sanitized tracesql / trc excerpt", files, "mpu-tracesql-files"),
+    field("Sanitized tracesql paste (optional if no file)", paste, "mpu-tracesql-paste"),
     status,
     preview,
     clear,
@@ -82,12 +88,22 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const reset = () => {
     invalidate();
     files.value = "";
-    status.textContent = "Trace SQL evidence and report cleared from this tab.";
+    paste.value = "";
+    status.textContent = "Trace SQL evidence and report cleared from this tab. Select a file or paste an excerpt to continue.";
   };
 
   files.addEventListener("change", () => {
     invalidate();
-    status.textContent = "File selection changed. Prepare a fresh preview.";
+    const selected = files.files?.[0];
+    status.textContent = selected
+      ? `Selected ${selected.name} (${selected.size.toLocaleString()} bytes). File wins over paste. Prepare a fresh preview.`
+      : "File selection cleared. Paste an excerpt or choose a file, then Preview.";
+  });
+  paste.addEventListener("input", () => {
+    invalidate();
+    status.textContent = files.files?.length
+      ? "Paste changed; the selected file still wins on Preview. Prepare a fresh preview."
+      : "Paste changed. Prepare a fresh preview.";
   });
   clear.addEventListener("click", reset);
   doc.defaultView?.addEventListener("pagehide", reset);
@@ -99,28 +115,44 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     invalidate();
     const generation = revision;
     const selected = Array.from(files.files ?? []);
-    if (selected.length !== 1) {
-      status.textContent = "Select exactly one sanitized tracesql or trc excerpt.";
+    const pasted = paste.value;
+    if (selected.length > 1) {
+      status.textContent = "Select at most one sanitized tracesql or trc excerpt.";
       return;
     }
-    if (selected[0].size > TRACESQL_LIMITS.maxBytes) {
+    if (!selected.length && !pasted.trim()) {
+      status.textContent = "Select one sanitized tracesql or trc excerpt, or paste sanitized text.";
+      return;
+    }
+    if (selected.length === 1 && selected[0].size > TRACESQL_LIMITS.maxBytes) {
       status.textContent = "File exceeds the size limit above. Use a smaller excerpt.";
       return;
     }
+    if (!selected.length && new TextEncoder().encode(pasted).length > TRACESQL_LIMITS.maxBytes) {
+      status.textContent = "Paste exceeds the size limit above. Use a smaller excerpt.";
+      return;
+    }
     preview.disabled = true;
-    status.textContent = "Reading selected excerpt locally…";
+    status.textContent = selected.length ? "Reading selected excerpt locally…" : "Preparing pasted excerpt locally…";
     void (async () => {
-      const text = await selected[0].arrayBuffer().then((buffer) => new TextDecoder("utf-8", { fatal: true }).decode(buffer));
+      const text = selected.length
+        ? await selected[0].arrayBuffer().then((buffer) => new TextDecoder("utf-8", { fatal: true }).decode(buffer))
+        : pasted;
       if (generation !== revision || !root.isConnected) return;
+      if (!text.trim()) {
+        status.textContent = "Excerpt is empty. Provide sanitized tracesql text, then Preview again.";
+        return;
+      }
       report.value = renderTraceSqlInvestigation(text);
       reviewed.disabled = false;
       report.focus();
-      status.textContent = "Preview ready. Review all unmasked SQL and error lines before export.";
+      status.textContent =
+        "Preview ready. Review all unmasked SQL and error lines, then check the review box to enable copy or download.";
     })()
       .catch(() => {
         if (generation !== revision || !root.isConnected) return;
         status.textContent =
-          "Cannot prepare this investigation. Check UTF-8 text, line/file limits and report size. No partial report is available.";
+          "Cannot prepare this investigation. Check UTF-8 text, nonempty excerpt, line/file limits and report size. No partial report is available.";
       })
       .finally(() => {
         if (generation === revision) preview.disabled = false;

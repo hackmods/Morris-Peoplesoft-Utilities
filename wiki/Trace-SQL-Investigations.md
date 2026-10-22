@@ -1,8 +1,10 @@
 # Trace SQL investigations
 
-Open **Options → Trace SQL**. Select one sanitized `.tracesql` / `.trc` excerpt,
-preview the report, review it, then copy or download. Files stay in the Options
-tab memory only — nothing is written to extension storage or sent over the network.
+Open **Options → Trace SQL** (linked from **Options → Tracing** after you capture
+a trace). Select one sanitized `.tracesql` / `.trc` file **or** paste sanitized
+text, preview the report, review it, then copy or download. Evidence stays in the
+Options tab memory only — nothing is written to extension storage or sent over
+the network.
 
 ## Partial port
 
