@@ -21,6 +21,11 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
 
+### Trace SQL investigations (Trace Magic marker port)
+
+- Add Options → Trace SQL: select one sanitized `.tracesql` / `.trc` excerpt and preview a local hotspot report (SQL by duration, PeopleCode timed ends, call counts, error lines). Session memory only — no storage, network or new permissions.
+- Parser `PeopleSoft tracesql markers v1` is a clean reimplementation of Trace Magic-style markers recovered from the RETM legacy desktop tool (not a vendor of Oracle Trace Magic source). Synthetic fixtures only; real PeopleTools patch compatibility unverified.
+
 ### Roadmap increment G — working tree, outside the prepared store candidate
 
 - Add Options → Compare configuration for explicitly selected, bounded INI-style and JSON files. Reject duplicate keys and unsupported formats; retain source-line and type/missing evidence.

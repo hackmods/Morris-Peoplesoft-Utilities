@@ -34,6 +34,7 @@ import { bindOracleDocs } from "../../features/oracle-docs-ui";
 import { bindRunbooksUI } from "../../features/runbooks-ui";
 import { bindEnvironmentComparisonUI } from "../../features/environment-comparison-ui";
 import { bindConfigurationComparisonUI } from "../../features/configuration-comparison-ui";
+import { bindTraceSqlInvestigationUI } from "../../features/tracesql-investigation-ui";
 
 const runbookEnvironmentLabels: string[] = [];
 
@@ -805,5 +806,6 @@ async function init(): Promise<void> {
 bindAgentLibrary(document);
 bindEnvironmentComparisonUI(document, document.getElementById("environment-comparison-workspace")!);
 bindConfigurationComparisonUI(document, document.getElementById("configuration-comparison-workspace")!);
+bindTraceSqlInvestigationUI(document, document.getElementById("tracesql-investigation-workspace")!);
 bindOracleDocs(document, document.getElementById("oracle-docs")!, new URLSearchParams(location.search).get("tools")?.slice(0, 30));
 void init();
