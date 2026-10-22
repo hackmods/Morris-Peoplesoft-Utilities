@@ -1,5 +1,6 @@
 import { test as base, expect } from "@playwright/test";
 import { Key, type WebDriver } from "selenium-webdriver";
+import firefox from "selenium-webdriver/firefox.js";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -34,6 +35,18 @@ const test = base.extend<{ driver: WebDriver; origin: string; requests: { method
           await driver.switchTo().defaultContent().catch(() => undefined);
           await testInfo.attach("document", { body: await driver.getPageSource().catch(() => ""), contentType: "text/html" });
           await testInfo.attach("firefox", { body: Buffer.from(await driver.takeScreenshot().catch(() => ""), "base64"), contentType: "image/png" });
+          const firefoxDriver = driver as firefox.Driver;
+          try {
+            await firefoxDriver.setContext(firefox.Context.CHROME);
+            const diagnostics = await driver.executeScript(`return {
+              messages: Services.console.getMessageArray().map(message => message.message).slice(-30),
+              origins: WebExtensionPolicy.getByID("morris-peoplesoft-utilities@hackmods")?.allowedOrigins.patterns
+            };`);
+            await testInfo.attach("firefox-startup", { body: JSON.stringify(diagnostics, null, 2), contentType: "application/json" });
+            console.log("Firefox failure diagnostics:", JSON.stringify(diagnostics));
+          } catch (cause) {
+            console.log("Firefox diagnostics unavailable:", String(cause));
+          } finally { await firefoxDriver.setContext(firefox.Context.CONTENT); }
         }
         await driver.quit();
       }
