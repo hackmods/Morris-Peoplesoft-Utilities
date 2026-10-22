@@ -3,6 +3,7 @@ import type { BrowserContext, Page } from "@playwright/test";
 import type { Server } from "node:http";
 import { audit } from "./helpers/accessibility";
 import type { MpuSettings } from "../../src/storage/schema";
+import { AGENT_REFERENCES } from "../../src/generated/agent-catalog";
 import {
   CLASSIC_COMPONENT_PATH,
   FLUID_COMPONENT_PATH,
@@ -388,7 +389,7 @@ test.describe("MPU extension UI", () => {
     page.on("request", (request) => { if (/^https?:/.test(request.url())) externalRequests.push(request.url()); });
     await page.goto(`chrome-extension://${extensionId}/options.html#agents`);
     await expect(page.getByRole("tab", { name: "Agents", exact: true })).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#agent-list > li")).toHaveCount(24);
+    await expect(page.locator("#agent-list > li")).toHaveCount(AGENT_REFERENCES.length);
     await expect(page.locator("#agent-templates a")).toHaveCount(3);
     const before = await page.evaluate(() => chrome.storage.local.get("mpuSettings"));
     const search = page.getByRole("searchbox", { name: "Search prompts" });
