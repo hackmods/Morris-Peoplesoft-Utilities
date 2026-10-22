@@ -2,23 +2,27 @@
 
 Open **Options → Trace SQL** (linked from **Options → Tracing** after you capture
 a trace). Select one or two sanitized `.tracesql` / `.trc` files **or** paste sanitized
-text, preview the report, review it, then copy or download. Two files add SQLID and
-FROM compare sections. FROM matching uses exact parsed text, including aliases and joins;
-different text does not establish missing database tables. Filter FROM/WHERE by SQLID and open a plan row to highlight
-the matching source line. Evidence stays in the
-Options tab memory only — nothing is written to extension storage or sent over
-the network.
+text, preview the report, review it, then copy or download the full report or
+SQL-only statements. Cancel an in-flight parse if the excerpt is large; no
+partial report remains. Two files add SQLID and FROM compare sections. FROM
+matching uses exact parsed text, including aliases and joins; different text
+does not establish missing database tables. Filter FROM/WHERE by SQLID, open
+**Occurrences** for a statement, or click a plan row to highlight the matching
+source line. Charts, internal/external PeopleCode ends, and grouping stay in
+the Options tab memory only — nothing is written to extension storage or sent
+over the network.
 
 ## Partial port
 
 MPU Options → Trace SQL is a **clean-room** hotspot preview for PeopleSoft
 `.tracesql` / `.trc` text. It covers core marker parsing plus a text report with
-independent SQL fingerprints, SQL-by-FROM / SQL-by-WHERE aggregates, a nested
-plan-tree section, and accessible duration bars. Still outstanding versus fuller
-desktop analyzers: richer charts, broader format handling,
-and verified real PeopleTools samples. Remaining backlog:
-sibling RETM vault (`../RETM/docs/remaining-parity.md`). Lawsuit-safe marker
-grammar + agent ideas: `../RETM/docs/peoplesoft-tracesql-marker-reference.md`.
+independent SQL fingerprints, SQL-by-FROM / SQL-by-WHERE aggregates with
+exec/fetch, a nested plan-tree section, accessible duration bars, SVG charts,
+occurrence dialogs, cancellable parse, and SQL-only export. Still outstanding
+versus fuller desktop analyzers: native WinForms chrome and a verified real
+PeopleTools sample. Remaining backlog: sibling RETM vault
+(`../RETM/docs/remaining-parity.md`). Lawsuit-safe marker grammar + agent ideas:
+`../RETM/docs/peoplesoft-tracesql-marker-reference.md`.
 
 ## Supported parser: PeopleSoft tracesql markers v1
 

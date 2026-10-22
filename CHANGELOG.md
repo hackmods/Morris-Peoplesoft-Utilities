@@ -36,6 +36,7 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 - Add lawsuit-safe prompt `assist-tracesql-hotspots` (embedded clean-room marker reference); Options Trace SQL links the agent; wiki documents sanitization bounds.
 - Expand the clean-room tracesql pack: sanitize coach, literacy guide, MPU report reviewer, SQLID/fingerprint explainer, and AE-bridge (sanitized labeled pastes only).
 - Add filterable FROM/WHERE tables, SQLID find, plan-row source jump, two-file SQLID/FROM compare, and installed Firefox Options Trace SQL smoke. Real PeopleTools samples remain a maintainer-accepted sanitized capture.
+- Finish remaining Trace SQL Options parity: cancellable parse with line progress, SVG duration charts, occurrence dialogs, internal/external PeopleCode tables, exec/fetch ledger columns, and reviewed SQL-only copy/download. WinForms chrome and a real PeopleTools sample stay out of this closeout.
 
 ### Roadmap increment G — working tree, outside the prepared store candidate
 

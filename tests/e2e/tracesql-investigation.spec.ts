@@ -30,6 +30,12 @@ test("Trace SQL excerpt previews locally with SQLID/plan evidence, keyboard revi
     await expect(report).toBeFocused();
     await expect(page.locator("#mpu-tracesql-grouping")).toBeVisible();
     await expect(page.locator("#mpu-tracesql-from")).toContainText("PS_PERSONAL_DATA");
+    await expect(page.locator("#mpu-tracesql-chart-sql")).toHaveAttribute("aria-label", /SQL duration/);
+    await expect(page.locator("#mpu-tracesql-internal")).toContainText("Application");
+    await page.locator("#mpu-tracesql-where tbody button").first().click();
+    await expect(page.locator("#mpu-tracesql-occurrences")).toBeVisible();
+    await page.locator("#mpu-tracesql-occ-close").click();
+    await expect(page.locator("#mpu-tracesql-occurrences")).toHaveCount(0);
     await page.locator("#mpu-tracesql-sqlid").fill("no-such-sqlid");
     await expect(page.locator("#mpu-tracesql-where tbody tr")).toHaveCount(0);
     await page.locator("#mpu-tracesql-sqlid").fill("");
@@ -45,6 +51,11 @@ test("Trace SQL excerpt previews locally with SQLID/plan evidence, keyboard revi
     const exported = await event;
     expect(exported.suggestedFilename()).toBe("mpu-tracesql-investigation.txt");
     expect(await readFile((await exported.path())!, "utf8")).toBe(await report.inputValue());
+    const sqlDownload = page.waitForEvent("download");
+    await page.locator("#mpu-tracesql-download-sql").click();
+    const sqlExported = await sqlDownload;
+    expect(sqlExported.suggestedFilename()).toBe("mpu-tracesql-statements.sql.txt");
+    expect(await readFile((await sqlExported.path())!, "utf8")).toContain("MPU Trace SQL statements only");
     await audit(page, "#panel-tracesql");
     await page.setViewportSize({ width: 390, height: 844 });
     await audit(page, "#panel-tracesql");

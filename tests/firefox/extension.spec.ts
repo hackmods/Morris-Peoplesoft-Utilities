@@ -365,6 +365,8 @@ test("Trace SQL excerpts preview locally, keep grouping in tab memory, and rejec
   expect(await report.getAttribute("value")).toContain("SQLID ");
   expect(await report.getAttribute("value")).toContain("PLAN TREE");
   await expect.poll(() => driver.findElement(By.css("#mpu-tracesql-from")).getText()).toContain("PS_PERSONAL_DATA");
+  expect(await driver.findElement(By.css("#mpu-tracesql-chart-sql")).getAttribute("aria-label")).toContain("SQL duration");
+  expect(await driver.findElement(By.css("#mpu-tracesql-internal")).getText()).toContain("Application");
   await fill(driver, "#mpu-tracesql-sqlid", "no-such-sqlid");
   await expect.poll(() => driver.findElements(By.css("#mpu-tracesql-where tbody tr")).then((rows) => rows.length)).toBe(0);
   await fill(driver, "#mpu-tracesql-sqlid", "");

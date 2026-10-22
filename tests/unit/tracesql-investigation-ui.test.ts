@@ -99,17 +99,59 @@ describe("session-only Trace SQL UI", () => {
     button("preview").click();
     await vi.waitFor(() => expect(report().value).toContain("SQLID "));
     const cells = () => Array.from(root.querySelectorAll("#mpu-tracesql-from tbody td"), (cell) => cell.textContent);
-    expect(cells()).toEqual(["SELECT", "PS_JOB A", "2", "4.000"]);
+    expect(cells().slice(0, 6)).toEqual(["SELECT", "PS_JOB A", "2", "4.000", "0.000", "4.000"]);
     const filter = root.querySelector<HTMLInputElement>("#mpu-tracesql-sqlid")!;
     filter.value = parseTraceSql(text).statements[0].sqlId;
     filter.dispatchEvent(new Event("input"));
-    expect(cells()).toEqual(["SELECT", "PS_JOB A", "1", "1.000"]);
+    expect(cells().slice(0, 6)).toEqual(["SELECT", "PS_JOB A", "1", "1.000", "0.000", "1.000"]);
     const target = root.querySelector<HTMLElement>("#mpu-tracesql-line-3")!;
     expect(target.textContent).toContain("SELECT A.EMPLID");
     target.scrollIntoView = vi.fn();
     root.querySelector<HTMLButtonElement>('#mpu-tracesql-plan button[data-line="3"]')!.click();
     expect(document.activeElement).toBe(target);
     expect(status().textContent).toContain("Source line 3");
+  });
+
+  it("cancels an in-flight preview without leaving a report", async () => {
+    let finish!: (buffer: ArrayBuffer) => void;
+    const file = select(sample, () => new Promise((resolve) => { finish = resolve; }));
+    button("preview").click();
+    await vi.waitFor(() => expect(button("cancel").disabled).toBe(false));
+    button("cancel").click();
+    expect(status().textContent).toMatch(/cancelled/i);
+    expect(report().value).toBe("");
+    const bytes = new TextEncoder().encode(sample);
+    finish(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+    await Promise.resolve();
+    expect(report().value).toBe("");
+    expect(file.arrayBuffer).toHaveBeenCalled();
+  });
+
+  it("opens occurrence details and exports reviewed SQL without stats", async () => {
+    select();
+    button("preview").click();
+    await vi.waitFor(() => expect(report().value).toContain("SQLID "));
+    expect(root.querySelector("#mpu-tracesql-chart-sql")?.getAttribute("aria-label")).toMatch(/SQL duration/);
+    expect(root.querySelector("#mpu-tracesql-internal")?.textContent).toMatch(/Application|Name\.Field\.Event/);
+    root.querySelector<HTMLButtonElement>("#mpu-tracesql-where tbody button")!.click();
+    expect(root.querySelector("#mpu-tracesql-occurrences")).toBeTruthy();
+    root.querySelector<HTMLButtonElement>("#mpu-tracesql-occ-close")!.click();
+    expect(root.querySelector("#mpu-tracesql-occurrences")).toBeFalsy();
+    Object.assign(navigator, { clipboard: { writeText: vi.fn(async () => undefined) } });
+    reviewed().checked = true;
+    reviewed().dispatchEvent(new Event("change"));
+    button("copy-sql").click();
+    await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalled());
+    const sql = vi.mocked(navigator.clipboard.writeText).mock.calls.at(-1)?.[0] ?? "";
+    expect(sql).toContain("MPU Trace SQL statements only");
+    expect(sql).not.toContain("DURATION CHART");
+    Object.assign(URL, { createObjectURL: vi.fn(() => "blob:sql"), revokeObjectURL: vi.fn() });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+      expect(this.download).toBe("mpu-tracesql-statements.sql.txt");
+    });
+    button("download-sql").click();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:sql");
+    click.mockRestore();
   });
 
   it("exports only reviewed text as mpu-tracesql-investigation.txt", async () => {
