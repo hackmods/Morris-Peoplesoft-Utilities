@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 import { mkdirSync } from "node:fs";
 import { Builder, By, error, type WebDriver } from "selenium-webdriver";
+import { Command } from "selenium-webdriver/lib/command.js";
 import firefox from "selenium-webdriver/firefox.js";
 import axe from "axe-core";
 import { expect } from "@playwright/test";
@@ -33,7 +34,12 @@ export async function launchFirefox(): Promise<{ driver: firefox.Driver; origin:
   try {
     await driver.manage().setTimeouts({ script: 20_000, pageLoad: 30_000 });
     await driver.manage().window().setRect({ width: 1280, height: 900 });
-    await driver.installAddon(resolve("dist/firefox"), true);
+    // These sessions run locally, so Gecko can keep using the built directory.
+    // Selenium's base64 install deletes its temporary XPI after startup; Firefox
+    // 140 still needs that file for content scripts (and locks it on Windows).
+    await driver.execute(new Command("install addon")
+      .setParameter("path", resolve("dist/firefox"))
+      .setParameter("temporary", true));
     const origin = `moz-extension://${uuid}`;
     // Installation opens Options asynchronously. Wait for that real entry point
     // before seeding or navigating, so it cannot steal a later test's active tab.
