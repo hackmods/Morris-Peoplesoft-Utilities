@@ -10,7 +10,7 @@ import { traceMagicSqlId } from "./tracesql-md5";
 
 export const TRACESQL_FORMAT = "PeopleSoft tracesql markers v1";
 export const TRACESQL_LIMITS = {
-  maxFiles: 1,
+  maxFiles: 2,
   maxBytes: 2_000_000,
   maxLines: 50_000,
   maxLineChars: 16_000,
@@ -544,7 +544,7 @@ export function parseTraceSql(input: string): TraceSqlReport {
   };
 }
 
-function aggregateByTable(statements: TraceSqlStatement[]): Array<{ table: string; kind: string; calls: number; duration: number }> {
+export function aggregateByTable(statements: TraceSqlStatement[]): Array<{ table: string; kind: string; calls: number; duration: number }> {
   const map = new Map<string, { table: string; kind: string; calls: number; duration: number }>();
   for (const stmt of statements) {
     const key = `${stmt.kind}|${stmt.table}`;
@@ -556,7 +556,7 @@ function aggregateByTable(statements: TraceSqlStatement[]): Array<{ table: strin
   return [...map.values()].sort((a, b) => b.duration - a.duration || a.table.localeCompare(b.table));
 }
 
-function aggregateByWhere(statements: TraceSqlStatement[]): Array<{ sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }> {
+export function aggregateByWhere(statements: TraceSqlStatement[]): Array<{ sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }> {
   const map = new Map<string, { sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }>();
   for (const stmt of statements) {
     const row = map.get(stmt.sql) ?? {
@@ -597,6 +597,92 @@ class ReportLines {
   join(): string {
     return this.lines.join("\n");
   }
+}
+
+export interface TraceSqlCompareRow {
+  key: string;
+  label: string;
+  leftDuration: number;
+  rightDuration: number;
+  presence: "both" | "left" | "right";
+}
+
+function compareMaps(left: Map<string, { label: string; duration: number }>, right: Map<string, { label: string; duration: number }>): TraceSqlCompareRow[] {
+  const keys = new Set([...left.keys(), ...right.keys()]);
+  const rows: TraceSqlCompareRow[] = [];
+  for (const key of keys) {
+    const l = left.get(key);
+    const r = right.get(key);
+    rows.push({
+      key,
+      label: l?.label ?? r?.label ?? key,
+      leftDuration: l?.duration ?? 0,
+      rightDuration: r?.duration ?? 0,
+      presence: l && r ? "both" : l ? "left" : "right",
+    });
+  }
+  return rows.sort((a, b) => Math.abs(b.rightDuration - b.leftDuration) - Math.abs(a.rightDuration - a.leftDuration) || a.label.localeCompare(b.label));
+}
+
+export function compareTraceSqlBySqlId(left: TraceSqlReport, right: TraceSqlReport): TraceSqlCompareRow[] {
+  const collect = (report: TraceSqlReport) => {
+    const map = new Map<string, { label: string; duration: number }>();
+    for (const stmt of report.statements) {
+      const row = map.get(stmt.sqlId) ?? { label: `${stmt.sqlId} ${stmt.kind} ${stmt.table}`, duration: 0 };
+      row.duration += stmt.durationExec + stmt.durationFetch;
+      map.set(stmt.sqlId, row);
+    }
+    return map;
+  };
+  return compareMaps(collect(left), collect(right));
+}
+
+export function compareTraceSqlByFrom(left: TraceSqlReport, right: TraceSqlReport): TraceSqlCompareRow[] {
+  const collect = (report: TraceSqlReport) => {
+    const map = new Map<string, { label: string; duration: number }>();
+    for (const row of aggregateByTable(report.statements)) {
+      map.set(`${row.kind}|${row.table}`, { label: `${row.kind} ${row.table}`, duration: row.duration });
+    }
+    return map;
+  };
+  return compareMaps(collect(left), collect(right));
+}
+
+function renderCompareSection(out: ReportLines, title: string, rows: TraceSqlCompareRow[]): void {
+  out.push("", title);
+  if (!rows.length) {
+    out.push("No SQL statements to compare.");
+    return;
+  }
+  for (const row of rows.slice(0, 80)) {
+    const delta = row.rightDuration - row.leftDuration;
+    out.push(
+      `${row.presence} | ${JSON.stringify(row.label)} | Dur A ${row.leftDuration.toFixed(3)} | Dur B ${row.rightDuration.toFixed(3)} | delta ${delta.toFixed(3)}`,
+    );
+  }
+}
+
+/** One or two sanitized excerpts. Filenames omitted. Session memory only. */
+export function renderTraceSqlInvestigations(texts: string[]): string {
+  if (texts.length < 1 || texts.length > TRACESQL_LIMITS.maxFiles) throw new Error("Unsupported tracesql file count.");
+  if (texts.length === 1) return renderTraceSqlInvestigation(texts[0]);
+  const left = parseTraceSql(texts[0]);
+  const right = parseTraceSql(texts[1]);
+  const out = new ReportLines([
+    "MPU Trace SQL investigation — report v1",
+    `Parser: ${TRACESQL_FORMAT}`,
+    "Two sanitized excerpts compared in this browser tab. Filenames omitted. Nothing is stored or sent over the network.",
+    "Real PeopleTools patch compatibility unverified.",
+    "",
+    "SUMMARY A",
+    `Physical lines: ${left.totalLines} | SELECT ${left.totals.selectCount} Dur ${left.totals.selectDuration.toFixed(3)} | DML ${left.totals.otherSqlCount} Dur ${left.totals.otherSqlDuration.toFixed(3)}`,
+    "SUMMARY B",
+    `Physical lines: ${right.totalLines} | SELECT ${right.totals.selectCount} Dur ${right.totals.selectDuration.toFixed(3)} | DML ${right.totals.otherSqlCount} Dur ${right.totals.otherSqlDuration.toFixed(3)}`,
+  ]);
+  renderCompareSection(out, "COMPARE BY SQLID — present in one side or duration delta", compareTraceSqlBySqlId(left, right));
+  renderCompareSection(out, "COMPARE BY FROM — present in one side or duration delta", compareTraceSqlByFrom(left, right));
+  out.push("", "EXCERPT A — full hotspot report", renderTraceSqlInvestigation(texts[0]), "", "EXCERPT B — full hotspot report", renderTraceSqlInvestigation(texts[1]));
+  return out.join();
 }
 
 /** Plain-text investigation report. Session memory only — no storage or network. */

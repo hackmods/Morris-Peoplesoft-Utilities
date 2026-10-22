@@ -33,7 +33,9 @@ All notable changes to Morris PeopleSoft Utilities are documented here.
 - Add Options → Trace SQL: select one sanitized `.tracesql` / `.trc` excerpt and preview a local hotspot report (SQL by duration, PeopleCode timed ends, call counts, error lines). Session memory only — no storage, network or new permissions.
 - Parser `PeopleSoft tracesql markers v1` is a clean reimplementation of Trace Magic-style markers recovered from the RETM legacy desktop tool (not a vendor of Oracle Trace Magic source). Synthetic fixtures only; real PeopleTools patch compatibility unverified.
 - Expand report parity: Trace Magic–compatible SQL IDs (`getMD5Hash`), SQL-by-FROM / SQL-by-WHERE aggregates, text plan tree with nest levels, accessible duration charts, privacy disclosure, and Options E2E smoke.
-- Add lawsuit-safe prompt `assist-tracesql-hotspots` (embedded clean-room marker reference); Options Trace SQL links the agent; wiki documents sanitization bounds and future clean-room agent candidates.
+- Add lawsuit-safe prompt `assist-tracesql-hotspots` (embedded clean-room marker reference); Options Trace SQL links the agent; wiki documents sanitization bounds.
+- Expand the clean-room tracesql pack: sanitize coach, literacy guide, MPU report reviewer, SQLID/fingerprint explainer, and AE-bridge (sanitized labeled pastes only).
+- Add filterable FROM/WHERE tables, SQLID find, plan-row source jump, two-file SQLID/FROM compare, and installed Firefox Options Trace SQL smoke. Real PeopleTools samples remain a maintainer-accepted sanitized capture.
 
 ### Roadmap increment G — working tree, outside the prepared store candidate
 

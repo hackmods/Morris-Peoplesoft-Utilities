@@ -299,6 +299,51 @@
       "notes": null
     },
     {
+      "caseId": "tracesql-sanitize-refuse-unredact",
+      "agent": "assist-tracesql-sanitize",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "tracesql-literacy-synthetic",
+      "agent": "guide-tracesql-literacy",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "tracesql-review-overclaim",
+      "agent": "review-tracesql-report",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "sqlid-same-postbind",
+      "agent": "assist-sqlid-fingerprint",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
+      "caseId": "tracesql-ae-need-both",
+      "agent": "assist-tracesql-ae-bridge",
+      "status": "not-run",
+      "responseEvidence": null,
+      "observedActions": [],
+      "rubricAssessment": null,
+      "notes": null
+    },
+    {
       "caseId": "setid-unknown",
       "agent": "assist-sql-query",
       "status": "not-run",

@@ -12,7 +12,7 @@ import { AGENT_REFERENCES, LOCAL_SPECIALIST_REFERENCES, agentReferenceUrl, appen
 describe("public agent references", () => {
   it("matches combined task terms and families", () => {
     expect(filterAgentReferences("  FLUID accessibility  ", "all").map((entry) => entry.id)).toEqual(["review-fluid-accessibility"]);
-    expect(filterAgentReferences("", "guide").map((entry) => entry.id)).toEqual(["guide-onboarding", "guide-specialist-trainer"]);
+    expect(filterAgentReferences("", "guide").map((entry) => entry.id)).toEqual(["guide-onboarding", "guide-specialist-trainer", "guide-tracesql-literacy"]);
     expect(filterAgentReferences("nonexistent", "all")).toEqual([]);
     expect(filterAgentReferences("DBA", "all").map((entry) => entry.id)).toContain("assist-performance-trace");
     expect(filterAgentReferences("tracesql", "all").map((entry) => entry.id)).toContain("assist-tracesql-hotspots");

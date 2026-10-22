@@ -1,4 +1,13 @@
-import { TRACESQL_FORMAT, TRACESQL_LIMITS, renderTraceSqlInvestigation } from "./tracesql-investigation";
+import {
+  TRACESQL_FORMAT,
+  TRACESQL_LIMITS,
+  aggregateByTable,
+  aggregateByWhere,
+  parseTraceSql,
+  renderTraceSqlInvestigations,
+  type TracePlanNode,
+  type TraceSqlReport,
+} from "./tracesql-investigation";
 
 /** Session memory only. Selection never triggers capture or a network call. */
 export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): void {
@@ -26,11 +35,11 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const heading = make("h2", "Trace SQL investigation");
   const intro = make(
     "p",
-    "Select one sanitized PeopleSoft .tracesql or .trc excerpt, or paste sanitized text, then preview a hotspot report in this browser tab. Evidence stays in tab memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network.",
+    "Select one or two sanitized PeopleSoft .tracesql or .trc excerpts, or paste sanitized text, then preview a hotspot report in this browser tab. Two files add a SQLID/FROM compare section. Evidence stays in tab memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network.",
   );
   const scope = make(
     "p",
-    `Supported parser: ${TRACESQL_FORMAT}. UTF-8 plain text only: one file or paste, at most ${TRACESQL_LIMITS.maxBytes.toLocaleString()} bytes, ${TRACESQL_LIMITS.maxLines.toLocaleString()} lines, ${TRACESQL_LIMITS.maxLineChars.toLocaleString()} characters per line. Recognizes clean-room PeopleSoft tracesql markers (COM STMT=SELECT/INSERT/UPDATE/DELETE, Dur=, Bind-, >>> start / <<< end, call). SELECT without PS_/PS tables is ignored. Synthetic samples do not verify real-log compatibility.`,
+    `Supported parser: ${TRACESQL_FORMAT}. UTF-8 plain text only: at most ${TRACESQL_LIMITS.maxFiles} files or one paste, ${TRACESQL_LIMITS.maxBytes.toLocaleString()} bytes each, ${TRACESQL_LIMITS.maxLines.toLocaleString()} lines, ${TRACESQL_LIMITS.maxLineChars.toLocaleString()} characters per line. Recognizes clean-room PeopleSoft tracesql markers (COM STMT=SELECT/INSERT/UPDATE/DELETE, Dur=, Bind-, >>> start / <<< end, call). SELECT without PS_/PS tables is ignored. Synthetic samples do not verify real-log compatibility.`,
   );
   const privacy = make(
     "p",
@@ -57,6 +66,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   );
   const files = make("input");
   files.type = "file";
+  files.multiple = true;
   files.accept = ".tracesql,.trc,.txt,.log,text/plain";
   const paste = make("textarea");
   paste.rows = 8;
@@ -65,7 +75,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const status = make("p");
   status.id = "mpu-tracesql-status";
   status.setAttribute("aria-live", "polite");
-  status.textContent = "Select a sanitized .tracesql / .trc file or paste an excerpt, then Preview.";
+  status.textContent = "Select one or two sanitized .tracesql / .trc files or paste an excerpt, then Preview.";
   const preview = button("Preview Trace SQL investigation", "mpu-tracesql-preview");
   const clear = button("Clear Trace SQL evidence and report", "mpu-tracesql-clear");
   const report = make("textarea");
@@ -79,6 +89,36 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const download = button("Download reviewed Trace SQL report", "mpu-tracesql-download");
   download.disabled = true;
 
+  const grouping = make("section");
+  grouping.id = "mpu-tracesql-grouping";
+  grouping.hidden = true;
+  grouping.setAttribute("aria-label", "Trace SQL grouping");
+  const groupingHeading = make("h3", "Filterable grouping (first excerpt)");
+  const sqlid = make("input");
+  sqlid.type = "search";
+  sqlid.placeholder = "SQLID fragment";
+  sqlid.autocomplete = "off";
+  const fromTable = make("table");
+  fromTable.id = "mpu-tracesql-from";
+  const whereTable = make("table");
+  whereTable.id = "mpu-tracesql-where";
+  const planList = make("ol");
+  planList.id = "mpu-tracesql-plan";
+  const source = make("pre");
+  source.id = "mpu-tracesql-source";
+  source.tabIndex = 0;
+  grouping.append(
+    groupingHeading,
+    field("Find by SQLID", sqlid, "mpu-tracesql-sqlid"),
+    make("h4", "SQL by FROM"),
+    fromTable,
+    make("h4", "SQL by WHERE"),
+    whereTable,
+    make("h4", "Plan tree (click a row to highlight the source line)"),
+    planList,
+    field("Source excerpt (first file or paste)", source, "mpu-tracesql-source"),
+  );
+
   root.replaceChildren(
     heading,
     intro,
@@ -90,6 +130,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     status,
     preview,
     clear,
+    grouping,
     field("Trace SQL investigation report", report, "mpu-tracesql-report"),
     field("I reviewed this Trace SQL report for sensitive information and scope", reviewed, "mpu-tracesql-reviewed"),
     copy,
@@ -97,6 +138,87 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   );
 
   let revision = 0;
+  let parsed: TraceSqlReport | null = null;
+  let sourceLines: string[] = [];
+
+  const fillTable = (table: HTMLTableElement, captionText: string, headers: string[], rows: string[][]) => {
+    const caption = make("caption", captionText);
+    const head = make("thead");
+    const headRow = make("tr");
+    for (const header of headers) {
+      const cell = make("th", header);
+      cell.scope = "col";
+      headRow.append(cell);
+    }
+    head.append(headRow);
+    const body = make("tbody");
+    for (const values of rows) {
+      const row = make("tr");
+      for (const value of values) row.append(make("td", value));
+      body.append(row);
+    }
+    table.replaceChildren(caption, head, body);
+  };
+
+  const renderSource = (lines: string[]) => {
+    source.replaceChildren();
+    lines.forEach((line, index) => {
+      const span = make("span", line || " ");
+      span.dataset.line = String(index + 1);
+      span.id = `mpu-tracesql-line-${index + 1}`;
+      span.tabIndex = -1;
+      source.append(span, doc.createTextNode("\n"));
+    });
+  };
+
+  const jumpToLine = (line: number) => {
+    const target = grouping.querySelector<HTMLElement>(`#mpu-tracesql-line-${line}`);
+    if (!target) return;
+    grouping.querySelectorAll("[data-current-line]").forEach((node) => node.removeAttribute("data-current-line"));
+    target.setAttribute("data-current-line", "true");
+    target.scrollIntoView({ block: "nearest" });
+    target.focus();
+    status.textContent = `Source line ${line} in the first excerpt.`;
+  };
+
+  const renderPlan = (nodes: TracePlanNode[]) => {
+    planList.replaceChildren();
+    for (const node of nodes.slice(0, 200)) {
+      const item = make("li");
+      const jump = button(`L${node.line} ${node.label}`, "");
+      jump.removeAttribute("id");
+      jump.dataset.line = String(node.line);
+      jump.addEventListener("click", () => jumpToLine(node.line));
+      item.append(jump);
+      planList.append(item);
+    }
+  };
+
+  const renderGrouping = (report: TraceSqlReport, filter: string) => {
+    const needle = filter.trim().toLowerCase();
+    const match = (sqlId: string) => !needle || sqlId.toLowerCase().includes(needle);
+    const fromRows = aggregateByTable(report.statements)
+      .filter((row) => !needle || report.statements.some((stmt) => stmt.table === row.table && stmt.kind === row.kind && match(stmt.sqlId)))
+      .map((row) => [row.kind, row.table, String(row.calls), row.duration.toFixed(3)]);
+    const whereRows = aggregateByWhere(report.statements)
+      .filter((row) => match(row.sqlId))
+      .map((row) => [row.sqlId, row.table, String(row.calls), row.duration.toFixed(3), row.where.slice(0, 120)]);
+    fillTable(fromTable, "SQL by FROM table", ["Kind", "FROM", "Calls", "Duration"], fromRows);
+    fillTable(whereTable, "SQL by WHERE / SQLID", ["SQLID", "FROM", "Calls", "Duration", "WHERE"], whereRows);
+    renderPlan(report.plan);
+  };
+
+  const hideGrouping = () => {
+    parsed = null;
+    sourceLines = [];
+    grouping.hidden = true;
+    sqlid.value = "";
+    fromTable.replaceChildren();
+    whereTable.replaceChildren();
+    planList.replaceChildren();
+    source.replaceChildren();
+  };
+
   const invalidate = () => {
     revision++;
     report.value = "";
@@ -104,6 +226,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     reviewed.disabled = true;
     copy.disabled = download.disabled = true;
     preview.disabled = false;
+    hideGrouping();
   };
   const reset = () => {
     invalidate();
@@ -114,16 +237,19 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
 
   files.addEventListener("change", () => {
     invalidate();
-    const selected = files.files?.[0];
-    status.textContent = selected
-      ? `Selected ${selected.name} (${selected.size.toLocaleString()} bytes). File wins over paste. Prepare a fresh preview.`
+    const selected = Array.from(files.files ?? []);
+    status.textContent = selected.length
+      ? `Selected ${selected.map((file) => `${file.name} (${file.size.toLocaleString()} bytes)`).join("; ")}. Files win over paste. Prepare a fresh preview.`
       : "File selection cleared. Paste an excerpt or choose a file, then Preview.";
   });
   paste.addEventListener("input", () => {
     invalidate();
     status.textContent = files.files?.length
-      ? "Paste changed; the selected file still wins on Preview. Prepare a fresh preview."
+      ? "Paste changed; selected files still win on Preview. Prepare a fresh preview."
       : "Paste changed. Prepare a fresh preview.";
+  });
+  sqlid.addEventListener("input", () => {
+    if (parsed) renderGrouping(parsed, sqlid.value);
   });
   clear.addEventListener("click", reset);
   doc.defaultView?.addEventListener("pagehide", reset);
@@ -136,16 +262,16 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     const generation = revision;
     const selected = Array.from(files.files ?? []);
     const pasted = paste.value;
-    if (selected.length > 1) {
-      status.textContent = "Select at most one sanitized tracesql or trc excerpt.";
+    if (selected.length > TRACESQL_LIMITS.maxFiles) {
+      status.textContent = `Select at most ${TRACESQL_LIMITS.maxFiles} sanitized tracesql or trc excerpts.`;
       return;
     }
     if (!selected.length && !pasted.trim()) {
-      status.textContent = "Select one sanitized tracesql or trc excerpt, or paste sanitized text.";
+      status.textContent = "Select one or two sanitized tracesql or trc excerpts, or paste sanitized text.";
       return;
     }
-    if (selected.length === 1 && selected[0].size > TRACESQL_LIMITS.maxBytes) {
-      status.textContent = "File exceeds the size limit above. Use a smaller excerpt.";
+    if (selected.some((file) => file.size > TRACESQL_LIMITS.maxBytes)) {
+      status.textContent = "A selected file exceeds the size limit above. Use a smaller excerpt.";
       return;
     }
     if (!selected.length && new TextEncoder().encode(pasted).length > TRACESQL_LIMITS.maxBytes) {
@@ -153,24 +279,30 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
       return;
     }
     preview.disabled = true;
-    status.textContent = selected.length ? "Reading selected excerpt locally…" : "Preparing pasted excerpt locally…";
+    status.textContent = selected.length ? "Reading selected excerpt(s) locally…" : "Preparing pasted excerpt locally…";
     void (async () => {
-      const text = selected.length
-        ? await selected[0].arrayBuffer().then((buffer) => new TextDecoder("utf-8", { fatal: true }).decode(buffer))
-        : pasted;
+      const texts = selected.length
+        ? await Promise.all(selected.map((file) => file.arrayBuffer().then((buffer) => new TextDecoder("utf-8", { fatal: true }).decode(buffer))))
+        : [pasted];
       if (generation !== revision || !root.isConnected) return;
-      if (!text.trim()) {
+      if (texts.some((text) => !text.trim())) {
         status.textContent = "Excerpt is empty. Provide sanitized tracesql text, then Preview again.";
         return;
       }
-      report.value = renderTraceSqlInvestigation(text);
+      report.value = renderTraceSqlInvestigations(texts);
+      parsed = parseTraceSql(texts[0]);
+      sourceLines = texts[0].split(/\r?\n/);
+      renderSource(sourceLines);
+      renderGrouping(parsed, sqlid.value);
+      grouping.hidden = false;
       reviewed.disabled = false;
       report.focus();
       status.textContent =
-        "Preview ready. Review all unmasked SQL and error lines, then check the review box to enable copy or download.";
+        "Preview ready. Filter FROM/WHERE by SQLID or open a plan row to highlight the source line, then check the review box to enable copy or download.";
     })()
       .catch(() => {
         if (generation !== revision || !root.isConnected) return;
+        hideGrouping();
         status.textContent =
           "Cannot prepare this investigation. Check UTF-8 text, nonempty excerpt, line/file limits and report size. No partial report is available.";
       })

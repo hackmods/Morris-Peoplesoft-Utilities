@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { parseTraceSql, renderTraceSqlInvestigation, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
+import { compareTraceSqlByFrom, compareTraceSqlBySqlId, parseTraceSql, renderTraceSqlInvestigation, renderTraceSqlInvestigations, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
 import { md5Bytes, traceMagicSqlId } from "@/features/tracesql-md5";
 
 const fixture = (name: string) => readFileSync(resolve(process.cwd(), "tests/fixtures/tracesql-investigation", name), "utf8");
@@ -79,6 +79,21 @@ describe("PeopleSoft tracesql markers v1", () => {
     expect(errors.errors.some((e) => e.text.startsWith("  Error Position:"))).toBe(true);
     const mixed = parseTraceSql(fixture("example-mixed-session.tracesql"));
     expect(mixed.statements.map((s) => s.kind).sort()).toEqual(["DELETE", "INSERT", "SELECT", "UPDATE"]);
+  });
+
+  it("compares two excerpts by SQLID and FROM table", () => {
+    const left = fixture("sample.tracesql");
+    const right = "COM Stmt=SELECT B.DEPTID FROM PS_JOB B WHERE B.EMPLID = :1\n Dur=1.000 EXE";
+    const text = renderTraceSqlInvestigations([left, right]);
+    expect(text).toContain("COMPARE BY SQLID");
+    expect(text).toContain("COMPARE BY FROM");
+    expect(text).toContain("SUMMARY A");
+    expect(text).toContain("SUMMARY B");
+    const from = compareTraceSqlByFrom(parseTraceSql(left), parseTraceSql(right));
+    expect(from.some((row) => row.presence === "right" && row.label.includes("PS_JOB"))).toBe(true);
+    expect(from.some((row) => row.presence === "left" && row.label.includes("PS_PERSONAL_DATA"))).toBe(true);
+    const ids = compareTraceSqlBySqlId(parseTraceSql(left), parseTraceSql(left));
+    expect(ids.every((row) => row.presence === "both")).toBe(true);
   });
 
   it("aggregates hotspots by duration and nests plan levels", () => {

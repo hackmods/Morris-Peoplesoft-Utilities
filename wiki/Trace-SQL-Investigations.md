@@ -1,8 +1,10 @@
 # Trace SQL investigations
 
 Open **Options → Trace SQL** (linked from **Options → Tracing** after you capture
-a trace). Select one sanitized `.tracesql` / `.trc` file **or** paste sanitized
-text, preview the report, review it, then copy or download. Evidence stays in the
+a trace). Select one or two sanitized `.tracesql` / `.trc` files **or** paste sanitized
+text, preview the report, review it, then copy or download. Two files add SQLID and
+FROM compare sections. Filter FROM/WHERE by SQLID and open a plan row to highlight
+the matching source line. Evidence stays in the
 Options tab memory only — nothing is written to extension storage or sent over
 the network.
 
@@ -28,6 +30,8 @@ Coverage is synthetic; real PeopleTools patch compatibility is unverified.
 
 - After copy/download, open **Options → Agents** and search `tracesql` for
   `assist-tracesql-hotspots` (sanitized report text only; refuses proprietary binaries).
+- Related: `assist-tracesql-sanitize`, `guide-tracesql-literacy`,
+  `review-tracesql-report`, `assist-sqlid-fingerprint`, `assist-tracesql-ae-bridge`.
 - Sibling: `assist-performance-trace` — capture design / waits / plans.
 - Do not upload Trace Magic installers or unsanitized production dumps to AI hosts.
 
@@ -44,10 +48,11 @@ are ignored (legacy Trace Magic filter).
 
 ## Limits and privacy
 
-One file: at most 2,000,000 UTF-8 bytes, 50,000 physical lines and 16,000
-characters per line. Unsupported encoding or control characters fail the preview;
-no partial report remains exportable. Sanitize binds and PII before selection.
-Report cells use JSON string escaping. Filenames are omitted.
+At most two files (or one paste): each at most 2,000,000 UTF-8 bytes, 50,000
+physical lines and 16,000 characters per line. Unsupported encoding or control
+characters fail the preview; no partial report remains exportable. Sanitize binds
+and PII before selection. Report cells use JSON string escaping. Filenames are
+omitted.
 
 ## Evidence
 

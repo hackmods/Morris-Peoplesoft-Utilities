@@ -15,7 +15,7 @@ test("Trace SQL excerpt previews locally with SQLID/plan evidence, keyboard revi
     });
     await page.goto(`chrome-extension://${extensionId}/options.html#tracesql`);
     const before = await context.serviceWorkers()[0].evaluate(async () => JSON.stringify(await chrome.storage.local.get(null)));
-    await expect(page.locator("#mpu-tracesql-status")).toContainText("Select a sanitized");
+    await expect(page.locator("#mpu-tracesql-status")).toContainText("sanitized");
     await page.getByLabel("Sanitized tracesql / trc excerpt", { exact: true }).setInputFiles([resolve("tests/fixtures/tracesql-investigation/sample.tracesql")]);
     await expect(page.locator("#mpu-tracesql-status")).toContainText("sample.tracesql");
     const report = page.getByLabel("Trace SQL investigation report", { exact: true });
@@ -28,6 +28,13 @@ test("Trace SQL excerpt previews locally with SQLID/plan evidence, keyboard revi
     await expect(report).toHaveValue(/AGGREGATE BY WHERE/);
     await expect(page.locator("#mpu-tracesql-status")).toContainText("review box");
     await expect(report).toBeFocused();
+    await expect(page.locator("#mpu-tracesql-grouping")).toBeVisible();
+    await expect(page.locator("#mpu-tracesql-from")).toContainText("PS_PERSONAL_DATA");
+    await page.locator("#mpu-tracesql-sqlid").fill("no-such-sqlid");
+    await expect(page.locator("#mpu-tracesql-where tbody tr")).toHaveCount(0);
+    await page.locator("#mpu-tracesql-sqlid").fill("");
+    await page.locator("#mpu-tracesql-plan button").first().click();
+    await expect(page.locator("#mpu-tracesql-status")).toContainText("Source line");
     const review = page.locator("#mpu-tracesql-reviewed");
     await review.focus();
     await page.keyboard.press("Space");

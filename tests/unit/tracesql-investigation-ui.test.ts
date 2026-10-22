@@ -27,14 +27,16 @@ beforeEach(() => {
 
 describe("session-only Trace SQL UI", () => {
   it("starts with a next-action empty state and accepts paste without a file", async () => {
-    expect(status().textContent).toMatch(/Select a sanitized/);
+    expect(status().textContent).toMatch(/sanitized/);
     button("preview").click();
-    expect(status().textContent).toMatch(/Select one sanitized|or paste/);
+    expect(status().textContent).toMatch(/Select one or two sanitized|or paste/);
     paste().value = sample;
     paste().dispatchEvent(new Event("input"));
     button("preview").click();
     await vi.waitFor(() => expect(report().value).toContain("SQLID "));
     expect(status().textContent).toMatch(/review box/);
+    expect(root.querySelector<HTMLElement>("#mpu-tracesql-grouping")?.hidden).toBe(false);
+    expect(root.querySelector("#mpu-tracesql-from")?.textContent).toContain("PS_PERSONAL_DATA");
   });
 
   it("requires explicit preview and review; never writes storage; clears on pagehide", async () => {
@@ -73,6 +75,22 @@ describe("session-only Trace SQL UI", () => {
     await vi.waitFor(() => expect(status().textContent).toContain("Cannot prepare this investigation"));
     expect(report().value).toBe("");
     expect(reviewed().disabled).toBe(true);
+  });
+
+  it("compares two selected excerpts in the report", async () => {
+    const first = new TextEncoder().encode(sample);
+    const secondText = "COM Stmt=SELECT B.DEPTID FROM PS_JOB B\n Dur=1.000 EXE";
+    const second = new TextEncoder().encode(secondText);
+    const files = [
+      { name: "a.tracesql", size: first.length, arrayBuffer: vi.fn(async () => first.buffer.slice(first.byteOffset, first.byteOffset + first.byteLength)) },
+      { name: "b.tracesql", size: second.length, arrayBuffer: vi.fn(async () => second.buffer.slice(second.byteOffset, second.byteOffset + second.byteLength)) },
+    ];
+    Object.defineProperty(input(), "files", { configurable: true, value: files });
+    input().dispatchEvent(new Event("change"));
+    button("preview").click();
+    await vi.waitFor(() => expect(report().value).toContain("COMPARE BY SQLID"));
+    expect(report().value).toContain("COMPARE BY FROM");
+    expect(root.querySelector("#mpu-tracesql-from")?.textContent).toContain("PS_PERSONAL_DATA");
   });
 
   it("exports only reviewed text as mpu-tracesql-investigation.txt", async () => {

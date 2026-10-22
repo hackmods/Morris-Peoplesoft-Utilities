@@ -73,7 +73,7 @@ Marker recognition summary; ranked SQL/PeopleCode hotspot table with counts/dura
 
 ## Handoffs
 
-Use `assist-performance-trace` for capture-plan design and wait/plan interpretation; `assist-sql-query` / `review-data-correctness` for statement rewrites; `assist-application-engine` for AE-specific logs; `assist-admin-diagnostics` for domain/server boundaries. Transfer confirmed markers, durations and unresolved questions.
+Use `assist-performance-trace` for capture-plan design and wait/plan interpretation; `assist-sql-query` / `review-data-correctness` for statement rewrites; `assist-application-engine` for AE-specific logs; `assist-admin-diagnostics` for domain/server boundaries; `assist-tracesql-sanitize` before sharing unsanitized text; `review-tracesql-report` for MPU report critique; `assist-tracesql-ae-bridge` when an AE excerpt is also present. Transfer confirmed markers, durations and unresolved questions.
 
 ## Sources and maintenance
 

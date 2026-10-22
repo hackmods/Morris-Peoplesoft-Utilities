@@ -21,6 +21,7 @@ Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser v
 | Delivered change hooks | Verify saved values after FieldChange/deferred processing, including AJAX replacement; do not infer success solely from changed DOM text | Real-system test needed |
 | Search helpers | Advanced Search does not toggle closed on retry; Correct History honors delivered security and user setting | Real-system test needed |
 | Trace | Validate distinct SQL cursor/fetch checkbox IDs, PC flags, save response, start/stop and partial denial; verify server trace stops | Real-system test needed |
+| Trace SQL investigation | Accept one sanitized PeopleTools 8.62 `.tracesql`/`.trc` from a real capture; record Tools patch privately; only then change marker grammar | Not supplied — keep synthetic/unverified wording until a maintainer accepts a sanitized sample. Do not invent a “real” log |
 | Host allowlist / inactive environment | No bar, keyboard action, Page Info snapshot, or delayed search mutation; side panel cannot navigate disabled hosts | Real-system test needed |
 | Multi-tab / session | No storage churn; environment settings and favorites survive concurrent edits; sign-out/sign-in does not imply a verified trace state | Real-system test needed |
 | Keyboard / screen reader | Tab and Shift+Tab stay in dialogs; Escape works after typing; focus returns; 200% zoom, contrast, forced colors, and live announcements | Real-system test needed |

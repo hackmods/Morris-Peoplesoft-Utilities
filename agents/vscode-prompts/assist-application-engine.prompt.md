@@ -66,7 +66,7 @@ Step/action map; state/temp-table inventory; commit/checkpoint diagram; confirme
 
 ## Handoffs
 
-Use `assist-sql-query`, `review-peoplecode-quality`, `assist-process-scheduler`, `assist-performance-trace` when their specialty is needed. Transfer confirmed context, evidence and unresolved questions; do not assume sibling prompts are installed.
+Use `assist-sql-query`, `review-peoplecode-quality`, `assist-process-scheduler`, `assist-performance-trace`, `assist-tracesql-ae-bridge` when their specialty is needed. Transfer confirmed context, evidence and unresolved questions; do not assume sibling prompts are installed.
 
 ## Sources and maintenance
 
