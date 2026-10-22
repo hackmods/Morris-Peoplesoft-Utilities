@@ -51,6 +51,36 @@ describe("PeopleSoft tracesql markers v1", () => {
     expect(() => parseTraceSql("a".repeat(TRACESQL_LIMITS.maxLineChars + 1))).toThrow();
   });
 
+  it("parses doc-based example fixtures without throwing", () => {
+    const examples = [
+      "example-volume-vs-slow.tracesql",
+      "example-peoplecode-nesting.tracesql",
+      "example-multiline-select.tracesql",
+      "example-sql-errors.tracesql",
+      "example-mixed-session.tracesql",
+    ];
+    for (const name of examples) {
+      const report = parseTraceSql(fixture(name));
+      expect(report.totalLines, name).toBeGreaterThan(0);
+    }
+    const volume = parseTraceSql(fixture("example-volume-vs-slow.tracesql"));
+    expect(volume.statements.some((s) => s.table.includes("PS_JOB") && s.durationExec >= 0.4)).toBe(true);
+    expect(volume.statements.filter((s) => s.table.includes("PS_PERSONAL_DATA")).length).toBeGreaterThan(1);
+    const nesting = parseTraceSql(fixture("example-peoplecode-nesting.tracesql"));
+    expect(nesting.events.some((e) => e.kind === "begin")).toBe(true);
+    expect(nesting.events.some((e) => e.kind === "end" && e.external)).toBe(true);
+    expect(nesting.calls.map((c) => c.name)).toEqual(expect.arrayContaining(["internal", "get", "set"]));
+    const multi = parseTraceSql(fixture("example-multiline-select.tracesql"));
+    expect(multi.statements.some((s) => s.table.includes("PS_NAMES"))).toBe(true);
+    expect(multi.statements.every((s) => !s.table.includes("DUAL"))).toBe(true);
+    const errors = parseTraceSql(fixture("example-sql-errors.tracesql"));
+    expect(errors.errors.some((e) => e.text.includes("Caught Exception"))).toBe(true);
+    expect(errors.errors.some((e) => e.text.startsWith("Called from:"))).toBe(true);
+    expect(errors.errors.some((e) => e.text.startsWith("  Error Position:"))).toBe(true);
+    const mixed = parseTraceSql(fixture("example-mixed-session.tracesql"));
+    expect(mixed.statements.map((s) => s.kind).sort()).toEqual(["DELETE", "INSERT", "SELECT", "UPDATE"]);
+  });
+
   it("aggregates hotspots by duration and nests plan levels", () => {
     const text = [
       ">>> start Nested App.Field.Event",

@@ -52,5 +52,6 @@ Report cells use JSON string escaping. Filenames are omitted.
 ## Evidence
 
 [Synthetic fixtures](../tests/fixtures/tracesql-investigation/README.md) cover unit
-tests only. Validate representative traces from your environment before relying
-on hotspot rankings operationally.
+tests and doc-based examples (`example-*.tracesql`: volume vs slow, PeopleCode
+nesting, multi-line SELECT, SQL errors, mixed session). Validate representative
+traces from your environment before relying on hotspot rankings operationally.
