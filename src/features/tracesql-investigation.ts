@@ -6,6 +6,8 @@
  * fixtures only — real PeopleTools patch compatibility is unverified.
  */
 
+import { traceMagicSqlId } from "./tracesql-md5";
+
 export const TRACESQL_FORMAT = "PeopleSoft tracesql markers v1";
 export const TRACESQL_LIMITS = {
   maxFiles: 1,
@@ -19,10 +21,13 @@ export interface TraceSqlStatement {
   kind: "SELECT" | "INSERT" | "UPDATE" | "DELETE";
   line: number;
   table: string;
+  where: string;
   sql: string;
   durationExec: number;
   durationFetch: number;
   fetches: number;
+  /** Trace Magic–compatible `getMD5Hash` SQL ID. */
+  sqlId: string;
   fingerprint: string;
 }
 
@@ -33,6 +38,15 @@ export interface TracePeopleCodeEvent {
   peopleCode: string;
   external: boolean;
   duration: number;
+  level: number;
+}
+
+export interface TracePlanNode {
+  line: number;
+  level: number;
+  label: string;
+  duration: number;
+  kind: "peoplecode" | "sql" | "call";
 }
 
 export interface TraceErrorLine {
@@ -44,6 +58,7 @@ export interface TraceSqlReport {
   statements: TraceSqlStatement[];
   events: TracePeopleCodeEvent[];
   calls: TracePeopleCodeEvent[];
+  plan: TracePlanNode[];
   errors: TraceErrorLine[];
   totalLines: number;
   totals: {
@@ -80,6 +95,19 @@ function fingerprint(sql: string): string {
     hash = Math.imul(hash, 16777619);
   }
   return `mpu${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+function idsFor(sql: string): { sqlId: string; fingerprint: string } {
+  return { sqlId: traceMagicSqlId(sql), fingerprint: fingerprint(sql) };
+}
+
+function extractWhere(sql: string): string {
+  const upper = sql.toUpperCase();
+  const whereAt = upper.indexOf(" WHERE ");
+  if (whereAt < 0) return "";
+  const orderAt = upper.indexOf(" ORDER ");
+  const slice = orderAt > whereAt ? sql.slice(whereAt, orderAt) : sql.slice(whereAt);
+  return slice.replace(/ WHERE /i, " ").trim();
 }
 
 function nextAtom(line: string, start: number): { atom: string; end: number } {
@@ -195,7 +223,12 @@ class TraceReader {
   }
 }
 
-function tryPeopleCode(reader: TraceReader, events: TracePeopleCodeEvent[]): boolean {
+function tryPeopleCode(
+  reader: TraceReader,
+  events: TracePeopleCodeEvent[],
+  plan: TracePlanNode[],
+  nest: { level: number },
+): boolean {
   const line = reader.current;
   const startAt = line.indexOf(">>> start");
   if (startAt >= 0) {
@@ -205,6 +238,7 @@ function tryPeopleCode(reader: TraceReader, events: TracePeopleCodeEvent[]): boo
     ({ end: pos } = nextAtom(line, pos));
     const name = nextAtom(line, pos);
     const pc = nextAtom(line, name.end);
+    const label = `${name.atom} --- ${pc.atom}`;
     events.push({
       kind: "start",
       line: reader.lineNumber,
@@ -212,7 +246,10 @@ function tryPeopleCode(reader: TraceReader, events: TracePeopleCodeEvent[]): boo
       peopleCode: pc.atom,
       external: false,
       duration: 0,
+      level: nest.level,
     });
+    plan.push({ line: reader.lineNumber, level: nest.level, label, duration: 0, kind: "peoplecode" });
+    nest.level++;
     return true;
   }
 
@@ -222,17 +259,27 @@ function tryPeopleCode(reader: TraceReader, events: TracePeopleCodeEvent[]): boo
   if (endAt < 0 && beginAt < 0) return false;
 
   if (endAt >= 0) {
+    nest.level = Math.max(0, nest.level - 1);
     const marker = extAt >= 0 ? "<<< end-ext" : "<<< end";
     const afterMarker = endAt + marker.length;
     const n = nextAtom(line, afterMarker);
     const p = nextAtom(line, n.end);
+    const duration = parseDuration(line).value;
     events.push({
       kind: "end",
       line: reader.lineNumber,
       name: n.atom,
       peopleCode: p.atom,
       external: extAt >= 0,
-      duration: parseDuration(line).value,
+      duration,
+      level: nest.level,
+    });
+    plan.push({
+      line: reader.lineNumber,
+      level: nest.level,
+      label: `${extAt >= 0 ? "end-ext" : "end"} ${n.atom} --- ${p.atom}`,
+      duration,
+      kind: "peoplecode",
     });
     return true;
   }
@@ -258,11 +305,19 @@ function tryPeopleCode(reader: TraceReader, events: TracePeopleCodeEvent[]): boo
     peopleCode,
     external: false,
     duration: 0,
+    level: nest.level,
+  });
+  plan.push({
+    line: reader.lineNumber,
+    level: nest.level,
+    label: `begin ${name || peopleCode}`,
+    duration: 0,
+    kind: "peoplecode",
   });
   return true;
 }
 
-function tryCall(reader: TraceReader, calls: TracePeopleCodeEvent[]): boolean {
+function tryCall(reader: TraceReader, calls: TracePeopleCodeEvent[], plan: TracePlanNode[], nest: { level: number }): boolean {
   const at = reader.current.indexOf("    call ");
   if (at < 0) return false;
   const kindAtom = nextAtom(reader.current, at + 9);
@@ -278,11 +333,19 @@ function tryCall(reader: TraceReader, calls: TracePeopleCodeEvent[]): boolean {
     peopleCode: target.atom,
     external: false,
     duration: 0,
+    level: nest.level,
+  });
+  plan.push({
+    line: reader.lineNumber,
+    level: nest.level,
+    label: `${name} --- ${target.atom}`,
+    duration: 0,
+    kind: "call",
   });
   return true;
 }
 
-function trySelect(reader: TraceReader, statements: TraceSqlStatement[]): boolean {
+function trySelect(reader: TraceReader, statements: TraceSqlStatement[], plan: TracePlanNode[], nest: { level: number }): boolean {
   let text = reader.current;
   let upper = text.toUpperCase();
   let at = upper.indexOf("COM STMT=SELECT");
@@ -352,29 +415,31 @@ function trySelect(reader: TraceReader, statements: TraceSqlStatement[]): boolea
     break;
   }
 
-  const whereAt = sqlBody.toUpperCase().indexOf(" WHERE ");
-  const orderAt = sqlBody.toUpperCase().indexOf(" ORDER ");
-  let where = "";
-  if (whereAt >= 0) {
-    where = orderAt > whereAt ? sqlBody.slice(whereAt, orderAt) : sqlBody.slice(whereAt);
-    where = where.replace(/ WHERE /i, " ");
-  }
-  void where;
-
+  const where = extractWhere(sqlBody);
+  const id = idsFor(sqlBody);
   statements.push({
     kind: "SELECT",
     line: startLine,
     table,
+    where,
     sql: sqlBody,
     durationExec,
     durationFetch,
     fetches,
-    fingerprint: fingerprint(sqlBody),
+    sqlId: id.sqlId,
+    fingerprint: id.fingerprint,
+  });
+  plan.push({
+    line: startLine,
+    level: nest.level,
+    label: `SELECT FROM ${table} (Dur=${(durationExec + durationFetch).toFixed(3)})`,
+    duration: durationExec + durationFetch,
+    kind: "sql",
   });
   return true;
 }
 
-function tryOtherSql(reader: TraceReader, statements: TraceSqlStatement[]): boolean {
+function tryOtherSql(reader: TraceReader, statements: TraceSqlStatement[], plan: TracePlanNode[], nest: { level: number }): boolean {
   const upper = reader.current.toUpperCase();
   let kind: TraceSqlStatement["kind"] | null = null;
   let at = upper.indexOf("COM STMT=INSERT");
@@ -405,15 +470,25 @@ function tryOtherSql(reader: TraceReader, statements: TraceSqlStatement[]): bool
     if (dur.value) durationExec += dur.value;
     if (next.endsWith("EXE") || next.endsWith("Disconnect")) {
       sqlBody = replaceBinds(sqlBody, binds);
+      const id = idsFor(sqlBody);
       statements.push({
         kind,
         line: startLine,
         table,
+        where: extractWhere(sqlBody),
         sql: sqlBody,
         durationExec,
         durationFetch: 0,
         fetches: 0,
-        fingerprint: fingerprint(sqlBody),
+        sqlId: id.sqlId,
+        fingerprint: id.fingerprint,
+      });
+      plan.push({
+        line: startLine,
+        level: nest.level,
+        label: `${kind} ${table} (Dur=${durationExec.toFixed(3)})`,
+        duration: durationExec,
+        kind: "sql",
       });
       return true;
     }
@@ -430,7 +505,9 @@ export function parseTraceSql(input: string): TraceSqlReport {
   const statements: TraceSqlStatement[] = [];
   const events: TracePeopleCodeEvent[] = [];
   const calls: TracePeopleCodeEvent[] = [];
+  const plan: TracePlanNode[] = [];
   const errors: TraceErrorLine[] = [];
+  const nest = { level: 0 };
 
   while (reader.peek()) {
     reader.read();
@@ -438,7 +515,12 @@ export function parseTraceSql(input: string): TraceSqlReport {
     if (isErrorLine(reader.current)) {
       errors.push({ line: reader.lineNumber, text: reader.current });
     }
-    if (tryPeopleCode(reader, events) || tryCall(reader, calls) || trySelect(reader, statements) || tryOtherSql(reader, statements)) {
+    if (
+      tryPeopleCode(reader, events, plan, nest) ||
+      tryCall(reader, calls, plan, nest) ||
+      trySelect(reader, statements, plan, nest) ||
+      tryOtherSql(reader, statements, plan, nest)
+    ) {
       continue;
     }
   }
@@ -449,6 +531,7 @@ export function parseTraceSql(input: string): TraceSqlReport {
     statements,
     events,
     calls,
+    plan,
     errors,
     totalLines: reader.totalLines,
     totals: {
@@ -471,6 +554,30 @@ function aggregateByTable(statements: TraceSqlStatement[]): Array<{ table: strin
     map.set(key, row);
   }
   return [...map.values()].sort((a, b) => b.duration - a.duration || a.table.localeCompare(b.table));
+}
+
+function aggregateByWhere(statements: TraceSqlStatement[]): Array<{ sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }> {
+  const map = new Map<string, { sql: string; where: string; table: string; calls: number; duration: number; sqlId: string }>();
+  for (const stmt of statements) {
+    const row = map.get(stmt.sql) ?? {
+      sql: stmt.sql,
+      where: stmt.where,
+      table: stmt.table,
+      calls: 0,
+      duration: 0,
+      sqlId: stmt.sqlId,
+    };
+    row.calls++;
+    row.duration += stmt.durationExec + stmt.durationFetch;
+    map.set(stmt.sql, row);
+  }
+  return [...map.values()].sort((a, b) => b.duration - a.duration || a.sqlId.localeCompare(b.sqlId));
+}
+
+function asciiBar(value: number, max: number, width = 24): string {
+  if (max <= 0 || value <= 0) return "".padEnd(width, "·");
+  const filled = Math.max(1, Math.round((value / max) * width));
+  return `${"#".repeat(filled)}${"·".repeat(Math.max(0, width - filled))}`;
 }
 
 class ReportLines {
@@ -496,6 +603,7 @@ class ReportLines {
 export function renderTraceSqlInvestigation(input: string): string {
   const report = parseTraceSql(input);
   const byTable = aggregateByTable(report.statements);
+  const byWhere = aggregateByWhere(report.statements);
   const topSql = [...report.statements]
     .sort((a, b) => b.durationExec + b.durationFetch - (a.durationExec + a.durationFetch))
     .slice(0, 40);
@@ -503,6 +611,7 @@ export function renderTraceSqlInvestigation(input: string): string {
     .filter((e) => e.duration > 0)
     .sort((a, b) => b.duration - a.duration)
     .slice(0, 40);
+  const chartMax = Math.max(0, ...byTable.map((row) => row.duration), ...topEvents.map((e) => e.duration));
 
   const out = new ReportLines([
     "MPU Trace SQL investigation — report v1",
@@ -510,20 +619,50 @@ export function renderTraceSqlInvestigation(input: string): string {
     "Local sanitized .tracesql / .trc excerpt only. Filename omitted. Nothing is stored or sent over the network.",
     "Clean reimplementation of Trace Magic-style markers for browser use. Real PeopleTools patch compatibility unverified.",
     "SELECT statements without PS_/PS table tokens are ignored (legacy Trace Magic filter). Durations come from Dur= atoms.",
+    "SQLID values use Trace Magic getMD5Hash encoding; fingerprint is an MPU-only FNV id.",
     "",
     "SUMMARY",
     `Physical lines: ${report.totalLines}`,
     `SELECT statements: ${report.totals.selectCount} (duration ${report.totals.selectDuration.toFixed(3)})`,
     `INSERT/UPDATE/DELETE: ${report.totals.otherSqlCount} (duration ${report.totals.otherSqlDuration.toFixed(3)})`,
     `PeopleCode events with duration: ${topEvents.length} (recorded event duration sum ${report.totals.eventDuration.toFixed(3)})`,
+    `Plan nodes: ${report.plan.length}`,
     `Error / exception lines: ${report.errors.length}`,
     "",
-    "AGGREGATE BY TABLE — highest duration first",
+    "DURATION CHART — tables (accessible text bars)",
   ]);
+  if (!byTable.length) out.push("No PeopleSoft SQL statements recognized.");
+  else {
+    for (const row of byTable.slice(0, 15)) {
+      out.push(`${asciiBar(row.duration, chartMax)} ${row.duration.toFixed(3)}s | ${row.kind} ${JSON.stringify(row.table)} ×${row.calls}`);
+    }
+  }
+
+  out.push("", "DURATION CHART — PeopleCode ends");
+  if (!topEvents.length) out.push("No timed PeopleCode end markers.");
+  else {
+    for (const event of topEvents.slice(0, 15)) {
+      out.push(
+        `${asciiBar(event.duration, chartMax)} ${event.duration.toFixed(3)}s | L${event.line} ${JSON.stringify(event.name)} ${JSON.stringify(event.peopleCode)}`,
+      );
+    }
+  }
+
+  out.push("", "AGGREGATE BY TABLE (SQL-by-FROM) — highest duration first");
   if (!byTable.length) out.push("No PeopleSoft SQL statements recognized.");
   else {
     for (const row of byTable) {
       out.push(`${row.kind} ${JSON.stringify(row.table)} | calls ${row.calls} | duration ${row.duration.toFixed(3)}`);
+    }
+  }
+
+  out.push("", "AGGREGATE BY WHERE (unique post-bind SQL) — highest duration first");
+  if (!byWhere.length) out.push("No SQL statements.");
+  else {
+    for (const row of byWhere.slice(0, 40)) {
+      out.push(
+        `SQLID ${row.sqlId} | calls ${row.calls} | duration ${row.duration.toFixed(3)} | table ${JSON.stringify(row.table)} | where ${JSON.stringify(row.where.slice(0, 200))} | ${JSON.stringify(row.sql.slice(0, 300))}`,
+      );
     }
   }
 
@@ -532,8 +671,18 @@ export function renderTraceSqlInvestigation(input: string): string {
   else {
     for (const stmt of topSql) {
       out.push(
-        `L${stmt.line} | ${stmt.kind} | Dur ${(stmt.durationExec + stmt.durationFetch).toFixed(3)} (exec ${stmt.durationExec.toFixed(3)} fetch ${stmt.durationFetch.toFixed(3)}) | fetches ${stmt.fetches} | ${stmt.fingerprint} | ${JSON.stringify(stmt.table)} | ${JSON.stringify(stmt.sql.slice(0, 500))}`,
+        `L${stmt.line} | ${stmt.kind} | Dur ${(stmt.durationExec + stmt.durationFetch).toFixed(3)} (exec ${stmt.durationExec.toFixed(3)} fetch ${stmt.durationFetch.toFixed(3)}) | fetches ${stmt.fetches} | SQLID ${stmt.sqlId} | ${stmt.fingerprint} | ${JSON.stringify(stmt.table)} | ${JSON.stringify(stmt.sql.slice(0, 500))}`,
       );
+    }
+  }
+
+  out.push("", "PLAN TREE — nest level from >>> start / <<< end (text stand-in for Trace Magic PlanTreeView)");
+  if (!report.plan.length) out.push("No plan nodes.");
+  else {
+    for (const node of report.plan.slice(0, 200)) {
+      const indent = "  ".repeat(node.level);
+      const dur = node.duration > 0 ? ` Dur=${node.duration.toFixed(3)}` : "";
+      out.push(`${indent}L${node.line} [${node.kind}] ${node.label}${dur}`);
     }
   }
 
@@ -542,7 +691,7 @@ export function renderTraceSqlInvestigation(input: string): string {
   else {
     for (const event of topEvents) {
       out.push(
-        `L${event.line} | ${event.kind}${event.external ? " ext" : ""} | Dur ${event.duration.toFixed(3)} | ${JSON.stringify(event.name)} | ${JSON.stringify(event.peopleCode)}`,
+        `L${event.line} | ${event.kind}${event.external ? " ext" : ""} | level ${event.level} | Dur ${event.duration.toFixed(3)} | ${JSON.stringify(event.name)} | ${JSON.stringify(event.peopleCode)}`,
       );
     }
   }

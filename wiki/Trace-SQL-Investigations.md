@@ -7,12 +7,12 @@ tab memory only — nothing is written to extension storage or sent over the net
 ## Partial port
 
 This is a **partial** replacement for the legacy Oracle Trace Magic desktop tool.
-MPU today covers core marker parsing and a text hotspot report. Not yet in the
-extension: Trace Magic–compatible SQL IDs, plan trees with source jump, duration
-charts, interactive SQL-by-FROM / SQL-by-WHERE grouping, multi-file compare, E2E
-Options smoke coverage, and verified real PeopleTools samples. Recovery notes and
-the full remaining backlog live in the sibling RETM vault
-(`../RETM/docs/remaining-parity.md`).
+MPU today covers core marker parsing plus a text hotspot report with Trace Magic
+SQL IDs, SQL-by-FROM / SQL-by-WHERE aggregates, a nested plan-tree section, and
+accessible duration bars. Still outstanding versus the desktop tool: interactive
+ListView-style grouping UI, clickable source jump, rich charts, multi-file
+compare, and verified real PeopleTools samples. Recovery notes and the remaining
+backlog live in the sibling RETM vault (`../RETM/docs/remaining-parity.md`).
 
 ## Supported parser: PeopleSoft tracesql markers v1
 
