@@ -1,0 +1,14 @@
+PSAPPSRV.4004 4-1 >>> start Nested DEMO.JOB_DATA.SaveEdit
+PSAPPSRV.4004 4-2 COM Stmt=UPDATE PS_JOB SET DEPTID = :1 WHERE EMPLID = :2
+PSAPPSRV.4004 4-3      Bind-1 type=2 length=10 value=REDACTED
+PSAPPSRV.4004 4-4      Bind-2 type=2 length=11 value=REDACTED01
+PSAPPSRV.4004 4-5      Dur=0.003 EXE
+PSAPPSRV.4004 4-6 Caught Exception: SYNTHETIC_DATA_CONFLICT
+PSAPPSRV.4004 4-7 ErrorReturn-> -1
+Called from: DEMO.JOB_DATA.SaveEdit
+PSAPPSRV.4004 4-9 SQL error. Function: SqlExec
+  Error Position: 42
+  Return: 1403
+  Statement: UPDATE PS_JOB SET DEPTID = :1 WHERE EMPLID = :2
+  Original Statement: UPDATE PS_JOB SET DEPTID = 'REDACTED' WHERE EMPLID = 'REDACTED01'
+PSAPPSRV.4004 4-14 <<< end Nested DEMO.JOB_DATA.SaveEdit Dur=0.020

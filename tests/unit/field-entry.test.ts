@@ -3,7 +3,6 @@ import {
   buildFindReplaceBuffer,
   captureFieldValues,
   clearSessionBuffer,
-  ensureGridRows,
   fieldEntryKey,
   getSessionBuffer,
   listPageFields,
@@ -196,7 +195,7 @@ describe("field entry capture / eligibility / apply", () => {
     expect(keys).toContain("ADDRESSES.CITY");
   });
 
-  it("ensureGridRows clicks Add Row until enough occurrences exist", () => {
+  it("sheet preview does not click Add Row or change the page", () => {
     document.body.innerHTML = `
       <table id="g"><tbody>
         <tr><td><input id="JOB_DEPTID$0" value="1" /><input id="JOB_JOBCODE$0" value="A" /></td></tr>
@@ -211,12 +210,8 @@ describe("field entry capture / eligibility / apply", () => {
       tr.innerHTML = `<td><input id="JOB_DEPTID$${n}" value="" /><input id="JOB_JOBCODE$${n}" value="" /></td>`;
       tbody.appendChild(tr);
     });
-    const result = ensureGridRows(document, 3, "JOB");
-    expect(result.ok).toBe(true);
-    expect(result.clicked).toBe(2);
-    expect(document.getElementById("JOB_DEPTID$2")).toBeTruthy();
-
     const prepared = prepareSheetBuffer("JOB.DEPTID\n10\n20\n30", document);
+    expect(document.getElementById("JOB_DEPTID$1")).toBeNull();
     expect(prepared.error).toBeUndefined();
     expect(prepared.rows.filter((r) => r.field === "DEPTID")).toHaveLength(3);
   });

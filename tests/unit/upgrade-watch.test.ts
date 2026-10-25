@@ -4,11 +4,14 @@ import {
   compareFingerprints,
   createWatchFromFingerprint,
   findWatchForParsed,
+  listWatchesForParsed,
+  formatDriftHandoffMarkdown,
   upsertWatch,
   watchKey,
 } from "@/features/upgrade-watch";
 import type { PageFingerprint } from "@/storage/schema";
 import type { ParsedPsUrl } from "@/adapters/ps-page";
+import { isSettingsBackup } from "@/storage/backup";
 
 function fp(partial: Partial<PageFingerprint>): PageFingerprint {
   return {
@@ -21,6 +24,10 @@ function fp(partial: Partial<PageFingerprint>): PageFingerprint {
     tabLabels: ["General", "Pages"],
     structureLabels: ["group:Header"],
     fieldIds: ["JOB_EMPLID", "JOB_EFFDT"],
+    fieldIdsComplete: true,
+    fieldIdsTotal: 2,
+    structureLabelsComplete: true,
+    pageMetadataComplete: true,
     ...partial,
   };
 }
@@ -54,7 +61,43 @@ describe("upgrade-watch", () => {
     expect(report.findings.some((f) => f.code === "tabs")).toBe(true);
   });
 
-  it("upserts by menu.component.market key", () => {
+  it("warns instead of calling legacy or incomplete captures clean", () => {
+    const baseline = fp({ fieldIdsComplete: undefined, fieldIdsTotal: undefined });
+    const report = compareFingerprints(baseline, fp({}));
+    expect(report.severity).toBe("drifted");
+    expect(report.findings.find((f) => f.code === "capture-completeness")?.message).toContain("baseline field scan is legacy or incomplete");
+  });
+
+  it("accepts legacy and metadata-bearing fingerprint backups while validating metadata", () => {
+    const watch = createWatchFromFingerprint({ fingerprint: fp({}), now: 1 });
+    const legacy = structuredClone(watch);
+    delete legacy.baseline.fieldIdsComplete;
+    delete legacy.baseline.fieldIdsTotal;
+    delete legacy.baseline.structureLabelsComplete;
+    delete legacy.baseline.pageMetadataComplete;
+    expect(isSettingsBackup({ customizationWatches: [legacy] })).toBe(true);
+    expect(isSettingsBackup({ customizationWatches: [watch] })).toBe(true);
+    expect(isSettingsBackup({ customizationWatches: [{ ...watch, baseline: { ...watch.baseline, fieldIdsTotal: -1 } }] })).toBe(false);
+    expect(isSettingsBackup({ customizationWatches: [{ ...watch, baseline: { ...watch.baseline, fieldIdsComplete: "yes" } }] })).toBe(false);
+  });
+
+  it("counts unique field ids beyond the retention cap and marks truncation accurately", () => {
+    document.body.innerHTML = Array.from({ length: 201 }, (_, index) => `<input id="FIELD_${String(index).padStart(3, "0")}$0">`).join("") +
+      `<input id="FIELD_000$1"><input id="FIELD_001$1">`;
+    const parsed = { menu: "M", component: "C", market: "GBL", kind: "component" } as ParsedPsUrl;
+    const capture = capturePageFingerprint(document, parsed);
+    expect(capture.fieldIds).toHaveLength(200);
+    expect(capture.fieldIdsTotal).toBe(201);
+    expect(capture.fieldIdsComplete).toBe(false);
+
+    document.body.innerHTML = Array.from({ length: 200 }, (_, index) => `<input id="FIELD_${String(index).padStart(3, "0")}$0">`).join("");
+    const atLimit = capturePageFingerprint(document, parsed);
+    expect(atLimit.fieldIds).toHaveLength(200);
+    expect(atLimit.fieldIdsTotal).toBe(200);
+    expect(atLimit.fieldIdsComplete).toBe(true);
+  });
+
+  it("retains dated history rather than overwriting the previous baseline", () => {
     const a = createWatchFromFingerprint({
       fingerprint: fp({}),
       label: "First",
@@ -66,9 +109,23 @@ describe("upgrade-watch", () => {
       now: 2,
     });
     const list = upsertWatch(upsertWatch([], a), b);
-    expect(list).toHaveLength(1);
+    expect(list).toHaveLength(2);
     expect(list[0].label).toBe("Second");
     expect(watchKey("menu", "comp", "gbl")).toBe("MENU.COMP.GBL");
+  });
+
+  it("caps history per environment and requires an explicit cross-environment comparison", () => {
+    let list: ReturnType<typeof createWatchFromFingerprint>[] = [];
+    for (let index = 1; index <= 7; index++) list = upsertWatch(list, createWatchFromFingerprint({ fingerprint: fp({}), scope: "https://dev.example/ps", envLabel: "DEV", now: index }));
+    const qa = createWatchFromFingerprint({ fingerprint: fp({ toolsRel: "8.62" }), scope: "https://qa.example/ps", envLabel: "QA", now: 8 });
+    list = upsertWatch(list, qa);
+    expect(list).toHaveLength(6);
+    const parsed = { baseURL: "https://qa.example", siteNormalized: "ps", menu: "MENU", component: "COMP", market: "GBL" } as ParsedPsUrl;
+    expect(findWatchForParsed(list, parsed)?.id).toBe(qa.id);
+    expect(listWatchesForParsed(list, parsed)).toHaveLength(6);
+    expect(findWatchForParsed(list, { ...parsed, baseURL: "https://prod.example" })).toBeUndefined();
+    const report = compareFingerprints(qa.baseline, fp({ toolsRel: "8.63" }));
+    expect(formatDriftHandoffMarkdown(qa, report, "TEST")).toContain("App Designer Compare Report / Change Assistant project: [attach verified evidence]");
   });
 
   it("finds watch for parsed URL", () => {
@@ -101,5 +158,21 @@ describe("upgrade-watch", () => {
     expect(snap.tabLabels).toEqual(["One", "Two"]);
     expect(snap.fieldIds).toContain("JOB_EMPLID");
     expect(snap.fieldIds).toContain("JOB_EFFDT");
+    expect(snap.fieldIdsComplete).toBe(true);
+    expect(snap.fieldIdsTotal).toBe(2);
+    expect(snap.pageMetadataComplete).toBe(true);
+  });
+
+  it("marks missing page metadata, zero fields, and capped structure as review warnings", () => {
+    document.body.innerHTML = Array.from({ length: 41 }, (_, index) => `<section id="S${index}" aria-label="Section ${index}"></section>`).join("");
+    const parsed = { menu: "M", component: "C", market: "GBL", kind: "component" } as ParsedPsUrl;
+    const capture = capturePageFingerprint(document, parsed);
+    expect(capture.pageMetadataComplete).toBe(false);
+    expect(capture.fieldIdsTotal).toBe(0);
+    expect(capture.structureLabels).toHaveLength(40);
+    expect(capture.structureLabelsComplete).toBe(false);
+    const report = compareFingerprints(capture, capture);
+    expect(report.severity).toBe("drifted");
+    expect(report.findings.find((f) => f.code === "capture-completeness")?.message).toContain("40 retained maximum");
   });
 });

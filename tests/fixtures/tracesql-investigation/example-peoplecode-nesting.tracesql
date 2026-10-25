@@ -1,0 +1,12 @@
+PSAPPSRV.2002 2-1 >>> start Nested DEMO.COMPONENT.PageActivate
+PSAPPSRV.2002 2-2 >>>>> Begin DEMO_APP_PKG:Helper
+PSAPPSRV.2002 2-3 : method DoWork
+PSAPPSRV.2002 2-4     call int DEMO_APP_PKG:Helper.DoWork
+PSAPPSRV.2002 2-5     call getter DEMO_APP_PKG:Helper.Status
+PSAPPSRV.2002 2-6     call setter DEMO_APP_PKG:Helper.Status
+PSAPPSRV.2002 2-7 COM Stmt=SELECT A.MENU_NAME FROM PSMENUITEM A WHERE A.MENU_NAME = :1
+PSAPPSRV.2002 2-8      Bind-1 type=2 length=8 value=REDACTED
+PSAPPSRV.2002 2-9      Dur=0.015 EXE
+PSAPPSRV.2002 2-10     Dur=0.003 Fetch
+PSAPPSRV.2002 2-11 <<< end-ext Nested DEMO_APP_PKG:Helper.DoWork Dur=0.040
+PSAPPSRV.2002 2-12 <<< end Nested DEMO.COMPONENT.PageActivate Dur=0.060

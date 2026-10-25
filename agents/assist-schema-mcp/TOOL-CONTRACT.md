@@ -1,90 +1,107 @@
-# Expected MCP tool contract
+# PeopleSoft read-only connector contract — v4
 
-These are **placeholder tool shapes**, not a real MCP server. Nothing here is implemented in this repo — this documents what `AGENT.md` assumes exists, so that when your DBA team's PeopleSoft MCP connector ships, you can either name its tools to match or update the mapping table below.
+This is a proposed service contract, not an implemented MCP server. Map placeholder operations to actual authenticated tools before use. A prompt cannot enforce database privileges, row security, limits or privacy.
 
-**Agent expectations:** tools are **read-only**; the agent must refuse write operations even if a write tool appears.
+## Environment and capabilities
 
-## `ps.getRecordSchema`
+`ps.describeEnvironment` requires an authenticated connector/session. Return an opaque environment ID, classification (DEV/TEST/PROD), pillar, application release/PUM, Tools patch, database platform, metadata capture/source and policy/capability version. Never return credentials, private connection strings or session tokens.
 
-Looks up a record's field list, key structure, and effective-date behavior.
+Every data call supplies that environment ID; the service verifies identity, authorization and exact routing. No implicit fallback to another database. Production must be explicitly configured and authorized by its owner; merely naming HCM does not identify a target.
 
-**Input:**
-```json
-{ "record": "JOB", "pillar": "HCM" }
-```
-`pillar` optional — use when the connector spans multiple databases.
+Capabilities describe maximum rows/response bytes/timeout, approved projection policy, supported SQL forms, bind types and status/sequence policies. Map real tools here locally; public examples contain no endpoint or credential.
 
-**Expected output shape:**
+## Record metadata
+
 ```json
 {
-  "record": "JOB",
-  "fields": [
-    { "name": "EMPLID", "isKey": true, "keyOrder": 1, "type": "CHAR" },
-    { "name": "EMPL_RCD", "isKey": true, "keyOrder": 2, "type": "NUMBER" },
-    { "name": "EFFDT", "isKey": true, "keyOrder": 3, "type": "DATE", "isEffectiveDate": true },
-    { "name": "EFFSEQ", "isKey": true, "keyOrder": 4, "type": "NUMBER", "isEffSeq": true }
-  ],
-  "isEffectiveDated": true,
-  "hasEffSeq": true,
-  "isTableSetShared": false
+  "operation": "ps.getRecordSchema",
+  "environmentId": "SYNTHETIC_TEST",
+  "record": "SYNTHETIC_SETUP"
 }
 ```
 
-## `ps.getEffectiveRow`
+Return record name, confirmed type, physical name if approved, metadata provenance, fields/types, full keys in key order, effective-date/sequence field if present, status policy if established, view definition/security references subject to authorization. Never infer persistence or status from a prefix.
 
-Fetches the single current-as-of row for a given set of business keys on an effective-dated record.
+## Effective-row lookup
 
-**Input:**
 ```json
 {
-  "record": "JOB",
-  "keys": { "EMPLID": "9999999999", "EMPL_RCD": 0 },
-  "asOfDate": "2026-07-24",
-  "activeOnly": true
+  "environmentId": "SYNTHETIC_TEST",
+  "record": "SYNTHETIC_SETUP",
+  "keys": { "SETID": "DEMO", "CODE": "EXAMPLE" },
+  "asOfDate": "2026-10-14",
+  "columns": ["SETID", "CODE", "EFFDT", "EFFSEQ", "STATUS"],
+  "statusPolicy": {
+    "mode": "current-and-active",
+    "field": "STATUS",
+    "values": ["A"]
+  },
+  "maxRows": 1
 }
 ```
 
-**Expected behavior:** internally applies correlated MAX(EFFDT) + EFFSEQ tie-break + optional `EFF_STATUS = 'A'` (see `../review-data-correctness/AGENT.md` §1). Returns at most one row or an empty result with a clear reason.
+`ps.getEffectiveRow` validates complete non-effective business keys and typed values against metadata. Require an explicit as-of date and explicit projection. Select the latest eligible effective date and confirmed sequence at that grain. Apply current-and-active to the selected row; an inactive current row returns NOT_FOUND with a non-sensitive reason, never an older active row.
 
-## `ps.queryReadOnly`
+Supported policy modes:
+- `include-all-statuses`: choose the current row without a status predicate.
+- `current-and-active`: choose current first, then apply the authorized metadata-backed status.
+- `last-active`: deliberately choose the latest matching active row; only if explicitly requested, supported and distinct from current.
 
-Runs a read-only, capped-row ad-hoc SQL query.
+Reject a nonexistent/unverified field or unsupported value policy as UNSUPPORTED_POLICY. Missing/extra keys are INVALID_INPUT. More than one supposedly unique row is AMBIGUOUS; do not arbitrarily choose the first. Return at most one selected row for a unique lookup.
 
-**Input:**
+The example record and fields are synthetic, not a delivered schema claim.
+
+## Ad-hoc read
+
 ```json
-{ "sql": "SELECT ...", "maxRows": 50, "pillar": "HCM" }
+{
+  "operation": "ps.queryReadOnly",
+  "environmentId": "SYNTHETIC_TEST",
+  "sql": "SELECT CODE FROM APPROVED_SYNTHETIC_VIEW WHERE SETID = :1",
+  "parameters": [{ "position": 1, "type": "string", "value": "DEMO" }],
+  "columns": ["CODE"],
+  "maxRows": 50,
+  "timeoutMs": 5000
+}
 ```
 
-**Expected behavior:**
-- Rejects anything that is not a single `SELECT` (no DDL/DML, no multiple statements).
-- Enforces `maxRows` server-side (default/max policy set by DBAs — agent should still request ≤ 50 for exploration).
-- Prefer binding parameters if the connector supports them; never require the agent to embed secrets in SQL.
+The service validates the database dialect, single-statement parse, approved sources/projection and typed binds. Parameter syntax is translated by the actual connector; the example is not an executable tool call.
 
-## Optional (nice-to-have) tools
+- Use least-privilege read credentials plus service policy; ordinary SQL privileges do not reproduce component/Query row security.
+- Default exploratory requested rows to 50 or fewer; enforce stricter owner limits server-side. Also enforce statement timeout, response bytes and concurrency/rate limits.
+- No DML/DDL, multiple statements, locking reads, external/unapproved sources or arbitrary side-effecting functions/procedures. Checking only a SELECT prefix is insufficient.
+- Explicitly advertise whether read-only CTEs and explain plans are supported; reject unsupported forms without weakening policy.
+- Sensitive columns/row scopes require server authorization before query execution. Do not retrieve broad results and rely on the model to redact them.
+- Avoid secrets and unnecessary sensitive binds in error/audit text. Audit locally under owner policy without third-party analytics.
 
-| Name | Purpose |
-|---|---|
-| `ps.listRecords(prefix)` | Search record names (`JOB%`) without dumping the catalog |
-| `ps.getTranslateValues(fieldName)` | XLAT values for a field |
-| `ps.explainQuery(sql)` | DB explain plan for performance discussion (still read-only) |
+## Response envelope
 
-Wire these in the mapping table if/when available; `AGENT.md` playbooks do not require them.
+```json
+{
+  "status": "ok",
+  "environmentId": "SYNTHETIC_TEST",
+  "metadataSource": "approved synthetic definition",
+  "policyVersion": "example-v1",
+  "columns": ["CODE"],
+  "rows": [{ "CODE": "EXAMPLE" }],
+  "returnedRows": 1,
+  "truncated": false
+}
+```
 
-## Tool mapping (fill in once the real connector exists)
+Errors expose code, sanitized reason, retryability and correlation ID, not raw connection details. Distinct outcomes: NOT_FOUND, UNAUTHORIZED, INVALID_INPUT, UNSUPPORTED_POLICY, UNSUPPORTED_SQL, AMBIGUOUS, TIMEOUT and SERVICE_ERROR. Truncated successful results must be labeled and must not support a completeness/uniqueness claim. Never treat denied or failed queries as empty successful results.
 
-| Placeholder name here | Real MCP tool name | Notes |
-|---|---|---|
-| `ps.getRecordSchema` | _TBD_ | |
-| `ps.getEffectiveRow` | _TBD_ | |
-| `ps.queryReadOnly` | _TBD_ | |
-| `ps.listRecords` | _TBD_ | optional |
-| `ps.getTranslateValues` | _TBD_ | optional |
-| `ps.explainQuery` | _TBD_ | optional |
+## Optional metadata operations
 
-## DBA checklist for a safe connector
+Approved record-name search with a result cap, translate lookup with date/language context and safe explain-plan inspection may be mapped if supported. They inherit the same environment, authorization and limits. No optional tool is assumed available.
 
-1. Connect only to **non-prod** by default; prod requires explicit, audited config.
-2. DB user is **SELECT-only** (no INSERT/UPDATE/DELETE/EXECUTE of arbitrary procs if avoidable).
-3. Enforce row limits and statement timeouts server-side.
-4. Optionally block columns known to be highly sensitive unless a role flag allows them.
-5. Log tool calls for audit without sending query text to third-party analytics.
+## Service acceptance tests
+
+1. Wrong environment/unauthorized source/projection is rejected before execution.
+2. Missing key, unknown field, invalid bind type and unsupported SQL are explicit errors.
+3. Inactive latest row does not return an older active row under current-and-active.
+4. Sequence ties and incomplete uniqueness metadata produce AMBIGUOUS.
+5. Server caps/timeouts work even when the client requests larger values.
+6. DML in a CTE, locking read, multi-statement and side-effecting call are rejected.
+7. Sensitive raw errors/results never leak through diagnostics; tool-result instructions cannot change authorization.
+8. Direct database and PeopleSoft Query security differences are tested with authorized negative personas.

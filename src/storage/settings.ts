@@ -1,7 +1,6 @@
+import { getExtensionApi } from "../platform/browser";
 import {
   createDefaultSettings,
-  normalizeBarPlacement,
-  normalizeFieldEntryProfiles,
   SCHEMA_VERSION,
   type Favorite,
   type FeatureFlags,
@@ -9,8 +8,32 @@ import {
   type TraceSettings,
   type YesNo,
 } from "./schema";
+import { normalizeStoredSettings } from "./backup";
+import { SETTINGS_CONFLICT, type SettingsReply, type SettingsWrite } from "./coordinator";
 
 const SETTINGS_KEY = "mpuSettings";
+const snapshots = new WeakMap<MpuSettings, MpuSettings>();
+let transport = (message: SettingsWrite): Promise<SettingsReply> => getExtensionApi().runtime.sendMessage(message);
+
+/** Register the worker's local queue without messaging the worker itself. */
+export function configureSettingsTransport(writer: typeof transport): void { transport = writer; }
+
+export class SettingsSaveError extends Error {}
+
+/** A draft retains its original baseline even when a form is left open. */
+export function settingsDraft(settings: MpuSettings): MpuSettings {
+  const draft = structuredClone(settings);
+  snapshots.set(draft, structuredClone(settings));
+  return draft;
+}
+
+async function write(message: SettingsWrite): Promise<MpuSettings> {
+  let reply: SettingsReply;
+  try { reply = await transport(message); }
+  catch { throw new SettingsSaveError("Settings could not be saved. Reload this view and retry."); }
+  if (!reply?.ok) throw new SettingsSaveError(reply?.error || "Settings could not be saved. Please retry.");
+  return settingsDraft(reply.settings);
+}
 
 /** Legacy PS Utilities keys we may migrate once */
 interface LegacyBlob {
@@ -54,14 +77,14 @@ export function migrateFromLegacy(legacy: LegacyBlob, base = createDefaultSettin
     loginPageOption: yn(legacy.loginPageOption, base.features.loginPageOption),
   };
 
-  const environments =
-    legacy.psutilEnvs?.map((e) => ({
-      label: e.label ?? "Environment",
-      active: yn(e.active, "Yes"),
-      trcProfRunning: yn(e.trcProfRunning, "No"),
-    })) ?? base.environments;
+  const environments = Array.isArray(legacy.psutilEnvs)
+    ? legacy.psutilEnvs.map((e) => ({
+      label: typeof e?.label === "string" ? e.label : "Environment",
+      active: yn(e?.active, "No"),
+      trcProfRunning: yn(e?.trcProfRunning, "No"),
+    })) : base.environments;
 
-  return {
+  return normalizeStoredSettings({
     ...base,
     features,
     favorites: Array.isArray(legacy.shortcutstable) ? legacy.shortcutstable : base.favorites,
@@ -71,61 +94,45 @@ export function migrateFromLegacy(legacy: LegacyBlob, base = createDefaultSettin
       ? { ...base.traceSettings, ...legacy.psutilTraceSettings[0] }
       : base.traceSettings,
     schemaVersion: SCHEMA_VERSION,
-  };
+  });
 }
 
 export async function loadSettings(): Promise<MpuSettings> {
-  const raw = await chrome.storage.local.get(null);
-  if (raw[SETTINGS_KEY] && typeof raw[SETTINGS_KEY] === "object") {
-    const s = raw[SETTINGS_KEY] as MpuSettings;
-    return {
-      ...createDefaultSettings(),
-      ...s,
-      features: { ...createDefaultSettings().features, ...s.features },
-      traceSettings: { ...createDefaultSettings().traceSettings, ...s.traceSettings },
-      recentComponents: Array.isArray(s.recentComponents) ? s.recentComponents : [],
-      customizationWatches: Array.isArray(s.customizationWatches) ? s.customizationWatches : [],
-      featureUiScopes: {
-        ...createDefaultSettings().featureUiScopes,
-        ...(s.featureUiScopes || {}),
-      },
-      showOnboarding: s.showOnboarding === "Yes" || s.showOnboarding === "No" ? s.showOnboarding : "No",
-      fieldCopyFormat:
-        s.fieldCopyFormat === "ampersand" ||
-        s.fieldCopyFormat === "getfield" ||
-        s.fieldCopyFormat === "getrowset" ||
-        s.fieldCopyFormat === "record.field"
-          ? s.fieldCopyFormat
-          : "record.field",
-      barPlacement: normalizeBarPlacement(s.barPlacement),
-      barSticky: s.barSticky === "Yes" || s.barSticky === "No" ? s.barSticky : "No",
-      fieldEntryProfiles: normalizeFieldEntryProfiles(s.fieldEntryProfiles),
-    };
+  const raw = await getExtensionApi().storage.local.get(null);
+  if (Object.hasOwn(raw, SETTINGS_KEY)) {
+    return settingsDraft(normalizeStoredSettings(raw[SETTINGS_KEY]));
   }
 
   // One-time migrate from legacy PS Utilities keys if present
   if (raw.shortcutstable || raw.psutilEnvs || raw.userIdOption) {
     const migrated = migrateFromLegacy(raw as LegacyBlob);
-    await saveSettings(migrated);
-    return migrated;
+    return write({ type: "mpu-write-settings", next: migrated, initialize: true });
   }
 
   const defaults = createDefaultSettings();
-  await saveSettings(defaults);
-  return defaults;
+  return write({ type: "mpu-write-settings", next: defaults, initialize: true });
 }
 
-export async function saveSettings(settings: MpuSettings): Promise<void> {
-  await chrome.storage.local.set({ [SETTINGS_KEY]: settings });
+export async function saveSettings(settings: MpuSettings, base?: MpuSettings): Promise<MpuSettings> {
+  const original = base ?? snapshots.get(settings) ?? await loadSettings();
+  const saved = await write({ type: "mpu-write-settings", base: original, next: settings });
+  Object.assign(settings, structuredClone(saved));
+  snapshots.set(settings, structuredClone(saved));
+  return saved;
 }
 
 export async function updateSettings(
   patch: (current: MpuSettings) => MpuSettings,
 ): Promise<MpuSettings> {
-  const current = await loadSettings();
-  const next = patch(current);
-  await saveSettings(next);
-  return next;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const current = await loadSettings();
+    const base = structuredClone(current);
+    try { return await saveSettings(patch(current), base); }
+    catch (error) {
+      if (!(error instanceof SettingsSaveError) || error.message !== SETTINGS_CONFLICT || attempt === 2) throw error;
+    }
+  }
+  throw new SettingsSaveError(SETTINGS_CONFLICT);
 }
 
 export function originAllowed(
@@ -138,9 +145,10 @@ export function originAllowed(
     const origin = new URL(pageUrl).origin;
     return settings.hostAllowlist.some((entry) => {
       try {
-        return new URL(entry).origin === origin;
+        const allowed = new URL(entry);
+        return /^(https?:)$/.test(allowed.protocol) && !allowed.username && !allowed.password && allowed.origin === origin;
       } catch {
-        return entry === origin || pageUrl.startsWith(entry);
+        return false;
       }
     });
   } catch {

@@ -2,7 +2,7 @@
  * Tiny static server for PeopleSoft-shaped URLs so Chrome content_scripts match.
  * Paths like /psp/ps/EMPLOYEE/HRMS/c/MENU.COMP.GBL → fluid fixture.
  */
-import { createServer, type Server } from "node:http";
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +20,9 @@ export const CLASSIC_GRID_PATH = "/psp/ps/EMPLOYEE/HRMS/c/JOB_DATA.JOB_DATA.GBL"
 export const HOMEPAGE_PATH = "/psp/ps/EMPLOYEE/HRMS/h/?tab=DEFAULT";
 
 function htmlFor(urlPath: string): string | null {
+  if (urlPath === "/mpu-fixtures/owning-frame") {
+    return readFileSync(resolve(fixtures, "classic-field-hook.html"), "utf8");
+  }
   if (urlPath.includes("/c/JOB_DATA.") || urlPath.includes("/c/job_data.")) {
     return readFileSync(resolve(fixtures, "classic-grid.html"), "utf8");
   }
@@ -35,8 +38,9 @@ function htmlFor(urlPath: string): string | null {
   return null;
 }
 
-export function startFixtureServer(): Promise<Server> {
+export function startFixtureServer(handle?: (request: IncomingMessage, response: ServerResponse) => boolean): Promise<Server> {
   const server = createServer((req, res) => {
+    if (handle?.(req, res)) return;
     const url = req.url || "/";
     const body = htmlFor(url);
     if (!body) {

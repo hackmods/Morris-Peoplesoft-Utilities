@@ -1,0 +1,38 @@
+/* Shared orange and neutral identity. No remote assets or styles. */
+:root {
+  --bg: #f7f7f7;
+  --card: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #525252;
+  --accent: #333333;
+  --brand: #FF5C00;
+  --action: #FF5C00;
+  --on-action: #111111;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--card));
+  --brand-soft: #eeeeee;
+  --careful: #333333;
+  --careful-soft: color-mix(in srgb, var(--careful) 12%, var(--card));
+  --focus: #333333;
+  --border: #cccccc;
+  --shadow: 0 10px 28px rgb(26 26 26 / 8%);
+  --radius: 10px;
+  --font: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111111;
+    --card: #1a1a1a;
+    --fg: #f8f8f8;
+    --muted: #bdbdbd;
+    --accent: #FF5C00;
+    --accent-soft: #292929;
+    --brand-soft: #292929;
+    --careful-soft: #292929;
+    --careful: #FF5C00;
+    --focus: #FF5C00;
+    --border: #525252;
+    --shadow: 0 12px 32px rgb(0 0 0 / 35%);
+  }
+}

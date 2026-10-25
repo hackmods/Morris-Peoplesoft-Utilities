@@ -1,4 +1,5 @@
 import { getTargetDocument } from "../adapters/ps-page";
+import { isVisible } from "../adapters/dom";
 import type { ParsedPsUrl } from "../adapters/ps-page";
 
 export interface IbBreadcrumb {
@@ -26,6 +27,7 @@ function cleanValue(raw: string): string {
 
 function valueFromLabelRow(doc: Document, labelRe: RegExp): string | undefined {
   for (const el of Array.from(doc.querySelectorAll("label, span, th, td, .PSEDITBOXLABEL, .ps_box-label"))) {
+    if (!isVisible(el)) continue;
     const text = el.textContent?.replace(/\s+/g, " ").trim() || "";
     const m = text.match(labelRe);
     if (!m?.[1]) continue;
@@ -41,10 +43,10 @@ function valueFromLabelRow(doc: Document, labelRe: RegExp): string | undefined {
 }
 
 function valueFromFieldId(doc: Document, idPart: string): string | undefined {
-  const el = doc.querySelector(
+  const el = Array.from(doc.querySelectorAll(
     `input[id*="${idPart}" i], span[id*="${idPart}" i], select[id*="${idPart}" i]`,
-  );
-  const v = el?.textContent || (el as HTMLInputElement | null)?.value;
+  )).find((node) => isVisible(node) && !node.matches('input[type="hidden"], input[type="password"]'));
+  const v = (el as HTMLInputElement | undefined)?.value ?? el?.textContent;
   const cleaned = cleanValue(v || "");
   return cleaned || undefined;
 }

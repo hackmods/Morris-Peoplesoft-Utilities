@@ -17,20 +17,28 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm run generate:icons
-      - run: npm run generate:store-assets
       - run: npm run release:check
+      - run: npx playwright install --with-deps chromium
+      - uses: browser-actions/setup-firefox@v1
+        id: firefox
+        with:
+          firefox-version: latest
+      # Both browser suites must pass before uploading either browser's package.
+      - run: npm run test:e2e
+        env:
+          FIREFOX_BINARY: ${{ steps.firefox.outputs.firefox-path }}
       - name: Upload release assets
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            morris-peoplesoft-utilities-v*.zip
+            morris-peoplesoft-utilities-chrome-v*.zip
+            morris-peoplesoft-utilities-firefox-v*.zip
             morris-peoplesoft-agents-v*.zip
           body: |
             ## Morris PeopleSoft Utilities
 
-            Chrome extension zip for Chrome Web Store / load-unpacked review builds.
-            See `store/SUBMISSION_CHECKLIST.md` and `CHANGELOG.md`.
+            Chrome and Firefox builds share one version and runtime. The Firefox ZIP is unsigned and requires Mozilla signing for normal installation.
+            See `docs/browser-support.md`, `store/SUBMISSION_CHECKLIST.md`, and `CHANGELOG.md`.
 
             ## PeopleSoft agent prompt pack (side toolkit)
 

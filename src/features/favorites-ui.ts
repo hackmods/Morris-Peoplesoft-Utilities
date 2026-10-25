@@ -1,3 +1,4 @@
+import { bindModalDialog } from "./dialog";
 import type { Favorite } from "../storage/schema";
 
 export type FavoriteEntry = { index: number; fav: Favorite };
@@ -151,16 +152,7 @@ export function showAddFavoriteDialog(doc: Document, opts: AddFavoriteDialogOpti
 
   (dialog.querySelector("#mpu-sc-desc") as HTMLInputElement).value = opts.defaultDescription;
 
-  const close = (): void => {
-    doc.removeEventListener("keydown", onKey);
-    backdrop.remove();
-  };
-  const onKey = (e: KeyboardEvent): void => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      close();
-    }
-  };
+  const close = bindModalDialog(doc, backdrop, dialog);
 
   dialog.querySelector("#mpu-sc-cancel")?.addEventListener("click", close);
   dialog.querySelector("#mpu-sc-params-toggle")?.addEventListener("click", () => {
@@ -194,7 +186,6 @@ export function showAddFavoriteDialog(doc: Document, opts: AddFavoriteDialogOpti
   backdrop.addEventListener("click", (ev) => {
     if (ev.target === backdrop) close();
   });
-  doc.addEventListener("keydown", onKey);
   (dialog.querySelector("#mpu-sc-desc") as HTMLInputElement).focus();
 }
 

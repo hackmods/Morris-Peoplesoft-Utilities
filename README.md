@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-coming%20soon-lightgrey)](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/store/SUBMISSION_CHECKLIST.md)
 
-**Morris PeopleSoft Utilities (MPU)** is a modern Manifest V3 Chrome extension that helps college business analysts and technical staff work faster in PeopleSoft **Classic** and **Fluid**—with privacy-first defaults and AODA-oriented accessibility.
+**Morris PeopleSoft Utilities (MPU)** is a Manifest V3 extension for Chrome and Firefox that helps college business analysts and technical staff work faster in PeopleSoft **Classic** and **Fluid**—with privacy-first defaults and AODA-oriented accessibility.
 
 Maintained by **[hackmods](https://github.com/hackmods)** (Ryan Morris).
 
@@ -23,14 +23,20 @@ Classic PS Utilities improved PeopleSoft usability but aged out of Chrome Web St
 | Advanced Search & Correct History helpers | Settings JSON backup |
 | Quiet mode for env prompts | |
 
+**Compatibility target:** PeopleTools **8.62**, including Classic/Classic Plus, Fluid, and Classic components hosted inside Fluid. Chrome 116+ and Firefox desktop 140+ share one source and version; all future changes must maintain both builds in parity. See [browser support, builds, and Firefox installation](docs/browser-support.md). Real-environment sign-off remains required separately for each browser; see [the 8.62 validation checklist](docs/testing/peopletools-8.62.md).
+
+For the customization upgrade watch workflow, see the [Upgrade watch walkthrough](docs/user-guide/upgrade-watch.md). It compares captured UI fingerprints and does not compare SQL or PeopleCode.
+
 ## Install
 
 ### Chrome Web Store (recommended)
 
-Store listing is in progress. See:
+Store listing is in progress. When you are ready to submit:
 
-- [`docs/release-readiness.md`](docs/release-readiness.md) — blocking vs nice-to-have before submit
-- [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md) — dashboard upload checklist
+- [`store/PUBLISH.md`](store/PUBLISH.md) — **start here** (publish checklist)
+- [`store/DEVELOPER_DASHBOARD.md`](store/DEVELOPER_DASHBOARD.md) — step-by-step upload guide
+- [`docs/release-readiness.md`](docs/release-readiness.md) — blocking vs nice-to-have
+- [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md) — dashboard checklist
 
 When published, this section will link the Store URL.
 
@@ -48,9 +54,13 @@ npm run build
 
 Or download the latest zip from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases).
 
+### Firefox (development / review)
+
+Run `npm run build`, open `about:debugging#/runtime/this-firefox`, select **Load Temporary Add-on**, and choose `dist/firefox/manifest.json`. Firefox desktop 140+ is supported. The Firefox release ZIP is unsigned; normal installation requires Mozilla signing. See [Firefox packaging, tests, and distribution](docs/browser-support.md).
+
 ## Privacy
 
-- Settings stay in `chrome.storage.local` on your device
+- Settings stay in extension-local storage on your device, separately in each browser profile
 - **No passwords**, **no analytics**, **no developer phone-home**
 - Full policy: [`docs/privacy.md`](docs/privacy.md)
 
@@ -60,7 +70,13 @@ MPU targets **WCAG 2.1 Level AA** for extension UI and the injected utilities ba
 
 ## Screenshots
 
-Preview assets live under [`store/assets/screenshots/`](store/assets/screenshots/). Replace with live PeopleSoft captures before Store submission.
+Listing images (1280×800) live under [`store/assets/screenshots/`](store/assets/screenshots/). Import live PeopleSoft captures with [`store/incoming/`](store/incoming/README.md) and `npm run import:store-screenshots`.
+
+| Utilities bar | Field Inspector | Options |
+|:---:|:---:|:---:|
+| ![MPU utilities bar](store/assets/screenshots/01-utilities-bar.png) | ![Field Inspector](store/assets/screenshots/04-field-inspector.png) | ![Options Features](store/assets/screenshots/05-options.png) |
+
+Replace mocks with your Classic/Fluid captures before the public Store listing (`npm run audit:store` warns while mocks remain).
 
 ## Testing
 
@@ -70,6 +86,9 @@ Automated gates run locally and in CI:
 |---|---|
 | `npm test` | Unit, integration, smoke, and a11y Vitest suites |
 | `npm run test:coverage` | Same + V8 coverage (thresholds enforced) |
+| `npm run build` | Chrome + Firefox builds and runtime/manifest parity audit |
+| `npm run audit:firefox` | Mozilla validation of the built Firefox extension |
+| `npm run test:e2e` | Actual Chromium and Firefox extension browser suites |
 | `npm run test:a11y` | axe WCAG 2A/2AA on popup/options markup |
 | `npm run audit` | a11y + Store lint + compliance scan |
 | `npm run test:all` | lint + coverage + audits + production build |
@@ -95,26 +114,26 @@ npm run lint
 npm run test:coverage
 npm run audit
 npm run build
-npm run package          # zip for CWS / GitHub Release
-npm run release:check    # full gate
+npm run import:store-screenshots  # live CWS screenshots from store/incoming/
+npm run prep:store                # audit + extension zip for dashboard upload
 ```
 
 See the [wiki sources](wiki/Home.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## PeopleSoft agent prompt pack
 
-Separate from the extension itself — nothing under `agents/` ships in the Chrome zip:
+Full prompts, skills and templates are distributed separately from the extension. The toolbar's Agents button and popup open a searchable side-panel library, also available under Options → Agents. Audience filters and task shortcuts help find a specialist; favorites, six recent references and the welcome dismissal stay on this device. MPU does not run agents or send page data to AI services.
 
 - **Browse:** [`agents/`](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · guide [`agents/README.md`](agents/README.md) · wiki [AI agent prompts](wiki/AI-Agent-Prompts.md)
 - **Download:** each GitHub Release attaches `morris-peoplesoft-agents-v*.zip` (or run `npm run package:agents`)
 
-Covers PeopleTools 8.5x–8.6x / PS 8.56: data & PeopleCode review, SQL authoring, IB/CI integrations, MCP schema assist, design, onboarding, and specialist training — for Cursor, Visual Studio / VS Code + Copilot, or Claude.
+Content v4.2.0 targets PeopleTools 8.62 (confirm application release and PUM image separately): 24 workflows for BA requirements, PeopleCode/SQL, IB/CI, AE/Scheduler, reporting, testing, upgrades, approvals, performance/trace, Fluid/accessibility, Search Framework, portal/branding, conversion, onboarding and specialist training. Complete Copilot, Claude/Codex skill and Cursor exports, three private pillar templates and a private host-evaluation worksheet are included. The library prepares an editable blank task brief with explicit copy; it reads no page context and saves neither searches nor brief text. The displayed catalog version describes bundled metadata; release downloads are opened only when requested.
 
 ## Releases
 
-Tagged versions (`v*`) publish the Chrome Web Store zip **and** the agents prompt zip via GitHub Actions. Prefer installing the extension from the Store once live; use Release artifacts for review builds.
+Tagged versions (`v*`) attach separate Chrome and Firefox ZIPs **and** the agents prompt ZIP via GitHub Actions after both browser suites pass. The Firefox ZIP is unsigned; Mozilla signing is required for normal installation. See [browser distribution and parity policy](docs/browser-support.md).
 
-Latest: [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25)
+Latest: tag **`v1.0.26`** after merge, or run `npm run prep:store` for a local upload zip. Previous: [v1.0.25](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/tag/v1.0.25).
 
 ## Credits
 

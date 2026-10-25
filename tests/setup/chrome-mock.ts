@@ -1,4 +1,5 @@
 import { beforeEach, vi } from "vitest";
+import { coordinateSettingsWrite, type SettingsWrite } from "../../src/storage/coordinator";
 
 type Store = Record<string, unknown>;
 
@@ -41,10 +42,12 @@ const local = {
 };
 
 vi.stubGlobal("chrome", {
-  storage: { local },
+  storage: { local, onChanged: { addListener: vi.fn(), removeListener: vi.fn() } },
   runtime: {
     getURL: vi.fn((path: string) => `chrome-extension://mpu-test/${path}`),
-    sendMessage: vi.fn(async () => ({ ok: true })),
+    id: "mpu-test",
+    getManifest: vi.fn(() => ({ version: "1.0.29" })),
+    sendMessage: vi.fn(async (message: SettingsWrite) => message?.type === "mpu-write-settings" ? coordinateSettingsWrite(message) : { ok: true }),
     onMessage: { addListener: vi.fn() },
     onInstalled: { addListener: vi.fn() },
     openOptionsPage: vi.fn(),

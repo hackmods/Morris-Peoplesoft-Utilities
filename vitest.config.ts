@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    maxWorkers: 4,
     environment: "jsdom",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["tests/setup/chrome-mock.ts"],

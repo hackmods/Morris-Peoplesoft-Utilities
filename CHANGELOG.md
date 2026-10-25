@@ -1,8 +1,136 @@
 # Changelog
 
+## Unreleased — repository review / PeopleTools 8.62
+
+- Add Firefox desktop 140+ alongside Chrome 116+: shared MV3 manifest generation/version, browser API/sidebar adapter, separate validated browser packages, runtime asset parity audit, actual Firefox extension tests, and dual-browser CI/release checks. Future features and fixes must maintain both browsers in parity; Mozilla signing/publication and real-system PeopleTools verification remain separate steps.
+
+- Fix Classic iframe Field Entry, page tabs, structure and upgrade fingerprints; notify the actual field document's change hooks.
+- Enforce allowlist/environment/feature guards for shortcuts and page snapshots; cancel delayed search retries and prevent multi-tab recent-history loops.
+- Make sheet preview read-only, preserve quoted multiline and empty CSV/TSV cells, reject ambiguous/unsafe targets, and revalidate fields before Apply.
+- Validate settings backups before saving; preserve existing feature flags on partial restore.
+- Recover malformed saved settings and legacy entries safely while preserving valid data and environment indices; fail closed on unreadable host restrictions.
+- Add menu arrow-key navigation and focus restoration; correct Shortcuts/empty Pages ARIA semantics and Options text contrast. Add rendered browser axe and narrow-viewport regressions.
+- Keep trace form posts on the current origin; distinguish SQL Fetch from Cursor and preserve the running indicator when Stop is not confirmed.
+- Share modal keyboard/focus cleanup, fix Escape after typing, and avoid generating invalid PeopleCode `GetRow(0)` or guessed scroll paths.
+- Validate Side Panel navigation context and open directly from popup clicks.
+- Declare Chrome 116 minimum; audit freshly built packages, include license/credits, enforce short-description length, and preserve reviewed artwork in CI.
+- Target PeopleTools 8.62 in repository and prompt-pack instructions; expand privacy disclosures and real-environment release checks.
+
+
 All notable changes to Morris PeopleSoft Utilities are documented here.
 
 ## [Unreleased]
+
+### Scheduler, Integration Broker and quality consolidation
+
+- Add session-only Scheduler excerpt investigations with cited timeline/parent-label evidence, manual case findings, validated citations and explicit source-scoped process focus. Synthetic parser coverage does not establish native-log compatibility.
+- Add IB evidence preparation/import, strict versioned envelopes, bounded inert JSON/XML/SOAP, explicit two-record comparisons and manual case/checklist findings. Payload detail requires explicit inclusion and review; masked payloads are not compared. Native exports and real-system compatibility remain unverified.
+- Protect runbook drafts and pending saves, keep ProcessPack evidence within one unambiguous process context, and route Help/PCode references through guarded internal destinations. PCode now requires a locked field and verified record/field/event/row context before one explicit preview/copy.
+- Enforce E/G report budgets during assembly and expand installed-Firefox journey coverage, keyboard/focus, rendered accessibility and narrow-layout checks. Preserve both browser builds from the same source/version.
+
+### Trace SQL investigations (Trace Magic marker port)
+
+- Add Options → Trace SQL: select one sanitized `.tracesql` / `.trc` excerpt and preview a local hotspot report (SQL by duration, PeopleCode timed ends, call counts, error lines). Session memory only — no storage, network or new permissions.
+- Parser `PeopleSoft tracesql markers v1` is a clean reimplementation of Trace Magic-style markers recovered from the RETM legacy desktop tool (not a vendor of Oracle Trace Magic source). Synthetic fixtures only; real PeopleTools patch compatibility unverified.
+- Expand report parity: Trace Magic–compatible SQL IDs (`getMD5Hash`), SQL-by-FROM / SQL-by-WHERE aggregates, text plan tree with nest levels, accessible duration charts, privacy disclosure, and Options E2E smoke.
+- Add lawsuit-safe prompt `assist-tracesql-hotspots` (embedded clean-room marker reference); Options Trace SQL links the agent; wiki documents sanitization bounds.
+- Expand the clean-room tracesql pack: sanitize coach, literacy guide, MPU report reviewer, SQLID/fingerprint explainer, and AE-bridge (sanitized labeled pastes only).
+- Add filterable FROM/WHERE tables, SQLID find, plan-row source jump, two-file SQLID/FROM compare, and installed Firefox Options Trace SQL smoke. Real PeopleTools samples remain a maintainer-accepted sanitized capture.
+- Finish remaining Trace SQL Options parity: cancellable parse with line progress, SVG duration charts, occurrence dialogs, internal/external PeopleCode tables, exec/fetch ledger columns, and reviewed SQL-only copy/download. WinForms chrome and a real PeopleTools sample stay out of this closeout.
+
+### Roadmap increment G — working tree, outside the prepared store candidate
+
+- Add Options → Compare configuration for explicitly selected, bounded INI-style and JSON files. Reject duplicate keys and unsupported formats; retain source-line and type/missing evidence.
+- Mask sensitive pairs before comparison, omit filenames, and require report review before copy/download. Inputs and reports remain in tab memory with explicit clear, no server access, storage or configuration writes.
+- Document supported subsets and synthetic fixture provenance. Real export compatibility remains unverified; the prepared J/A/D/K/I 1.0.33 ZIP is unchanged.
+
+### Roadmap increment C — working tree, outside the prepared store candidate
+
+- Add explicit Page Info snapshot preparation and review, followed by Options → Compare environments with two user-selected captures, saved comparison history and reviewed text copy/download.
+- Preserve portal/target origin and site, dates, versions and capture limits; warn about unknown PUM, incomplete captures and mismatched objects/UI. Browser metadata cannot establish server object or database equivalence.
+- Keep comparisons in bounded separate local storage with revision conflicts and current-page/activation checks. Saved comparisons retain their own snapshot copies. Exclude MPU controls from page fingerprints.
+
+### Roadmap increment K / I — working tree
+
+- Add explicit environment classification and a persistent production badge, independent of greeting/color. Production keeps the toolbar at document top and sticky.
+- Confirm each production Field Entry Apply and trace start; recheck current access, UI scope, classification and environment after consent. Revalidate field targets and values at Apply; keep trace stop available without production confirmation.
+- Add Options → Environments local runbooks with bounded notes and approved HTTPS links, manual environment/component association, full JSON import preview, collision rejection and revision checks across views. Keep runbooks separate from settings/recent visits and export them separately.
+- Preserve action/failure announcements through toolbar refresh. No version change or new permission. A 1.0.33 candidate containing K/I was prepared on 2026-10-21 after the release request; Chrome submission remains blocked by browser access. C is not in that candidate.
+
+### Next build — 1.0.33
+
+- Add guided, unsaved agent intake with editable preview and explicit draft-discard handling.
+- Add the Oracle documentation hub: 45 official PeopleTools 8.62 PDF links, local search/topic filters, manual favorites/recents and explicit version fallback; application-family indexes stay separate.
+- Add Structure → Fluid navigation debugger with bounded read-only frame/modal ownership clues and uncertainty labels.
+- Show popup activation status; clarify URL scoping and lack of traffic interception. Link PCode starters to agent/docs workflows and correct row-context wording.
+- Record a multi-session roadmap and public PeopleSoft test candidate registry. Live save-warning and extension-on-public-page screenshot verification remain open.
+
+### Next build — 1.0.32
+
+- Restrict automatic search helpers to explicit search-page containers and exact known controls. Skip already-selected Correct History and Advanced Search controls without a confirmed collapsed state.
+- Remove generic More/Expand clicks and prevent action replay across retries or AJAX control replacement in the same document. Stop remaining automation after user edits, and cancel delayed work directly when disabled.
+- Preserve PeopleSoft save warnings. This addresses unsafe automation; the reported live Fluid navigation-collection warning still requires real-system verification. Unrecognized search layouts are left for manual interaction.
+- Make upgrade-watch captures disclose incomplete field scans, cap each capture at 200 unique field IDs, and warn when the current Page Info identity or UI context does not match the selected baseline.
+- Document Page Info capture and comparison plus Options → Upgrade watch import/export. These checks compare browser UI fingerprints only; they do not compare SQL or PeopleCode.
+
+### Next build — 1.0.31
+
+- Open the local Agents library from the PeopleSoft toolbar or popup, with guarded Options fallback.
+- Share audience filters, task shortcuts, favorites, recents and blank task briefs between the side panel and Options.
+- Serialize local preference changes across views; keep brief text and searches unsaved, with no automatic page capture or remote prompt loading.
+- Show the bundled catalog version and explicit instruction/download links.
+
+### Prompt pack 4.2.0
+
+- Add bounded Oracle retrieval, evidence reuse/freshness, proportional intake/output and cost-aware delegation to all standalone specialist instructions.
+- Preserve PeopleSoft domain safeguards and source-review dates; add seven behavioral rubrics without claiming full host validation.
+- Check shared instruction parity and reject unusable evaluation rubrics; regenerate all host exports and public catalog metadata.
+
+### 1.0.30 — 2026-10-18
+
+- Use the supplied October 18 PS/form icon, recolored in orange, black and white, at every Chrome icon size.
+- Refresh both promotional tiles and all five store screenshots from actual extension UI.
+- Standardize the extension on #FF5C00 and neutral grays, with dark text on orange actions and distinct outline patterns for field states. Preserve saved environment colors.
+
+### Next build — 1.0.29
+
+- Serialize settings writes in the service worker; merge independent edits and report conflicting stale drafts without redirecting collection indices. Retry functional updates against fresh state and preserve read-only recovery of malformed settings.
+- Replace trace On/Off assertions with scoped, dated request evidence and explicit On/Off actions. Revalidate access before delayed network steps; incomplete results remain unknown.
+- Add an editable diagnostics preview with an allowlisted configuration summary and explicit copy/download, without automatically including page values, hostnames or session context.
+- Retain five upgrade baselines per component/environment (50 overall), offer explicit dated baseline selection, and preview/copy a Markdown upgrade handoff.
+- Add complete Search Framework and portal/branding specialists across all host exports. Prompt pack 4.1.0 has 24 prompts and 36 unexecuted evaluation cases; existing source-review dates remain truthful.
+
+### Next build — 1.0.28
+
+- Adopt the UnionOps-inspired black/orange palette across Options, popup, side panel, injected bar/dialogs and future promo generation. Use shared accessible UI tokens and a versioned recolour of the existing PS icon; preserve prior artwork and genuine Store captures.
+- Add audience search and a blank editable task brief for each agent reference, with explicit copy and manual-copy fallback. No PeopleSoft page context is captured or persisted.
+- Reject stale prompt/reference exports at build time, and add a private host-evaluation worksheet that starts every prompt case as not run. Prompt maintenance revision: 4.0.1.
+
+- Add Options → Agents: local search/filtering for 22 PeopleSoft prompt references and three private pillar templates, with entry links from popup, side panel and Help. Public documentation links omit referrer/page context; no AI execution, remote fetching or new permissions.
+- Keep the reference catalog generated from prompt-pack metadata and update privacy/store disclosures. Preserve selected-tab/button contrast in dark mode.
+
+- Expand the PeopleSoft prompt pack to content v4.0.0: 22 complete workflows, including BA requirements, PeopleCode authoring, AE/Scheduler, reporting, UAT, upgrades, approvals, trace/performance, Fluid development/accessibility, administration and conversion.
+- Correct effective-date/status, PeopleCode meta-SQL/noninteractive and evidence-based security guidance; define a bounded read-only schema connector contract.
+- Add private-tailoring HCM, FSCM and Campus Solutions templates; generate complete Copilot prompts, Cursor rules, Codex/Claude skills and restricted Claude agent definitions.
+- Validate prompt catalogs, sources, links, export parity and evaluation coverage before packaging an explicit public file list. Host/model/real-system trials remain separately recorded as not run.
+
+## [1.0.27] — 2026-10-13
+
+- Replace the extension and store icons with the approved navy-and-gold PS artwork.
+- Generate all Chrome icon sizes from the same source and protect the approved store icon from mock asset generation.
+
+## [1.0.26] — 2026-08-07
+
+### Added
+
+- **Chrome Web Store submit path:** [`store/DEVELOPER_DASHBOARD.md`](store/DEVELOPER_DASHBOARD.md) walkthrough, [`store/incoming/`](store/incoming/README.md) + `npm run import:store-screenshots`, `npm run prep:store`, screenshot captions, mock-hash warnings in `audit:store`
+
+### Changed
+
+- **Store listing screenshots:** `01` (Roles search + Inspect), `04` (Field Inspector lock bar), and `05` (Options Features) refreshed via `npm run capture:store-screenshots`; `02` Favorites and `03` Page Info unchanged
+- **Release workflow** no longer runs `generate:store-assets` on tag (avoids overwriting committed listing screenshots)
+- **`generate:store-assets`** skips screenshot regeneration when `store/assets/screenshots/.live-captures` exists or `SKIP_STORE_SCREENSHOTS=1`
+- Submission checklist and release-readiness docs updated for dashboard upload
 
 ## [1.0.25] — 2026-07-24
 

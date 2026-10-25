@@ -1,3 +1,4 @@
+import { isHtmlElement } from "./dom";
 export type PageKind =
   | "component"
   | "homepage"
@@ -65,7 +66,7 @@ const WORKLIST_RE =
 const LOGIN_RE = /[?&]cmd=(login|logout)/i;
 
 function normalizeSite(site: string): string {
-  return site.replace(/_\d+/gi, "");
+  return site.replace(/(?:_newwin|_\d+)$/i, "");
 }
 
 export function parsePsUrl(href: string): ParsedPsUrl {
@@ -90,6 +91,7 @@ export function parsePsUrl(href: string): ParsedPsUrl {
 
   if (LOGIN_RE.test(href)) {
     const m = href.match(/^(https?:\/\/[^/]+)\/(psp|psc)\/([^/?#]+)/i);
+    if (!m) return unknown;
     const cmd = /cmd=logout/i.test(href) ? "logout" : "login";
     return {
       href,
@@ -172,6 +174,8 @@ export function parsePsUrl(href: string): ParsedPsUrl {
 
 export function detectUiModel(doc: Document = document): UiModel {
   if (doc.querySelector(".ps_target-iframe")) return "navCollection";
+  // Classic components can be hosted beneath a Fluid portal header.
+  if (doc.querySelector('#ptifrmtgtframe, iframe[name="TargetContent"]')) return "classic";
   if (
     doc.querySelector("#PT_HEADER, #pthdr2container, #ptbr_header_container, .ps_box-control")
   ) {
@@ -721,7 +725,7 @@ export function collectPageTabs(doc: Document = document): PageTabLink[] {
   ];
   for (const sel of selectors) {
     for (const node of Array.from(target.querySelectorAll(sel))) {
-      if (!(node instanceof HTMLElement)) continue;
+      if (!(isHtmlElement(node))) continue;
       const label = (node.textContent || node.getAttribute("title") || "").replace(/\s+/g, " ").trim();
       if (!label || label.length > 80) continue;
       const key = label.toLowerCase();
