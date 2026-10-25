@@ -376,7 +376,7 @@ test("Trace SQL excerpts preview locally, keep grouping in tab memory, and rejec
     await audit(driver, "#mpu-tracesql-dialog");
     await driver.actions().sendKeys(Key.ESCAPE).perform();
     expect(await driver.findElements(By.css("#mpu-tracesql-dialog"))).toHaveLength(0);
-    expect(await (await driver.switchTo().activeElement()).equals(occurrence)).toBe(true);
+    expect(await driver.executeScript("return document.activeElement === arguments[0];", occurrence)).toBe(true);
   await fill(driver, "#mpu-tracesql-sqlid", "no-such-sqlid");
   await expect.poll(() => driver.findElement(By.css("#mpu-tracesql-where")).getText()).toContain("No SQLIDs match this filter");
   await fill(driver, "#mpu-tracesql-sqlid", "");
