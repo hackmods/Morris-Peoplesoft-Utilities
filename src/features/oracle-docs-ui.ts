@@ -1,5 +1,5 @@
 import { getExtensionApi } from "../platform/browser";
-import { filterOracleDocs, getManualFamilyLinks, getOraclePeopleToolsRelease, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_HELP_URL, ORACLE_PEOPLETOOLS_LIBRARY_URL, ORACLE_PEOPLETOOLS_PATCHES_URL, ORACLE_PEOPLETOOLS_RELEASES, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
+import { filterOracleDocs, getManualFamilyLinks, getOraclePeopleToolsRelease, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_LIBRARY_URL, ORACLE_PEOPLETOOLS_PATCHES_URL, ORACLE_PEOPLETOOLS_RELEASES, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
 
 const FAVORITE_KEY = "mpuOracleDocsFavorite:";
 const RECENT_KEY = "mpuOracleDocsRecent:";
