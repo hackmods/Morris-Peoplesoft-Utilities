@@ -90,7 +90,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
       if (release.version === "8.62") source.append(" · ", externalLink(doc, ORACLE_PEOPLETOOLS_LIBRARY_URL, "Browse the 8.62 PDF catalog"));
     }
     if (!match.supported) { list.replaceChildren(); status.textContent = "Choose a supported release or open Oracle's index; MPU will not substitute a different version."; return; }
-    if (match.label !== "8.62") { list.replaceChildren(); status.textContent = `The curated manual list is for 8.62. Use the ${match.label} PeopleBooks or HTML link above for this release.`; return; }
+    if (match.label !== "8.62") { list.replaceChildren(); status.textContent = `The curated manual list is for 8.62. Use the ${match.label} PeopleBooks or HTML link above for this release; MPU will not substitute another release.`; return; }
     const results = filterOracleDocs(search.value, category.value).filter((entry) => {
       if (view.value === "favorites") return favorites.get(entry.id) === true;
       if (view.value === "recent") return typeof recents.get(entry.id) === "number";
