@@ -547,10 +547,10 @@ function consumeCurrentLine(
 ): void {
   if (!reader.current) return;
   if (isErrorLine(reader.current)) errors.push({ line: reader.lineNumber, text: reader.current });
-  tryPeopleCode(reader, events, plan, nest) ||
-    tryCall(reader, calls, plan, nest) ||
-    trySelect(reader, statements, plan, nest) ||
-    tryOtherSql(reader, statements, plan, nest);
+  if (tryPeopleCode(reader, events, plan, nest)) return;
+  if (tryCall(reader, calls, plan, nest)) return;
+  if (trySelect(reader, statements, plan, nest)) return;
+  tryOtherSql(reader, statements, plan, nest);
 }
 
 /** Parse one sanitized tracesql / .trc excerpt in memory. */
@@ -582,6 +582,7 @@ export async function parseTraceSqlAsync(
   const errors: TraceErrorLine[] = [];
   const nest = { level: 0 };
   let steps = 0;
+  options.onProgress?.(0, reader.totalLines);
   while (reader.peek()) {
     if (options.signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
     reader.read();
@@ -592,6 +593,7 @@ export async function parseTraceSqlAsync(
       await new Promise((resolve) => setTimeout(resolve, 0));
     }
   }
+  options.onProgress?.(reader.lineNumber, reader.totalLines);
   return finishReport(reader, statements, events, calls, plan, errors);
 }
 
@@ -814,7 +816,7 @@ export function renderTraceSqlInvestigation(input: string): string {
     `Physical lines: ${report.totalLines}`,
     `SELECT statements: ${report.totals.selectCount} (duration ${report.totals.selectDuration.toFixed(3)})`,
     `INSERT/UPDATE/DELETE: ${report.totals.otherSqlCount} (duration ${report.totals.otherSqlDuration.toFixed(3)})`,
-    `PeopleCode events with duration: ${topEvents.length} (recorded event duration sum ${report.totals.eventDuration.toFixed(3)})`,
+    `PeopleCode events with duration: ${report.events.filter((event) => event.duration > 0).length} (recorded event duration sum ${report.totals.eventDuration.toFixed(3)}; internal ${report.totals.eventInternalCount} / ${report.totals.eventInternalDuration.toFixed(3)}; external ${report.totals.eventExternalCount} / ${report.totals.eventExternalDuration.toFixed(3)})`,
     `Plan nodes: ${report.plan.length}`,
     `Error / exception lines: ${report.errors.length}`,
     "",
@@ -841,7 +843,9 @@ export function renderTraceSqlInvestigation(input: string): string {
   if (!byTable.length) out.push("No PeopleSoft SQL statements recognized.");
   else {
     for (const row of byTable) {
-      out.push(`${row.kind} ${JSON.stringify(row.table)} | calls ${row.calls} | duration ${row.duration.toFixed(3)}`);
+      out.push(
+        `${row.kind} ${JSON.stringify(row.table)} | calls ${row.calls} | exec ${row.durationExec.toFixed(3)} | fetch ${row.durationFetch.toFixed(3)} | duration ${row.duration.toFixed(3)}`,
+      );
     }
   }
 
@@ -850,7 +854,7 @@ export function renderTraceSqlInvestigation(input: string): string {
   else {
     for (const row of byWhere.slice(0, 40)) {
       out.push(
-        `SQLID ${row.sqlId} | calls ${row.calls} | duration ${row.duration.toFixed(3)} | table ${JSON.stringify(row.table)} | where ${JSON.stringify(row.where.slice(0, 200))} | ${JSON.stringify(row.sql.slice(0, 300))}`,
+        `SQLID ${row.sqlId} | calls ${row.calls} | exec ${row.durationExec.toFixed(3)} | fetch ${row.durationFetch.toFixed(3)} | duration ${row.duration.toFixed(3)} | table ${JSON.stringify(row.table)} | where ${JSON.stringify(row.where.slice(0, 200))} | ${JSON.stringify(row.sql.slice(0, 300))}`,
       );
     }
   }
@@ -875,15 +879,19 @@ export function renderTraceSqlInvestigation(input: string): string {
     }
   }
 
-  out.push("", "PEOPLECODE EVENTS WITH DURATION");
-  if (!topEvents.length) out.push("No timed PeopleCode end/begin markers.");
-  else {
-    for (const event of topEvents) {
-      out.push(
-        `L${event.line} | ${event.kind}${event.external ? " ext" : ""} | level ${event.level} | Dur ${event.duration.toFixed(3)} | ${JSON.stringify(event.name)} | ${JSON.stringify(event.peopleCode)}`,
-      );
+  const pushPeopleCode = (title: string, list: TracePeopleCodeEvent[]) => {
+    out.push("", title);
+    if (!list.length) out.push("None.");
+    else {
+      for (const event of list) {
+        out.push(
+          `L${event.line} | ${event.kind}${event.external ? " ext" : ""} | level ${event.level} | Dur ${event.duration.toFixed(3)} | ${JSON.stringify(event.name)} | ${JSON.stringify(event.peopleCode)}`,
+        );
+      }
     }
-  }
+  };
+  pushPeopleCode("PEOPLECODE INTERNAL ENDS", timedPeopleCodeEnds(report, false));
+  pushPeopleCode("PEOPLECODE EXTERNAL ENDS", timedPeopleCodeEnds(report, true));
 
   out.push("", "CALL MARKERS (count only)");
   const callCounts = new Map<string, number>();
