@@ -1,5 +1,5 @@
 import { getExtensionApi } from "../platform/browser";
-import { filterOracleDocs, getManualFamilyLinks, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_HELP_URL, ORACLE_PEOPLETOOLS_LIBRARY_URL, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
+import { filterOracleDocs, getManualFamilyLinks, getOraclePeopleToolsRelease, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_LIBRARY_URL, ORACLE_PEOPLETOOLS_PATCHES_URL, ORACLE_PEOPLETOOLS_RELEASES, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
 
 const FAVORITE_KEY = "mpuOracleDocsFavorite:";
 const RECENT_KEY = "mpuOracleDocsRecent:";
@@ -31,19 +31,22 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   const heading = doc.createElement("h2"); heading.textContent = "Oracle documentation";
   const intro = doc.createElement("p");
   intro.textContent = version.supported
-    ? `PeopleTools ${version.label} documentation${version.patch ? ` (detected patch ${version.patch})` : " (default)"}. Patch-level applicability should be confirmed against your system.`
-    : `The entered version “${version.label}” is not matched to this PeopleTools 8.62 catalog. Choose the matching official documentation index below.`;
+    ? `PeopleTools ${version.label} documentation${version.patch ? ` (entered build ${version.label}.${version.patch})` : " (default)"}. Confirm patch-level applicability against your system.`
+    : `The entered version “${version.label}” is not matched to this PeopleTools 8.62 catalog. Choose a supported release on Oracle's documentation index below.`;
   const versionNote = doc.createElement("p");
   versionNote.textContent = "PeopleTools tools version is separate from the application release and PUM image. This hub does not infer either one.";
   const source = doc.createElement("p");
-  source.append("Official sources: ", externalLink(doc, ORACLE_PEOPLETOOLS_LIBRARY_URL, "PeopleTools 8.62 PeopleBooks library"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_HELP_URL, "Oracle hosted PeopleSoft Help"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "PeopleTools documentation updates"));
-  const updateNote = doc.createElement("p"); updateNote.textContent = `Library links checked against Oracle's ${ORACLE_DOCS_SNAPSHOT} index snapshot. Oracle documents update availability for PeopleTools 8.61 and 8.62; consult the updates index for newer content.`;
+  source.append("Official sources: ", externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "PeopleTools releases and documentation updates"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_PATCHES_URL, "PeopleTools patch downloads and build information (Oracle Support)"));
+  const updateNote = doc.createElement("p"); updateNote.textContent = `The curated PDF list is for PeopleTools 8.62 and was checked against Oracle's ${ORACLE_DOCS_SNAPSHOT} index. Release links open Oracle's current books for that release; an entered build number does not pin a historical PDF build.`;
 
   const toolsLabel = doc.createElement("label"); toolsLabel.textContent = "PeopleTools version";
-  const toolsInput = doc.createElement("input"); toolsInput.type = "text"; toolsInput.value = initialToolsRel?.trim() || "8.62"; toolsInput.placeholder = "8.62 or 8.62.xx";
+  const toolsInput = doc.createElement("input"); toolsInput.type = "text"; toolsInput.value = initialToolsRel?.trim() || "8.62"; toolsInput.placeholder = "8.62 or 8.62.06";
   toolsInput.maxLength = 30;
   toolsInput.autocomplete = "off";
-  toolsLabel.appendChild(toolsInput);
+  const releaseOptions = doc.createElement("datalist"); releaseOptions.id = "oracle-docs-tools-releases";
+  for (const release of ORACLE_PEOPLETOOLS_RELEASES) { const option = doc.createElement("option"); option.value = release.version; releaseOptions.appendChild(option); }
+  toolsInput.setAttribute("list", releaseOptions.id);
+  toolsLabel.append(toolsInput, releaseOptions);
   const familyLabel = doc.createElement("label"); familyLabel.textContent = "Application manual family";
   const familySelect = doc.createElement("select");
   const blank = doc.createElement("option"); blank.value = ""; blank.textContent = "Choose a family"; familySelect.appendChild(blank);
@@ -77,12 +80,17 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     if (!live) return;
     const focused = (doc.activeElement as HTMLElement | null)?.dataset.oracleFocus;
     const match = resolvePeopleToolsDocsVersion(toolsInput.value);
+    const release = getOraclePeopleToolsRelease(toolsInput.value || "8.62");
     intro.textContent = match.supported
-      ? `PeopleTools 8.62 catalog${match.patch ? `; entered patch 8.62.${match.patch}` : " (selected, not automatically detected)"}. Verify patch applicability. No documents are fetched until you open a link.`
-      : `The entered version “${match.label}” is not matched to this PeopleTools 8.62 catalog. Choose the matching official documentation index below.`;
-    source.replaceChildren(externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "All PeopleTools versions and documentation updates"));
-    if (match.supported) source.append(" · ", externalLink(doc, ORACLE_PEOPLETOOLS_LIBRARY_URL, "Full 8.62 PDF library"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_HELP_URL, "8.62 HTML help"));
-    if (!match.supported) { list.replaceChildren(); status.textContent = "No catalog match. Select your release on Oracle; MPU will not substitute a different version."; return; }
+      ? `PeopleTools ${match.label}${match.patch ? `.${match.patch}` : ""} selected. The release links open Oracle's current documentation; verify the exact patch against your system. No documents are fetched until you open a link.`
+      : `The entered version “${match.label}” is not matched to this PeopleTools 8.62 catalog. Choose a supported release on Oracle's documentation index below.`;
+    source.replaceChildren(externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "All PeopleTools versions and documentation updates"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_PATCHES_URL, "Patch downloads and build information (Oracle Support)"));
+    if (release) {
+      source.append(" · ", externalLink(doc, release.peopleBooksUrl, `PeopleTools ${release.version} PeopleBooks (PDF)`), " · ", externalLink(doc, release.helpUrl, `PeopleTools ${release.version} online help (HTML)`));
+      if (release.version === "8.62") source.append(" · ", externalLink(doc, ORACLE_PEOPLETOOLS_LIBRARY_URL, "Browse the 8.62 PDF catalog"));
+    }
+    if (!match.supported) { list.replaceChildren(); status.textContent = "Choose a supported release or open Oracle's index; MPU will not substitute a different version."; return; }
+    if (match.label !== "8.62") { list.replaceChildren(); status.textContent = `The curated manual list is for 8.62. Use the ${match.label} PeopleBooks or HTML link above for this release; MPU will not substitute another release.`; return; }
     const results = filterOracleDocs(search.value, category.value).filter((entry) => {
       if (view.value === "favorites") return favorites.get(entry.id) === true;
       if (view.value === "recent") return typeof recents.get(entry.id) === "number";

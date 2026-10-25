@@ -55,7 +55,29 @@ export const ORACLE_DOCS: readonly OracleDoc[] = [
 export const ORACLE_PEOPLETOOLS_LIBRARY_URL = "https://docs.oracle.com/cd/G41076_01/psft/index.html";
 export const ORACLE_PEOPLETOOLS_HELP_URL = "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt862help";
 export const ORACLE_PEOPLETOOLS_UPDATES_URL = "https://docs.oracle.com/en/applications/peoplesoft/peopletools/index.html";
+export const ORACLE_PEOPLETOOLS_PATCHES_URL = "https://support.oracle.com/knowledgefs/?docId=KA614";
 export const ORACLE_DOCS_SNAPSHOT = "November 2025";
+
+export interface OraclePeopleToolsRelease {
+  version: string;
+  peopleBooksUrl: string;
+  helpUrl: string;
+}
+
+/** Oracle's release aliases resolve the selected Tools release to its current hosted books. */
+export const ORACLE_PEOPLETOOLS_RELEASES: readonly OraclePeopleToolsRelease[] =
+  ["8.63", "8.62", "8.61", "8.60", "8.59", "8.58", "8.57", "8.56"].map((version) => {
+    const minor = version.replace(".", "");
+    const lookup = (id: string) => `https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=${id}`;
+    return version === "8.63"
+      ? { version, peopleBooksUrl: "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/index.html", helpUrl: lookup("pt863") }
+      : { version, peopleBooksUrl: lookup(`pt${minor}pb`), helpUrl: lookup(`pt${minor}help`) };
+  });
+
+export function getOraclePeopleToolsRelease(input: string | null | undefined): OraclePeopleToolsRelease | undefined {
+  const match = /^(8\.(?:56|57|58|59|60|61|62|63))(?:\.(\d+))?$/.exec((input ?? "").trim());
+  return match ? ORACLE_PEOPLETOOLS_RELEASES.find((release) => release.version === match[1]) : undefined;
+}
 
 export function filterOracleDocs(query = "", category = "all"): readonly OracleDoc[] {
   const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
@@ -63,12 +85,12 @@ export function filterOracleDocs(query = "", category = "all"): readonly OracleD
 }
 
 export type OracleDocsVersion = { supported: true; label: string; patch?: string } | { supported: false; label: string };
-/** Match only a well-formed PeopleTools 8.62 version. App releases and PUMs are intentionally not inferred. */
+/** Match known PeopleTools release/build forms. Application releases and PUMs are intentionally not inferred. */
 export function resolvePeopleToolsDocsVersion(input: string | null | undefined): OracleDocsVersion {
   const value = (input ?? "").trim();
   if (!value) return { supported: true, label: "8.62" };
-  const match = /^8\.62(?:\.(\d+))?$/.exec(value);
-  return match ? { supported: true, label: "8.62", ...(match[1] ? { patch: match[1] } : {}) } : { supported: false, label: value };
+  const match = /^(8\.(?:56|57|58|59|60|61|62|63))(?:\.(\d+))?$/.exec(value);
+  return match ? { supported: true, label: match[1], ...(match[2] ? { patch: match[2] } : {}) } : { supported: false, label: value };
 }
 
 export type OracleApplicationFamily = "hcm" | "fscm" | "cs";
