@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { compareTraceSqlByFrom, compareTraceSqlBySqlId, parseTraceSql, renderTraceSqlInvestigation, renderTraceSqlInvestigations, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
+import { compareTraceSqlByFrom, compareTraceSqlBySqlId, parseTraceSql, parseTraceSqlAsync, renderTraceSqlInvestigation, renderTraceSqlInvestigations, renderTraceSqlSqlOnly, timedPeopleCodeEnds, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
 import { md5Bytes, traceMagicSqlId } from "@/features/tracesql-md5";
 
 const fixture = (name: string) => readFileSync(resolve(process.cwd(), "tests/fixtures/tracesql-investigation", name), "utf8");
@@ -19,6 +19,10 @@ describe("PeopleSoft tracesql markers v1", () => {
     expect(report.totals.selectCount).toBe(1);
     expect(report.totals.otherSqlCount).toBe(3);
     expect(report.events.some((e) => e.kind === "end" && e.duration === 0.05)).toBe(true);
+    expect(report.totals.eventInternalCount).toBeGreaterThan(0);
+    expect(timedPeopleCodeEnds(report, true)).toEqual([]);
+    expect(renderTraceSqlSqlOnly(report)).toContain("SELECT");
+    expect(renderTraceSqlSqlOnly(report)).not.toContain("DURATION CHART");
     expect(report.calls.some((c) => c.name === "internal")).toBe(true);
     expect(report.plan.some((n) => n.kind === "peoplecode" && n.label.includes("Nested"))).toBe(true);
     expect(report.plan.some((n) => n.kind === "sql")).toBe(true);
@@ -125,5 +129,23 @@ describe("PeopleSoft tracesql markers v1", () => {
     expect(section.indexOf("PS_A")).toBeLessThan(section.indexOf("PS_B"));
     expect(section).toContain("Dur 1.600");
     expect(report).toContain("AGGREGATE BY WHERE");
+    expect(report).toContain("exec 1.500 | fetch 0.100 | duration 1.600");
+    expect(report).toContain("PEOPLECODE INTERNAL ENDS");
+    expect(report).toContain("PEOPLECODE EXTERNAL ENDS");
+  });
+
+  it("parses asynchronously with progress and abort", async () => {
+    const bulky = "COM Stmt=SELECT A.X FROM PS_A A\n Dur=0.001 EXE\n".repeat(500);
+    const ticks: number[] = [];
+    const report = await parseTraceSqlAsync(bulky, { onProgress: (line) => ticks.push(line) });
+    expect(report.statements).toHaveLength(500);
+    expect(ticks.length).toBeGreaterThan(0);
+    const controller = new AbortController();
+    await expect(
+      parseTraceSqlAsync(bulky, {
+        signal: controller.signal,
+        onProgress: () => controller.abort(),
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
   });
 });
