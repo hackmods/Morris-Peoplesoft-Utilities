@@ -55,7 +55,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "archiver": "^8.0.0",
     "axe-core": "^4.10.3",
-    "eslint": "^10.7.0",
+    "eslint": "^10.8.0",
     "globals": "^17.8.0",
     "jsdom": "^29.1.1",
     "pngjs": "^7.0.0",
