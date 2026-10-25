@@ -94,9 +94,9 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   copy.disabled = true;
   const download = button("Download reviewed Trace SQL report", "mpu-tracesql-download");
   download.disabled = true;
-  const copySql = button("Copy reviewed SQL statements only", "mpu-tracesql-copy-sql");
+  const copySql = button("Copy reviewed SQL statements only (first excerpt)", "mpu-tracesql-copy-sql");
   copySql.disabled = true;
-  const downloadSql = button("Download reviewed SQL statements only", "mpu-tracesql-download-sql");
+  const downloadSql = button("Download reviewed SQL statements only (first excerpt)", "mpu-tracesql-download-sql");
   downloadSql.disabled = true;
 
   const grouping = make("section");
@@ -211,21 +211,22 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   };
 
   const paintChart = (svg: SVGSVGElement, title: string, rows: Array<{ label: string; duration: number }>) => {
+    const shown = rows.slice(0, 12);
     const ns = "http://www.w3.org/2000/svg";
     const width = 640;
     const barHeight = 18;
-    const height = Math.max(48, rows.length * (barHeight + 6) + 28);
+    const height = Math.max(48, shown.length * (barHeight + 6) + 28);
     const max = Math.max(0, ...rows.map((row) => row.duration));
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", `${title}: ${rows.map((row) => `${row.label} ${row.duration.toFixed(3)} seconds`).join("; ") || "none"}`);
+    svg.setAttribute("aria-label", `${title} (showing ${shown.length} of ${rows.length}): ${shown.map((row) => `${row.label} ${row.duration.toFixed(3)} seconds`).join("; ") || "none"}`);
     if (rows.length) svg.removeAttribute("hidden");
     else svg.setAttribute("hidden", "");
     svg.replaceChildren();
     const heading = doc.createElementNS(ns, "title");
     heading.textContent = title;
     svg.append(heading);
-    rows.slice(0, 12).forEach((row, index) => {
+    shown.forEach((row, index) => {
       const y = 24 + index * (barHeight + 6);
       const barWidth = max > 0 ? Math.max(4, (row.duration / max) * 360) : 0;
       const rect = doc.createElementNS(ns, "rect");
@@ -273,7 +274,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
       list.append(item);
     }
     const dismiss = button("Close occurrences", "mpu-tracesql-occ-close");
-    dialog.append(heading, list, dismiss);
+    dialog.append(heading, make("p", `Showing ${Math.min(80, statements.length)} of ${statements.length} occurrences. Full source remains available below.`), list, dismiss);
     backdrop.append(dialog);
     root.append(backdrop);
     const close = bindModalDialog(doc, backdrop, dialog);

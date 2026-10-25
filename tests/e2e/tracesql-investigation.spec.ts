@@ -34,7 +34,12 @@ test("Trace SQL excerpt previews locally with SQLID/plan evidence, keyboard revi
     await expect(page.locator("#mpu-tracesql-internal")).toContainText("Application");
     await page.locator("#mpu-tracesql-where tbody button").first().click();
     await expect(page.locator("#mpu-tracesql-occurrences")).toBeVisible();
-    await page.locator("#mpu-tracesql-occ-close").click();
+    await expect(page.locator("#mpu-tracesql-occ-close")).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#mpu-tracesql-occurrences button").first()).toBeFocused();
+    await audit(page, "#mpu-tracesql-dialog");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#mpu-tracesql-where tbody button").first()).toBeFocused();
     await expect(page.locator("#mpu-tracesql-occurrences")).toHaveCount(0);
     await page.locator("#mpu-tracesql-sqlid").fill("no-such-sqlid");
     await expect(page.locator("#mpu-tracesql-where")).toContainText("No SQLIDs match this filter");

@@ -816,7 +816,7 @@ export function renderTraceSqlInvestigation(input: string): string {
     `Physical lines: ${report.totalLines}`,
     `SELECT statements: ${report.totals.selectCount} (duration ${report.totals.selectDuration.toFixed(3)})`,
     `INSERT/UPDATE/DELETE: ${report.totals.otherSqlCount} (duration ${report.totals.otherSqlDuration.toFixed(3)})`,
-    `PeopleCode events with duration: ${topEvents.length} (recorded event duration sum ${report.totals.eventDuration.toFixed(3)}; internal ${report.totals.eventInternalCount} / ${report.totals.eventInternalDuration.toFixed(3)}; external ${report.totals.eventExternalCount} / ${report.totals.eventExternalDuration.toFixed(3)})`,
+    `PeopleCode events with duration: ${report.events.filter((event) => event.duration > 0).length} (recorded event duration sum ${report.totals.eventDuration.toFixed(3)}; internal ${report.totals.eventInternalCount} / ${report.totals.eventInternalDuration.toFixed(3)}; external ${report.totals.eventExternalCount} / ${report.totals.eventExternalDuration.toFixed(3)})`,
     `Plan nodes: ${report.plan.length}`,
     `Error / exception lines: ${report.errors.length}`,
     "",

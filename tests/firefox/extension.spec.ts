@@ -367,6 +367,16 @@ test("Trace SQL excerpts preview locally, keep grouping in tab memory, and rejec
   await expect.poll(() => driver.findElement(By.css("#mpu-tracesql-from")).getText()).toContain("PS_PERSONAL_DATA");
   expect(await driver.findElement(By.css("#mpu-tracesql-chart-sql")).getAttribute("aria-label")).toContain("SQL duration");
   expect(await driver.findElement(By.css("#mpu-tracesql-internal")).getText()).toContain("Application");
+    const occurrence = await driver.findElement(By.css("#mpu-tracesql-where tbody button"));
+    await occurrence.click();
+    await visible(driver, "#mpu-tracesql-occurrences");
+    expect(await (await driver.switchTo().activeElement()).getAttribute("id")).toBe("mpu-tracesql-occ-close");
+    await driver.actions().sendKeys(Key.TAB).perform();
+    expect(await (await driver.switchTo().activeElement()).getText()).toContain("SQLID");
+    await audit(driver, "#mpu-tracesql-dialog");
+    await driver.actions().sendKeys(Key.ESCAPE).perform();
+    expect(await driver.findElements(By.css("#mpu-tracesql-dialog"))).toHaveLength(0);
+    expect(await (await driver.switchTo().activeElement()).equals(occurrence)).toBe(true);
   await fill(driver, "#mpu-tracesql-sqlid", "no-such-sqlid");
   await expect.poll(() => driver.findElement(By.css("#mpu-tracesql-where")).getText()).toContain("No SQLIDs match this filter");
   await fill(driver, "#mpu-tracesql-sqlid", "");
@@ -378,6 +388,10 @@ test("Trace SQL excerpts preview locally, keep grouping in tab memory, and rejec
   const downloaded = resolve(downloads, "mpu-tracesql-investigation.txt");
   await expect.poll(() => existsSync(downloaded)).toBe(true);
   expect(readFileSync(downloaded, "utf8")).toBe(await report.getAttribute("value"));
+    await click(driver, "#mpu-tracesql-download-sql");
+    const sqlDownloaded = resolve(downloads, "mpu-tracesql-statements.sql.txt");
+    await expect.poll(() => existsSync(sqlDownloaded)).toBe(true);
+    expect(readFileSync(sqlDownloaded, "utf8")).toContain("MPU Trace SQL statements only");
   await audit(driver, "#panel-tracesql");
   await click(driver, "#mpu-tracesql-clear");
   const invalidPath = resolve(downloads, "PRIVATE-FILENAME.tracesql");

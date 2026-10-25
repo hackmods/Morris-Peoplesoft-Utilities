@@ -3,7 +3,9 @@
 Open **Options → Trace SQL** (linked from **Options → Tracing** after you capture
 a trace). Select one or two sanitized `.tracesql` / `.trc` files **or** paste sanitized
 text, preview the report, review it, then copy or download the full report or
-SQL-only statements. Cancel an in-flight parse if the excerpt is large; no
+SQL-only statements from the first excerpt. Charts show up to 12 groups and
+occurrence dialogs show up to 80 hits, with visible counts. The source excerpt
+remains available for the other hits. Cancel an in-flight parse if the excerpt is large; no
 partial report remains. Two files add SQLID and FROM compare sections. FROM
 matching uses exact parsed text, including aliases and joins; different text
 does not establish missing database tables. Filter FROM/WHERE by SQLID, open

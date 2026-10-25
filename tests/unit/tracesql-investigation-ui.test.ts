@@ -122,6 +122,23 @@ describe("session-only Trace SQL UI", () => {
     expect(status().textContent).toContain("Source line 3");
   });
 
+  it("bounds chart layout and discloses omitted occurrences for larger excerpts", async () => {
+    const text = Array.from({ length: 15 }, (_, index) =>
+      `COM Stmt=SELECT A.X FROM PS_TABLE${index} A\n Dur=0.001 EXE\n`,
+    ).join("") + "COM Stmt=SELECT A.X FROM PS_REPEAT A\n Dur=0.001 EXE\n".repeat(81);
+    select(text);
+    button("preview").click();
+    await vi.waitFor(() => expect(report().value).toContain("PS_REPEAT"));
+    const chart = root.querySelector("#mpu-tracesql-chart-sql")!;
+    expect(chart.getAttribute("aria-label")).toContain("showing 12 of 16");
+    expect(chart.querySelectorAll("rect")).toHaveLength(12);
+    expect(chart.getAttribute("viewBox")).toBe("0 0 640 316");
+    root.querySelector<HTMLButtonElement>("#mpu-tracesql-from tbody button")!.click();
+    expect(root.querySelector("#mpu-tracesql-dialog")?.textContent).toContain("Showing 80 of 81 occurrences");
+    expect(root.querySelectorAll("#mpu-tracesql-occurrences li")).toHaveLength(80);
+    root.querySelector<HTMLButtonElement>("#mpu-tracesql-occ-close")!.click();
+  });
+
   it("cancels an in-flight preview without leaving a report", async () => {
     let finish!: (buffer: ArrayBuffer) => void;
     const file = select(sample, () => new Promise((resolve) => { finish = resolve; }));

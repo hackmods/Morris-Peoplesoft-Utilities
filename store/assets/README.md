@@ -6,6 +6,10 @@ The icon source is `mpu-peoplesoft-icon-v5.png`, recolored from the user-supplie
 sources, not current release assets. `npm run generate:icons` produces all Chrome
 icon sizes and the 128px store icon from v5, preserving transparency.
 
+`mpu-icon-v2.png` is retained historical artwork from the earlier local work.
+Its generation provenance is unrecorded; it is not an approved current icon
+source and must not replace v5 in release tooling.
+
 The two promotional tiles are marketing illustrations (the marquee includes a
 clearly fictional demo), not compatibility evidence. Regenerate only promos with
 `GENERATE_STORE_ONLY=promo-small-440x280.png,promo-marquee-1400x560.png` when running
