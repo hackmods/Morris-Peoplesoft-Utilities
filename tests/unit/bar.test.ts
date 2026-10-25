@@ -241,6 +241,7 @@ describe("utilities bar", () => {
 
     const settings = createDefaultSettings();
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No", color: "#2288aa" }];
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     mountBar({
       settings,
       parsed,
@@ -389,7 +390,7 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
     });
     const trace = document.getElementById("mpu-trace") as HTMLButtonElement;
-    expect(trace.disabled).toBe(true);
+    expect(trace.disabled).toBe(false);
     expect(trace.textContent).toContain("🔒");
   });
 
@@ -412,7 +413,7 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
     });
     const trace = document.getElementById("mpu-trace");
-    expect(trace?.textContent).toContain("Trace ON");
+    expect(trace?.textContent).toContain("Trace · unknown");
     expect(trace?.textContent).toContain("SQL");
   });
 
@@ -562,6 +563,7 @@ describe("utilities bar", () => {
       },
     ];
     settings.environments = [{ label: "DEV", active: "Yes", trcProfRunning: "No", color: "#2288aa" }];
+    settings.urlSites = { [parsed.baseURL]: { ps: { envId: 0 } } };
     settings.recentComponents = [
       {
         Servlet: "psp",
@@ -591,7 +593,7 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-ui-mode")?.textContent).toBeTruthy();
     const shortcutsBtn = document.getElementById("mpu-fav");
     expect(shortcutsBtn?.textContent).toBe("Shortcuts");
-    expect(shortcutsBtn?.getAttribute("aria-haspopup")).toBe("menu");
+    expect(shortcutsBtn?.getAttribute("aria-haspopup")).toBe("dialog");
     shortcutsBtn?.click();
     expect(shortcutsBtn?.getAttribute("aria-expanded")).toBe("true");
     expect(document.querySelector(".mpu-flyout")).toBeTruthy();

@@ -16,6 +16,9 @@ When enabled:
 
 - Only listed origins receive the utilities bar / content features
 - An empty list means **no pages** are enhanced
+- Entries must be valid HTTP(S) origins; empty strings, malformed prefixes and URL credentials never match.
+
+This controls MPU behavior after its content script loads. It does not revoke or narrow Chrome's declared permissions; use Chrome's extension site-access settings for browser-enforced restrictions.
 
 ## IT notes
 

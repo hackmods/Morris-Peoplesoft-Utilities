@@ -109,10 +109,22 @@ export function pushRecentComponent(
 
 export interface Environment {
   label: string;
+  /** Explicit user choice; missing legacy values are unclassified. Never infer from color/name. */
+  classification?: "unclassified" | "non-production" | "production";
   active: YesNo;
   trcProfRunning: YesNo;
   /** Optional AA-safe accent (hex). Empty = default */
   color?: string;
+  /** Last request evidence, never a live server/session assertion. */
+  traceRequest?: TraceRequest;
+}
+
+export interface TraceRequest {
+  origin: string;
+  site: string;
+  at: number;
+  target: "on" | "off";
+  status: "requested" | "confirmed" | "incomplete" | "unknown";
 }
 
 export interface UrlSiteMap {
@@ -154,6 +166,12 @@ export interface PageFingerprint {
   tabLabels: string[];
   structureLabels: string[];
   fieldIds: string[];
+  /** Missing on legacy captures; true only when the whole field scan was retained. */
+  fieldIdsComplete?: boolean;
+  /** Exact unique field-id count, including ids beyond the retention cap. */
+  fieldIdsTotal?: number;
+  structureLabelsComplete?: boolean;
+  pageMetadataComplete?: boolean;
 }
 
 /** User-marked customized object with a baseline fingerprint (local only). */
@@ -167,6 +185,25 @@ export interface CustomizationWatch {
   baseline: PageFingerprint;
   capturedAt: number;
   envLabel: string;
+  /** Origin/site scope, without query parameters or session tokens. */
+  scope?: string;
+}
+
+export const CUSTOMIZATION_WATCH_LIMIT = 50;
+export const BASELINES_PER_ENVIRONMENT = 5;
+
+/** Shared by reads, imports and new captures; never persist repairs on read. */
+export function normalizeWatchHistory(list: CustomizationWatch[], limit = CUSTOMIZATION_WATCH_LIMIT): CustomizationWatch[] {
+  const counts = new Map<string, number>();
+  const ids = new Set<string>();
+  return [...list].sort((a, b) => b.capturedAt - a.capturedAt).filter((watch) => {
+    if (ids.has(watch.id)) return false;
+    ids.add(watch.id);
+    const key = `${watch.menu}.${watch.component}.${watch.market || "GBL"}`.toUpperCase() + `@${watch.scope || watch.envLabel}`;
+    const count = (counts.get(key) || 0) + 1;
+    counts.set(key, count);
+    return count <= BASELINES_PER_ENVIRONMENT;
+  }).slice(0, limit);
 }
 
 export interface MpuSettings {
@@ -213,7 +250,7 @@ export const FIELD_COPY_FORMATS: Array<{ id: FieldCopyFormat; label: string; exa
   {
     id: "getrowset",
     label: "GetRowset…GetField",
-    example: "GetLevel0().GetRow(1).GetRecord(Record.JOB).GetField(Field.EMPLID)",
+    example: "GetRow().GetRecord(Record.JOB).GetField(Field.EMPLID)",
   },
 ];
 

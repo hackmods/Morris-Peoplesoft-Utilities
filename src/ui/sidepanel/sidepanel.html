@@ -10,23 +10,88 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="top">
       <h1>Morris PeopleSoft Utilities</h1>
-      <p>Favorites and Page Info — data stays on this device.</p>
+      <p>Favorites, Page Info and agent prompts.</p>
     </header>
     <main id="main">
-      <section aria-labelledby="fav-heading">
+      <nav aria-label="Side panel views"><a href="#favorites">Favorites</a> · <a href="#page-info-view">Page Info</a> · <a href="#agents">Agents</a> · <a href="#docs">Oracle docs</a></nav><section id="favorites-view" aria-labelledby="fav-heading">
         <h2 id="fav-heading">Favorites</h2>
         <input type="search" id="fav-filter" placeholder="Filter…" aria-label="Filter favorites" autocomplete="off" />
         <ul id="fav-list"></ul>
         <p id="fav-empty" class="hint" hidden>No favorites yet — add from the bar ★ on a component page.</p>
       </section>
-      <section aria-labelledby="pi-heading">
+      <section id="page-info-view" aria-labelledby="pi-heading">
         <h2 id="pi-heading">Page Info</h2>
         <p class="hint">Open a PeopleSoft tab with MPU active, then refresh.</p>
         <pre id="page-info" class="pre" aria-live="polite">—</pre>
         <button type="button" id="refresh-pi">Refresh from active tab</button>
       </section>
-      <p class="links">
+      <section id="panel-docs" aria-label="Oracle documentation" hidden><div id="oracle-docs"></div></section>
+      <section id="panel-agents" aria-label="Agent prompt library" hidden>
+        <header class="panel-head">
+          <h2>PeopleSoft agent prompts</h2>
+          <p class="panel-lede">Find a specialist prompt for your next PeopleSoft task.</p>
+        </header>
+        <p class="agent-disclosure">MPU does not run agents or send page data. Search and task briefs stay unsaved.</p>
+        <section id="agent-onboarding" aria-label="Getting started">
+          <h3>Getting started</h3>
+          <p>Choose a specialist, load its skill in your approved AI tool, then prepare a task brief.</p>
+          <button type="button" id="agent-dismiss-onboarding">Dismiss getting started</button>
+        </section>
+        <div class="agent-actions" aria-label="Common tasks">
+          <button type="button" data-agent-task="peoplecode">PeopleCode</button>
+          <button type="button" data-agent-task="sql">SQL</button>
+          <button type="button" data-agent-task="testing">UAT</button>
+          <button type="button" data-agent-task="diagnostics">Diagnosis</button>
+        </div>
+        <details class="agent-setup">
+          <summary>Setup and downloads</summary>
+          <p id="agent-pack-version"></p>
+          <p>Use prompts in Visual Studio Copilot, Claude, Codex or another approved AI tool. Share only sanitized information your organization permits. The prompts require review; source checks do not establish real-system compatibility.</p>
+          <p>Select the agents ZIP in a published release, then follow its setup instructions. Public GitHub links open in a new tab only when selected.</p>
+          <p class="agent-resource-links">
+            <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Setup and full prompt pack on GitHub</a>
+            <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Download skills (release assets)</a>
+          </p>
+        </details>
+        <div class="agent-filters">
+          <label for="agent-search">Search prompts
+            <input type="search" id="agent-search" placeholder="Try Fluid, SQL or testing" autocomplete="off" aria-describedby="agent-results" />
+          </label>
+          <label for="agent-audience">Audience
+            <select id="agent-audience"><option value="all">All audiences</option><option value="ba">BA</option><option value="developer">Developer</option><option value="admin">Admin</option></select>
+          </label>
+          <label for="agent-view">Library view
+            <select id="agent-view"><option value="all">All prompts</option><option value="favorites">Favorites</option><option value="recent">Recent</option></select>
+          </label>
+          <button type="button" id="agent-clear-recents">Clear recent prompts</button>
+          <label for="agent-family">Task type
+            <select id="agent-family">
+              <option value="all">All tasks</option>
+              <option value="assist">Authoring and troubleshooting</option>
+              <option value="review">Review</option>
+              <option value="design">Design and testing</option>
+              <option value="guide">Learning and local expertise</option>
+            </select>
+          </label>
+        </div>
+        <section id="agent-brief-panel" aria-labelledby="agent-brief-heading" hidden>
+          <h3 id="agent-brief-heading">Prepare a task brief</h3>
+          <p>Choose a prompt below to create a blank request. Fill in only approved, sanitized information, and load that prompt or skill in your AI tool first.</p>
+          <label for="agent-brief">Task brief</label>
+          <textarea id="agent-brief" rows="10" spellcheck="false" aria-describedby="agent-brief-status"></textarea>
+          <button type="button" id="agent-brief-copy">Copy task brief</button><button type="button" id="agent-brief-reset">Reset blank brief</button>
+          <p id="agent-brief-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+        <p id="agent-results" role="status" aria-live="polite" aria-atomic="true"></p>
+        <ul id="agent-list" class="agent-list" aria-label="PeopleSoft prompts"></ul>
+        <section aria-labelledby="agent-templates-title">
+          <h3 id="agent-templates-title">Private pillar specialists</h3>
+          <p>Tailor these HCM, FSCM and Campus Solutions templates privately with verified local definitions and policies before using them.</p>
+          <ul id="agent-templates"></ul>
+        </section>
+      </section><p class="links">
         <a href="#" id="open-options">Options</a>
+        · <a href="#" id="open-agents" target="_blank" rel="noopener noreferrer">Agent prompt library</a>
       </p>
     </main>
     <div id="toast" class="sr-only" aria-live="polite"></div>

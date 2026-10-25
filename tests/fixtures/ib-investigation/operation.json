@@ -1,0 +1,27 @@
+{
+  "format": "mpu-ib-evidence",
+  "version": 1,
+  "records": [
+    {
+      "serviceOperation": "SYNTHETIC_OPERATION",
+      "operationType": "asynchronous",
+      "direction": "outbound",
+      "senderNode": "SYNTHETIC_LOCAL",
+      "receiverNode": "SYNTHETIC_REMOTE",
+      "queue": "SYNTHETIC_QUEUE",
+      "routing": "SYNTHETIC_ROUTING",
+      "transactionId": "SYNTHETIC_TRANSACTION",
+      "stage": "operation",
+      "reportedStatus": "Done",
+      "payload": {
+        "reference": "SYNTHETIC-BUSINESS-CONTEXT",
+        "amount": 9007199254740993,
+        "password": "SYNTHETIC-PRIVATE-PASSWORD",
+        "employeeId": "SYNTHETIC-PRIVATE-EMPLOYEE",
+        "credentials": { "nested": "SYNTHETIC-PRIVATE-NESTED" },
+        "destination": "https://synthetic.invalid/private?token=SYNTHETIC-PRIVATE-TOKEN",
+        "markup": "<Password>SYNTHETIC-PRIVATE-XML</Password>"
+      }
+    }
+  ]
+}

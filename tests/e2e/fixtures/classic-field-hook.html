@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><title>Synthetic owning-frame change hook</title></head>
+  <body>
+    <label for="JOB_DEPTID$0">Dept</label><input id="JOB_DEPTID$0" value="100">
+    <label for="JOB_JOBCODE$0">Job code</label><input id="JOB_JOBCODE$0" value="A">
+    <script>
+      // Regression fixture only; not evidence of a delivered PeopleTools patch.
+      window.addchg_ = function (el) { document.body.dataset.changed = el.id; };
+    </script>
+  </body>
+</html>

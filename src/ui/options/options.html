@@ -12,20 +12,33 @@
       <p class="brand">Morris PeopleSoft Utilities</p>
       <h1>Options</h1>
       <p class="lede">
-        Tune the utilities bar for Classic and Fluid. Everything stays in
-        <code>chrome.storage.local</code> on this device — no passwords, no telemetry.
+        Tune the utilities bar for Classic and Fluid. Saved settings stay in
+        this browser profile on this device — no telemetry.
       </p>
     </header>
     <nav class="tabs" role="tablist" aria-label="Options sections">
       <button type="button" class="tab" role="tab" data-tab="features" aria-selected="true" id="tab-features" aria-controls="panel-features">Features</button>
       <button type="button" class="tab" role="tab" data-tab="favorites" aria-selected="false" id="tab-favorites" aria-controls="panel-favorites">Favorites</button>
       <button type="button" class="tab" role="tab" data-tab="upgrade" aria-selected="false" id="tab-upgrade" aria-controls="panel-upgrade">Upgrade</button>
+      <button type="button" class="tab" role="tab" data-tab="compare" aria-selected="false" id="tab-compare" aria-controls="panel-compare">Compare environments</button>
+      <button type="button" class="tab" role="tab" data-tab="configuration" aria-selected="false" id="tab-configuration" aria-controls="panel-configuration">Compare configuration</button>
+      <button type="button" class="tab" role="tab" data-tab="tracesql" aria-selected="false" id="tab-tracesql" aria-controls="panel-tracesql">Trace SQL</button>
+      <button type="button" class="tab" role="tab" data-tab="scheduler" aria-selected="false" id="tab-scheduler" aria-controls="panel-scheduler">Process Scheduler</button>
+      <button type="button" class="tab" role="tab" data-tab="ib" aria-selected="false" id="tab-ib" aria-controls="panel-ib">Integration Broker</button>
       <button type="button" class="tab" role="tab" data-tab="tracing" aria-selected="false" id="tab-tracing" aria-controls="panel-tracing">Tracing</button>
       <button type="button" class="tab" role="tab" data-tab="environments" aria-selected="false" id="tab-environments" aria-controls="panel-environments">Environments</button>
       <button type="button" class="tab" role="tab" data-tab="allowlist" aria-selected="false" id="tab-allowlist" aria-controls="panel-allowlist">Host allowlist</button>
+      <button type="button" class="tab" role="tab" data-tab="docs" aria-selected="false" id="tab-docs" aria-controls="panel-docs">Oracle docs</button>
+      <button type="button" class="tab" role="tab" data-tab="agents" aria-selected="false" id="tab-agents" aria-controls="panel-agents">Agents</button>
       <button type="button" class="tab" role="tab" data-tab="about" aria-selected="false" id="tab-about" aria-controls="panel-about">About</button>
     </nav>
     <main id="main">
+      <section id="panel-configuration" class="panel hidden" data-panel="configuration" role="tabpanel" aria-labelledby="tab-configuration" hidden><div id="configuration-comparison-workspace"></div></section>
+      <section id="panel-compare" class="panel hidden" data-panel="compare" role="tabpanel" aria-labelledby="tab-compare" hidden><div id="environment-comparison-workspace"></div></section>
+      <section id="panel-tracesql" class="panel hidden" data-panel="tracesql" role="tabpanel" aria-labelledby="tab-tracesql" hidden><div id="tracesql-investigation-workspace"></div></section>
+      <section id="panel-scheduler" class="panel hidden" data-panel="scheduler" role="tabpanel" aria-labelledby="tab-scheduler" hidden><div id="scheduler-investigation-workspace"></div></section>
+      <section id="panel-ib" class="panel hidden" data-panel="ib" role="tabpanel" aria-labelledby="tab-ib" hidden><div id="ib-investigation-workspace"></div></section>
+      <section id="panel-docs" class="panel hidden" data-panel="docs" role="tabpanel" aria-labelledby="tab-docs" hidden><div id="oracle-docs"></div></section>
       <section id="panel-features" class="panel" data-panel="features" role="tabpanel" aria-labelledby="tab-features">
         <header class="panel-head">
           <h2>Features</h2>
@@ -165,7 +178,7 @@
           <h2>Customization upgrade watch</h2>
           <p class="panel-lede">
             Compares page tabs, structure hosts, and field ids vs a baseline you capture before upgrade.
-            Does <strong>not</strong> detect PeopleCode-only overrides — use App Designer Compare Report for that.
+            Only the current loaded page is captured: up to 200 unique field IDs and 40 structure hosts. Unloaded tabs, PeopleCode, SQL and database changes are not compared — use App Designer Compare Report and your upgrade validation process.
           </p>
         </header>
         <div class="row-actions">
@@ -176,7 +189,8 @@
             Replace existing watches on import
           </label>
         </div>
-        <p id="watch-empty" class="empty-state" hidden>No watches yet — open Page Info on a component and choose Watch customization.</p>
+        <p class="help">Retains up to five baselines per component/environment and 50 total. Page Info lets you select a dated baseline, compare UI drift and copy a reviewed upgrade handoff.</p>
+        <p id="watch-empty" class="empty-state" hidden>No baselines yet — open Page Info on a component and choose Capture baseline.</p>
         <div class="table-wrap">
           <table id="watch-table">
             <thead>
@@ -197,13 +211,18 @@
       <section id="panel-tracing" class="panel hidden" data-panel="tracing" role="tabpanel" aria-labelledby="tab-tracing" hidden>
         <header class="panel-head">
           <h2>Tracing profiles</h2>
-          <p class="panel-lede">Flags applied when Trace is turned on from the bar. Requires access to delivered trace components.</p>
+          <p class="panel-lede">Flags applied by an explicit On request from the bar. Requires access to delivered trace components. The bar shows request history, not live server trace status; verify in PeopleSoft.</p>
         </header>
         <p class="help">
           <strong>When to use which flags:</strong>
           Start with <strong>SQL Statement + Bind</strong> when a page feels slow or returns wrong data — binds show the literal values sent to the database.
           Add <strong>PeopleCode Assignments</strong> or <strong>Start of programs</strong> when a field change, save, or row event looks wrong but SQL is clean.
           Use <strong>Verbose</strong> only for short, targeted sessions — it adds a lot of log noise. Turn Trace off when you are done.
+        </p>
+        <p class="help">
+          After you capture a sanitized <code>.tracesql</code> / <code>.trc</code> file from the app server,
+          open <a href="#tracesql">Options → Trace SQL</a> to preview hotspots locally (no upload).
+          Trace SQL does not turn tracing on or off — use the presets below and the bar On/Off requests for that.
         </p>
         <div class="trace-presets" role="group" aria-label="Trace presets">
           <span class="trace-presets-label">Presets</span>
@@ -219,12 +238,13 @@
       <section id="panel-environments" class="panel hidden" data-panel="environments" role="tabpanel" aria-labelledby="tab-environments" hidden>
         <header class="panel-head">
           <h2>Environments</h2>
-          <p class="panel-lede">Labels and accent colors for the bar environment indicator.</p>
+          <p class="panel-lede">Name and explicitly classify each environment. Color and names never determine production status. Production keeps the bar at the top of the document and sticky, and confirms MPU Field Entry Apply and trace start; trace stop stays available.</p>
         </header>
         <div id="env-list"></div>
         <div class="panel-actions">
           <button type="button" id="add-env">Add environment</button>
         </div>
+        <section id="environment-runbooks" aria-label="Environment runbooks"></section>
       </section>
 
       <section id="panel-allowlist" class="panel hidden" data-panel="allowlist" role="tabpanel" aria-labelledby="tab-allowlist" hidden>
@@ -252,6 +272,71 @@
         </div>
       </section>
 
+      <section id="panel-agents" class="panel hidden" data-panel="agents" role="tabpanel" aria-labelledby="tab-agents" hidden>
+        <header class="panel-head">
+          <h2>PeopleSoft agent prompts</h2>
+          <p class="panel-lede">Find a specialist prompt for your next PeopleSoft task.</p>
+        </header>
+        <p class="agent-disclosure">MPU does not run agents or send page data. Search and task briefs stay unsaved.</p>
+        <section id="agent-onboarding" aria-label="Getting started">
+          <h3>Getting started</h3>
+          <p>Choose a specialist, load its skill in your approved AI tool, then prepare a task brief.</p>
+          <button type="button" id="agent-dismiss-onboarding">Dismiss getting started</button>
+        </section>
+        <div class="agent-actions" aria-label="Common tasks">
+          <button type="button" data-agent-task="peoplecode">PeopleCode</button>
+          <button type="button" data-agent-task="sql">SQL</button>
+          <button type="button" data-agent-task="testing">UAT</button>
+          <button type="button" data-agent-task="diagnostics">Diagnosis</button>
+        </div>
+        <details class="agent-setup">
+          <summary>Setup and downloads</summary>
+          <p id="agent-pack-version"></p>
+          <p>Use prompts in Visual Studio Copilot, Claude, Codex or another approved AI tool. Share only sanitized information your organization permits. The prompts require review; source checks do not establish real-system compatibility.</p>
+          <p>Select the agents ZIP in a published release, then follow its setup instructions. Public GitHub links open in a new tab only when selected.</p>
+          <p class="agent-resource-links">
+            <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Setup and full prompt pack on GitHub</a>
+            <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Download skills (release assets)</a>
+          </p>
+        </details>
+        <div class="agent-filters">
+          <label for="agent-search">Search prompts
+            <input type="search" id="agent-search" placeholder="Try Fluid, SQL, tracesql or testing" autocomplete="off" aria-describedby="agent-results" />
+          </label>
+          <label for="agent-audience">Audience
+            <select id="agent-audience"><option value="all">All audiences</option><option value="ba">BA</option><option value="developer">Developer</option><option value="admin">Admin</option></select>
+          </label>
+          <label for="agent-view">Library view
+            <select id="agent-view"><option value="all">All prompts</option><option value="favorites">Favorites</option><option value="recent">Recent</option></select>
+          </label>
+          <button type="button" id="agent-clear-recents">Clear recent prompts</button>
+          <label for="agent-family">Task type
+            <select id="agent-family">
+              <option value="all">All tasks</option>
+              <option value="assist">Authoring and troubleshooting</option>
+              <option value="review">Review</option>
+              <option value="design">Design and testing</option>
+              <option value="guide">Learning and local expertise</option>
+            </select>
+          </label>
+        </div>
+        <section id="agent-brief-panel" aria-labelledby="agent-brief-heading" hidden>
+          <h3 id="agent-brief-heading">Prepare a task brief</h3>
+          <p>Choose a prompt below to create a blank request. Fill in only approved, sanitized information, and load that prompt or skill in your AI tool first.</p>
+          <label for="agent-brief">Task brief</label>
+          <textarea id="agent-brief" rows="10" spellcheck="false" aria-describedby="agent-brief-status"></textarea>
+          <button type="button" id="agent-brief-copy">Copy task brief</button><button type="button" id="agent-brief-reset">Reset blank brief</button>
+          <p id="agent-brief-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+        <p id="agent-results" role="status" aria-live="polite" aria-atomic="true"></p>
+        <ul id="agent-list" class="agent-list" aria-label="PeopleSoft prompts"></ul>
+        <section aria-labelledby="agent-templates-title">
+          <h3 id="agent-templates-title">Private pillar specialists</h3>
+          <p>Tailor these HCM, FSCM and Campus Solutions templates privately with verified local definitions and policies before using them.</p>
+          <ul id="agent-templates"></ul>
+        </section>
+      </section>
+
       <section id="panel-about" class="panel hidden" data-panel="about" role="tabpanel" aria-labelledby="tab-about" hidden>
         <header class="panel-head">
           <h2>About</h2>
@@ -263,13 +348,13 @@
         </p>
         <p>
           Inspired by <strong>PS Utilities</strong> (Uffe Graakjaer, Neil Yetman, and contributors).
-          This is a greenfield Manifest V3 rewrite for Chrome Web Store standards, PeopleSoft Fluid,
-          and AODA / WCAG 2.1 AA.
+          This Manifest V3 extension supports Chrome, Firefox, and PeopleSoft Classic and Fluid.
+          Its UI is designed toward WCAG 2.1 AA; automated checks do not establish conformance.
         </p>
         <ul class="about-list">
           <li>No password storage</li>
           <li>No telemetry or analytics</li>
-          <li>Settings stored only in <code>chrome.storage.local</code></li>
+          <li>Settings stored only in this browser profile on this device</li>
         </ul>
         <p>
           <a href="https://github.com/hackmods/Morris-Peoplesoft-Utilities" target="_blank" rel="noopener"

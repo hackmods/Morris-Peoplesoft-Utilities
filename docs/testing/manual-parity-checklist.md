@@ -1,6 +1,6 @@
 # Manual parity checklist
 
-Use before tagging a release or uploading to the Chrome Web Store.
+Use before tagging a release or uploading to the Chrome Web Store. The primary target is PeopleTools 8.62; record results in [the 8.62 checklist](peopletools-8.62.md).
 
 ## Environments
 
@@ -21,7 +21,8 @@ Use before tagging a release or uploading to the Chrome Web Store.
 - [ ] Page Info dialog + copy
 - [ ] Customization upgrade watch — capture baseline + check drift (Page Info + Options → Upgrade)
 - [ ] Field Inspector on/off + Escape (Classic, Fluid, and Classic page inside Fluid menu/nav)
-- [ ] Field Inspector: each field has its own orange border (not one mega container)- [ ] New Window opens `_newwin` style URL
+- [ ] Field Inspector: each field has its own orange border (not one mega container)
+- [ ] New Window opens `_newwin` style URL
 - [ ] Advanced Search expand (where control exists)
 - [ ] Correct History select (where control exists; enable in Options)
 - [ ] Trace on/off (user with access) and locked state (without access)

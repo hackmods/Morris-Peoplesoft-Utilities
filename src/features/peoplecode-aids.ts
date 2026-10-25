@@ -18,57 +18,19 @@ export function buildPeopleCodeStubs(input: {
   component?: string;
   page?: string;
   occurrence?: string;
+  event?: string;
+  rowContext?: string;
 }): PeopleCodeEventStub[] {
-  const record = input.record || "RECORD";
-  const field = input.field || "FIELD";
-  const component = input.component || "COMPONENT";
-  const page = input.page || "PAGE";
-  const row = input.occurrence != null && input.occurrence !== "" ? input.occurrence : "1";
-
-  return [
-    {
-      id: "fieldchange",
-      label: "FieldChange",
-      scope: "field",
-      stub: `/* ${record}.${field}.FieldChange */\nLocal Field &Fld = GetField(Field.${field});\n`,
-    },
-    {
-      id: "fieldedit",
-      label: "FieldEdit",
-      scope: "field",
-      stub: `/* ${record}.${field}.FieldEdit */\nIf None(GetField(Field.${field}).Value) Then\n   Error MsgGet(0, 0, "Required field.");\nEnd-If;\n`,
-    },
-    {
-      id: "rowinit",
-      label: "RowInit",
-      scope: "record",
-      stub: `/* ${record}.RowInit */\nLocal Row &Row = GetRow();\nLocal Record &Rec = &Row.GetRecord(Record.${record});\n`,
-    },
-    {
-      id: "saveprechange",
-      label: "SavePreChange",
-      scope: "record",
-      stub: `/* ${record}.SavePreChange */\nLocal Record &Rec = GetRecord(Record.${record});\n`,
-    },
-    {
-      id: "component-prebuild",
-      label: "Component PreBuild",
-      scope: "component",
-      stub: `/* Component ${component} PreBuild */\n/* Page context: ${page} */\n`,
-    },
-    {
-      id: "component-postbuild",
-      label: "Component PostBuild",
-      scope: "component",
-      stub: `/* Component ${component} PostBuild */\n/* Menu: ${input.menu || "MENU"} */\n`,
-    },
-    {
-      id: "getrowset",
-      label: "GetRowset / GetRow",
-      scope: "field",
-      stub: `Local Rowset &Rs = GetLevel0();\nLocal Row &Row = &Rs.GetRow(${row});\nLocal Record &Rec = &Row.GetRecord(Record.${record});\nLocal Field &Fld = &Rec.GetField(Field.${field});\n`,
-    },
-  ];
+  const { record, field, event, rowContext } = input;
+  // The browser cannot determine App Designer event or buffer context. Never
+  // generate placeholders or interpolate executable user text/DOM occurrences.
+  if (!record || !field || !/^[A-Z][A-Z0-9_]{0,63}$/i.test(record) || !/^[A-Z][A-Z0-9_]{0,63}$/i.test(field)
+    || !["FieldChange", "RowInit"].includes(event || "") || !rowContext?.trim() || rowContext.length > 500
+    // eslint-disable-next-line no-control-regex
+    || /[\u0000-\u001f\u007f-\u009f\u2028-\u202e\u2066-\u2069]/.test(rowContext)) return [];
+  const context = rowContext.replace(/\/\*/g, "/ *").replace(/\*\//g, "* /");
+  return [{ id: event!.toLowerCase(), label: event!, scope: "field",
+    stub: `/* Adapt in ${record}.${field}.${event}; requires the intended component-buffer row. */\n/* Developer-supplied row/scroll context (unverified): ${context} */\n/* DOM occurrence does not identify a PeopleCode row or scroll path. */\nLocal Row &Row = GetRow();\nLocal Record &Rec = &Row.GetRecord(Record.${record});\nLocal Field &Fld = &Rec.GetField(Field.${field});\n/* Add and test event-specific logic in App Designer. */\n` }];
 }
 
 export const OBJECT_PACK_COMPARE_KEYS = [

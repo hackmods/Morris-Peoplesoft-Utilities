@@ -1,42 +1,39 @@
 # Chrome Web Store submission checklist
 
-See also the prioritized readiness summary: [`docs/release-readiness.md`](../docs/release-readiness.md).
+**Publish checklist:** [`PUBLISH.md`](PUBLISH.md)  
+**Dashboard walkthrough:** [`DEVELOPER_DASHBOARD.md`](DEVELOPER_DASHBOARD.md)  
+**Readiness summary:** [`docs/release-readiness.md`](../docs/release-readiness.md)
 
-## Blocking before Chrome Web Store submit
+## Before you upload
 
-- [ ] Manual PeopleSoft parity checklist completed ([`docs/testing/manual-parity-checklist.md`](../docs/testing/manual-parity-checklist.md)) on target Classic/Fluid envs
-- [ ] Replace mock screenshots under `store/assets/screenshots/` with real captures (blur sensitive IDs)
-- [ ] Refresh upload zip from current `main` (`npm run package` or tag `v1.0.25+` for a new GitHub Release artifact)
-- [ ] `npm run release:check` passes locally and CI is green on `main`
-- [ ] Privacy policy URL reachable (`docs/privacy.md` on GitHub)
-- [ ] Listing copy from `store/listing.md` pasted into dashboard
-- [ ] Privacy practices from `store/privacy-practices.md` completed in dashboard
-- [ ] Icons: 128×128 store icon + extension icons uploaded
-- [ ] Small promo 440×280 uploaded
-- [ ] Marquee 1400×560 uploaded (optional but included in repo)
-- [ ] No legacy `key` field in packaged manifest
-- [ ] Credits mention hackmods + PS Utilities inspiration
+- [ ] Live screenshots in `store/assets/screenshots/` (see [`store/incoming/README.md`](incoming/README.md) + `npm run import:store-screenshots`)
+- [ ] `npm run audit:store` — no errors; resolve mock-screenshot **warnings** before public listing
+- [ ] `npm run prep:store` — produces separate browser ZIPs; select `morris-peoplesoft-utilities-chrome-v*.zip` for Chrome Web Store
+- [ ] `npm run release:check` passes (CI gate)
+- [ ] `npm run test:e2e` passes separately for Chromium and Firefox; keep both builds in parity
+- [ ] Manual PeopleSoft parity optional but recommended ([`docs/testing/manual-parity-checklist.md`](../docs/testing/manual-parity-checklist.md))
 
-## Human-only Developer Dashboard steps
+## Developer Dashboard (copy/paste)
 
-- [ ] Pay Chrome Web Store developer registration fee (if not already)
-- [ ] Complete identity verification if prompted
-- [ ] Upload zip (refreshed from current `main`)
+- [ ] Listing copy from [`listing.md`](listing.md)
+- [ ] Privacy practices from [`privacy-practices.md`](privacy-practices.md)
+- [ ] Privacy policy URL: `https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/privacy.md`
+- [ ] Icons + promo from [`assets/`](assets/) + screenshots `assets/screenshots/01`–`05`
+- [ ] Upload zip from `npm run prep:store` or latest GitHub Release
+- [ ] Pay developer registration fee / complete identity verification if prompted
 - [ ] Submit for review
-- [ ] After publish: update README Store badge/URL
+- [ ] After publish: README Store badge + [`wiki/Chrome-Web-Store.md`](../wiki/Chrome-Web-Store.md) live URL
 
-## Nice to have (not blockers)
-
-- [ ] Sync `wiki/` sources to GitHub Wiki
-- [ ] Optional promo video (`store/promo-video-script.md`)
-- [ ] Carefully review Dependabot major bumps before merging
-- [ ] Announce Store publish on GitHub Release notes
-- [ ] Update wiki Home with live Store link
-
-## Already in place (reference)
+## Already in place
 
 - MV3 extension, CI, audits, coverage
 - Privacy / AODA / ADR docs
-- Store asset pack + listing drafts
-- GitHub Release workflow
-- hackmods + upstream credits
+- Listing drafts, promo tiles, icon pack
+- GitHub Release workflow (does **not** regenerate listing screenshots on tag)
+- hackmods + upstream PS Utilities credits
+
+## Nice to have
+
+- [ ] Sync `wiki/` to GitHub Wiki
+- [ ] Promo video ([`promo-video-script.md`](promo-video-script.md))
+- [ ] Announce on GitHub Release when Store goes live

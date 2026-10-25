@@ -19,3 +19,6 @@ blob-report/
 
 # Local legacy oracle — keep untracked by default (large vendor tree)
 .reference/
+
+# Historical account reauthentication capture: keep private and local.
+store/assets/submission/chrome-1.0.32-signin-required.png
