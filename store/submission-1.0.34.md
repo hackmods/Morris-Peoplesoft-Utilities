@@ -1,7 +1,28 @@
 # Shared 1.0.34 store deployment checkpoint
 
 Prepared 2026-10-25 at the user's request to deploy updated builds to Chrome Web
-Store and Mozilla Add-ons. **Neither new build has been uploaded or submitted.**
+Store and Mozilla Add-ons. **Firefox 1.0.34 is submitted, approved and listed.
+Chrome submission remains in progress.**
+
+## Firefox submission completed — 2026-10-25
+
+The user uploaded the Firefox package after completing MFA. The remaining flow
+was completed in the connected browser: release/reviewer notes saved, build
+tooling declared, and the exact matching source ZIP below attached. Mozilla
+confirmed **Version Submitted** and then showed **Approved**, **Listed Version
+1.0.34**, and an available signed XPI.
+
+- Version ID: `6621177`; file ID: `5165291`.
+- [Manage version](https://addons.mozilla.org/en-US/developers/addon/morris-peoplesoft-utilities/versions/6621177).
+- [Public listing](https://addons.mozilla.org/en-US/firefox/addon/morris-peoplesoft-utilities/).
+- The version page confirms a current source attachment and the saved release
+  notes. Reviewer notes now say the matching source ZIP is attached.
+- Mozilla's full privacy policy was updated to current `docs/privacy.md`
+  (2026-10-22), including Scheduler/IB and Trace SQL disclosures, and verified
+  after saving. MIT license and existing authors were retained.
+- Evidence: `assets/submission/firefox-1.0.34-submitted.png` and
+  `assets/submission/firefox-1.0.34-approved.png`. These genuine dashboard captures
+  establish store status, not real PeopleTools or signed-install validation.
 
 ## Exact artifacts
 
@@ -28,7 +49,7 @@ generated/local/private inputs. An extracted source build using the same locked
 installed dependencies matched all 29 executable/style/manifest/image files in
 the upload build. Source maps and HTML line endings are outside that byte check.
 
-## Dashboard state and access blockers
+## Initial dashboard state and access blockers (historical)
 
 - Chrome: creating the publisher dashboard tab returned `Not allowed`; the
   public Chrome Web Store page was also denied. No current published/pending
@@ -53,8 +74,7 @@ the upload build. Source maps and HTML line endings are outside that byte check.
 2. Chrome: select the exact Chrome ZIP above, reconcile the listing/privacy
    policy with current `docs/privacy.md` and `store/privacy-practices.md`, and
    submit the updated version for review.
-3. Mozilla: upload the exact Firefox ZIP and matching source ZIP, use
-   `store/firefox/reviewer-notes-1.0.34.md` and the refreshed `amo-metadata.json`,
-   and ensure the full current privacy policy is saved before submission.
+3. Mozilla submission is complete as recorded above. Preserve the exact package
+   and source archive; normal signed-install testing remains a separate check.
 4. Record actual confirmation URLs/status and screenshots for each store.
    Submission is not approval or proof that the new version is live.
