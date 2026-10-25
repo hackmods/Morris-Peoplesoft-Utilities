@@ -1,4 +1,6 @@
-import { loadSettings, saveSettings } from "../../storage/settings";
+import { getExtensionApi } from "../../platform/browser";
+import { loadSettings, saveSettings, settingsDraft, SettingsSaveError } from "../../storage/settings";
+import { mergeSettingsBackup } from "../../storage/backup";
 import { FEATURE_LABELS, FEATURE_TOGGLE_GROUPS } from "../../storage/feature-labels";
 import type { FeatureToggleKey } from "../../storage/feature-labels";
 import { removeEnvironmentAt } from "../../storage/env-map";
@@ -19,16 +21,34 @@ import {
   type TraceSettings,
   type YesNo,
 } from "../../storage/schema";
-import { parseProfilesImportJson, profilesToExportJson } from "../../features/field-entry";import {
+import { parseProfilesImportJson, profilesToExportJson } from "../../features/field-entry";
+import {
   TRACE_PRESET_META,
   applyTracePreset,
   summarizeActiveTraceFlags,
   type TracePresetId,
 } from "../../features/trace-presets";
 import { upsertWatch } from "../../features/upgrade-watch";
+import { bindAgentLibrary } from "../../features/agent-references";
+import { bindOracleDocs } from "../../features/oracle-docs-ui";
+import { bindRunbooksUI } from "../../features/runbooks-ui";
+import { bindEnvironmentComparisonUI } from "../../features/environment-comparison-ui";
+import { bindConfigurationComparisonUI } from "../../features/configuration-comparison-ui";
+import { bindTraceSqlInvestigationUI } from "../../features/tracesql-investigation-ui";
+import { bindSchedulerInvestigationUI } from "../../features/scheduler-investigation-ui";
+import { bindIbInvestigationUI } from "../../features/ib-investigation-ui";
+
+const runbookEnvironmentLabels: string[] = [];
 
 const toast = document.getElementById("toast")!;
 let toastTimer = 0;
+let featureBaseline: MpuSettings;
+let traceBaseline: MpuSettings;
+let allowlistBaseline: MpuSettings;
+
+window.addEventListener("unhandledrejection", (event) => {
+  if (event.reason instanceof SettingsSaveError) { event.preventDefault(); say(event.reason.message); }
+});
 
 function say(msg: string): void {
   toast.textContent = msg;
@@ -36,11 +56,11 @@ function say(msg: string): void {
   window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => {
     toast.classList.remove("is-visible");
-  }, 2800);
+  }, msg.includes("Reload") ? 15_000 : 2800);
 }
 
 function broadcast(): void {
-  chrome.runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
+  getExtensionApi().runtime.sendMessage({ type: "mpu-refresh" }).catch(() => undefined);
 }
 
 const SCOPE_LABELS: Array<{ key: keyof FeatureUiScopes; label: string }> = [
@@ -109,9 +129,16 @@ function wireTabs(): void {
       selectTab(tabs[next]);
     });
   });
+  const selectFromHash = () => {
+    const tab = tabs.find((candidate) => candidate.dataset.tab === window.location.hash.slice(1));
+    if (tab) selectTab(tab);
+  };
+  selectFromHash();
+  window.addEventListener("hashchange", selectFromHash);
 }
 
 function renderFeatures(settings: MpuSettings): void {
+  featureBaseline = settingsDraft(settings);
   const root = document.getElementById("feature-toggles")!;
   root.replaceChildren();
 
@@ -226,6 +253,7 @@ function renderFeatures(settings: MpuSettings): void {
 }
 
 function renderTrace(settings: MpuSettings): void {
+  traceBaseline = settingsDraft(settings);
   const root = document.getElementById("trace-flags")!;
   root.replaceChildren();
   const t = { ...DEFAULT_TRACE, ...settings.traceSettings };
@@ -288,18 +316,7 @@ function emptyState(text: string): HTMLParagraphElement {
 }
 
 function isCustomizationWatch(value: unknown): value is CustomizationWatch {
-  if (!value || typeof value !== "object") return false;
-  const w = value as CustomizationWatch;
-  return (
-    typeof w.id === "string" &&
-    typeof w.menu === "string" &&
-    typeof w.component === "string" &&
-    typeof w.market === "string" &&
-    typeof w.capturedAt === "number" &&
-    w.baseline !== null &&
-    typeof w.baseline === "object" &&
-    Array.isArray((w.baseline as CustomizationWatch["baseline"]).fieldIds)
-  );
+  return isSettingsBackup({ customizationWatches: [value] });
 }
 
 function parseCustomizationWatchesImport(data: unknown): CustomizationWatch[] | null {
@@ -318,8 +335,7 @@ function mergeCustomizationWatches(
   imported: CustomizationWatch[],
   replace: boolean,
 ): CustomizationWatch[] {
-  if (replace) return imported.slice(0, 50);
-  let next = [...current];
+  let next = replace ? [] : [...current];
   for (const watch of imported) {
     next = upsertWatch(next, watch);
   }
@@ -347,7 +363,7 @@ function renderUpgradeWatches(settings: MpuSettings): void {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td>`;
     const cells = tr.querySelectorAll("td");
-    cells[0].textContent = watch.label;
+    cells[0].textContent = `${watch.envLabel || "Unlabelled"} · ${watch.label}`;
     cells[1].textContent = `${watch.menu}.${watch.component}.${watch.market}`;
     cells[2].textContent = formatWatchDate(watch.capturedAt);
     cells[3].textContent = watch.baseline.toolsRel || "—";
@@ -356,7 +372,7 @@ function renderUpgradeWatches(settings: MpuSettings): void {
     del.type = "button";
     del.textContent = "Delete";
     del.addEventListener("click", async () => {
-      const s = await loadSettings();
+      const s = settingsDraft(settings);
       s.customizationWatches.splice(index, 1);
       await saveSettings(s);
       renderUpgradeWatches(s);
@@ -389,12 +405,13 @@ function renderFavorites(settings: MpuSettings): void {
     notesInput.value = fav.Notes || "";
     notesInput.setAttribute("aria-label", `Notes for ${fav.Description || fav.Component}`);
     notesInput.addEventListener("change", async () => {
-      const s = await loadSettings();
+      const s = settingsDraft(settings);
       if (!s.favorites[index]) return;
       const notes = notesInput.value.trim();
       if (notes) s.favorites[index].Notes = notes;
       else delete s.favorites[index].Notes;
       await saveSettings(s);
+      renderFavorites(s);
       broadcast();
       say("Notes saved");
     });
@@ -403,7 +420,7 @@ function renderFavorites(settings: MpuSettings): void {
     del.type = "button";
     del.textContent = "Delete";
     del.addEventListener("click", async () => {
-      const s = await loadSettings();
+      const s = settingsDraft(settings);
       s.favorites.splice(index, 1);
       await saveSettings(s);
       renderFavorites(s);
@@ -416,6 +433,8 @@ function renderFavorites(settings: MpuSettings): void {
 }
 
 function renderEnvs(settings: MpuSettings): void {
+  runbookEnvironmentLabels.splice(0, runbookEnvironmentLabels.length, ...new Set(settings.environments.map(env => env.label)));
+  document.dispatchEvent(new Event("mpu-runbook-environments-changed"));
   const root = document.getElementById("env-list")!;
   root.replaceChildren();
   if (!settings.environments.length) {
@@ -430,25 +449,33 @@ function renderEnvs(settings: MpuSettings): void {
     const name = document.createElement("input");
     name.value = env.label;
     name.setAttribute("aria-label", `Environment ${index + 1} name`);
+    const classification = document.createElement("select");
+    classification.setAttribute("aria-label", `Environment ${index + 1} classification`);
+    for (const [value, label] of [["unclassified", "Unclassified"], ["non-production", "Non-production"], ["production", "Production"]]) {
+      classification.add(new Option(label, value));
+    }
+    classification.value = env.classification || "unclassified";
     const active = document.createElement("input");
     active.type = "checkbox";
     active.checked = env.active === "Yes";
     const color = document.createElement("input");
     color.type = "color";
-    color.value = env.color || "#b8922a";
+    color.value = env.color || "#FF5C00";
     color.setAttribute("aria-label", "Accent color");
     const save = document.createElement("button");
     save.type = "button";
     save.textContent = "Save";
     save.addEventListener("click", async () => {
-      const s = await loadSettings();
+      const s = settingsDraft(settings);
       s.environments[index] = {
         ...s.environments[index],
         label: name.value.trim() || s.environments[index].label,
         active: active.checked ? "Yes" : "No",
         color: color.value,
+        classification: classification.value as NonNullable<typeof env.classification>,
       };
       await saveSettings(s);
+      renderEnvs(s);
       broadcast();
       say("Environment saved");
     });
@@ -456,20 +483,21 @@ function renderEnvs(settings: MpuSettings): void {
     del.type = "button";
     del.textContent = "Delete";
     del.addEventListener("click", async () => {
-      const s = removeEnvironmentAt(await loadSettings(), index);
-      await saveSettings(s);
+      const s = removeEnvironmentAt(settings, index);
+      await saveSettings(s, settings);
       renderEnvs(s);
       broadcast();
       say("Environment deleted");
     });
     const activeLab = document.createElement("label");
     activeLab.append(active, document.createTextNode(" Active on this browser"));
-    card.append(name, activeLab, color, save, del);
+    card.append(name, classification, activeLab, color, save, del);
     root.appendChild(card);
   });
 }
 
 function renderAllowlist(settings: MpuSettings): void {
+  allowlistBaseline = settingsDraft(settings);
   (document.getElementById("hostAllowlistEnabled") as HTMLInputElement).checked =
     settings.features.hostAllowlistEnabled === "Yes";
   (document.getElementById("hostAllowlist") as HTMLTextAreaElement).value =
@@ -531,11 +559,12 @@ async function init(): Promise<void> {
   renderFavorites(settings);
   renderUpgradeWatches(settings);
   renderEnvs(settings);
+  bindRunbooksUI(document, document.getElementById("environment-runbooks")!, runbookEnvironmentLabels);
   renderAllowlist(settings);
   renderFieldEntryProfiles(settings);
 
   document.getElementById("save-features")!.addEventListener("click", async () => {
-    const s = await loadSettings();
+    const s = settingsDraft(featureBaseline);
     for (const f of FEATURE_LABELS) {
       const el = document.getElementById(f.key) as HTMLInputElement;
       s.features[f.key as FeatureToggleKey] = (el.checked ? "Yes" : "No") as YesNo;
@@ -566,6 +595,7 @@ async function init(): Promise<void> {
     }
     s.featureUiScopes = scopes;
     await saveSettings(s);
+    renderFeatures(s);
     broadcast();
     say("Features saved");
   });
@@ -580,14 +610,15 @@ async function init(): Promise<void> {
   });
 
   document.getElementById("save-trace")!.addEventListener("click", async () => {
-    const s = await loadSettings();
+    const s = settingsDraft(traceBaseline);
     s.traceSettings = readTraceFromDom();
     await saveSettings(s);
+    renderTrace(s);
     say("Trace settings saved");
   });
 
   document.getElementById("save-allowlist")!.addEventListener("click", async () => {
-    const s = await loadSettings();
+    const s = settingsDraft(allowlistBaseline);
     s.features.hostAllowlistEnabled = (
       document.getElementById("hostAllowlistEnabled") as HTMLInputElement
     ).checked
@@ -598,6 +629,7 @@ async function init(): Promise<void> {
       .map((l) => l.trim())
       .filter(Boolean);
     await saveSettings(s);
+    renderAllowlist(s);
     broadcast();
     say("Allowlist saved");
   });
@@ -755,7 +787,8 @@ async function init(): Promise<void> {
         say("Invalid settings file");
         return;
       }
-      await saveSettings({ ...(await loadSettings()), ...(parsed as Partial<MpuSettings>) });
+      const original = await loadSettings();
+      await saveSettings(mergeSettingsBackup(original, parsed), original);
       const s = await loadSettings();
       renderFeatures(s);
       renderTrace(s);
@@ -773,4 +806,11 @@ async function init(): Promise<void> {
   });
 }
 
+bindAgentLibrary(document);
+bindEnvironmentComparisonUI(document, document.getElementById("environment-comparison-workspace")!);
+bindConfigurationComparisonUI(document, document.getElementById("configuration-comparison-workspace")!);
+bindTraceSqlInvestigationUI(document, document.getElementById("tracesql-investigation-workspace")!);
+bindSchedulerInvestigationUI(document, document.getElementById("scheduler-investigation-workspace")!);
+bindIbInvestigationUI(document, document.getElementById("ib-investigation-workspace")!);
+bindOracleDocs(document, document.getElementById("oracle-docs")!, new URLSearchParams(location.search).get("tools")?.slice(0, 30));
 void init();

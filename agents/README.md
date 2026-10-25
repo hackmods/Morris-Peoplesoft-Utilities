@@ -1,104 +1,118 @@
 # PeopleSoft Agent Prompt Pack
 
-**What this is:** a set of portable, generic AI-agent/skill prompts for working on **PeopleSoft 8.56** (PeopleTools **8.5x–8.6x**, on-prem **HRMS**, **Financials**, and **Campus Solutions**). Plain markdown — Cursor, VS Code / Visual Studio + Copilot, Claude, or any chat tool. No Cursor lock-in; no required MCP server.
+Content version **4.2.0** · **30 complete prompts** (28 task agents and two guides) · **3 local pillar templates**.
 
-**What this is not:** part of the Morris PeopleSoft Utilities Chrome extension. Nothing here ships in the extension bundle.
+Portable knowledge for PeopleSoft on **PeopleTools 8.62**. Confirm the application release/PUM and Tools patch separately. The pack supports HCM, FSCM and Campus Solutions workflows; it stays separate from the Morris PeopleSoft Utilities Chrome extension.
 
-**Design intent:** generic and reusable. No customer-specific role names, customizations, or SetIDs. Site-specific specialists stay local — see [Site-specific tailoring](#site-specific-tailoring).
+Every prompt includes intake, workflow, output, synthetic examples, validation and handoffs. Definitions are self-contained. No MCP server is required or implemented. Each definition retains its actual source-review date; the two new specialist sources were reviewed on 2026-10-15. Installed-host evaluation and real-system trials are **not run**. Two limited canonical-prompt trials from the 4.2.0 review are recorded separately in [the review report](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/docs/findings/agent-instructions-4.2-review.md); they do not validate the full suite.
 
-**Pack version:** **v3 (alignment)** — consistent `review-*` / `assist-*` / `design-*` / `guide-*` names; SQL + integrations specialists; VS Copilot stubs; tool-fit matrix (hosts, not model SKUs).
+The extension's Options → Agents page provides a searchable reference catalog, role/audience hints and links to these public files. Prepare task brief creates an editable blank request for a selected prompt; it reads no PeopleSoft page context and is not saved. Load the actual prompt/skill in your AI tool before using the brief. Only public reference metadata is bundled in the extension; full definitions, skills and templates remain in this separate toolkit. The extension does not execute agents or send page data to an AI service.
 
-**Get the pack:**
+## Choose by task
 
-- Browse: https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents
-- Download zip from [GitHub Releases](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) (`morris-peoplesoft-agents-v*.zip`) or run `npm run package:agents` in a clone
-- Wiki adoption guide: [wiki/AI-Agent-Prompts.md](../wiki/AI-Agent-Prompts.md)
+- **BA work:** design-functional-requirements → design-component/assist-fluid → design-test-uat.
+- **SQL/reporting:** assist-schema-mcp (or paste metadata) → assist-sql-query → review-data-correctness → assist-reporting.
+- **PeopleCode:** assist-peoplecode → review-peoplecode-quality and review-data-correctness where data logic is involved.
+- **Batch/operations:** assist-application-engine, assist-process-scheduler, assist-admin-diagnostics, assist-performance-trace, assist-tracesql-hotspots / sanitize / AE-bridge / SQLID fingerprint / report review (clean-room tracesql; sanitized text only).
+- **Integrations/approvals:** assist-integrations, assist-approval-framework, review-security.
+- **UI:** assist-fluid plus review-fluid-accessibility; design-component for transaction/search structure.
+- **Search/portal:** assist-search-framework for indexing/results/security; assist-portal-branding for registry navigation and themes.
+- **Change/conversion:** review-upgrade-migration, design-data-conversion and design-test-uat.
+- **Learning/local expertise:** guide-onboarding, guide-specialist-trainer, guide-tracesql-literacy (synthetic tracesql markers only).
 
----
+<!-- CATALOG-BEGIN -->
 
-## Why this exists
-
-PeopleSoft bugs and design choices repeat: wrong effective-dated row, missing `SETID`/`EMPL_RCD`, unsafe PeopleCode SQL, IB routing inactive, CI calling `MessageBox`. These prompts encode that pattern knowledge once so any assistant can apply it.
-
-## The agents
-
-| Folder | Status | What it does |
+| Prompt | Kind | Use |
 |---|---|---|
-| [`review-data-correctness/`](review-data-correctness/AGENT.md) | **Full (v3)** | Audit existing SQL/PeopleCode for effdt, joins, keys, wrong data source |
-| [`review-peoplecode-quality/`](review-peoplecode-quality/AGENT.md) | **Full (v3)** | PeopleCode quality (`%Table`, `.Value`, scope, events); short CI-unsafe deferral |
-| [`review-security/`](review-security/AGENT.md) | **Full (v3)** | Roles, PLs, SoD, row/Query/process security |
-| [`assist-sql-query/`](assist-sql-query/AGENT.md) | **Full (v3)** | **Author/improve** Query Manager, AE, view SQL (VS/Copilot-friendly) |
-| [`assist-integrations/`](assist-integrations/AGENT.md) | **Full (v3)** | Integration Broker + Component Interface design/triage |
-| [`assist-schema-mcp/`](assist-schema-mcp/AGENT.md) | **Full (v3)** | Live/paste schema + current-row + capped SELECT; [`TOOL-CONTRACT.md`](assist-schema-mcp/TOOL-CONTRACT.md) |
-| [`design-component/`](design-component/AGENT.md) | **Full (v3)** | Pre–App Designer component/page design |
-| [`guide-onboarding/`](guide-onboarding/AGENT.md) | **Full (v3)** | New BA/dev mentor |
-| [`guide-specialist-trainer/`](guide-specialist-trainer/GUIDE.md) | **Full (v3)** | Build a **local** specialist agent |
+| [assist-admin-diagnostics](assist-admin-diagnostics/AGENT.md) | agent | Triage PeopleSoft PIA, web/application domains, Process Scheduler and IB boundaries using sanitized logs and configuration evidence. |
+| [assist-application-engine](assist-application-engine/AGENT.md) | agent | Design and troubleshoot PeopleSoft AE programs, state records, temporary tables, commit/restart boundaries and concurrent execution. |
+| [assist-approval-framework](assist-approval-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft approval routing, participant resolution, delegation, escalation and transaction controls. |
+| [assist-fluid](assist-fluid/AGENT.md) | agent | Design and troubleshoot PeopleSoft Fluid components, layouts, search, tiles, navigation collections and modal behavior. |
+| [assist-integrations](assist-integrations/AGENT.md) | agent | Design and troubleshoot PeopleSoft IB and Component Interfaces, including security, CI event timing, error collections and safe replay. |
+| [assist-peoplecode](assist-peoplecode/AGENT.md) | agent | Draft PeopleCode and application-class solutions with explicit caller, event, buffer context, dependencies and validation. |
+| [assist-performance-trace](assist-performance-trace/AGENT.md) | agent | Analyze scrubbed PeopleSoft SQL, PeopleCode and AE traces, timings, plans and lock evidence; design bounded diagnostic capture. |
+| [assist-portal-branding](assist-portal-branding/AGENT.md) | agent | Design and troubleshoot PeopleSoft portal registry navigation, CREFs, homepages, tiles and branding themes with verified configuration and rendered evidence. |
+| [assist-process-scheduler](assist-process-scheduler/AGENT.md) | agent | Triage PeopleSoft process execution, run controls, scheduling dependencies and report distribution from sanitized monitor evidence. |
+| [assist-reporting](assist-reporting/AGENT.md) | agent | Design and troubleshoot BI Publisher, Query/Connected Query and existing SQR report data, templates, reconciliation and distribution. |
+| [assist-schema-mcp](assist-schema-mcp/AGENT.md) | agent | Inspect authorized PeopleSoft record metadata and bounded read-only samples through a mapped connector or sanitized pasted definitions. |
+| [assist-search-framework](assist-search-framework/AGENT.md) | agent | Design and troubleshoot PeopleSoft Search Framework definitions, indexing, search security and result behavior using verified metadata and sanitized evidence. |
+| [assist-sql-query](assist-sql-query/AGENT.md) | agent | Draft or improve PeopleSoft Query, AE, view and PeopleCode SQL using known metadata, explicit result grain and supported syntax. |
+| [assist-sqlid-fingerprint](assist-sqlid-fingerprint/AGENT.md) | agent | Explain PeopleSoft tracesql SQL grouping using statement text the user already has: MPU SQLID encoding versus the MPU-only FNV fingerprint, including collisions. |
+| [assist-tracesql-ae-bridge](assist-tracesql-ae-bridge/AGENT.md) | agent | Correlate a sanitized Application Engine step excerpt with a sanitized PeopleSoft tracesql excerpt using clean-room markers; hand AE restart questions to assist-application-engine. |
+| [assist-tracesql-hotspots](assist-tracesql-hotspots/AGENT.md) | agent | Triage sanitized PeopleSoft .tracesql/.trc excerpts using clean-room COM STMT/Dur=/PeopleCode markers; rank SQL and PeopleCode hotspots without proprietary desktop binaries. |
+| [assist-tracesql-sanitize](assist-tracesql-sanitize/AGENT.md) | agent | Coach redaction of binds, PII, host paths and tokens in PeopleSoft tracesql excerpts or MPU Trace SQL reports before any AI paste. |
+| [design-component](design-component/AGENT.md) | agent | Plan PeopleSoft component, search, record and scroll structures across Classic and Fluid with security, history and upgrade tradeoffs. |
+| [design-data-conversion](design-data-conversion/AGENT.md) | agent | Plan PeopleSoft conversion mappings, staging, supported load interfaces, rejects, reconciliation, restart and cutover. |
+| [design-functional-requirements](design-functional-requirements/AGENT.md) | agent | Develop PeopleSoft BA requirements, process maps, configuration fit/gap, business rules and testable acceptance criteria. |
+| [design-test-uat](design-test-uat/AGENT.md) | agent | Create traceable PeopleSoft unit, integration, security, UAT and upgrade regression plans, including PTF where suitable. |
+| [guide-onboarding](guide-onboarding/AGENT.md) | agent | Teach PeopleSoft concepts and safe first tasks for BAs, developers and administrators with pillar-specific learning routes. |
+| [guide-specialist-trainer](guide-specialist-trainer/GUIDE.md) | guide | Create and maintain private HCM, FSCM or Campus Solutions specialists from verified local definitions, policies, incidents and acceptance cases. |
+| [guide-tracesql-literacy](guide-tracesql-literacy/GUIDE.md) | guide | Teach PeopleSoft tracesql marker literacy using synthetic .tracesql excerpts only; not a PeopleTools patch proof or Trace Magic product guide. |
+| [review-data-correctness](review-data-correctness/AGENT.md) | agent | Review existing PeopleSoft SQL, Query, PeopleCode SQL, AE or SQR for result grain, effective dating, keys, joins and data sources. |
+| [review-fluid-accessibility](review-fluid-accessibility/AGENT.md) | agent | Review rendered PeopleSoft Fluid and Classic tasks for keyboard, focus, semantics, errors, contrast, zoom and assistive-technology barriers. |
+| [review-peoplecode-quality](review-peoplecode-quality/AGENT.md) | agent | Review PeopleCode APIs, SQL construction, buffer access, event placement, error handling and reusable application classes. |
+| [review-security](review-security/AGENT.md) | agent | Review effective PeopleSoft page, row, Query, process, CI and integration access and evidence-based segregation of duties. |
+| [review-tracesql-report](review-tracesql-report/AGENT.md) | agent | Critique an MPU Trace SQL investigation report for double-counted durations, missing unknowns, SQLID versus fingerprint overclaim, and sanitization gaps. |
+| [review-upgrade-migration](review-upgrade-migration/AGENT.md) | agent | Review PeopleTools/application updates, object compares, customization impact and controlled object/configuration migration plans. |
 
-### Hand-offs (boundaries)
+<!-- CATALOG-END -->
 
-| If you are… | Use |
-|---|---|
-| Writing new SQL | `assist-sql-query` → then `review-data-correctness` before prod |
-| Looking up keys / a sample row | `assist-schema-mcp` |
-| Auditing finished SQL for silent PS bugs | `review-data-correctness` |
-| Reviewing PeopleCode style/safety | `review-peoplecode-quality` |
-| Designing/troubleshooting IB or CI | `assist-integrations` |
-| Designing a page/component | `design-component` |
-| Reviewing Roles / SoD | `review-security` |
+## Visual Studio and VS Code Copilot
 
-### Rename map (v2 → v3)
+Copy selected complete files from [vscode-prompts](vscode-prompts/README.md) into your PeopleSoft solution's `.github/prompts/`. No paste section or sibling definition is required. Attach the task/code/metadata in chat and invoke the prompt through `#prompt:`, the context picker or slash command supported by your installed host. [Microsoft's Visual Studio guide](https://learn.microsoft.com/en-us/visualstudio/ide/copilot-chat-context?view=vs-2022).
 
-| Old folder | New folder |
-|---|---|
-| `code-review-effdt-joins` | `review-data-correctness` |
-| `peoplecode-quality` | `review-peoplecode-quality` |
-| `security-role-review` | `review-security` |
-| `mcp-schema-assistant` | `assist-schema-mcp` |
-| `design-helper` | `design-component` |
-| `onboarding-guide` | `guide-onboarding` |
-| `component-agent-trainer` | `guide-specialist-trainer` |
+Start with one prompt per task; use named handoffs when appropriate. Do not paste the entire pack into a global instruction file. Host policy and available tools still govern actions.
 
----
+## Claude and Codex skills
 
-## Tool fit (hosts, not models)
+Copy selected `skills/ps-*/` directories intact to your project's `.claude/skills/` for Claude Code or `.agents/skills/` for Codex. Their `SKILL.md` files contain complete instructions. Claude Code also has complete read-only agent definitions in [claude-agents](claude-agents/README.md). [Claude skills](https://code.claude.com/docs/en/skills), [official OpenAI skill documentation](https://learn.chatgpt.com/docs/build-skills).
 
-Prompts are **model-agnostic**. Pick the **host** that matches your workflow; use whatever LLM your org allows in that host.
+For Claude Projects or another chat/knowledge tool, attach the canonical AGENT.md/GUIDE.md or copy its body. File upload, skill discovery and tool permissions vary by host; a plain prompt works without a skill system. See [skills setup](skills/README.md) for invocation and validation.
 
-| Agent family | Best host fit | Needs MCP? |
-|---|---|---|
-| `review-*` | Cursor on-demand rule **or** Copilot reusable prompt | No |
-| `assist-sql-query`, `assist-integrations` | **VS Code / Visual Studio + Copilot** (also Cursor) | No |
-| `assist-schema-mcp` | Cursor / Claude Desktop / any MCP host | Optional (paste mode works) |
-| `design-*`, `guide-*` | Any chat (Claude Projects or Copilot Chat) | No |
+These files are distributions, not installed configuration for this extension repository. Install only in the project/private environment where you want PeopleSoft expertise.
 
-Adoption walkthrough for wiki readers: [wiki/AI-Agent-Prompts.md](../wiki/AI-Agent-Prompts.md).
+## Cursor and plain chat
 
----
+Complete on-demand rules are in [cursor-rules](cursor-rules/README.md); copy selected .mdc files to your target project's `.cursor/rules/`. Three original per-agent rule paths remain as complete exports for compatibility. For plain chat use one canonical definition plus sanitized task artifacts.
 
-## How to use a prompt in your tool
+## Private pillar specialists
 
-Each agent has a **Quick start** section. Copy the AGENT body (frontmatter is fine) into:
+Use [local templates](local-templates/README.md) for HCM, FSCM and Campus Solutions. They contain module interview questions, evidence ledgers, working methods and synthetic acceptance cases. Copy outside this public repository, fill only confirmed local facts, and validate before installation. They are not preconfigured experts on your employer's records, roles or policies.
 
-- **Cursor** — Custom Mode, or `.cursor/rules/*.mdc` with `alwaysApply: false`. Wrappers: [`review-data-correctness/cursor.mdc`](review-data-correctness/cursor.mdc), [`review-peoplecode-quality/cursor.mdc`](review-peoplecode-quality/cursor.mdc), [`assist-sql-query/cursor.mdc`](assist-sql-query/cursor.mdc).
-- **VS Code / Visual Studio + Copilot** — use thin stubs in [`vscode-prompts/`](vscode-prompts/README.md): copy to `.github/prompts/`, paste the matching `AGENT.md` body under the stub line, then Copilot Chat → Reuse prompts.
-- **Claude** — Project custom instructions or `CLAUDE.md`.
-- **Any chat tool** — paste as system/first message, then paste code/SQL/description.
+## Evidence and boundaries
 
----
+- Generic/synthetic examples only; no credentials, telemetry or production data dumps.
+- Read-only connector operations require authenticated, server-enforced policy; a row cap or SELECT privilege alone is insufficient.
+- No inferred delivered keys, status fields, role names, trace IDs or PeopleCode row paths from browser IDs.
+- Drafting fixes does not authorize production writes, process replay, security changes or deployment.
+- Preserve intentional history and valid alternate SQL. Missing evidence is an uncertainty, not an automatic defect.
+- [Sources](SOURCES.md), [authoring template](PROMPT-TEMPLATE.md), [sample requests](examples/README.md) and [behavioral evaluations](evaluations/README.md).
 
-## Site-specific tailoring
+## Build, validate and distribute
 
-Keep tailored copies **outside this repo** or untracked (same idea as `.reference/`). Use [`guide-specialist-trainer/`](guide-specialist-trainer/GUIDE.md) to build local specialists.
+```text
+npm run generate:agents
+npm run check:agents
+npm run package:agents
+```
 
-## Compliance notes
+Run these commands in a repository clone; a downloaded prompt ZIP is ready to copy into your chosen host. Edit canonical definitions and catalog metadata, then generate. Exports and README/wiki inventories must match exactly. Packaging validates links/catalog/export parity and includes only an explicit file list plus LICENSE/NOTICE, excluding private/untracked files. The ZIP uses the extension release number; content revision is independently recorded as 4.2.0.
 
-Same constraints as the extension (see [`.cursor/rules/compliance-privacy.mdc`](../.cursor/rules/compliance-privacy.mdc)):
+[Browse source](https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents) · [release downloads](https://github.com/hackmods/Morris-Peoplesoft-Utilities/releases/latest) · [wiki adoption guide](https://github.com/hackmods/Morris-Peoplesoft-Utilities/blob/main/wiki/AI-Agent-Prompts.md).
 
-- No credentials / Quick Logins.
-- No telemetry.
-- MCP usage is **read-only**; never suggest production writes from chat.
-- Sample data uses obvious fakes (`EMPLID = '9999999999'`).
+## Contributing
 
-## Contributing / extending
+Use review-/assist-/design-/guide- prefixes and [PROMPT-TEMPLATE.md](PROMPT-TEMPLATE.md). Add catalog metadata, sources, handoffs and at least one discriminating behavioral case; regenerate every host export. Keep local facts outside package inputs. Repository maintenance guidance is in [AGENTS.md](AGENTS.md); do not install that file as a user persona.
 
-Add a folder under the right prefix (`review-` / `assist-` / `design-` / `guide-`), include `AGENT.md` or `GUIDE.md` with frontmatter + Quick start + Design notes, add a [`vscode-prompts/`](vscode-prompts/) stub, and a row in the table above.
+## Efficient use
+
+Start with one specialist and the relevant sanitized task evidence. Oracle links
+are references: retrieve the smallest section needed, reuse still-current verified
+evidence, and expand only to resolve a specific gap. A link alone does not load a
+manual. Repeated full-manual retrieval and unnecessary delegation can increase
+cost; this pack does not claim measured token or monetary savings.
+
+The 4.2.0 working method makes intake, output artifacts and handoffs proportional
+to the request while preserving domain safeguards and requested depth. Every
+export remains self-contained. Installation, model behavior and target-system
+validation must still be recorded separately from structural checks.

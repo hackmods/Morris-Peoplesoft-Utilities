@@ -59,12 +59,10 @@ describe("integration: BA session bootstrap", () => {
     expect(document.getElementById("mpu-bar")).toBeTruthy();
     expect(document.querySelector(".mpu-env")?.textContent).toBe("CSPRD");
     expect(document.getElementById("mpu-fav")?.textContent).toBe("Shortcuts");
-    expect(document.getElementById("mpu-fav")?.getAttribute("aria-haspopup")).toBe("menu");
+    expect(document.getElementById("mpu-fav")?.getAttribute("aria-haspopup")).toBe("dialog");
 
     runSearchOptions(loaded);
-    expect(document.querySelector("script")?.getAttribute("src")).toContain(
-      "corr-hist-and-adv-search.js",
-    );
+    expect(document.querySelector("script[data-mpu-inject]")).toBeNull();
 
     loaded.features.hostAllowlistEnabled = "Yes";
     loaded.hostAllowlist = ["https://other.college.edu"];

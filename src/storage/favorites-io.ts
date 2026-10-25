@@ -1,3 +1,4 @@
+import { parseDelimited } from "./delimited";
 import type { Favorite } from "./schema";
 
 const CSV_HEADER =
@@ -54,10 +55,16 @@ export function splitCsvLine(line: string): string[] {
 }
 
 export function parseFavoritesCsv(text: string): Favorite[] {
-  const lines = text.trim().split(/\r?\n/).filter(Boolean);
-  if (lines.length < 2) return [];
-  return lines.slice(1).map((line) => {
-    const cols = splitCsvLine(line);
+  const rows = parseDelimited(text);
+  if (rows.length < 2) return [];
+  const header = rows[0];
+  if (header.slice(0, 8).join(",") !== CSV_HEADER.split(",").slice(0, 8).join(",")) {
+    throw new Error("Unrecognized favorites CSV header");
+  }
+  return rows.slice(1).map((cols) => {
+    if (cols.length !== header.length || !["psp", "psc"].includes(cols[0]) || !cols[1] || !cols[2]) {
+      throw new Error("Invalid favorite row");
+    }
     return {
       Servlet: (cols[0] === "psc" ? "psc" : "psp") as "psp" | "psc",
       Menu: cols[1] || "",
@@ -72,7 +79,4 @@ export function parseFavoritesCsv(text: string): Favorite[] {
   });
 }
 
-/** Shallow validation for a restored settings JSON blob. */
-export function isSettingsBackup(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+export { isSettingsBackup } from "./backup";

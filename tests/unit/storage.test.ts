@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   loadSettings,
   saveSettings,
@@ -14,6 +14,53 @@ import {
 import { getChromeStorageSnapshot, resetChromeStorage } from "../setup/chrome-mock";
 
 describe("storage load/save/update", () => {
+  it("recovers valid saved entries without rewriting corrupt data during a read", async () => {
+    const favorite = { Servlet: "psp", Menu: "M", Component: "C", Market: "GBL", Parameters: "", Category: "", SubCategory: "", Description: "Keep" };
+    const stored = {
+      ...createDefaultSettings(), favorites: [null, favorite], recentComponents: [null],
+      customizationWatches: [null], fieldEntryProfiles: [null], hostAllowlist: [null, "https://hr.example.edu"],
+      features: { hostAllowlistEnabled: "Yes", fieldEntryOption: "invalid", pageInfoOption: "No" },
+      environments: [null, { label: "QA", active: "No", trcProfRunning: "No" }],
+      urlSites: { "https://hr.example.edu": { ps: { envId: 1 }, broken: null } },
+    };
+    resetChromeStorage({ mpuSettings: stored });
+    const loaded = await loadSettings();
+    expect(loaded.favorites).toEqual([favorite]);
+    expect(loaded.recentComponents).toEqual([]);
+    expect(loaded.customizationWatches).toEqual([]);
+    expect(loaded.fieldEntryProfiles).toEqual([]);
+    expect(loaded.hostAllowlist).toEqual(["https://hr.example.edu"]);
+    expect(loaded.features.fieldEntryOption).toBe("No");
+    expect(loaded.features.pageInfoOption).toBe("No");
+    expect(loaded.environments[0].active).toBe("No");
+    expect(loaded.environments[1].label).toBe("QA");
+    expect(loaded.urlSites).toEqual({ "https://hr.example.edu": { ps: { envId: 1 } } });
+    expect(chrome.storage.local.set).not.toHaveBeenCalled();
+    expect(getChromeStorageSnapshot().mpuSettings).toBe(stored);
+  });
+
+  it.each([null, [], "invalid", { features: null }, { features: { hostAllowlistEnabled: "invalid" } }])("keeps unreadable host restrictions closed: %j", async (stored) => {
+    resetChromeStorage({ mpuSettings: stored });
+    expect(originAllowed("https://hr.example.edu", await loadSettings())).toBe(false);
+  });
+
+  it("handles malformed legacy collections without throwing or retaining credentials", async () => {
+    resetChromeStorage({ psutilEnvs: [null, { label: "QA", active: "Yes", creds: {} }], shortcutstable: [null], psutilTraceSettings: "broken" });
+    const loaded = await loadSettings();
+    expect(loaded.environments[0].active).toBe("No");
+    expect(loaded.environments[1].active).toBe("Yes");
+    expect(loaded.environments[1]).not.toHaveProperty("creds");
+    expect(loaded.favorites).toEqual([]);
+  });
+
+  it("installation cleanup tolerates corrupt legacy entries and still strips credentials", async () => {
+    resetChromeStorage({ mpuSettings: createDefaultSettings(), psutilEnvs: [null, { label: "QA", creds: { user: "old" } }] });
+    await import("@/background/service-worker");
+    const installed = vi.mocked(chrome.runtime.onInstalled.addListener).mock.calls.at(-1)![0];
+    await installed({ reason: "update" as chrome.runtime.OnInstalledReason });
+    expect(getChromeStorageSnapshot().psutilEnvs).toEqual([null, { label: "QA" }]);
+  });
+
   it("seeds defaults when storage empty", async () => {
     const s = await loadSettings();
     expect(s.schemaVersion).toBe(1);

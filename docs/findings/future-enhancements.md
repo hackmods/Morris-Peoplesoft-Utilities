@@ -10,6 +10,7 @@
 
 ## How to use this doc
 
+- Current priority: [quality consolidation of recent enhancements](recent-enhancements-quality-review.md), before further roadmap expansion. Draft-loss, ProcessPack context and internal-navigation repairs, E/PCode workflow completion and targeted Firefox journeys are implemented; use the current roadmap checkpoint for verification and remaining real-sample/live-system evidence.
 - Prefer items tagged **P1** when picking the next feature after Store readiness work.
 - Each idea lists **who** (BA / Dev), **why**, and **notes** (Classic/Fluid, risks).
 - Do not implement password vaults, remote logging, or advertising SDKs even if requested in issues.
@@ -194,9 +195,9 @@
 | ID | Idea | Who | Why | Notes |
 |---|---|---|---|---|
 | UG-01 | ~~**Customization upgrade watch**~~ — capture UI fingerprint (tabs, structure hosts, field ids) + post-upgrade drift check | BA, Dev, Admin | Faster regression triage after upgrades | Page Info + Options → Upgrade; not PeopleCode |
-| UG-02 | **Change Assistant handoff export** — structured notes from drift report for CA project docs | Admin | Ops workflow | Deferred — file/export only |
+| UG-02 | ~~**Change Assistant handoff export**~~ — reviewed Markdown UI-drift notes with manual evidence/test/rollback sections | Admin | Ops workflow | Done in 1.0.29; no project creation/deployment |
 | UG-03 | **PeopleCode compare integration** | Dev | Full override detection | **N/A in browser** — use App Designer Compare Report |
-| UG-04 | **Multi-baseline history** per object (last N captures) | Dev | Track drift across envs | Deferred |
+| UG-04 | ~~**Multi-baseline history**~~ per component/environment | Dev | Track drift across envs | Done in 1.0.29; five per scope, 50 total, explicit baseline selection |
 | UG-05 | **Bar Upgrade chip** when watch exists for current component | BA | Faster re-check | Nice-to-have; Page Info buttons sufficient |
 
 ---
@@ -222,3 +223,34 @@
 | 2026-07-23 | **UX-11** — bar placement (document top) + sticky; dismiss menus when entering Classic content iframe |
 | 2026-07-23 | **FE-01..04** — Field Entry toolkit (capture/paste/sheet/find-replace + profiles + eligibility preview); careful opt-in |
 | 2026-07-23 | **FE-05/06** — multi-row grid sheet paste + Add Row; Fluid/modal (ptModFrame) field discovery; Playwright e2e |
+
+## Review correction — 2026-10-11
+
+FE-05 supports multi-row paste to existing grid occurrences. Automatic Add Row was removed after review: preview must not mutate records, and the original global selector/synchronous loop could target the wrong grid. A future implementation needs explicit consent in the UI, unambiguous grid targeting, and asynchronous completion on real PeopleTools 8.62. See [repository review](repo-review-2026-10-11.md).
+
+## Agent references — 2026-10-14
+
+AG-01 implemented (Unreleased): Options → Agents with a local, generated public-reference catalog, task/search filtering, three pillar-template links and entry points from popup/side panel/Help. Full prompts remain a separate toolkit; no AI execution, remote fetch, automatic page export or added permissions. Policy rationale: [ADR 0009](../adr/0009-agent-reference-library.md). Browser accessibility/privacy regressions accompany the change.
+
+AG-02 implemented for 1.0.28 (Unreleased): audience discovery and blank, editable task briefs with explicit clipboard copy/manual fallback; no page-context capture or persistence. Build-time catalog/export validation prevents stale references. Prompt maintenance 4.0.1 adds a private evaluation worksheet; host/model trials remain unexecuted.
+
+BR-01 implemented for 1.0.28 (Unreleased): UnionOps-inspired black/orange shared UI tokens and versioned PS artwork. Preserve semantic/environment state cues and prior assets. Release priority remains real 8.62/assistive-technology evidence and genuine updated Store captures; do not add speculative features to bypass those gates.
+
+## Reliability and diagnostics — 2026-10-15
+
+Implemented for 1.0.29: serialized settings edits with stale-form conflict protection; scoped/datable trace request evidence and explicit On/Off actions; allowlisted diagnostics preview with explicit export; dated upgrade baseline selection/history and Markdown handoff (UG-02/UG-04). History is capped at five per component/environment and 50 total, including imports. ADR: [0010](../adr/0010-settings-coordination-and-local-evidence.md).
+
+Prompt pack 4.1.0 adds Search Framework and portal/branding specialists: 24 prompts and 36 unexecuted evaluation cases. Actual host/model trials and private HCM/FSCM/Campus Solutions tailoring need the selected host and verified local evidence; generic templates remain unfilled. Store captures and real 8.62/assistive-technology validation remain outstanding.
+
+## 2026-10-20 developer/admin roadmap
+
+Extended F now supplies the complete local case workflow: form-based evidence drafts,
+compatible version 1/2 envelopes, bounded inert XML/SOAP excerpts with distinct JSON/XML
+citations, supplied-time ordering, explicitly selected record comparisons, original/
+transformed scope context and manual findings/checklist notes. Masked payloads are
+never compared; all edits require a fresh report review. Native exports, larger XML
+and actual PeopleTools/AT verification remain sample-dependent validation work, as
+described in the latest [F checkpoint](developer-admin-roadmap.md) and
+[supported scope](../../wiki/Integration-Broker-Investigations.md). H remains next.
+
+See [the ordered multi-session plan](developer-admin-roadmap.md). J guided agent handoffs, A Oracle documentation hub, and user-promoted D Fluid navigation debugger are saved in `092966e`. K production awareness and I environment runbooks were packaged locally as a 1.0.33 candidate after the explicit release request; subsequent release/submission evidence is recorded in [the release checkpoint](release-finish-plan.md). C environment comparisons and G bounded local INI-style/JSON configuration comparisons were implemented separately from that frozen candidate and later integrated with browser parity. G uses synthetic format samples, conservative masking and explicit report review; real export compatibility remains unverified. E now has an initial session-only Scheduler excerpt/ticket workspace with a named narrow parser, cited timeline/parent-label evidence and reviewed export. Its user-approved synthetic samples establish regression coverage only; native formats and representative real-log compatibility remain open. See [Scheduler scope](../../wiki/Process-Scheduler-Investigations.md). F adds a session-only versioned JSON IB evidence workspace with operation/node/queue/routing/stage citations, default payload omission, masked opt-in payload detail and a manual routing/error checklist. Its synthetic custom envelope is not a native export parser; see [IB scope](../../wiki/Integration-Broker-Investigations.md) and the latest F checkpoint. The [quality consolidation review](recent-enhancements-quality-review.md) now takes precedence over H upgrade evidence and B local trace analysis. Live Niagara comparison, screenshots and actual PeopleTools compatibility evidence remain open. See [public PeopleSoft candidate registry](../testing/public-peoplesoft-pages.md); URLs do not establish compatibility.

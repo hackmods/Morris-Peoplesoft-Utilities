@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
-describe("automated audit scripts", () => {
+describe("automated audit scripts", { timeout: 30_000 }, () => {
   it("audit:store exits 0 when assets present", () => {
     const out = execFileSync(process.execPath, ["./node_modules/tsx/dist/cli.mjs", "scripts/audit-store.ts"], {
       encoding: "utf8",

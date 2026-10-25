@@ -1,8 +1,10 @@
 import { test as base, expect } from "@playwright/test";
 import type { BrowserContext, Page } from "@playwright/test";
 import type { Server } from "node:http";
+import { audit } from "./helpers/accessibility";
 import {
   CLASSIC_GRID_PATH,
+  CLASSIC_COMPONENT_PATH,
   FLUID_FIELD_ENTRY_PATH,
   startFixtureServer,
   stopFixtureServer,
@@ -58,6 +60,40 @@ async function waitForIframeBody(page: Page, frameSelector: string): Promise<voi
 }
 
 test.describe("Field Entry toolkit", () => {
+  test("Entry dialogs and populated preview pass browser axe", async ({ extensionContext, extensionId }) => {
+    await seedMpuSettings(extensionContext, extensionId, e2eSettings({
+      features: { ...e2eSettings().features, fieldEntryOption: "Yes" },
+      fieldEntryProfiles: [{ id: "demo", name: "Demo", updatedAt: 1, rows: [{ record: "PERSONAL_DATA", field: "FIRST_NAME", value: "Demo" }] }],
+    }));
+    const page = await openPsPage(extensionContext, FLUID_FIELD_ENTRY_PATH);
+    await page.locator("#mpu-entry").click();
+    const menu = page.getByRole("menu", { name: "Field Entry", exact: true });
+    await audit(page, '.mpu-flyout[aria-label="Field Entry"]');
+    await menu.getByRole("menuitem", { name: "Capture", exact: true }).click();
+    for (const name of ["Paste…", "From sheet…", "Find / Replace…", "Save profile…", "Load profile…"]) {
+      await page.locator("#mpu-entry").click();
+      await menu.getByRole("menuitem", { name, exact: true }).click();
+      await audit(page, "#mpu-dialog");
+      await page.keyboard.press("Escape");
+      await expect(page.locator("#mpu-entry")).toBeFocused();
+    }
+    await page.close();
+  });
+  test("Classic TargetContent: writes iframe fields and notifies that frame's change hook", async ({ extensionContext }) => {
+    const page = await openPsPage(extensionContext, CLASSIC_COMPONENT_PATH);
+    const frame = page.frames().find((f) => f.name() === "TargetContent")!;
+    await frame.evaluate(() => {
+      document.body.innerHTML = '<input id="JOB_DEPTID$0" value="100"><input id="JOB_JOBCODE$0" value="A">';
+      (window as Window & { addchg_?: (el: Element) => void }).addchg_ = (el) => { document.body.dataset.changed = el.id; };
+    });
+    await page.keyboard.press("Alt+Shift+E");
+    await page.locator("#mpu-fe-sheet-text").fill("JOB.DEPTID\n200");
+    await page.locator("#mpu-fe-sheet-preview").click();
+    await page.locator("#mpu-fe-elig-apply").click();
+    await expect(frame.locator('[id="JOB_DEPTID$0"]')).toHaveValue("200");
+    await expect(frame.locator("body")).toHaveAttribute("data-changed", "JOB_DEPTID$0");
+    await page.close();
+  });
   test("Fluid: Entry menu Capture then Paste restores main page values", async ({
     extensionContext,
   }) => {
@@ -111,7 +147,7 @@ test.describe("Field Entry toolkit", () => {
     await page.close();
   });
 
-  test("Classic grid: multi-row sheet expands via Add Row and fills $0/$1", async ({
+  test("Classic grid: multi-row sheet fills $0/$1 after the user adds a row", async ({
     extensionContext,
   }) => {
     const page = await openPsPage(extensionContext, CLASSIC_GRID_PATH);
@@ -141,7 +177,7 @@ test.describe("Field Entry toolkit", () => {
     await page.close();
   });
 
-  test("Classic grid: From sheet alone clicks Add Row when only $0 exists", async ({
+  test("Classic grid: preview leaves missing rows unmatched without clicking Add Row", async ({
     extensionContext,
   }) => {
     const page = await openPsPage(extensionContext, CLASSIC_GRID_PATH);
@@ -159,11 +195,11 @@ test.describe("Field Entry toolkit", () => {
     await page.locator("#mpu-fe-sheet-preview").click();
     await expect(page.locator("#mpu-fe-elig-title")).toBeVisible({ timeout: 15_000 });
 
-    await expect(page.locator("#JOB_DEPTID\\$2")).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator("#JOB_DEPTID\\$2")).toHaveCount(0);
     await page.locator("#mpu-fe-elig-apply").click();
     await expect(page.locator("#JOB_DEPTID\\$0")).toHaveValue("10");
-    await expect(page.locator("#JOB_DEPTID\\$1")).toHaveValue("20");
-    await expect(page.locator("#JOB_DEPTID\\$2")).toHaveValue("30");
+    await expect(page.locator("#JOB_DEPTID\\$1")).toHaveCount(0);
+    await expect(page.locator("#JOB_DEPTID\\$2")).toHaveCount(0);
     await page.close();
   });
 

@@ -24,7 +24,7 @@ const parsed: ParsedPsUrl = {
 };
 
 describe("peoplecode aids", () => {
-  it("builds stubs with FieldChange and GetRowset", () => {
+  it("builds one example only after explicit event and row context", () => {
     const stubs = buildPeopleCodeStubs({
       record: "JOB",
       field: "EMPLID",
@@ -32,15 +32,17 @@ describe("peoplecode aids", () => {
       component: "COMP",
       page: "PAGE1",
       occurrence: "2",
+      event: "FieldChange",
+      rowContext: "Confirmed current component row",
     });
     const ids = stubs.map((s) => s.id);
     expect(ids).toContain("fieldchange");
-    expect(ids).toContain("getrowset");
+    expect(ids).toEqual(["fieldchange"]);
     const fieldChange = stubs.find((s) => s.id === "fieldchange");
     expect(fieldChange?.stub).toContain("JOB.EMPLID.FieldChange");
-    const getRowset = stubs.find((s) => s.id === "getrowset");
-    expect(getRowset?.stub).toContain("GetLevel0()");
-    expect(getRowset?.stub).toContain("GetRow(2)");
+    expect(fieldChange?.stub).toContain("GetRow()");
+    expect(fieldChange?.stub).not.toContain("GetRow(2)");
+    expect(buildPeopleCodeStubs({ record: "JOB", field: "EMPLID" })).toEqual([]);
   });
 
   it("object pack includes Menu and Component", () => {
@@ -62,8 +64,8 @@ describe("peoplecode aids", () => {
       field: "EMPLID",
       occurrence: "3",
     });
-    expect(text).toContain("GetLevel0()");
-    expect(text).toContain("GetRow(3)");
+    expect(text).not.toContain("GetLevel0()");
+    expect(text).toContain("GetRow()");
     expect(text).toContain("GetRecord(Record.JOB)");
     expect(text).toContain("GetField(Field.EMPLID)");
     expect(formatRecFieldCopyExtended(

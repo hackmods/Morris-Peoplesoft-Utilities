@@ -21,6 +21,17 @@ import {
 } from "@/adapters/ps-page";
 
 describe("parsePsUrl edge cases", () => {
+  it.each([
+    ["https://career.sickkids.ca:8001", "psc", "CRHCMPRD", "CAREER", "HRMS"],
+    ["https://jobs.omni.fsu.edu", "psc", "sprdhr_er", "EMPLOYEE", "HRMS"],
+    ["https://careerspub.universityofcalifornia.edu", "psc", "ucb", "EMPLOYEE", "HRMS"],
+    ["https://careers.lhsc.on.ca", "psc", "LHCGWPRD", "EMPLOYEE", "CAREERS_EXT"],
+    ["https://careers.nga.mil", "psp", "CAREERS", "EMPLOYEE", "HRMS"],
+    ["https://careers.niagararegion.ca", "psc", "careers", "EMPLOYEE", "PSFT_HR"],
+  ])("parses public candidate path variants without visiting %s", (origin, servlet, site, portal, node) => {
+    const parsed = parsePsUrl(`${origin}/${servlet}/${site}/${portal}/${node}/c/HRS_HRAM_FL.HRS_CG_SEARCH_FL.GBL?Page=HRS_APP_SCHJOB_FL&Action=U`);
+    expect(parsed).toMatchObject({ kind: "component", baseURL: origin, servlet, site, portal, node, menu: "HRS_HRAM_FL", component: "HRS_CG_SEARCH_FL", market: "GBL" });
+  });
   it("returns unknown for non-PS URLs", () => {
     const p = parsePsUrl("https://example.com/app/home");
     expect(p.kind).toBe("unknown");

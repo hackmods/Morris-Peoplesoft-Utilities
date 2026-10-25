@@ -1,3 +1,4 @@
+import { getExtensionApi } from "../platform/browser";
 /**
  * Toggle PeopleCode + SQL session trace using delivered UTILITIES components.
  * Classic PeopleSoft protocol (parity with PS Utilities):
@@ -7,9 +8,11 @@
  */
 import type { MpuSettings, TraceSettings, YesNo } from "../storage/schema";
 import type { ParsedPsUrl } from "../adapters/ps-page";
-import { updateSettings } from "../storage/settings";
+import { originAllowed, updateSettings } from "../storage/settings";
 import { announce } from "./bar";
 import { isYes } from "../storage/schema";
+import { currentPageAccess } from "./access";
+import { authorizeWriteAction } from "./production-awareness";
 
 type TraceOpt = { key: keyof TraceSettings; elId: string };
 
@@ -31,7 +34,7 @@ const SQL_OPTS: TraceOpt[] = [
   { key: "SQL0001", elId: "TRACE_SQL_TRACE_SQL_STMT" },
   { key: "SQL0002", elId: "TRACE_SQL_TRACE_SQL_BIND" },
   { key: "SQL0004", elId: "TRACE_SQL_TRACE_SQL_CURSOR" },
-  { key: "SQL0008", elId: "TRACE_SQL_TRACE_SQL_CURSOR" },
+  { key: "SQL0008", elId: "TRACE_SQL_TRACE_SQL_FETCH" },
   { key: "SQL0016", elId: "TRACE_SQL_TRACE_SQL_API" },
   { key: "SQL0032", elId: "TRACE_SQL_TRACE_SQL_SSB" },
   { key: "SQL0064", elId: "TRACE_SQL_TRACE_SQL_DB" },
@@ -76,7 +79,7 @@ function selectedOpts(
   opts: TraceOpt[],
   turnOn: boolean,
 ): Array<{ elId: string; selected: boolean }> {
-  // De-dupe elIds (legacy SQL Fetch shares CURSOR id)
+  // Each SQL bit must address its own checkbox; never alias Fetch to Cursor.
   const byId = new Map<string, boolean>();
   for (const o of opts) {
     const on = turnOn && isYes(settings[o.key]);
@@ -86,9 +89,13 @@ function selectedOpts(
 }
 
 function absoluteUrl(baseURL: string, action: string, fallback: string): string {
-  if (/^https?:\/\//i.test(action)) return action;
-  if (action.startsWith("/")) return `${baseURL}${action}`;
-  return fallback;
+  try {
+    const target = new URL(action || fallback, fallback);
+    return target.origin === new URL(baseURL).origin && !target.username && !target.password
+      ? target.href : "";
+  } catch {
+    return "";
+  }
 }
 
 export type TraceApplyResult = "ok" | "locked" | "fail";
@@ -102,11 +109,13 @@ export async function applyTraceComponent(
   menuComp: string,
   opts: Array<{ elId: string; selected: boolean }>,
   fetchImpl: typeof fetch = fetch,
+  canContinue: () => Promise<boolean> = async () => true,
 ): Promise<TraceApplyResult> {
+  if (!await canContinue()) return "fail";
   const openUrl = `${baseURL}/psc/${siteNormalized}_newwin/${portal}/${node}/c/${menuComp}`;
   let getRes: Response;
   try {
-    getRes = await fetchImpl(openUrl, { credentials: "include" });
+    getRes = await fetchImpl(openUrl, { credentials: "same-origin", redirect: "error" });
   } catch {
     return "fail";
   }
@@ -129,6 +138,7 @@ export async function applyTraceComponent(
   if (!icsid || elementNum == null || stateNum == null || !form) return "fail";
 
   const formAction = absoluteUrl(baseURL, form.getAttribute("action") || "", openUrl);
+  if (!formAction) return "fail";
   const params = [
     "ICAJAX=1",
     "ICNAVTYPEDROPDOWN=1",
@@ -158,10 +168,12 @@ export async function applyTraceComponent(
   }
 
   let postRes: Response;
+  if (!await canContinue()) return "fail";
   try {
     postRes = await fetchImpl(formAction, {
       method: "POST",
-      credentials: "include",
+      credentials: "same-origin",
+      redirect: "error",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.join("&"),
     });
@@ -191,6 +203,37 @@ export async function toggleTrace(
     return { running: false, locked: false };
   }
 
+  const approval = turnOn ? await authorizeWriteAction(document, parsed, "traceOption", "Start PeopleCode and SQL trace") : null;
+  if (turnOn && !approval) {
+    announce(document, "Trace start cancelled — access or environment changed, or confirmation was cancelled.");
+    return { running: isYes(settings.environments[envIndex]?.trcProfRunning), locked: false };
+  }
+  if (approval) settings = approval.settings;
+
+  const canContinue = async () => {
+    if (document.location.href !== parsed.href) return false;
+    if (approval) {
+      const approvedIndex = approval.settings.urlSites[parsed.baseURL]?.[parsed.siteNormalized]?.envId ?? -1;
+      return approvedIndex === envIndex && await approval.canContinue();
+    }
+    const current = await currentPageAccess(parsed, "traceOption");
+    if (!current || !originAllowed(parsed.baseURL, current)) return false;
+    const mapping = current.urlSites[parsed.baseURL]?.[parsed.siteNormalized];
+    return document.location.href === parsed.href && (mapping?.envId ?? -1) === envIndex &&
+      (envIndex < 0 || isYes(current.environments[envIndex]?.active));
+  };
+  if (!await canContinue()) {
+    announce(document, "Trace request cancelled — this page or feature is disabled.");
+    return { running: isYes(settings.environments[envIndex]?.trcProfRunning), locked: false };
+  }
+  const request = { origin: new URL(parsed.baseURL).origin, site: parsed.siteNormalized,
+    at: Date.now(), target: turnOn ? "on" as const : "off" as const, status: "requested" as const };
+  if (envIndex >= 0) await updateSettings((s) => {
+    if (!s.environments[envIndex]) return s;
+    s.environments[envIndex].traceRequest = request;
+    return s;
+  });
+
   const pcOpts = selectedOpts(settings.traceSettings, PC_OPTS, turnOn);
   const sqlOpts = selectedOpts(settings.traceSettings, SQL_OPTS, turnOn);
 
@@ -201,6 +244,8 @@ export async function toggleTrace(
     parsed.node,
     "UTILITIES.PEOPLECODE_TRACE.GBL",
     pcOpts,
+    fetch,
+    canContinue,
   );
   const sql = await applyTraceComponent(
     parsed.baseURL,
@@ -209,23 +254,31 @@ export async function toggleTrace(
     parsed.node,
     "UTILITIES.TRACE_SQL.GBL",
     sqlOpts,
+    fetch,
+    canContinue,
   );
 
   const locked = pc === "locked" || sql === "locked";
-  const running = turnOn && pc === "ok" && sql === "ok" && !locked;
+  const succeeded = pc === "ok" && sql === "ok";
+  // A failed/partial stop does not prove that tracing stopped. Keep Stop available.
+  const running = succeeded ? turnOn : turnOn
+    ? pc === "ok" || sql === "ok"
+    : isYes(settings.environments[envIndex]?.trcProfRunning);
 
   if (envIndex >= 0 && envIndex < settings.environments.length) {
     await updateSettings((s) => {
+      if (!s.environments[envIndex] || (s.urlSites[parsed.baseURL]?.[parsed.siteNormalized]?.envId ?? envIndex) !== envIndex) return s;
       const environments = [...s.environments];
       environments[envIndex] = {
         ...environments[envIndex],
         trcProfRunning: running ? "Yes" : "No",
+        traceRequest: { ...request, at: Date.now(), status: succeeded ? "confirmed" : "incomplete" },
       };
       return { ...s, environments };
     });
   }
 
-  chrome.runtime.sendMessage({
+  getExtensionApi().runtime.sendMessage({
     type: "mpu-trace-sync",
     envIndex,
     running,
@@ -233,13 +286,9 @@ export async function toggleTrace(
 
   announce(
     document,
-    locked
-      ? "Trace components not accessible for this user"
-      : running
-        ? "Trace started"
-        : turnOn
-          ? "Trace request failed"
-          : "Trace stopped",
+    !succeeded
+      ? "Trace request incomplete — tracing may still be active. Verify PeopleCode and SQL trace settings in PeopleSoft."
+      : `Trace ${running ? "ON" : "OFF"} save requests acknowledged. Verify the current state in PeopleSoft.`,
   );
 
   return { running, locked };
