@@ -106,12 +106,14 @@ export function bindAgentLibrary(doc: Document): void {
   const onboarding = doc.getElementById("agent-onboarding");
   let preferences: AgentLibraryPreferences = { favoriteIds: [], recentIds: [], onboardingDismissed: false };
   let preferencesRevision = 0;
+  let preferencesSaved = false;
   const pendingFavorites = new Set<string>();
   let selectedId = "";
   const reportFailure = () => { status.textContent = "Unable to save library preferences. Try again."; };
   const savePreferences = (save: () => Promise<AgentLibraryPreferences>, after: () => void, failed = reportFailure) => {
     const revision = preferencesRevision;
     void save().then(value => {
+      preferencesSaved = true;
       // Storage events may already contain a later update from another Options/sidebar view.
       if (preferencesRevision === revision) preferences = value;
       after();
@@ -364,7 +366,7 @@ export function bindAgentLibrary(doc: Document): void {
   getExtensionApi().storage.onChanged.addListener(synchronize);
   doc.defaultView?.addEventListener("pagehide", () => getExtensionApi().storage.onChanged.removeListener(synchronize), { once: true });
   void loadAgentLibraryPreferences().then((value) => {
-    if (preferencesRevision) return;
+    if (preferencesRevision || preferencesSaved) return;
     preferences = value;
     if (onboarding) onboarding.hidden = value.onboardingDismissed;
     render();

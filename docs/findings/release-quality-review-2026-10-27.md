@@ -17,7 +17,9 @@ It is not real PeopleTools or assistive-technology sign-off.
 2. **Preference completion could undo a later view update.** PDF and Agents
    callbacks unconditionally replaced local state after a save, even if a newer
    storage event had already arrived. Delayed-save regressions reproduced this
-   in both libraries. Completion now respects observed storage revisions.
+   in both libraries. Completion now respects observed storage revisions. An
+   additional failing-before regression showed that an initial Agents preference
+   read could overwrite a completed local save; that late read is now ignored.
    Favorite buttons stay focusable and duplicate clicks remain blocked across
    rerenders. These are UI-state repairs, not a change to storage schema.
 3. **One PDF test never exercised the topic filter.** It selected the first
