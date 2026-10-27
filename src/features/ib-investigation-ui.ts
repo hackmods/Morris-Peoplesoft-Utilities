@@ -1,5 +1,6 @@
 import { IB_LIMITS, renderIbInvestigation } from "./ib-investigation";
 import { bindIbCaseUI } from "./ib-case-ui";
+import { mountInvestigationLayout } from "./investigation-layout";
 
 /** Explicit, local file reads; never attach active-page or clipboard evidence. */
 export function bindIbInvestigationUI(doc: Document, root: HTMLElement): void {
@@ -13,7 +14,8 @@ export function bindIbInvestigationUI(doc: Document, root: HTMLElement): void {
   const button = (text: string, id: string) => { const node = make("button", text); node.type = "button"; node.id = id; return node; };
   root.classList.add("mpu-comparison", "mpu-ib-investigation");
   const heading = make("h2", "Integration Broker investigation");
-  const intro = make("p", "Select sanitized JSON evidence samples, then preview a report with operation/node/queue/routing evidence and a manual error checklist. Selection does not read files. Nothing is captured from a PeopleSoft page, fetched, replayed or changed on a server. Files and reports stay in this tab's memory until cleared or reloaded, without extension storage or network requests.");
+  const intro = make("p", "Choose evidence sources, preview the investigation, then review the report before export.");
+  const notice = "Sanitize evidence first. Nothing is saved or sent over the network; no server actions are taken. Prepared mpu-ib-evidence JSON or the manual form only; native monitor/gateway exports are not accepted.";
   const scope = make("p", 'Supported: mpu-ib-evidence JSON envelopes, versions 1 and 2, or records prepared in the form below. Version 2 adds environmentLabel, operationVersion, observedAt, correlationId, subQueue, errorLocation, evidenceNote, payloadRole, payloadVariant (original/transformed/unknown) and payloadXml. This is not a native monitor or gateway export parser. Metadata is reported evidence; no status, routing, delivery or root cause is inferred. Synthetic samples do not verify real-system compatibility.');
   const limits = make("p", "Limits: 1–4 sources including the optional draft; 256,000 bytes, 50 records and 2,000 entries per source, 16 total nesting levels, 256 characters per path segment, 200 characters per metadata value and 4,000 per payload scalar/error/note or XML excerpt. Report limit: 1,000,000 bytes. XML/SOAP subset v1 is bounded inert payload text in version 2, not a native export parser. DTDs, custom entities, processing instructions, raw HTTP and native logs are unsupported. Unknown schema properties, duplicate keys and overflows reject the whole preview.");
   const privacy = make("p", "Sanitize samples before selecting them. Conservative masking can over-mask evidence and cannot detect every secret or business identifier. Sensitive keys, subtrees and suspicious values are masked before reporting. Payload details are omitted by default; including them requires a new preview and review. Review remaining metadata, payload paths and values for business context and scope. Selected filenames are omitted; keep originals to resolve source/line/JSON Pointer citations. Matching IDs or reported statuses do not prove a shared transaction or end-to-end success.");
@@ -24,15 +26,36 @@ export function bindIbInvestigationUI(doc: Document, root: HTMLElement): void {
   const caseRoot = make("div"); caseRoot.id = "mpu-ib-case-workspace";
   const include = make("input"); include.type = "checkbox";
   const status = make("p"); status.id = "mpu-ib-status"; status.setAttribute("aria-live", "polite");
+  status.textContent = "Choose sanitized JSON files or prepare a manual form source, then preview the investigation.";
   const preview = button("Preview IB investigation", "mpu-ib-preview");
   const clear = button("Clear IB evidence and report", "mpu-ib-clear");
-  const report = make("textarea"); report.rows = 20; report.readOnly = true;
+  const report = make("textarea"); report.rows = 10; report.readOnly = true;
   const reviewed = make("input"); reviewed.type = "checkbox"; reviewed.disabled = true;
   const copy = button("Copy reviewed IB report", "mpu-ib-copy"); copy.disabled = true;
   const download = button("Download reviewed IB report", "mpu-ib-download"); download.disabled = true;
-  root.replaceChildren(heading, intro, scope, limits, privacy, example, caseRoot, field("Sanitized IB JSON evidence files", files, "mpu-ib-files"),
-    field("Include sanitized payload detail in the next preview", include, "mpu-ib-include-payload"), status, preview, clear,
-    field("IB investigation report", report, "mpu-ib-report"), field("I reviewed this IB report for sensitive information and scope", reviewed, "mpu-ib-reviewed"), copy, download);
+  mountInvestigationLayout(doc, root, {
+    heading,
+    intro,
+    notice,
+    guidance: [scope, limits, privacy],
+    sources: [
+      field("Sanitized IB JSON evidence files", files, "mpu-ib-files"),
+      example,
+      caseRoot,
+    ],
+    preview: [
+      field("Include sanitized payload detail in the next preview", include, "mpu-ib-include-payload"),
+      preview,
+      clear,
+      status,
+    ],
+    review: [
+      field("IB investigation report", report, "mpu-ib-report"),
+      field("I reviewed this IB report for sensitive information and scope", reviewed, "mpu-ib-reviewed"),
+      copy,
+      download,
+    ],
+  });
   let revision = 0;
   const invalidate = () => {
     revision++; report.value = ""; reviewed.checked = false; reviewed.disabled = true;

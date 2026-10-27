@@ -1,5 +1,8 @@
 # Shared 1.0.36 quality consolidation checkpoint — 2026-10-27
 
+The subsequent investigation-screen usability work targets 1.0.37. These frozen
+packages remain historical; they do not contain the new compact layouts.
+
 **Prepared and verified; not submitted to either store.** Firefox 1.0.34 remains
 the last verified approved/listed version. The frozen 1.0.35 packages lack the
 follow-up quality repairs and must not be uploaded.

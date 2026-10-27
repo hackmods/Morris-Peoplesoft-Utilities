@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.37] — 2026-10-27
+
+- Simplify Scheduler, Integration Broker, configuration comparison and Trace SQL into consistent source, preview and review/export steps. Detailed format guidance and advanced trace evidence expand on demand.
+- Keep sanitization and supported-input boundaries visible, shrink empty report areas, and retain review invalidation, keyboard navigation and local-only file handling.
+
 ## [1.0.36] — 2026-10-27
 
 - Keep later cross-tab preference changes when delayed PDF/Agents saves complete, and preserve favorite-button focus while saving.

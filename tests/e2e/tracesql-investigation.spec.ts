@@ -29,6 +29,8 @@ test("Trace SQL excerpt previews locally with SQLID/plan evidence, keyboard revi
     await expect(page.locator("#mpu-tracesql-status")).toContainText("review box");
     await expect(report).toBeFocused();
     await expect(page.locator("#mpu-tracesql-grouping")).toBeVisible();
+    await expect(page.locator("#mpu-tracesql-grouping")).not.toHaveAttribute("open", "");
+    await page.locator("#mpu-tracesql-grouping > summary").click();
     await expect(page.locator("#mpu-tracesql-from")).toContainText("PS_PERSONAL_DATA");
     await expect(page.locator("#mpu-tracesql-chart-sql")).toHaveAttribute("aria-label", /SQL duration/);
     await expect(page.locator("#mpu-tracesql-internal")).toContainText("Application");

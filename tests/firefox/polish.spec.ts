@@ -36,6 +36,24 @@ async function selectValue(driver: WebDriver, selector: string, value: string): 
     control.value = arguments[1]; control.dispatchEvent(new Event('change', { bubbles: true }));`, selector, value);
 }
 
+test("investigation screens expose the same compact steps and keyboard guidance in Firefox", async ({ driver, origin }) => {
+  for (const [route, selector] of [["scheduler", ".mpu-scheduler"], ["ib", ".mpu-ib-investigation"], ["configuration", ".mpu-config-comparison"], ["tracesql", ".mpu-tracesql"]]) {
+    await navigate(driver, `${origin}/options.html#${route}`);
+    await visible(driver, selector);
+    const headings = await driver.findElements(By.css(`${selector} > .mpu-investigation-step > h3`));
+    expect(await Promise.all(headings.map(heading => heading.getText()))).toEqual(["1. Choose sources", "2. Preview and investigate", "3. Review and export"]);
+    const guidance = await driver.findElement(By.css(`${selector} > .mpu-investigation-guidance`));
+    expect(await guidance.getAttribute("open")).toBeNull();
+    await driver.manage().window().setRect({ width: 480, height: 800 });
+    const summary = await driver.findElement(By.css(`${selector} > .mpu-investigation-guidance > summary`));
+    await driver.executeScript("arguments[0].focus()", summary);
+    await driver.actions().sendKeys(Key.ENTER).perform();
+    expect(await guidance.getAttribute("open")).not.toBeNull();
+    await audit(driver, selector);
+    expect(await driver.executeScript("return document.documentElement.scrollWidth <= innerWidth")).toBe(true);
+  }
+});
+
 test("Oracle PDF lists cover Tools releases and application families with isolated favorites", async ({ driver, origin }) => {
   await navigate(driver, `${origin}/options.html#docs`);
   await visible(driver, "#oracle-docs h2");
