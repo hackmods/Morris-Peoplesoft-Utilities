@@ -243,6 +243,7 @@ test("Scheduler excerpts retain cited uncertainty, require review, export locall
   const before = await extension(driver, "return browser.storage.local.get(null);");
   const files = await visible(driver, "#mpu-scheduler-files");
   await files.sendKeys([resolve("tests/fixtures/scheduler-investigation/scheduler.txt"), resolve("tests/fixtures/scheduler-investigation/distribution.txt")].join("\n"));
+  await driver.findElement(By.xpath("//summary[normalize-space(.)='Optional Process Monitor ticket evidence']")).click();
   await fill(driver, "#mpu-scheduler-pack", "Process Instance: 90002\nUser: PRIVATE-USER");
   const report = await visible(driver, "#mpu-scheduler-report");
   expect(await report.getAttribute("value")).toBe(""); expect(await driver.findElement(By.css("#mpu-scheduler-download")).isEnabled()).toBe(false);
@@ -281,7 +282,7 @@ test("Scheduler excerpts retain cited uncertainty, require review, export locall
   await driver.wait(async () => (await driver.getAllWindowHandles()).length > handles.length, 15_000);
   const opened = (await driver.getAllWindowHandles()).find(handle => !handles.includes(handle))!; await driver.switchTo().window(opened);
   await driver.wait(async () => await driver.getCurrentUrl() === `${origin}/options.html#scheduler`, 15_000);
-  expect(await (await visible(driver, "#mpu-scheduler-pack")).getAttribute("value")).toBe("");
+  expect(await driver.findElement(By.css("#mpu-scheduler-pack")).getAttribute("value")).toBe("");
   expect(await driver.findElement(By.css("#mpu-scheduler-report")).getAttribute("value")).toBe("");
 });
 
@@ -364,6 +365,7 @@ test("Trace SQL excerpts preview locally, keep grouping in tab memory, and rejec
   await expect.poll(() => report.getAttribute("value")).toContain("PS_PERSONAL_DATA");
   expect(await report.getAttribute("value")).toContain("SQLID ");
   expect(await report.getAttribute("value")).toContain("PLAN TREE");
+  await click(driver, "#mpu-tracesql-grouping > summary");
   await expect.poll(() => driver.findElement(By.css("#mpu-tracesql-from")).getText()).toContain("PS_PERSONAL_DATA");
   expect(await driver.findElement(By.css("#mpu-tracesql-chart-sql")).getAttribute("aria-label")).toContain("SQL duration");
   expect(await driver.findElement(By.css("#mpu-tracesql-internal")).getText()).toContain("Application");

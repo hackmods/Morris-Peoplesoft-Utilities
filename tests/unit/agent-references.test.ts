@@ -8,8 +8,35 @@ vi.mock("@/storage/agent-library", () => ({
   dismissAgentOnboarding: vi.fn(), clearAgentRecents: vi.fn(),
 }));
 import { AGENT_REFERENCES, LOCAL_SPECIALIST_REFERENCES, agentReferenceUrl, appendAgentHelp, bindAgentLibrary, buildAgentTaskBrief, filterAgentReferences } from "@/features/agent-references";
+import { loadAgentLibraryPreferences, setAgentFavorite } from "@/storage/agent-library";
 
 describe("public agent references", () => {
+  it("does not replace a completed local save with a late initial preference read", async () => {
+    document.body.innerHTML = '<input id="agent-search"><select id="agent-family"><option value="all">All</option></select><ul id="agent-list"></ul><p id="agent-results"></p><ul id="agent-templates"></ul>';
+    let finishLoad!: (value: { favoriteIds: string[]; recentIds: string[]; onboardingDismissed: boolean }) => void;
+    vi.mocked(loadAgentLibraryPreferences).mockImplementationOnce(() => new Promise(resolve => { finishLoad = resolve; }));
+    const id = AGENT_REFERENCES[0].id;
+    vi.mocked(setAgentFavorite).mockResolvedValueOnce({ favoriteIds: [id], recentIds: [], onboardingDismissed: false });
+    bindAgentLibrary(document);
+    document.querySelector<HTMLButtonElement>(`[data-favorite="${id}"]`)!.click();
+    await Promise.resolve(); await Promise.resolve();
+    finishLoad({ favoriteIds: [], recentIds: [], onboardingDismissed: false });
+    await Promise.resolve(); await Promise.resolve();
+    expect(document.querySelector(`[data-favorite="${id}"]`)?.getAttribute("aria-pressed")).toBe("true");
+  });
+  it("keeps a newer storage update when an older favorite request completes", async () => {
+    document.body.innerHTML = '<input id="agent-search"><select id="agent-family"><option value="all">All</option></select><ul id="agent-list"></ul><p id="agent-results"></p><ul id="agent-templates"></ul>';
+    bindAgentLibrary(document); await Promise.resolve();
+    const id = AGENT_REFERENCES[0].id;
+    let finish!: (value: { favoriteIds: string[]; recentIds: string[]; onboardingDismissed: boolean }) => void;
+    vi.mocked(setAgentFavorite).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    document.querySelector<HTMLButtonElement>(`[data-favorite="${id}"]`)!.click();
+    const listener = vi.mocked(chrome.storage.onChanged.addListener).mock.calls.at(-1)![0];
+    listener({ mpuAgentLibrary: { newValue: { favoriteIds: [], recentIds: [], onboardingDismissed: false } } }, "local");
+    finish({ favoriteIds: [id], recentIds: [], onboardingDismissed: false });
+    await Promise.resolve(); await Promise.resolve();
+    expect(document.querySelector(`[data-favorite="${id}"]`)?.getAttribute("aria-pressed")).toBe("false");
+  });
   it("matches combined task terms and families", () => {
     expect(filterAgentReferences("  FLUID accessibility  ", "all").map((entry) => entry.id)).toEqual(["review-fluid-accessibility"]);
     expect(filterAgentReferences("", "guide").map((entry) => entry.id)).toEqual(["guide-onboarding", "guide-specialist-trainer", "guide-tracesql-literacy"]);

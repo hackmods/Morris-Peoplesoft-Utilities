@@ -1,5 +1,6 @@
 import { SCHEDULER_FORMAT, SCHEDULER_LIMITS, parseSchedulerExcerpt, renderSchedulerInvestigation } from "./scheduler-investigation";
 import { SCHEDULER_CASE_FIELDS, schedulerFocusChoices, type SchedulerCase } from "./scheduler-case";
+import { mountInvestigationLayout } from "./investigation-layout";
 
 /** Session memory only. Selection never triggers a read, capture or network call. */
 export function bindSchedulerInvestigationUI(doc: Document, root: HTMLElement): void {
@@ -13,7 +14,7 @@ export function bindSchedulerInvestigationUI(doc: Document, root: HTMLElement): 
   const button = (text: string, id: string) => { const node = make("button", text); node.type = "button"; node.id = id; return node; };
   root.classList.add("mpu-comparison", "mpu-scheduler");
   const heading = make("h2", "Process Scheduler investigation");
-  const intro = make("p", "Select sanitized log excerpts, optionally paste the existing Process Monitor ticket pack, then preview a combined report. Files and pasted evidence stay in this tab's memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network. No server access or automatic page capture.");
+  const intro = make("p", "Select sanitized Scheduler log excerpts to prepare an investigation report.");
   const scope = make("p", `Supported parser: ${SCHEDULER_FORMAT}. UTF-8 plain text only: at most 4 files, 256,000 bytes and 2,000 physical lines per file, 4,000 characters per line. A timestamp must start a line, use YYYY-MM-DDTHH:mm:ss with optional milliseconds and Z or ±HH:MM. Exact semicolon-delimited Process Instance: 123 and Parent Process Instance: 100 labels provide reported relationship evidence. Native/localized log formats, numeric status codes and other IDs are not interpreted. Unsupported dates and unlabeled lines remain visible with unknown time/instance. Synthetic samples do not verify real-log compatibility.`);
   const privacy = make("p", "Sanitize sources first. Conservative masking cannot detect every secret or business identifier. Sensitive records and their continuations are omitted until the next supported timestamp; private-key blocks stay masked through their end. File names are omitted from the report. Confirm all excerpts refer to the intended environment and capture window; matching numbers or adjacent times do not prove dependencies, completion or a cause.");
   const files = make("input"); files.type = "file"; files.multiple = true; files.accept = ".txt,.log,.out,text/plain";
@@ -30,17 +31,24 @@ export function bindSchedulerInvestigationUI(doc: Document, root: HTMLElement): 
   caseForm.append(field("Evidence references (optional, comma-separated Source 1:L1)", refs, "mpu-scheduler-case-refs"));
   const focus = make("select"); const resetFocus = () => { const option = make("option", "No process focus selected"); option.value = ""; focus.replaceChildren(option); focus.disabled = true; };
   resetFocus();
-  const status = make("p"); status.id = "mpu-scheduler-status"; status.setAttribute("aria-live", "polite");
+  const status = make("p", "Sanitize excerpts, select 1–4 files, then preview the report."); status.id = "mpu-scheduler-status"; status.setAttribute("aria-live", "polite");
   const preview = button("Preview Scheduler investigation", "mpu-scheduler-preview");
   const clear = button("Clear Scheduler evidence and report", "mpu-scheduler-clear");
-  const report = make("textarea"); report.rows = 20; report.readOnly = true;
+  const report = make("textarea"); report.rows = 10; report.readOnly = true;
   const reviewed = make("input"); reviewed.type = "checkbox"; reviewed.disabled = true;
   const copy = button("Copy reviewed Scheduler report", "mpu-scheduler-copy"); copy.disabled = true;
   const download = button("Download reviewed Scheduler report", "mpu-scheduler-download"); download.disabled = true;
-  root.replaceChildren(heading, intro, scope, privacy, field("Sanitized Scheduler log excerpts", files, "mpu-scheduler-files"),
-    field("Sanitized Process Monitor ticket pack (optional, up to 4,000 characters)", pack, "mpu-scheduler-pack"), status, preview, clear,
-    caseForm, field("Process focus (choices load after Preview; source labels only)", focus, "mpu-scheduler-focus"),
-    field("Scheduler investigation report", report, "mpu-scheduler-report"), field("I reviewed this Scheduler report for sensitive information and scope", reviewed, "mpu-scheduler-reviewed"), copy, download);
+  const optionalPack = make("details"); optionalPack.append(make("summary", "Optional Process Monitor ticket evidence"),
+    field("Sanitized Process Monitor ticket pack (optional, up to 4,000 characters)", pack, "mpu-scheduler-pack"));
+  mountInvestigationLayout(doc, root, {
+    heading,
+    intro,
+    notice: "Sanitize sources first. Files and reports stay in this tab's memory; nothing is saved or sent over a network, and there are no server changes. Synthetic samples do not establish compatibility with native Process Scheduler logs.",
+    guidance: [scope, privacy],
+    sources: [field("Sanitized Scheduler log excerpts", files, "mpu-scheduler-files"), optionalPack],
+    preview: [preview, clear, status, caseForm, field("Process focus (choices load after Preview; source labels only)", focus, "mpu-scheduler-focus")],
+    review: [field("Scheduler investigation report", report, "mpu-scheduler-report"), field("I reviewed this Scheduler report for sensitive information and scope", reviewed, "mpu-scheduler-reviewed"), copy, download],
+  });
   let revision = 0;
   const invalidate = () => {
     revision++; report.value = ""; reviewed.checked = false; reviewed.disabled = true;

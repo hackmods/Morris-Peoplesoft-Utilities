@@ -590,6 +590,21 @@ a {
 .mpu-runbooks :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 .mpu-comparison { overflow-wrap: anywhere; min-width: 0; }
+.mpu-investigation > h2 { margin-bottom: .4rem; }
+.mpu-investigation-notice { border-left: 3px solid var(--focus); padding: .65rem .8rem; }
+.mpu-investigation-step { min-width: 0; margin: 1.25rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+.mpu-investigation-step > h3 { margin: 0 0 .8rem; font-size: 1.1rem; }
+.mpu-investigation details { min-width: 0; margin: .75rem 0; padding: .65rem; border: 1px solid var(--border); border-radius: 6px; }
+.mpu-investigation summary { cursor: pointer; font-weight: 600; overflow-wrap: anywhere; }
+.mpu-investigation-source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.mpu-investigation-source-grid fieldset { margin: 0; }
+.mpu-investigation textarea { resize: vertical; }
+.mpu-investigation textarea[readonly]:placeholder-shown { height: 5rem; min-height: 5rem; }
+.mpu-investigation .mpu-investigation-check { display: flex; align-items: flex-start; gap: .6rem; margin: .8rem 0; }
+.mpu-investigation .mpu-investigation-check label { margin: 0; }
+.mpu-investigation .mpu-investigation-check input[type="checkbox"] { order: -1; flex: 0 0 auto; margin: .3rem 0 0; }
+.mpu-investigation [aria-live] { margin: .75rem 0; }
+@media (max-width: 480px) { .mpu-investigation-step { padding: .7rem; } }
 .mpu-comparison label { display: block; margin: .75rem 0; font-weight: 600; }
 .mpu-comparison input, .mpu-comparison select, .mpu-comparison textarea { display: block; box-sizing: border-box; width: 100%; max-width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--border); padding: .55rem; border-radius: 5px; }
 .mpu-comparison button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; margin: .3rem; }

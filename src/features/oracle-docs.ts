@@ -1,62 +1,83 @@
-export type OracleDocCategory = "General Information" | "Development Tools" | "Reporting and Analysis Tools" | "Integration Tools" | "Administration Tools" | "Lifecycle Management Tools";
-export interface OracleDoc { id: string; title: string; category: OracleDocCategory; pdfUrl: string; }
+import snapshot from "./oracle-docs-catalog.json";
+export type OracleDocCategory = string;
+export interface OracleDoc { id: string; title: string; category: OracleDocCategory; pdfUrl: string; release?: string; }
 
-const ROOT = "https://docs.oracle.com/cd/G41076_01/psft/";
-const pdf = (file: string) => `${ROOT}pdf/${file}-b112025.pdf`;
-/** Direct links verified against the Oracle PeopleTools 8.62 PeopleBooks index (snapshot November 2025). */
-export const ORACLE_DOCS: readonly OracleDoc[] = [
-  ["accessibility-guide", "Accessibility Guide", "General Information", "pt862tacs"],
-  ["applications-users-guide", "Applications User’s Guide", "General Information", "pt862tupa"],
-  ["getting-started", "Getting Started with PeopleTools", "General Information", "pt862tgst"],
-  ["application-designer", "Application Designer Developer’s Guide", "Development Tools", "pt862tapd"],
-  ["application-engine", "Application Engine", "Development Tools", "pt862tape"],
-  ["data-distribution", "Data Distribution Framework", "Development Tools", "pt862tmlf"],
-  ["documents-technology", "Documents Technology", "Development Tools", "pt862tdoc"],
-  ["fluid-ui", "Fluid User Interface Developer’s Guide", "Development Tools", "pt862tflu"],
-  ["global-technology", "Global Technology", "Development Tools", "pt862tgbl"],
-  ["optimization-framework", "Optimization Framework", "Development Tools", "pt862topt"],
-  ["peoplecode-api", "PeopleCode API Reference", "Development Tools", "pt862tpcr"],
-  ["portal-technology", "Portal Technology", "Development Tools", "pt862tprt"],
-  ["peoplecode-developer", "PeopleCode Developer’s Guide", "Development Tools", "pt862tpcd"],
-  ["peoplecode-language", "PeopleCode Language Reference", "Development Tools", "pt862tpcl"],
-  ["search-technology", "Search Technology", "Development Tools", "pt862tpst"],
-  ["analytic-calculation-engine", "Analytic Calculation Engine", "Reporting and Analysis Tools", "pt862tace"],
-  ["bi-publisher", "BI Publisher for PeopleSoft", "Reporting and Analysis Tools", "pt862txml"],
-  ["pivot-grid", "Pivot Grid", "Reporting and Analysis Tools", "pt862tpvg"],
-  ["process-scheduler", "Process Scheduler", "Reporting and Analysis Tools", "pt862tprs"],
-  ["ps-nvision", "PS/nVision", "Reporting and Analysis Tools", "pt862tnvs"],
-  ["query", "Query", "Reporting and Analysis Tools", "pt862tpsq"],
-  ["reporting-web-services", "Reporting Web Services", "Reporting and Analysis Tools", "pt862trws"],
-  ["sqr-developers", "SQR for PeopleSoft Developers", "Reporting and Analysis Tools", "pt862tsqr"],
-  ["sqr-language", "SQR Language Reference for PeopleSoft", "Reporting and Analysis Tools", "pt862tsql"],
-  ["tree-manager", "Tree Manager", "Reporting and Analysis Tools", "pt862ttrm"],
-  ["component-interfaces", "Component Interfaces", "Integration Tools", "pt862tcpi"],
-  ["feed-publishing", "Feed Publishing Framework", "Integration Tools", "pt862tfee"],
-  ["integration-broker", "Integration Broker", "Integration Tools", "pt862tibr"],
-  ["integration-broker-admin", "Integration Broker Administration", "Integration Tools", "pt862tiba"],
-  ["integration-broker-monitor", "Integration Broker Service Operations Monitor", "Integration Tools", "pt862tibm"],
-  ["integration-broker-testing", "Integration Broker Testing Utilities and Tools", "Integration Tools", "pt862tibt"],
-  ["multichannel-framework", "MultiChannel Framework", "Integration Tools", "pt862tmcf"],
-  ["supported-integration", "Supported Integration Technologies", "Integration Tools", "pt862tsis"],
-  ["workflow-technology", "Workflow Technology", "Integration Tools", "pt862twfl"],
-  ["automated-configuration", "Automated Configuration Management", "Administration Tools", "pt862tacm"],
-  ["data-management", "Data Management", "Administration Tools", "pt862tadm"],
-  ["performance-monitor", "Performance Monitor", "Administration Tools", "pt862tpfm"],
-  ["security-administration", "Security Administration", "Administration Tools", "pt862tsec"],
-  ["system-server-admin", "System and Server Administration", "Administration Tools", "pt862tsvt"],
-  ["usage-monitor", "Usage Monitor", "Administration Tools", "pt862tusm"],
-  ["change-impact", "Change Impact Analyzer", "Lifecycle Management Tools", "pt862tcia"],
-  ["change-assistant", "Change Assistant and Update Manager", "Lifecycle Management Tools", "pt862tswu"],
-  ["lifecycle-management", "Lifecycle Management Guide", "Lifecycle Management Tools", "pt862tlcm"],
-  ["setup-manager", "Setup Manager", "Lifecycle Management Tools", "pt862tsum"],
-  ["test-framework", "Test Framework", "Lifecycle Management Tools", "pt862tptf"],
-].map(([id, title, category, file]) => ({ id, title, category: category as OracleDocCategory, pdfUrl: pdf(file) }));
+/** Preserve existing favorite IDs and topic labels; PDF URLs come only from the checked snapshot. */
+const originalDocs: readonly Pick<OracleDoc, "id" | "title" | "category">[] = [
+  ["accessibility-guide", "Accessibility Guide", "General Information"],
+  ["applications-users-guide", "Applications User’s Guide", "General Information"],
+  ["getting-started", "Getting Started with PeopleTools", "General Information"],
+  ["application-designer", "Application Designer Developer’s Guide", "Development Tools"],
+  ["application-engine", "Application Engine", "Development Tools"],
+  ["data-distribution", "Data Distribution Framework", "Development Tools"],
+  ["documents-technology", "Documents Technology", "Development Tools"],
+  ["fluid-ui", "Fluid User Interface Developer’s Guide", "Development Tools"],
+  ["global-technology", "Global Technology", "Development Tools"],
+  ["optimization-framework", "Optimization Framework", "Development Tools"],
+  ["peoplecode-api", "PeopleCode API Reference", "Development Tools"],
+  ["portal-technology", "Portal Technology", "Development Tools"],
+  ["peoplecode-developer", "PeopleCode Developer’s Guide", "Development Tools"],
+  ["peoplecode-language", "PeopleCode Language Reference", "Development Tools"],
+  ["search-technology", "Search Technology", "Development Tools"],
+  ["analytic-calculation-engine", "Analytic Calculation Engine", "Reporting and Analysis Tools"],
+  ["bi-publisher", "BI Publisher for PeopleSoft", "Reporting and Analysis Tools"],
+  ["pivot-grid", "Pivot Grid", "Reporting and Analysis Tools"],
+  ["process-scheduler", "Process Scheduler", "Reporting and Analysis Tools"],
+  ["ps-nvision", "PS/nVision", "Reporting and Analysis Tools"],
+  ["query", "Query", "Reporting and Analysis Tools"],
+  ["reporting-web-services", "Reporting Web Services", "Reporting and Analysis Tools"],
+  ["sqr-developers", "SQR for PeopleSoft Developers", "Reporting and Analysis Tools"],
+  ["sqr-language", "SQR Language Reference for PeopleSoft", "Reporting and Analysis Tools"],
+  ["tree-manager", "Tree Manager", "Reporting and Analysis Tools"],
+  ["component-interfaces", "Component Interfaces", "Integration Tools"],
+  ["feed-publishing", "Feed Publishing Framework", "Integration Tools"],
+  ["integration-broker", "Integration Broker", "Integration Tools"],
+  ["integration-broker-admin", "Integration Broker Administration", "Integration Tools"],
+  ["integration-broker-monitor", "Integration Broker Service Operations Monitor", "Integration Tools"],
+  ["integration-broker-testing", "Integration Broker Testing Utilities and Tools", "Integration Tools"],
+  ["multichannel-framework", "MultiChannel Framework", "Integration Tools"],
+  ["supported-integration", "Supported Integration Technologies", "Integration Tools"],
+  ["workflow-technology", "Workflow Technology", "Integration Tools"],
+  ["automated-configuration", "Automated Configuration Management", "Administration Tools"],
+  ["data-management", "Data Management", "Administration Tools"],
+  ["performance-monitor", "Performance Monitor", "Administration Tools"],
+  ["security-administration", "Security Administration", "Administration Tools"],
+  ["system-server-admin", "System and Server Administration", "Administration Tools"],
+  ["usage-monitor", "Usage Monitor", "Administration Tools"],
+  ["change-impact", "Change Impact Analyzer", "Lifecycle Management Tools"],
+  ["change-assistant", "Change Assistant and Update Manager", "Lifecycle Management Tools"],
+  ["lifecycle-management", "Lifecycle Management Guide", "Lifecycle Management Tools"],
+  ["setup-manager", "Setup Manager", "Lifecycle Management Tools"],
+  ["test-framework", "Test Framework", "Lifecycle Management Tools"],
+].map(([id, title, category]) => ({ id, title, category }));
 
 export const ORACLE_PEOPLETOOLS_LIBRARY_URL = "https://docs.oracle.com/cd/G41076_01/psft/index.html";
 export const ORACLE_PEOPLETOOLS_HELP_URL = "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt862help";
 export const ORACLE_PEOPLETOOLS_UPDATES_URL = "https://docs.oracle.com/en/applications/peoplesoft/peopletools/index.html";
 export const ORACLE_PEOPLETOOLS_PATCHES_URL = "https://support.oracle.com/knowledgefs/?docId=KA614";
-export const ORACLE_DOCS_SNAPSHOT = "November 2025";
+export const ORACLE_DOCS_SNAPSHOT = snapshot.checked;
+
+const normalizeTitle = (title: string) => title.toLowerCase().replace(/[’']/g, "");
+const originalByTitle = new Map(originalDocs.map(doc => [normalizeTitle(doc.title), doc]));
+export const ORACLE_CATALOGS = snapshot.catalogs.map(catalog => ({
+  ...catalog,
+  books: catalog.books.map(book => {
+    const original = originalByTitle.get(normalizeTitle(book.title));
+    return {
+      ...book,
+      title: original?.title ?? book.title,
+      id: catalog.id === "tools-8.62" && original ? original.id : `${catalog.id}:${normalizeTitle(book.title).replace(/[^a-z0-9]+/g, "-")}`,
+      category: catalog.family === "tools" ? original?.category || "General Information" : "Application manuals",
+      release: catalog.family === "tools" ? `PeopleTools ${catalog.release}` : catalog.release,
+    };
+  }),
+}));
+export const ORACLE_DOCS: readonly OracleDoc[] = ORACLE_CATALOGS.find(catalog => catalog.id === "tools-8.62")!.books;
+export const ALL_ORACLE_DOCS: readonly OracleDoc[] = ORACLE_CATALOGS.flatMap(catalog => catalog.books);
+
+export function getOracleDocCatalog(toolsVersion = "8.62", family = "") {
+  return family ? ORACLE_CATALOGS.find(catalog => catalog.family === family) : ORACLE_CATALOGS.find(catalog => catalog.id === `tools-${resolvePeopleToolsDocsVersion(toolsVersion).label}`);
+}
 
 export interface OraclePeopleToolsRelease {
   version: string;
@@ -79,9 +100,9 @@ export function getOraclePeopleToolsRelease(input: string | null | undefined): O
   return match ? ORACLE_PEOPLETOOLS_RELEASES.find((release) => release.version === match[1]) : undefined;
 }
 
-export function filterOracleDocs(query = "", category = "all"): readonly OracleDoc[] {
+export function filterOracleDocs(query = "", category = "all", books: readonly OracleDoc[] = ORACLE_DOCS): readonly OracleDoc[] {
   const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
-  return ORACLE_DOCS.filter((entry) => (category === "all" || entry.category === category) && terms.every((term) => `${entry.id} ${entry.title} ${entry.category} PeopleTools 8.62`.toLocaleLowerCase().includes(term)));
+  return books.filter((entry) => (category === "all" || entry.category === category) && terms.every((term) => `${entry.id} ${entry.title} ${entry.category} ${entry.release ?? "PeopleTools 8.62"}`.toLocaleLowerCase().includes(term)));
 }
 
 export type OracleDocsVersion = { supported: true; label: string; patch?: string } | { supported: false; label: string };

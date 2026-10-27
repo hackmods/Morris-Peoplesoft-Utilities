@@ -14,6 +14,7 @@ test("Scheduler excerpts preview locally with source evidence, keyboard review/e
     await page.goto(`chrome-extension://${extensionId}/options.html#scheduler`);
     const before = await context.serviceWorkers()[0].evaluate(async () => JSON.stringify(await chrome.storage.local.get(null)));
     await page.getByLabel("Sanitized Scheduler log excerpts", { exact: true }).setInputFiles([resolve("tests/fixtures/scheduler-investigation/scheduler.txt"), resolve("tests/fixtures/scheduler-investigation/distribution.txt")]);
+    await page.getByText("Optional Process Monitor ticket evidence", { exact: true }).click();
     await page.locator("#mpu-scheduler-pack").fill("Process Instance: 90002\nUser: PRIVATE-USER");
     const report = page.getByLabel("Scheduler investigation report", { exact: true });
     await expect(report).toHaveValue(""); await expect(page.locator("#mpu-scheduler-download")).toBeDisabled();

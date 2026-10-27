@@ -1,11 +1,12 @@
 import { bindModalDialog } from "./dialog";
+import { mountInvestigationLayout } from "./investigation-layout";
 import {
   TRACESQL_FORMAT,
   TRACESQL_LIMITS,
   aggregateByTable,
   aggregateByWhere,
   parseTraceSqlAsync,
-  renderTraceSqlInvestigations,
+  renderParsedTraceSqlInvestigations,
   renderTraceSqlSqlOnly,
   timedPeopleCodeEnds,
   type TracePlanNode,
@@ -39,7 +40,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const heading = make("h2", "Trace SQL investigation");
   const intro = make(
     "p",
-    "Select one or two sanitized PeopleSoft .tracesql or .trc excerpts, or paste sanitized text, then preview a hotspot report in this browser tab. Two files add a SQLID/FROM compare section. Evidence stays in tab memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network.",
+    "Choose one sanitized trace excerpt to investigate hotspots, or two to compare SQLID and FROM evidence.",
   );
   const scope = make(
     "p",
@@ -85,7 +86,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   cancel.disabled = true;
   const clear = button("Clear Trace SQL evidence and report", "mpu-tracesql-clear");
   const report = make("textarea");
-  report.rows = 22;
+  report.rows = 10;
   report.readOnly = true;
   const reviewed = make("input");
   reviewed.type = "checkbox";
@@ -99,11 +100,11 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const downloadSql = button("Download reviewed SQL statements only (first excerpt)", "mpu-tracesql-download-sql");
   downloadSql.disabled = true;
 
-  const grouping = make("section");
+  const grouping = make("details");
   grouping.id = "mpu-tracesql-grouping";
   grouping.hidden = true;
   grouping.setAttribute("aria-label", "Trace SQL grouping");
-  const groupingHeading = make("h3", "Filterable grouping (first excerpt)");
+  const groupingHeading = make("summary", "Explore charts, groups and source evidence (first excerpt)");
   const charts = make("div");
   charts.id = "mpu-tracesql-charts";
   const sqlChart = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -145,26 +146,19 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     field("Source excerpt (first file or paste)", source, "mpu-tracesql-source"),
   );
 
-  root.replaceChildren(
-    heading,
-    intro,
-    scope,
-    privacy,
-    agents,
-    field("Sanitized tracesql / trc excerpt", files, "mpu-tracesql-files"),
-    field("Sanitized tracesql paste (optional if no file)", paste, "mpu-tracesql-paste"),
-    status,
-    preview,
-    cancel,
-    clear,
-    grouping,
-    field("Trace SQL investigation report", report, "mpu-tracesql-report"),
-    field("I reviewed this Trace SQL report for sensitive information and scope", reviewed, "mpu-tracesql-reviewed"),
-    copy,
-    download,
-    copySql,
-    downloadSql,
-  );
+  const pastedSource = make("details");
+  pastedSource.append(make("summary", "Or paste a sanitized trace excerpt"),
+    field("Sanitized tracesql paste (optional if no file)", paste, "mpu-tracesql-paste"));
+  mountInvestigationLayout(doc, root, {
+    heading, intro,
+    notice: "Sanitize sources first and review every unmasked SQL string before sharing. Evidence stays in this tab; no storage or network transfer. The named marker parser has synthetic coverage, not verified native-log compatibility.",
+    guidance: [scope, privacy],
+    sources: [field("Sanitized tracesql / trc excerpt", files, "mpu-tracesql-files"), pastedSource],
+    preview: [preview, cancel, clear, status, grouping],
+    review: [field("Trace SQL investigation report", report, "mpu-tracesql-report"),
+      field("I reviewed this Trace SQL report for sensitive information and scope", reviewed, "mpu-tracesql-reviewed"),
+      copy, download, copySql, downloadSql, agents],
+  });
 
   let revision = 0;
   let parsed: TraceSqlReport | null = null;
@@ -300,6 +294,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
   const jumpToLine = (line: number) => {
     const target = grouping.querySelector<HTMLElement>(`#mpu-tracesql-line-${line}`);
     if (!target) return;
+    grouping.open = true;
     grouping.querySelectorAll("[data-current-line]").forEach((node) => node.removeAttribute("data-current-line"));
     target.setAttribute("data-current-line", "true");
     target.scrollIntoView({ block: "nearest" });
@@ -385,6 +380,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
     sourceLines = [];
     sqlOnly = "";
     grouping.hidden = true;
+    grouping.open = false;
     sqlid.value = "";
     fromTable.replaceChildren();
     whereTable.replaceChildren();
@@ -509,7 +505,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
         );
       }
       if (generation !== revision || !root.isConnected || signal.aborted) return;
-      report.value = renderTraceSqlInvestigations(texts);
+      report.value = renderParsedTraceSqlInvestigations(reports);
       parsed = reports[0];
       sqlOnly = renderTraceSqlSqlOnly(parsed);
       sourceLines = texts[0].replace(/^\ufeff/, "").split(/\r\n|\r|\n/);

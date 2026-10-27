@@ -1,4 +1,5 @@
 import { CONFIG_LIMITS, parseConfiguration, compareConfigurations, renderConfigurationComparison, type ConfigurationFormat } from "./configuration-comparison";
+import { mountInvestigationLayout } from "./investigation-layout";
 
 function make<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, text?: string) {
   const node = doc.createElement(tag);
@@ -10,9 +11,10 @@ function make<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, text
 export function bindConfigurationComparisonUI(doc: Document, root: HTMLElement): void {
   root.classList.add("mpu-comparison", "mpu-config-comparison");
   const heading = make(doc, "h2", "Compare configuration files");
-  const intro = make(doc, "p", "Choose two sanitized UTF-8 files and their formats. This compares local text only; it cannot read or change a server. Files and reports stay in this tab's memory until cleared or reloaded. Nothing is saved in extension storage or sent over the network.");
+  const intro = make(doc, "p", "Choose two sanitized configuration files to compare their text.");
   const limits = make(doc, "p", "Supported: INI-style sections with key=value, or JSON objects; both files must use the same format. Each file is limited to 256,000 UTF-8 bytes, 2,000 entries, 16 nesting levels and 4,000 characters per scalar. No PSADMIN override lists, templates, scripts, logs, includes or variable expansion. Comments, ordering and formatting are not compared. Matching text does not establish effective runtime configuration. Sanitize files before selecting them: masking is conservative and cannot detect every secret or business identifier.");
-  const status = make(doc, "p"); status.setAttribute("aria-live", "polite"); status.id = "mpu-config-status";
+  const notice = "Sanitize files first. This compares text, not effective runtime configuration. Nothing is saved or sent over the network; files and reports stay in this tab. No server is read or changed.";
+  const status = make(doc, "p", "Select two sanitized files, then preview their comparison."); status.setAttribute("aria-live", "polite"); status.id = "mpu-config-status";
   const field = (labelText: string, control: HTMLElement, id: string) => {
     const row = make(doc, "div"); const label = make(doc, "label", labelText);
     control.id = id; label.htmlFor = id; row.append(label, control); return row;
@@ -35,7 +37,12 @@ export function bindConfigurationComparisonUI(doc: Document, root: HTMLElement):
   const review = field("I reviewed this report for sensitive information", reviewed, "mpu-config-reviewed");
   const copy = make(doc, "button", "Copy reviewed configuration report"); copy.type = "button"; copy.disabled = true;
   const download = make(doc, "button", "Download reviewed configuration report"); download.type = "button"; download.disabled = true;
-  root.replaceChildren(heading, intro, limits, status, ...sides, preview, clear, report, review, copy, download);
+  const sourceGrid = make(doc, "div"); sourceGrid.className = "mpu-investigation-source-grid"; sourceGrid.append(...sides);
+  report.rows = 10;
+  mountInvestigationLayout(doc, root, {
+    heading, intro, notice, guidance: [limits], sources: [sourceGrid],
+    preview: [preview, clear, status], review: [report, review, copy, download],
+  });
   let revision = 0;
   const invalidate = () => {
     revision++; report.value = ""; reviewed.checked = false; reviewed.disabled = true;

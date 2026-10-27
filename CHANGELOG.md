@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.37] — 2026-10-27
+
+- Simplify Scheduler, Integration Broker, configuration comparison and Trace SQL into consistent source, preview and review/export steps. Detailed format guidance and advanced trace evidence expand on demand.
+- Keep sanitization and supported-input boundaries visible, shrink empty report areas, and retain review invalidation, keyboard navigation and local-only file handling.
+
+## [1.0.36] — 2026-10-27
+
+- Keep later cross-tab preference changes when delayed PDF/Agents saves complete, and preserve favorite-button focus while saving.
+- Reuse cancellable Trace SQL parse results for reports instead of parsing each excerpt again synchronously.
+- Clarify empty manual lists, correct the topic-filter regression test, and date future catalog refreshes when they actually run.
+
+## [1.0.35] — 2026-10-27
+
+- Expand the searchable Oracle PDF catalog to individual manuals for PeopleTools 8.56–8.63, HCM 9.2 Update Image 55, FSCM 9.2 Update Image 57 and Campus Solutions 9.2 Update Image 39.
+- Keep manual search, topic filters, favorites and recent history available for each catalog. Preserve saved 8.62 favorites and distinguish application releases from Tools versions.
+
 ## [1.0.34] — 2026-10-25
 
 - Ship the shared Chrome/Firefox Scheduler, Integration Broker and Trace SQL investigation workspaces, including reviewed local exports and the recent workflow/focus repairs described below.

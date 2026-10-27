@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { bindTraceSqlInvestigationUI } from "@/features/tracesql-investigation-ui";
 import { parseTraceSql, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
+import * as traceSql from "@/features/tracesql-investigation";
 
 const sample = readFileSync(resolve(process.cwd(), "tests/fixtures/tracesql-investigation/sample.tracesql"), "utf8");
 let root: HTMLElement;
@@ -26,6 +27,14 @@ beforeEach(() => {
 });
 
 describe("session-only Trace SQL UI", () => {
+  it("does not reparse the excerpts synchronously after cancellable parsing", async () => {
+    const synchronousReport = vi.spyOn(traceSql, "renderTraceSqlInvestigations");
+    try {
+      select(); button("preview").click();
+      await vi.waitFor(() => expect(report().value).toContain("SQLID "));
+      expect(synchronousReport).not.toHaveBeenCalled();
+    } finally { synchronousReport.mockRestore(); }
+  });
   it("starts with a next-action empty state and accepts paste without a file", async () => {
     expect(status().textContent).toMatch(/sanitized/);
     button("preview").click();
