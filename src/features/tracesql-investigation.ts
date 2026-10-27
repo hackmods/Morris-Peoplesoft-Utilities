@@ -769,9 +769,14 @@ function renderCompareSection(out: ReportLines, title: string, rows: TraceSqlCom
 /** One or two sanitized excerpts. Filenames omitted. Session memory only. */
 export function renderTraceSqlInvestigations(texts: string[]): string {
   if (texts.length < 1 || texts.length > TRACESQL_LIMITS.maxFiles) throw new Error("Unsupported tracesql file count.");
-  if (texts.length === 1) return renderTraceSqlInvestigation(texts[0]);
-  const left = parseTraceSql(texts[0]);
-  const right = parseTraceSql(texts[1]);
+  return renderParsedTraceSqlInvestigations(texts.map(parseTraceSql));
+}
+
+/** Reuse validated parse results so the UI never repeats parsing after its cancellable pass. */
+export function renderParsedTraceSqlInvestigations(reports: readonly TraceSqlReport[]): string {
+  if (reports.length < 1 || reports.length > TRACESQL_LIMITS.maxFiles) throw new Error("Unsupported tracesql file count.");
+  if (reports.length === 1) return renderParsedTraceSqlInvestigation(reports[0]);
+  const [left, right] = reports;
   const out = new ReportLines([
     "MPU Trace SQL investigation — report v1",
     `Parser: ${TRACESQL_FORMAT}`,
@@ -786,13 +791,16 @@ export function renderTraceSqlInvestigations(texts: string[]): string {
   renderCompareSection(out, "COMPARE BY SQLID — present in one side or duration delta", compareTraceSqlBySqlId(left, right));
   out.push("", "FROM comparison matches exact parsed text, including aliases and joins. Different text does not establish missing database tables.");
   renderCompareSection(out, "COMPARE BY FROM — exact text present in one side or duration delta", compareTraceSqlByFrom(left, right));
-  out.push("", "EXCERPT A — full hotspot report", renderTraceSqlInvestigation(texts[0]), "", "EXCERPT B — full hotspot report", renderTraceSqlInvestigation(texts[1]));
+  out.push("", "EXCERPT A — full hotspot report", renderParsedTraceSqlInvestigation(left), "", "EXCERPT B — full hotspot report", renderParsedTraceSqlInvestigation(right));
   return out.join();
 }
 
 /** Plain-text investigation report. Session memory only — no storage or network. */
 export function renderTraceSqlInvestigation(input: string): string {
-  const report = parseTraceSql(input);
+  return renderParsedTraceSqlInvestigation(parseTraceSql(input));
+}
+
+function renderParsedTraceSqlInvestigation(report: TraceSqlReport): string {
   const byTable = aggregateByTable(report.statements);
   const byWhere = aggregateByWhere(report.statements);
   const topSql = [...report.statements]

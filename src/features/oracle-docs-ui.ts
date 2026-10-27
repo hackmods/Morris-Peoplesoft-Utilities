@@ -78,6 +78,8 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   let recents = new Map<string, boolean | number>();
   let live = true;
   const touched = new Set<string>();
+  const preferenceRevisions = new Map<string, number>();
+  const pendingFavorites = new Set<string>();
   const render = () => {
     if (!live) return;
     const focused = (doc.activeElement as HTMLElement | null)?.dataset.oracleFocus;
@@ -108,7 +110,13 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
       if (view.value === "recent") return typeof recents.get(entry.id) === "number";
       return true;
     }).sort((a, b) => view.value === "recent" ? Number(recents.get(b.id) || 0) - Number(recents.get(a.id) || 0) : a.title.localeCompare(b.title));
-    status.textContent = results.length ? `${results.length} manual${results.length === 1 ? "" : "s"} · ${family?.title ?? "PeopleTools"} ${catalog.release}` : `No manuals match this search in ${family?.title ?? "PeopleTools"} ${catalog.release}.`;
+    const catalogLabel = `${family?.title ?? "PeopleTools"} ${catalog.release}`;
+    status.textContent = results.length ? `${results.length} manual${results.length === 1 ? "" : "s"} · ${catalogLabel}`
+      : view.value === "favorites" && !search.value.trim() && category.value === "all"
+        ? `No favorite manuals in ${catalogLabel} yet. Choose All manuals and Add favorite to keep a manual here.`
+        : view.value === "recent" && !search.value.trim() && category.value === "all"
+          ? `No recently opened manuals in ${catalogLabel} yet. Choose All manuals and open a PDF to add one here.`
+          : `No manuals match these filters in ${catalogLabel}. Clear the search or choose All topics and All manuals.`;
     list.replaceChildren(...results.map((entry) => renderEntry(entry)));
     if (focused) (Array.from(list.querySelectorAll<HTMLElement>("[data-oracle-focus]")).find((item) => item.dataset.oracleFocus === focused) || view).focus();
   };
@@ -121,19 +129,36 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     favorite.setAttribute("aria-pressed", String(favorites.get(entry.id) === true));
     favorite.dataset.oracleFocus = `${entry.id}:favorite`;
     favorite.setAttribute("aria-label", `${favorite.textContent}: ${entry.title}`);
-    let savingFavorite = false;
+    if (pendingFavorites.has(entry.id)) favorite.setAttribute("aria-disabled", "true");
     favorite.addEventListener("click", () => {
-      if (savingFavorite) return;
-      savingFavorite = true;
+      if (!live || pendingFavorites.has(entry.id)) return;
+      pendingFavorites.add(entry.id);
       favorite.setAttribute("aria-disabled", "true");
       const next = favorites.get(entry.id) !== true;
-      void getExtensionApi().storage.local.set({ [`${FAVORITE_KEY}${entry.id}`]: next }).then(() => {
-        if (!live) return; favorites.set(entry.id, next); render();
-      }).catch(() => { savingFavorite = false; favorite.removeAttribute("aria-disabled"); status.textContent = "Unable to save the manual favorite."; });
+      const key = `${FAVORITE_KEY}${entry.id}`;
+      const revision = preferenceRevisions.get(key);
+      void getExtensionApi().storage.local.set({ [key]: next }).then(() => {
+        pendingFavorites.delete(entry.id);
+        if (!live) return;
+        touched.add(key);
+        if (preferenceRevisions.get(key) === revision) favorites.set(entry.id, next);
+        render();
+      }).catch(() => {
+        pendingFavorites.delete(entry.id);
+        if (!live) return;
+        render(); status.textContent = "Unable to save the manual favorite. Try again.";
+      });
     });
     title.addEventListener("click", () => {
-      void getExtensionApi().storage.local.set({ [`${RECENT_KEY}${entry.id}`]: Date.now() }).then(() => {
-        if (!live) return; recents.set(entry.id, Date.now()); render();
+      if (!live) return;
+      const key = `${RECENT_KEY}${entry.id}`;
+      const revision = preferenceRevisions.get(key);
+      const opened = Date.now();
+      void getExtensionApi().storage.local.set({ [key]: opened }).then(() => {
+        if (!live) return;
+        touched.add(key);
+        if (preferenceRevisions.get(key) === revision) recents.set(entry.id, opened);
+        render();
       }).catch(() => { /* The manual still opens if recent-history storage is unavailable. */ });
     });
     const topic = doc.createElement("span"); topic.className = "oracle-docs-category"; topic.textContent = `${entry.release} · ${entry.category}`;
@@ -143,11 +168,12 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   toolsInput.addEventListener("input", render);
 
   const onStorageChanged = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
-    if (area !== "local") return;
+    if (!live || area !== "local") return;
     if (!Object.keys(changes).some((key) => (key.startsWith(FAVORITE_KEY) && ids.has(key.slice(FAVORITE_KEY.length))) || (key.startsWith(RECENT_KEY) && ids.has(key.slice(RECENT_KEY.length))))) return;
     const nextFavorites = new Map(favorites); const nextRecents = new Map(recents);
     for (const [key, change] of Object.entries(changes)) {
       touched.add(key);
+      preferenceRevisions.set(key, (preferenceRevisions.get(key) ?? 0) + 1);
       if (key.startsWith(FAVORITE_KEY)) { const id = key.slice(FAVORITE_KEY.length); if (ids.has(id)) { if (change.newValue === true || change.newValue === false) nextFavorites.set(id, change.newValue); else nextFavorites.delete(id); } }
       if (key.startsWith(RECENT_KEY)) { const id = key.slice(RECENT_KEY.length); if (ids.has(id)) { if (typeof change.newValue === "number" && Number.isFinite(change.newValue) && change.newValue > 0) nextRecents.set(id, change.newValue); else nextRecents.delete(id); } }
     }

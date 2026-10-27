@@ -34,4 +34,4 @@ const catalogs = await Promise.all(sources.map(async source => {
   return { ...source, sourceUrl: response.url, books };
 }));
 
-await writeFile(new URL("../src/features/oracle-docs-catalog.json", import.meta.url), JSON.stringify({ checked: "2026-10-27", catalogs }, null, 2) + "\n");
+await writeFile(new URL("../src/features/oracle-docs-catalog.json", import.meta.url), JSON.stringify({ checked: new Date().toISOString().slice(0, 10), catalogs }, null, 2) + "\n");

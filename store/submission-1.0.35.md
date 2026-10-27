@@ -1,5 +1,9 @@
 # Shared 1.0.35 PDF repair deployment checkpoint
 
+**Superseded by the 1.0.36 quality consolidation. Do not upload these frozen
+1.0.35 candidates.** They lack the subsequent preference-race and redundant
+Trace SQL parsing repairs. Their hashes remain historical evidence.
+
 Prepared 2026-10-27 after the maintainer reported that the PDF feature had not
 expanded the needed links. The repair adds individual searchable PDFs for both
 Tools releases and application families. **Neither store has received 1.0.35

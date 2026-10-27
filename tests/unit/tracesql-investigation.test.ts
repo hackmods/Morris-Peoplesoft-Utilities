@@ -2,12 +2,20 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { compareTraceSqlByFrom, compareTraceSqlBySqlId, parseTraceSql, parseTraceSqlAsync, renderTraceSqlInvestigation, renderTraceSqlInvestigations, renderTraceSqlSqlOnly, timedPeopleCodeEnds, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
+import { compareTraceSqlByFrom, compareTraceSqlBySqlId, parseTraceSql, parseTraceSqlAsync, renderParsedTraceSqlInvestigations, renderTraceSqlInvestigation, renderTraceSqlInvestigations, renderTraceSqlSqlOnly, timedPeopleCodeEnds, TRACESQL_LIMITS } from "@/features/tracesql-investigation";
 import { md5Bytes, traceMagicSqlId } from "@/features/tracesql-md5";
 
 const fixture = (name: string) => readFileSync(resolve(process.cwd(), "tests/fixtures/tracesql-investigation", name), "utf8");
 
 describe("PeopleSoft tracesql markers v1", () => {
+  it("renders the same single and comparison evidence from already parsed reports", () => {
+    const texts = [fixture("sample.tracesql"), "COM Stmt=SELECT B.DEPTID FROM PS_JOB B\n Dur=1.000 EXE"];
+    for (const selected of [texts.slice(0, 1), texts]) {
+      expect(renderParsedTraceSqlInvestigations(selected.map(parseTraceSql))).toBe(renderTraceSqlInvestigations(selected));
+    }
+    expect(() => renderParsedTraceSqlInvestigations([])).toThrow("file count");
+    expect(() => renderParsedTraceSqlInvestigations(texts.concat(texts).map(parseTraceSql))).toThrow("file count");
+  });
   it("extracts PS SQL, durations, binds, PeopleCode ends and error lines from the synthetic fixture", () => {
     const report = parseTraceSql(fixture("sample.tracesql"));
     expect(report.statements.map((s) => s.kind)).toEqual(["SELECT", "INSERT", "UPDATE", "DELETE"]);

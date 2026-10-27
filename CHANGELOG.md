@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.36] — 2026-10-27
+
+- Keep later cross-tab preference changes when delayed PDF/Agents saves complete, and preserve favorite-button focus while saving.
+- Reuse cancellable Trace SQL parse results for reports instead of parsing each excerpt again synchronously.
+- Clarify empty manual lists, correct the topic-filter regression test, and date future catalog refreshes when they actually run.
+
 ## [1.0.35] — 2026-10-27
 
 - Expand the searchable Oracle PDF catalog to individual manuals for PeopleTools 8.56–8.63, HCM 9.2 Update Image 55, FSCM 9.2 Update Image 57 and Campus Solutions 9.2 Update Image 39.

@@ -5,7 +5,7 @@ import {
   aggregateByTable,
   aggregateByWhere,
   parseTraceSqlAsync,
-  renderTraceSqlInvestigations,
+  renderParsedTraceSqlInvestigations,
   renderTraceSqlSqlOnly,
   timedPeopleCodeEnds,
   type TracePlanNode,
@@ -509,7 +509,7 @@ export function bindTraceSqlInvestigationUI(doc: Document, root: HTMLElement): v
         );
       }
       if (generation !== revision || !root.isConnected || signal.aborted) return;
-      report.value = renderTraceSqlInvestigations(texts);
+      report.value = renderParsedTraceSqlInvestigations(reports);
       parsed = reports[0];
       sqlOnly = renderTraceSqlSqlOnly(parsed);
       sourceLines = texts[0].replace(/^\ufeff/, "").split(/\r\n|\r|\n/);

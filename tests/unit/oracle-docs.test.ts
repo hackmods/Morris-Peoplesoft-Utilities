@@ -67,13 +67,57 @@ describe("Oracle docs UI", () => {
     const cleanup = bindOracleDocs(document, root);
     await Promise.resolve();
     const search = root.querySelector<HTMLInputElement>('input[type="search"]')!;
-    const topic = root.querySelector<HTMLSelectElement>("select")!;
+    const topic = root.querySelectorAll<HTMLSelectElement>("select")[1];
     search.focus(); search.value = "PeopleCode language"; search.dispatchEvent(new Event("input"));
     expect(document.activeElement).toBe(search);
     expect(root.querySelectorAll(".oracle-docs-item")).toHaveLength(1);
     expect(root.textContent).toContain("PeopleCode Language Reference");
     topic.value = "Development Tools"; topic.dispatchEvent(new Event("change"));
     expect(root.querySelectorAll(".oracle-docs-item")).toHaveLength(1);
+    topic.value = "Administration Tools"; topic.dispatchEvent(new Event("change"));
+    expect(root.querySelectorAll(".oracle-docs-item")).toHaveLength(0);
+    cleanup();
+  });
+
+  it("does not overwrite a newer cross-tab favorite change with a delayed write completion", async () => {
+    const root = document.createElement("section"); document.body.append(root);
+    const cleanup = bindOracleDocs(document, root);
+    await Promise.resolve();
+    const search = root.querySelector<HTMLInputElement>('input[type="search"]')!;
+    search.value = "query"; search.dispatchEvent(new Event("input"));
+    let finish!: () => void;
+    vi.mocked(chrome.storage.local.set).mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    root.querySelector<HTMLButtonElement>("button")!.click();
+    const listener = vi.mocked(chrome.storage.onChanged.addListener).mock.calls.at(-1)![0];
+    listener({ "mpuOracleDocsFavorite:query": { newValue: false } }, "local");
+    finish(); await Promise.resolve(); await Promise.resolve();
+    expect(root.querySelector("button")?.getAttribute("aria-pressed")).toBe("false");
+    cleanup();
+  });
+
+  it("explains empty favorites and keeps a pending favorite focusable through storage refresh", async () => {
+    const root = document.createElement("section"); document.body.append(root);
+    const cleanup = bindOracleDocs(document, root); await Promise.resolve();
+    const view = root.querySelectorAll<HTMLSelectElement>("select")[2];
+    view.value = "favorites"; view.dispatchEvent(new Event("change"));
+    expect(root.textContent).toContain("No favorite manuals in PeopleTools 8.62 yet");
+    view.value = "all"; view.dispatchEvent(new Event("change"));
+    const search = root.querySelector<HTMLInputElement>('input[type="search"]')!;
+    search.value = "query"; search.dispatchEvent(new Event("input"));
+    let finish!: () => void;
+    const save = vi.mocked(chrome.storage.local.set).mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const favorite = root.querySelector<HTMLButtonElement>("button")!;
+    favorite.focus(); favorite.click();
+    const calls = save.mock.calls.length;
+    const listener = vi.mocked(chrome.storage.onChanged.addListener).mock.calls.at(-1)![0];
+    listener({ "mpuOracleDocsFavorite:query": { newValue: true } }, "local");
+    const pending = root.querySelector<HTMLButtonElement>("button")!;
+    expect(document.activeElement).toBe(pending);
+    expect(pending.disabled).toBe(false);
+    expect(pending.getAttribute("aria-disabled")).toBe("true");
+    pending.click(); expect(save.mock.calls.length).toBe(calls);
+    finish(); await Promise.resolve(); await Promise.resolve();
+    expect(root.querySelector("button")?.hasAttribute("aria-disabled")).toBe(false);
     cleanup();
   });
 

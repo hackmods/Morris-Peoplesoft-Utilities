@@ -106,9 +106,18 @@ export function bindAgentLibrary(doc: Document): void {
   const onboarding = doc.getElementById("agent-onboarding");
   let preferences: AgentLibraryPreferences = { favoriteIds: [], recentIds: [], onboardingDismissed: false };
   let preferencesRevision = 0;
+  const pendingFavorites = new Set<string>();
   let selectedId = "";
   const reportFailure = () => { status.textContent = "Unable to save library preferences. Try again."; };
-  const use = (id: string) => { void recordAgentUse(id).then((value) => { preferences = value; }).catch(reportFailure); };
+  const savePreferences = (save: () => Promise<AgentLibraryPreferences>, after: () => void, failed = reportFailure) => {
+    const revision = preferencesRevision;
+    void save().then(value => {
+      // Storage events may already contain a later update from another Options/sidebar view.
+      if (preferencesRevision === revision) preferences = value;
+      after();
+    }).catch(failed);
+  };
+  const use = (id: string) => savePreferences(() => recordAgentUse(id), () => render());
   const briefPanel = doc.getElementById("agent-brief-panel");
   const brief = doc.getElementById("agent-brief") as HTMLTextAreaElement | null;
   const briefStatus = doc.getElementById("agent-brief-status");
@@ -291,12 +300,13 @@ export function bindAgentLibrary(doc: Document): void {
       favorite.textContent = isFavorite ? "Remove favorite" : "Add favorite";
       favorite.setAttribute("aria-label", `${favorite.textContent}: ${agent.title}`);
       favorite.setAttribute("aria-pressed", String(isFavorite));
+      if (pendingFavorites.has(agent.id)) favorite.setAttribute("aria-disabled", "true");
       favorite.addEventListener("click", () => {
-        favorite.disabled = true;
-        void setAgentFavorite(agent.id, !isFavorite).then((value) => {
-          preferences = value;
-          render();
-        }).catch(() => { favorite.disabled = false; reportFailure(); });
+        if (pendingFavorites.has(agent.id)) return;
+        pendingFavorites.add(agent.id); favorite.setAttribute("aria-disabled", "true");
+        savePreferences(() => setAgentFavorite(agent.id, !isFavorite), () => {
+          pendingFavorites.delete(agent.id); render();
+        }, () => { pendingFavorites.delete(agent.id); render(); reportFailure(); });
       });
       favorite.dataset.favorite = agent.id;
       actions.append(instructions, favorite);
@@ -327,10 +337,10 @@ export function bindAgentLibrary(doc: Document): void {
     search.focus();
   }));
   doc.getElementById("agent-dismiss-onboarding")?.addEventListener("click", () => {
-    void dismissAgentOnboarding().then((value) => { preferences = value; if (onboarding) onboarding.hidden = true; search.focus(); }).catch(reportFailure);
+    savePreferences(dismissAgentOnboarding, () => { if (onboarding) onboarding.hidden = preferences.onboardingDismissed; search.focus(); });
   });
   doc.getElementById("agent-clear-recents")?.addEventListener("click", () => {
-    void clearAgentRecents().then((value) => { preferences = value; render(); }).catch(reportFailure);
+    savePreferences(clearAgentRecents, () => render());
   });
   doc.getElementById("agent-brief-reset")?.addEventListener("click", () => {
     if (brief && selectedId) {
