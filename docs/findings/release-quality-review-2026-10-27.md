@@ -65,3 +65,14 @@ demonstrated failure and is deferred.
 
 No new feature module, permission, telemetry, automatic capture, persistent draft
 or remote service is introduced. PR #44 remains the existing review location.
+
+## Verification
+
+Final `npm run release:check`: 468 tests, unchanged coverage gates, lint/types,
+fresh dual packages, browser parity and all release audits passed. The local
+consolidation journeys passed 52 Chromium and 20 actual Firefox scenarios.
+Exact final source `b091aa8` then passed audit, Chromium, Firefox 140 and current
+Firefox CI, including the late initial-read repair. Historical renderer hashes
+independently pin unchanged single/comparison report bytes. The source archive
+reproduces all 29 runtime files; exact artifact hashes and the outstanding store
+status are in [the 1.0.36 checkpoint](../../store/submission-1.0.36.md).
