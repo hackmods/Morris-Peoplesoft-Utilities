@@ -1,6 +1,6 @@
 {
   "name": "morris-peoplesoft-utilities",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "private": true,
   "description": "Morris PeopleSoft Utilities — PeopleSoft Classic and Fluid productivity for Chrome and Firefox",
   "type": "module",

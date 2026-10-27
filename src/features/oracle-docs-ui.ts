@@ -1,9 +1,9 @@
 import { getExtensionApi } from "../platform/browser";
-import { filterOracleDocs, getManualFamilyLinks, getOraclePeopleToolsRelease, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_LIBRARY_URL, ORACLE_PEOPLETOOLS_PATCHES_URL, ORACLE_PEOPLETOOLS_RELEASES, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
+import { ALL_ORACLE_DOCS, filterOracleDocs, getManualFamilyLinks, getOracleDocCatalog, getOraclePeopleToolsRelease, ORACLE_DOCS, ORACLE_DOCS_SNAPSHOT, ORACLE_PEOPLETOOLS_PATCHES_URL, ORACLE_PEOPLETOOLS_RELEASES, ORACLE_PEOPLETOOLS_UPDATES_URL, resolvePeopleToolsDocsVersion, type OracleDoc } from "./oracle-docs";
 
 const FAVORITE_KEY = "mpuOracleDocsFavorite:";
 const RECENT_KEY = "mpuOracleDocsRecent:";
-const ids = new Set(ORACLE_DOCS.map((item) => item.id));
+const ids = new Set(ALL_ORACLE_DOCS.map((item) => item.id));
 
 function externalLink(doc: Document, url: string, text: string): HTMLAnchorElement {
   const anchor = doc.createElement("a"); anchor.href = url; anchor.textContent = text;
@@ -37,7 +37,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   versionNote.textContent = "PeopleTools tools version is separate from the application release and PUM image. This hub does not infer either one.";
   const source = doc.createElement("p");
   source.append("Official sources: ", externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "PeopleTools releases and documentation updates"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_PATCHES_URL, "PeopleTools patch downloads and build information (Oracle Support)"));
-  const updateNote = doc.createElement("p"); updateNote.textContent = `The curated PDF list is for PeopleTools 8.62 and was checked against Oracle's ${ORACLE_DOCS_SNAPSHOT} index. Release links open Oracle's current books for that release; an entered build number does not pin a historical PDF build.`;
+  const updateNote = doc.createElement("p"); updateNote.textContent = `PDF links checked against Oracle's indexes on ${ORACLE_DOCS_SNAPSHOT}. Select a Tools release or an application family to browse individual manuals. Application lists are labelled with their release and Update Image; they are independent of the Tools version. An entered build number does not pin a historical PDF build.`;
 
   const toolsLabel = doc.createElement("label"); toolsLabel.textContent = "PeopleTools version";
   const toolsInput = doc.createElement("input"); toolsInput.type = "text"; toolsInput.value = initialToolsRel?.trim() || "8.62"; toolsInput.placeholder = "8.62 or 8.62.06";
@@ -49,7 +49,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   toolsLabel.append(toolsInput, releaseOptions);
   const familyLabel = doc.createElement("label"); familyLabel.textContent = "Application manual family";
   const familySelect = doc.createElement("select");
-  const blank = doc.createElement("option"); blank.value = ""; blank.textContent = "Choose a family"; familySelect.appendChild(blank);
+  const blank = doc.createElement("option"); blank.value = ""; blank.textContent = "PeopleTools manuals"; familySelect.appendChild(blank);
   for (const family of getManualFamilyLinks()) { const option = doc.createElement("option"); option.value = family.id; option.textContent = family.title; familySelect.appendChild(option); }
   familyLabel.appendChild(familySelect);
   const familyLink = doc.createElement("p");
@@ -57,9 +57,11 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     familyLink.replaceChildren();
     const family = getManualFamilyLinks().find((entry) => entry.id === familySelect.value);
     if (family) familyLink.append(externalLink(doc, family.url, `Open ${family.title} documentation index`));
+    category.value = "all";
+    render();
   });
 
-  const searchLabel = doc.createElement("label"); searchLabel.textContent = "Search PeopleTools manuals";
+  const searchLabel = doc.createElement("label"); searchLabel.textContent = "Search manuals";
   const search = doc.createElement("input"); search.type = "search"; search.autocomplete = "off"; searchLabel.appendChild(search);
   const categoryLabel = doc.createElement("label"); categoryLabel.textContent = "Topic";
   const category = doc.createElement("select");
@@ -81,22 +83,32 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     const focused = (doc.activeElement as HTMLElement | null)?.dataset.oracleFocus;
     const match = resolvePeopleToolsDocsVersion(toolsInput.value);
     const release = getOraclePeopleToolsRelease(toolsInput.value || "8.62");
+    const catalog = getOracleDocCatalog(toolsInput.value || "8.62", familySelect.value);
+    const family = getManualFamilyLinks().find(item => item.id === familySelect.value);
+    toolsInput.disabled = Boolean(family);
+    const selectedCategory = category.value;
+    category.replaceChildren(all, ...[...new Set((catalog?.books ?? []).map(entry => entry.category))].map(name => {
+      const option = doc.createElement("option"); option.value = name; option.textContent = name; return option;
+    }));
+    category.value = [...category.options].some(option => option.value === selectedCategory) ? selectedCategory : "all";
     intro.textContent = match.supported
       ? `PeopleTools ${match.label}${match.patch ? `.${match.patch}` : ""} selected. The release links open Oracle's current documentation; verify the exact patch against your system. No documents are fetched until you open a link.`
       : `The entered version “${match.label}” is not matched to this PeopleTools 8.62 catalog. Choose a supported release on Oracle's documentation index below.`;
     source.replaceChildren(externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "All PeopleTools versions and documentation updates"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_PATCHES_URL, "Patch downloads and build information (Oracle Support)"));
-    if (release) {
+    if (family && catalog) {
+      intro.textContent = `${family.title} ${catalog.release}. This application release/Update Image is independent of your PeopleTools version; confirm applicability against your system. No documents are fetched until you open a link.`;
+      source.append(" · ", externalLink(doc, catalog.sourceUrl, `${family.title} ${catalog.release} PDF catalog`));
+    } else if (release) {
       source.append(" · ", externalLink(doc, release.peopleBooksUrl, `PeopleTools ${release.version} PeopleBooks (PDF)`), " · ", externalLink(doc, release.helpUrl, `PeopleTools ${release.version} online help (HTML)`));
-      if (release.version === "8.62") source.append(" · ", externalLink(doc, ORACLE_PEOPLETOOLS_LIBRARY_URL, "Browse the 8.62 PDF catalog"));
+      if (catalog) source.append(" · ", externalLink(doc, catalog.sourceUrl, `Browse the ${release.version} PDF catalog`));
     }
-    if (!match.supported) { list.replaceChildren(); status.textContent = "Choose a supported release or open Oracle's index; MPU will not substitute a different version."; return; }
-    if (match.label !== "8.62") { list.replaceChildren(); status.textContent = `The curated manual list is for 8.62. Use the ${match.label} PeopleBooks or HTML link above for this release; MPU will not substitute another release.`; return; }
-    const results = filterOracleDocs(search.value, category.value).filter((entry) => {
+    if (!catalog) { list.replaceChildren(); status.textContent = "Choose a supported release or open Oracle's index; MPU will not substitute a different version."; return; }
+    const results = filterOracleDocs(search.value, category.value, catalog.books).filter((entry) => {
       if (view.value === "favorites") return favorites.get(entry.id) === true;
       if (view.value === "recent") return typeof recents.get(entry.id) === "number";
       return true;
     }).sort((a, b) => view.value === "recent" ? Number(recents.get(b.id) || 0) - Number(recents.get(a.id) || 0) : a.title.localeCompare(b.title));
-    status.textContent = results.length ? `${results.length} manual${results.length === 1 ? "" : "s"}` : "No manuals match this search.";
+    status.textContent = results.length ? `${results.length} manual${results.length === 1 ? "" : "s"} · ${family?.title ?? "PeopleTools"} ${catalog.release}` : `No manuals match this search in ${family?.title ?? "PeopleTools"} ${catalog.release}.`;
     list.replaceChildren(...results.map((entry) => renderEntry(entry)));
     if (focused) (Array.from(list.querySelectorAll<HTMLElement>("[data-oracle-focus]")).find((item) => item.dataset.oracleFocus === focused) || view).focus();
   };
@@ -124,7 +136,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
         if (!live) return; recents.set(entry.id, Date.now()); render();
       }).catch(() => { /* The manual still opens if recent-history storage is unavailable. */ });
     });
-    const topic = doc.createElement("span"); topic.className = "oracle-docs-category"; topic.textContent = entry.category;
+    const topic = doc.createElement("span"); topic.className = "oracle-docs-category"; topic.textContent = `${entry.release} · ${entry.category}`;
     row.append(title, topic, favorite); return row;
   };
   search.addEventListener("input", render); category.addEventListener("change", render); view.addEventListener("change", render);
@@ -143,7 +155,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   };
   getExtensionApi().storage.onChanged.addListener(onStorageChanged);
   render();
-  void getExtensionApi().storage.local.get(ORACLE_DOCS.flatMap((entry) => [FAVORITE_KEY + entry.id, RECENT_KEY + entry.id])).then((raw) => {
+  void getExtensionApi().storage.local.get(ALL_ORACLE_DOCS.flatMap((entry) => [FAVORITE_KEY + entry.id, RECENT_KEY + entry.id])).then((raw) => {
     if (!live) return;
     const loadedFavorites = safeRead(raw, FAVORITE_KEY, "boolean");
     const loadedRecents = safeRead(raw, RECENT_KEY, "number");

@@ -1,10 +1,11 @@
-export type OracleDocCategory = "General Information" | "Development Tools" | "Reporting and Analysis Tools" | "Integration Tools" | "Administration Tools" | "Lifecycle Management Tools";
-export interface OracleDoc { id: string; title: string; category: OracleDocCategory; pdfUrl: string; }
+import snapshot from "./oracle-docs-catalog.json";
+export type OracleDocCategory = string;
+export interface OracleDoc { id: string; title: string; category: OracleDocCategory; pdfUrl: string; release?: string; }
 
 const ROOT = "https://docs.oracle.com/cd/G41076_01/psft/";
 const pdf = (file: string) => `${ROOT}pdf/${file}-b112025.pdf`;
 /** Direct links verified against the Oracle PeopleTools 8.62 PeopleBooks index (snapshot November 2025). */
-export const ORACLE_DOCS: readonly OracleDoc[] = [
+const originalDocs: readonly OracleDoc[] = [
   ["accessibility-guide", "Accessibility Guide", "General Information", "pt862tacs"],
   ["applications-users-guide", "Applications User’s Guide", "General Information", "pt862tupa"],
   ["getting-started", "Getting Started with PeopleTools", "General Information", "pt862tgst"],
@@ -56,7 +57,29 @@ export const ORACLE_PEOPLETOOLS_LIBRARY_URL = "https://docs.oracle.com/cd/G41076
 export const ORACLE_PEOPLETOOLS_HELP_URL = "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt862help";
 export const ORACLE_PEOPLETOOLS_UPDATES_URL = "https://docs.oracle.com/en/applications/peoplesoft/peopletools/index.html";
 export const ORACLE_PEOPLETOOLS_PATCHES_URL = "https://support.oracle.com/knowledgefs/?docId=KA614";
-export const ORACLE_DOCS_SNAPSHOT = "November 2025";
+export const ORACLE_DOCS_SNAPSHOT = snapshot.checked;
+
+const normalizeTitle = (title: string) => title.toLowerCase().replace(/[’']/g, "");
+const originalByTitle = new Map(originalDocs.map(doc => [normalizeTitle(doc.title), doc]));
+export const ORACLE_CATALOGS = snapshot.catalogs.map(catalog => ({
+  ...catalog,
+  books: catalog.books.map(book => {
+    const original = originalByTitle.get(normalizeTitle(book.title));
+    return {
+      ...book,
+      title: original?.title ?? book.title,
+      id: catalog.id === "tools-8.62" && original ? original.id : `${catalog.id}:${normalizeTitle(book.title).replace(/[^a-z0-9]+/g, "-")}`,
+      category: catalog.family === "tools" ? original?.category || "General Information" : "Application manuals",
+      release: catalog.family === "tools" ? `PeopleTools ${catalog.release}` : catalog.release,
+    };
+  }),
+}));
+export const ORACLE_DOCS: readonly OracleDoc[] = ORACLE_CATALOGS.find(catalog => catalog.id === "tools-8.62")!.books;
+export const ALL_ORACLE_DOCS: readonly OracleDoc[] = ORACLE_CATALOGS.flatMap(catalog => catalog.books);
+
+export function getOracleDocCatalog(toolsVersion = "8.62", family = "") {
+  return family ? ORACLE_CATALOGS.find(catalog => catalog.family === family) : ORACLE_CATALOGS.find(catalog => catalog.id === `tools-${resolvePeopleToolsDocsVersion(toolsVersion).label}`);
+}
 
 export interface OraclePeopleToolsRelease {
   version: string;
@@ -79,9 +102,9 @@ export function getOraclePeopleToolsRelease(input: string | null | undefined): O
   return match ? ORACLE_PEOPLETOOLS_RELEASES.find((release) => release.version === match[1]) : undefined;
 }
 
-export function filterOracleDocs(query = "", category = "all"): readonly OracleDoc[] {
+export function filterOracleDocs(query = "", category = "all", books: readonly OracleDoc[] = ORACLE_DOCS): readonly OracleDoc[] {
   const terms = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
-  return ORACLE_DOCS.filter((entry) => (category === "all" || entry.category === category) && terms.every((term) => `${entry.id} ${entry.title} ${entry.category} PeopleTools 8.62`.toLocaleLowerCase().includes(term)));
+  return books.filter((entry) => (category === "all" || entry.category === category) && terms.every((term) => `${entry.id} ${entry.title} ${entry.category} ${entry.release ?? "PeopleTools 8.62"}`.toLocaleLowerCase().includes(term)));
 }
 
 export type OracleDocsVersion = { supported: true; label: string; patch?: string } | { supported: false; label: string };

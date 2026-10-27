@@ -1,0 +1,2148 @@
+{
+  "checked": "2026-10-27",
+  "catalogs": [
+    {
+      "id": "tools-8.63",
+      "family": "tools",
+      "release": "8.63",
+      "url": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/index.html",
+      "sourceUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/accessibility-guide/accessibility-guide.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/applications-user-s-guide/applications-users-guide.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/getting-started-with-peopletools/getting-started-peopletools.pdf"
+        },
+        {
+          "title": "Using and Managing the PeopleSoft Online Help",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/using-and-managing-the-peoplesoft-online-help/using-and-managing-peoplesoft-online-help.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/application-designer-developer-s-guide/application-designer-developers-guide.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/application-engine/application-engine.pdf"
+        },
+        {
+          "title": "Data Distribution Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/data-distribution-framework/data-distribution-framework.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/documents-technology/documents-technology.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/fluid-user-interface-developer-s-guide/fluid-user-interface-developers-guide.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/global-technology/global-technology.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/optimization-framework/optimization-framework.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/peoplecode-api-reference/peoplecode-api-reference.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/peoplecode-developer-s-guide/peoplecode-developers-guide.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/peoplecode-language-reference/peoplecode-language-reference.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/portal-technology/portal-technology.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/search-technology/search-technology.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/analytic-calculation-engine/analytic-calculation-engine.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/bi-publisher-for-peoplesoft/bi-publisher-peoplesoft.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/pivot-grid/pivot-grid.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/process-scheduler/process-scheduler.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/ps-nvision/ps-nvision.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/query/query.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/reporting-web-services/reporting-web-services.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/sqr-for-peoplesoft-developers/sqr-peoplesoft-developers.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/sqr-language-reference-for-peoplesoft/sqr-language-reference-peoplesoft.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/tree-manager/tree-manager.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/component-interfaces/component-interfaces.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/feed-publishing-framework/feed-publishing-framework.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/integration-broker/integration-broker.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/integration-broker-administration/integration-broker-administration.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/integration-broker-service-operations-monitor/integration-broker-service-operations-monitor.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/integration-broker-testing-utilities-and-tools/integration-broker-testing-utilities-and-tools.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/multichannel-framework/multichannel-framework.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/supported-integration-technologies/supported-integration-technologies.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/workflow-technology/workflow-technology.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/automated-configuration-management/automated-configuration-management.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/data-management/data-management.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/performance-monitor/performance-monitor.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/security-administration/security-administration.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/system-and-server-administration/system-and-server-administration.pdf"
+        },
+        {
+          "title": "Usage Monitor",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/usage-monitor/usage-monitor.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/change-assistant-and-update-manager/change-assistant-and-update-manager.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/change-impact-analyzer/change-impact-analyzer.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/lifecycle-management-guide/lifecycle-management-guide.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/setup-manager/setup-manager.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peopletools/8.63/test-framework/test-framework.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.62",
+      "family": "tools",
+      "release": "8.62",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt862pb",
+      "sourceUrl": "https://docs.oracle.com/cd/G41076_01/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tacs-b112025.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tupa-b112025.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tgst-b112025.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tapd-b112025.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tape-b112025.pdf"
+        },
+        {
+          "title": "Data Distribution Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tmlf-b112025.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tdoc-b112025.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tflu-b112025.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tgbl-b112025.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862topt-b112025.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpcr-b112025.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpcd-b112025.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpcl-b112025.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tprt-b112025.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpst-b112025.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tace-b112025.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862txml-b112025.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpvg-b112025.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tprs-b112025.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tnvs-b112025.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpsq-b112025.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862trws-b112025.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tsqr-b112025.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tsql-b112025.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862ttrm-b112025.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tcpi-b112025.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tfee-b112025.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibr-b112025.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tiba-b112025.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibm-b112025.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tibt-b112025.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tmcf-b112025.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tsis-b112025.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862twfl-b112025.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tacm-b112025.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tadm-b112025.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tpfm-b112025.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tsec-b112025.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tsvt-b112025.pdf"
+        },
+        {
+          "title": "Usage Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tusm-b112025.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tswu-b112025.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tcia-b112025.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tlcm-b112025.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tsum-b112025.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G41076_01/psft/pdf/pt862tptf-b112025.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.61",
+      "family": "tools",
+      "release": "8.61",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt861pb",
+      "sourceUrl": "https://docs.oracle.com/cd/G36973_01/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tacs-b072025.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tupa-b072025.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tgst-b072025.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tapd-b072025.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tape-b072025.pdf"
+        },
+        {
+          "title": "Data Distribution Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tmlf-b072025.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tdoc-b072025.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tflu-b072025.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tgbl-b072025.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861topt-b072025.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpcr-b072025.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpcd-b072025.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpcl-b072025.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tprt-b072025.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpst-b072025.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tace-b072025.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861txml-b072025.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpvg-b072025.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tprs-b072025.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tnvs-b072025.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpsq-b072025.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861trws-b072025.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tsqr-b072025.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tsql-b072025.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861ttrm-b072025.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tcpi-b072025.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tfee-b072025.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tibr-b072025.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tiba-b072025.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tibm-b072025.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tibt-b072025.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tmcf-b072025.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tsis-b072025.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861twfl-b072025.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tacm-b072025.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tadm-b072025.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tpfm-b072025.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tsec-b072025.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tsvt-b072025.pdf"
+        },
+        {
+          "title": "Usage Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tusm-b072025.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tswu-b072025.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tcia-b072025.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tlcm-b072025.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tsum-b072025.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G36973_01/psft/pdf/pt861tptf-b072025.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.60",
+      "family": "tools",
+      "release": "8.60",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt860pb",
+      "sourceUrl": "https://docs.oracle.com/cd/G10811_01/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tacs-b072024.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tupa-b072024.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tgst-b072024.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tapd-b072024.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tape-b072024.pdf"
+        },
+        {
+          "title": "Data Distribution Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tmlf-b072024.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tdoc-b072024.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tflu-b072024.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tgbl-b072024.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860topt-b072024.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpcr-b072024.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpcd-b072024.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpcl-b072024.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tprt-b072024.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpst-b072024.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tace-b072024.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860txml-b072024.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpvg-b072024.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tprs-b072024.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tnvs-b072024.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpsq-b072024.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860trws-b072024.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tsqr-b072024.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tsql-b072024.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860ttrm-b072024.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tcpi-b072024.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tfee-b072024.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tibr-b072024.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tiba-b072024.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tibm-b072024.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tibt-b072024.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tmcf-b072024.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tsis-b072024.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860twfl-b072024.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tacm-b072024.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tadm-b072024.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tpfm-b072024.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tsec-b072024.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tsvt-b072024.pdf"
+        },
+        {
+          "title": "Usage Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tusm-b072024.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tswu-b072024.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tcia-b072024.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tlcm-b072024.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tsum-b072024.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/G10811_01/psft/pdf/pt860tptf-b072024.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.59",
+      "family": "tools",
+      "release": "8.59",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt859pb",
+      "sourceUrl": "https://docs.oracle.com/cd/F86651_01/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tacs-b092023.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tupa-b092023.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tgst-b092023.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tapd-b092023.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tape-b092023.pdf"
+        },
+        {
+          "title": "Data Distribution Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tmlf-b092023.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tdoc-b092023.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tflu-b092023.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tgbl-b092023.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859topt-b092023.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpcr-b092023.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpcd-b092023.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpcl-b092023.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tprt-b092023.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpst-b092023.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tace-b092023.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859txml-b092023.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpvg-b092023.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tprs-b092023.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tnvs-b092023.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpsq-b092023.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859trws-b092023.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tsqr-b092023.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tsql-b092023.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859ttrm-b092023.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tcpi-b092023.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tfee-b092023.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tibr-b092023.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tiba-b092023.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tibm-b092023.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tibt-b092023.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tmcf-b092023.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tsis-b092023.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859twfl-b092023.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tacm-b092023.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tadm-b092023.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tpfm-b092023.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tsec-b092023.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tsvt-b092023.pdf"
+        },
+        {
+          "title": "Usage Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tusm-b092023.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tswu-b092023.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tcia-b092023.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tlcm-b092023.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tsum-b092023.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F86651_01/psft/pdf/pt859tptf-b092023.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.58",
+      "family": "tools",
+      "release": "8.58",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt858pb",
+      "sourceUrl": "https://docs.oracle.com/cd/F44948_01/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tacs-b072021.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tupa-b072021.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tgst-b072021.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tapd-b072021.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tape-b072021.pdf"
+        },
+        {
+          "title": "Data Distribution Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tmlf-b072021.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tdoc-b072021.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tflu-b072021.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tgbl-b072021.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858topt-b072021.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpcr-b072021.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpcd-b072021.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpcl-b072021.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tprt-b072021.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpst-b072021.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tace-b072021.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858txml-b072021.pdf"
+        },
+        {
+          "title": "Cube Builder",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tcub-b072021.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpvg-b072021.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tprs-b072021.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tnvs-b072021.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpsq-b072021.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858trws-b072021.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tsqr-b072021.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tsql-b072021.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858ttrm-b072021.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tcpi-b072021.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tfee-b072021.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tibr-b072021.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tiba-b072021.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tibm-b072021.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tibt-b072021.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tmcf-b072021.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tsis-b072021.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858twfl-b072021.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tacm-b072021.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tadm-b072021.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tpfm-b072021.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tsec-b072021.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tsvt-b072021.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tswu-b072021.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tcia-b072021.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tlcm-b072021.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tsum-b072021.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F44948_01/psft/pdf/pt858tptf-b072021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.57",
+      "family": "tools",
+      "release": "8.57",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt857pb",
+      "sourceUrl": "https://docs.oracle.com/cd/F28300_01/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tacs-b022020.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tupa-b022020.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tgst-b022020.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tapd-b022020.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tape-b022020.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tdoc-b022020.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tflu-b022020.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tgbl-b022020.pdf"
+        },
+        {
+          "title": "Mobile Application Platform",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tmap-b022020.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857topt-b022020.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpcr-b022020.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpcd-b022020.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpcl-b022020.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tprt-b022020.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpst-b022020.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tace-b022020.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857txml-b022020.pdf"
+        },
+        {
+          "title": "Cube Builder",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tcub-b022020.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpvg-b022020.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tprs-b022020.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tnvs-b022020.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpsq-b022020.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857trws-b022020.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tsqr-b022020.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tsql-b022020.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857ttrm-b022020.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tcpi-b022020.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tfee-b022020.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tibr-b022020.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tiba-b022020.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tibm-b022020.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tibt-b022020.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tmcf-b022020.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tsis-b022020.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857twfl-b022020.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tacm-b022020.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tadm-b022020.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tpfm-b022020.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tsec-b022020.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tsvt-b022020.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tswu-b022020.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tcia-b022020.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tlcm-b022020.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tsum-b022020.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/F28300_01/psft/pdf/pt857tptf-b022020.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tools-8.56",
+      "family": "tools",
+      "release": "8.56",
+      "url": "https://www.oracle.com/pls/topic/lookup?ctx=en%2Fapplications%2Fpeoplesoft%2Fpeopletools&id=pt856pb",
+      "sourceUrl": "https://docs.oracle.com/cd/E92520_02/psft/index.html",
+      "books": [
+        {
+          "title": "Accessibility Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tacs-b102018.pdf"
+        },
+        {
+          "title": "Applications User's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tupa-b102018.pdf"
+        },
+        {
+          "title": "Getting Started with PeopleTools",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tgst-b102018.pdf"
+        },
+        {
+          "title": "Application Designer Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tapd-b102018.pdf"
+        },
+        {
+          "title": "Application Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tape-b102018.pdf"
+        },
+        {
+          "title": "Documents Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tdoc-b102018.pdf"
+        },
+        {
+          "title": "Fluid User Interface Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tflu-b102018.pdf"
+        },
+        {
+          "title": "Global Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tgbl-b102018.pdf"
+        },
+        {
+          "title": "Mobile Application Platform",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tmap-b102018.pdf"
+        },
+        {
+          "title": "Optimization Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856topt-b102018.pdf"
+        },
+        {
+          "title": "PeopleCode API Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpcr-b102018.pdf"
+        },
+        {
+          "title": "PeopleCode Developer's Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpcd-b102018.pdf"
+        },
+        {
+          "title": "PeopleCode Language Reference",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpcl-b102018.pdf"
+        },
+        {
+          "title": "Portal Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tprt-b102018.pdf"
+        },
+        {
+          "title": "Search Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpst-b102018.pdf"
+        },
+        {
+          "title": "Analytic Calculation Engine",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tace-b102018.pdf"
+        },
+        {
+          "title": "BI Publisher for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856txml-b102018.pdf"
+        },
+        {
+          "title": "Cube Builder",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tcub-b102018.pdf"
+        },
+        {
+          "title": "Pivot Grid",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpvg-b102018.pdf"
+        },
+        {
+          "title": "Process Scheduler",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tprs-b102018.pdf"
+        },
+        {
+          "title": "PS/nVision",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tnvs-b102018.pdf"
+        },
+        {
+          "title": "Query",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpsq-b102018.pdf"
+        },
+        {
+          "title": "Reporting Web Services",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856trws-b102018.pdf"
+        },
+        {
+          "title": "SQR for PeopleSoft Developers",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tsqr-b102018.pdf"
+        },
+        {
+          "title": "SQR Language Reference for PeopleSoft",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tsql-b102018.pdf"
+        },
+        {
+          "title": "Tree Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856ttrm-b102018.pdf"
+        },
+        {
+          "title": "Component Interfaces",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tcpi-b102018.pdf"
+        },
+        {
+          "title": "Feed Publishing Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tfee-b102018.pdf"
+        },
+        {
+          "title": "Integration Broker",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tibr-b102018.pdf"
+        },
+        {
+          "title": "Integration Broker Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tiba-b102018.pdf"
+        },
+        {
+          "title": "Integration Broker Service Operations Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tibm-b102018.pdf"
+        },
+        {
+          "title": "Integration Broker Testing Utilities and Tools",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tibt-b102018.pdf"
+        },
+        {
+          "title": "MultiChannel Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tmcf-b102018.pdf"
+        },
+        {
+          "title": "Supported Integration Technologies",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tsis-b102018.pdf"
+        },
+        {
+          "title": "Workflow Technology",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856twfl-b102018.pdf"
+        },
+        {
+          "title": "Automated Configuration Management",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tacm-b102018.pdf"
+        },
+        {
+          "title": "Data Management",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tadm-b102018.pdf"
+        },
+        {
+          "title": "Performance Monitor",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tpfm-b102018.pdf"
+        },
+        {
+          "title": "Security Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tsec-b102018.pdf"
+        },
+        {
+          "title": "System and Server Administration",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tsvt-b102018.pdf"
+        },
+        {
+          "title": "Change Assistant and Update Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tswu-b102018.pdf"
+        },
+        {
+          "title": "Change Impact Analyzer",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tcia-b102018.pdf"
+        },
+        {
+          "title": "Lifecycle Management Guide",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tlcm-b102018.pdf"
+        },
+        {
+          "title": "Setup Manager",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tsum-b102018.pdf"
+        },
+        {
+          "title": "Test Framework",
+          "pdfUrl": "https://docs.oracle.com/cd/E92520_02/psft/pdf/pt856tptf-b102018.pdf"
+        }
+      ]
+    },
+    {
+      "id": "hcm-9.2.055",
+      "family": "hcm",
+      "release": "9.2 · Update Image 55",
+      "url": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/index.html",
+      "sourceUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/index.html",
+      "books": [
+        {
+          "title": "Active Analytics Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/active-analytics-framework/active-analytics-framework.pdf"
+        },
+        {
+          "title": "Application Fundamentals",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/application-fundamentals/application-fundamentals.pdf"
+        },
+        {
+          "title": "Application Integration Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/application-integration-framework/application-integration-framework.pdf"
+        },
+        {
+          "title": "Approval Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/approval-framework/approval-framework.pdf"
+        },
+        {
+          "title": "Data Transformer",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/data-transformer/data-transformer.pdf"
+        },
+        {
+          "title": "Enterprise Components",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/enterprise-components/enterprise-components.pdf"
+        },
+        {
+          "title": "Events and Notifications Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/events-and-notifications-framework/events-and-notifications-framework.pdf"
+        },
+        {
+          "title": "Integration Interfaces",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/integration-interfaces/integration-interfaces.pdf"
+        },
+        {
+          "title": "Using and Managing the PeopleSoft Online Help",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/using-and-managing-the-peoplesoft-online-help/using-and-managing-peoplesoft-online-help.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Workforce",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-workforce/peoplesoft-human-resources-administer-workforce.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage French Public Sector",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-french-public-sector/peoplesoft-human-resources-manage-french-public-sector.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage German Public Sector",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-german-public-sector/peoplesoft-human-resources-manage-german-public-sector.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Labor Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-labor-administration/peoplesoft-human-resources-manage-labor-administration.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Positions",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-positions/peoplesoft-human-resources-manage-positions.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Monitor Absence",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-monitor-absence/peoplesoft-human-resources-monitor-absence.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Track Flexible Service",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-track-flexible-service/peoplesoft-human-resources-track-flexible-service.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Track Global Assignments",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-track-global-assignments/peoplesoft-human-resources-track-global-assignments.pdf"
+        },
+        {
+          "title": "PeopleSoft ePerformance",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-eperformance/peoplesoft-eperformance.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Training and Tuition Reimbursement",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-training-and-tuition-reimbursement/peoplesoft-human-resources-administer-training-and-tuition-reimbursement.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Employee Reviews",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-employee-reviews/peoplesoft-human-resources-manage-employee-reviews.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Professional Compliance",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-professional-compliance/peoplesoft-human-resources-manage-professional-compliance.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Profiles",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-profiles/peoplesoft-human-resources-manage-profiles.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Plan Careers and Successions",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-plan-careers-and-successions/peoplesoft-human-resources-plan-careers-and-successions.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Track Faculty Events",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-track-faculty-events/peoplesoft-human-resources-track-faculty-events.pdf"
+        },
+        {
+          "title": "PeopleSoft Benefits Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-benefits-administration/peoplesoft-benefits-administration.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Compensation",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-compensation/peoplesoft-human-resources-administer-compensation.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Festive Advance",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-festive-advance/peoplesoft-human-resources-administer-festive-advance.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Salaries for the Netherlands",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-salaries-for-the-netherlands/peoplesoft-human-resources-administer-salaries-netherlands.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Salary Packaging",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-salary-packaging/peoplesoft-human-resources-administer-salary-packaging.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Base Benefits",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-base-benefits/peoplesoft-human-resources-manage-base-benefits.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Base Compensation and Budgeting",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-base-compensation-and-budgeting/peoplesoft-human-resources-manage-base-compensation-and-budgeting.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage French Profit Sharing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-french-profit-sharing/peoplesoft-human-resources-manage-french-profit-sharing.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Variable Compensation",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-variable-compensation/peoplesoft-human-resources-manage-variable-compensation.pdf"
+        },
+        {
+          "title": "PeopleSoft Pension Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-pension-administration/peoplesoft-pension-administration.pdf"
+        },
+        {
+          "title": "PeopleSoft Stock Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-stock-administration/peoplesoft-stock-administration.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Administer Company Cars",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-administer-company-cars/peoplesoft-human-resources-administer-company-cars.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Manage Commitment Accounting",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-manage-commitment-accounting/peoplesoft-human-resources-manage-commitment-accounting.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Meet Regulatory Requirements",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-meet-regulatory-requirements/peoplesoft-human-resources-meet-regulatory-requirements.pdf"
+        },
+        {
+          "title": "PeopleSoft Human Resources Monitor Health and Safety",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-human-resources-monitor-health-and-safety/peoplesoft-human-resources-monitor-health-and-safety.pdf"
+        },
+        {
+          "title": "PeopleSoft eBenefits",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-ebenefits/peoplesoft-ebenefits.pdf"
+        },
+        {
+          "title": "PeopleSoft eCompensation",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-ecompensation/peoplesoft-ecompensation.pdf"
+        },
+        {
+          "title": "PeopleSoft eCompensation Manager Desktop",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-ecompensation-manager-desktop/peoplesoft-ecompensation-manager-desktop.pdf"
+        },
+        {
+          "title": "PeopleSoft eDevelopment",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-edevelopment/peoplesoft-edevelopment.pdf"
+        },
+        {
+          "title": "PeopleSoft ePay",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-epay/peoplesoft-epay.pdf"
+        },
+        {
+          "title": "PeopleSoft eProfile",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-eprofile/peoplesoft-eprofile.pdf"
+        },
+        {
+          "title": "PeopleSoft eProfile Manager Desktop",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-eprofile-manager-desktop/peoplesoft-eprofile-manager-desktop.pdf"
+        },
+        {
+          "title": "PeopleSoft HCM Portal Pack",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-hcm-portal-pack/peoplesoft-hcm-portal-pack.pdf"
+        },
+        {
+          "title": "PeopleSoft Absence Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-absence-management/peoplesoft-absence-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Payroll for North America",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-payroll-for-north-america/peoplesoft-payroll-north-america.pdf"
+        },
+        {
+          "title": "PeopleSoft Payroll Interface",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-payroll-interface/peoplesoft-payroll-interface.pdf"
+        },
+        {
+          "title": "PeopleSoft Time and Labor",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-time-and-labor/peoplesoft-time-and-labor.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll/peoplesoft-global-payroll.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Argentina",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-argentina/peoplesoft-global-payroll-argentina.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Australia",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-australia/peoplesoft-global-payroll-australia.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Brazil",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-brazil/peoplesoft-global-payroll-brazil.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for China",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-china/peoplesoft-global-payroll-china.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for France",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-france/peoplesoft-global-payroll-france.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Hong Kong",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-hong-kong/peoplesoft-global-payroll-hong-kong.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for India",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-india/peoplesoft-global-payroll-india.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Japan",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-japan/peoplesoft-global-payroll-japan.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Malaysia",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-malaysia/peoplesoft-global-payroll-malaysia.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Mexico",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-mexico/peoplesoft-global-payroll-mexico.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for New Zealand",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-new-zealand/peoplesoft-global-payroll-new-zealand.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Singapore",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-singapore/peoplesoft-global-payroll-singapore.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Spain",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-spain/peoplesoft-global-payroll-spain.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Switzerland",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-switzerland/peoplesoft-global-payroll-switzerland.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for Thailand",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-thailand/peoplesoft-global-payroll-thailand.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for the United Kingdom",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-the-united-kingdom/peoplesoft-global-payroll-united-kingdom.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Payroll for United States",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-global-payroll-for-united-states/peoplesoft-global-payroll-united-states.pdf"
+        },
+        {
+          "title": "PeopleSoft Candidate Gateway",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-candidate-gateway/peoplesoft-candidate-gateway.pdf"
+        },
+        {
+          "title": "PeopleSoft Talent Acquisition Manager",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/human-capital-management/9.2.055/peoplesoft-talent-acquisition-manager/peoplesoft-talent-acquisition-manager.pdf"
+        }
+      ]
+    },
+    {
+      "id": "fscm-9.2.057",
+      "family": "fscm",
+      "release": "9.2 · Update Image 57",
+      "url": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/index.html",
+      "sourceUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/index.html",
+      "books": [
+        {
+          "title": "Active Analytics Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/active-analytics-framework/active-analytics-framework.pdf"
+        },
+        {
+          "title": "Application Fundamentals",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/application-fundamentals/application-fundamentals.pdf"
+        },
+        {
+          "title": "Application Integration Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/application-integration-framework/application-integration-framework.pdf"
+        },
+        {
+          "title": "Approval Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/approval-framework/approval-framework.pdf"
+        },
+        {
+          "title": "Data Transformer",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/data-transformer/data-transformer.pdf"
+        },
+        {
+          "title": "Enterprise Components",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/enterprise-components/enterprise-components.pdf"
+        },
+        {
+          "title": "Events and Notifications Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/events-and-notifications-framework/events-and-notifications-framework.pdf"
+        },
+        {
+          "title": "Integration Interfaces",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/integration-interfaces/integration-interfaces.pdf"
+        },
+        {
+          "title": "Using and Managing the PeopleSoft Online Help",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/using-and-managing-the-peoplesoft-online-help/using-and-managing-peoplesoft-online-help.pdf"
+        },
+        {
+          "title": "PeopleSoft Billing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-billing/peoplesoft-billing.pdf"
+        },
+        {
+          "title": "PeopleSoft Commitment Control",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-commitment-control/peoplesoft-commitment-control.pdf"
+        },
+        {
+          "title": "PeopleSoft eBill Payment",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-ebill-payment/peoplesoft-ebill-payment.pdf"
+        },
+        {
+          "title": "PeopleSoft eSettlements",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-esettlements/peoplesoft-esettlements.pdf"
+        },
+        {
+          "title": "PeopleSoft Expenses",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-expenses/peoplesoft-expenses.pdf"
+        },
+        {
+          "title": "PeopleSoft Financials, ESA, ALM, and SCM Portal Packs",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-financials-esa-alm-and-scm-portal-packs/peoplesoft-financials-esa-alm-and-scm-portal-packs.pdf"
+        },
+        {
+          "title": "PeopleSoft General Ledger",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-general-ledger/peoplesoft-general-ledger.pdf"
+        },
+        {
+          "title": "PeopleSoft Global Options and Reports",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-global-options-and-reports/peoplesoft-global-options-and-reports.pdf"
+        },
+        {
+          "title": "PeopleSoft Payables",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-payables/peoplesoft-payables.pdf"
+        },
+        {
+          "title": "PeopleSoft Receivables",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-receivables/peoplesoft-receivables.pdf"
+        },
+        {
+          "title": "PeopleSoft Banks Setup and Processing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-banks-setup-and-processing/peoplesoft-banks-setup-and-processing.pdf"
+        },
+        {
+          "title": "PeopleSoft Cash Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-cash-management/peoplesoft-cash-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Deal Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-deal-management/peoplesoft-deal-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Financial Gateway",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-financial-gateway/peoplesoft-financial-gateway.pdf"
+        },
+        {
+          "title": "PeopleSoft Risk Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-risk-management/peoplesoft-risk-management.pdf"
+        },
+        {
+          "title": "Asset Lifecycle Management Fundamentals",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/asset-lifecycle-management-fundamentals/asset-lifecycle-management-fundamentals.pdf"
+        },
+        {
+          "title": "PeopleSoft Asset Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-asset-management/peoplesoft-asset-management.pdf"
+        },
+        {
+          "title": "PeopleSoft IT Asset Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-it-asset-management/peoplesoft-it-asset-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Lease Administration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-lease-administration/peoplesoft-lease-administration.pdf"
+        },
+        {
+          "title": "PeopleSoft Maintenance Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-maintenance-management/peoplesoft-maintenance-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Contracts",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-contracts/peoplesoft-contracts.pdf"
+        },
+        {
+          "title": "PeopleSoft Contracts for Government Contracting",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-contracts-for-government-contracting/peoplesoft-contracts-government-contracting.pdf"
+        },
+        {
+          "title": "PeopleSoft Grants",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-grants/peoplesoft-grants.pdf"
+        },
+        {
+          "title": "PeopleSoft Pay/Bill Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-pay-bill-management/peoplesoft-pay-bill-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Program Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-program-management/peoplesoft-program-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Project Costing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-project-costing/peoplesoft-project-costing.pdf"
+        },
+        {
+          "title": "PeopleSoft Proposal Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-proposal-management/peoplesoft-proposal-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Resource Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-resource-management/peoplesoft-resource-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Staffing Front Office",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-staffing-front-office/peoplesoft-staffing-front-office.pdf"
+        },
+        {
+          "title": "PeopleSoft Electronic Data Interchange",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-electronic-data-interchange/peoplesoft-electronic-data-interchange.pdf"
+        },
+        {
+          "title": "PeopleSoft Supply Chain Management Common Information",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-supply-chain-management-common-information/peoplesoft-supply-chain-management-common-information.pdf"
+        },
+        {
+          "title": "PeopleSoft Supply Chain Management Integration",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-supply-chain-management-integration/peoplesoft-supply-chain-management-integration.pdf"
+        },
+        {
+          "title": "PeopleSoft Catalog Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-catalog-management/peoplesoft-catalog-management.pdf"
+        },
+        {
+          "title": "PeopleSoft eProcurement",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-eprocurement/peoplesoft-eprocurement.pdf"
+        },
+        {
+          "title": "PeopleSoft eSupplier Connection",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-esupplier-connection/peoplesoft-esupplier-connection.pdf"
+        },
+        {
+          "title": "PeopleSoft Purchasing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-purchasing/peoplesoft-purchasing.pdf"
+        },
+        {
+          "title": "PeopleSoft Services Procurement",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-services-procurement/peoplesoft-services-procurement.pdf"
+        },
+        {
+          "title": "PeopleSoft Source to Settle Common Information",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-source-to-settle-common-information/peoplesoft-source-settle-common-information.pdf"
+        },
+        {
+          "title": "PeopleSoft Strategic Sourcing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-strategic-sourcing/peoplesoft-strategic-sourcing.pdf"
+        },
+        {
+          "title": "PeopleSoft Supplier Contract Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-supplier-contract-management/peoplesoft-supplier-contract-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Enterprise Pricer",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-enterprise-pricer/peoplesoft-enterprise-pricer.pdf"
+        },
+        {
+          "title": "PeopleSoft Order Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-order-management/peoplesoft-order-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Order to Cash Common Information",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-order-to-cash-common-information/peoplesoft-order-cash-common-information.pdf"
+        },
+        {
+          "title": "PeopleSoft Cost Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-cost-management/peoplesoft-cost-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Inventory",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-inventory/peoplesoft-inventory.pdf"
+        },
+        {
+          "title": "PeopleSoft Managing Items",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-managing-items/peoplesoft-managing-items.pdf"
+        },
+        {
+          "title": "PeopleSoft Mobile Inventory Management",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-mobile-inventory-management/peoplesoft-mobile-inventory-management.pdf"
+        },
+        {
+          "title": "PeopleSoft Engineering",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-engineering/peoplesoft-engineering.pdf"
+        },
+        {
+          "title": "PeopleSoft Manufacturing",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-manufacturing/peoplesoft-manufacturing.pdf"
+        },
+        {
+          "title": "PeopleSoft Quality",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-quality/peoplesoft-quality.pdf"
+        },
+        {
+          "title": "PeopleSoft Supply Planning",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/financials-and-supply-chain-management/9.2.057/peoplesoft-supply-planning/peoplesoft-supply-planning.pdf"
+        }
+      ]
+    },
+    {
+      "id": "cs-9.2.039",
+      "family": "cs",
+      "release": "9.2 · Update Image 39",
+      "url": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/index.html",
+      "sourceUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/index.html",
+      "books": [
+        {
+          "title": "Active Analytics Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/active-analytics-framework/active-analytics-framework.pdf"
+        },
+        {
+          "title": "Application Integration Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/application-integration-framework/application-integration-framework.pdf"
+        },
+        {
+          "title": "Approval Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/approval-framework/approval-framework.pdf"
+        },
+        {
+          "title": "Data Transformer",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/data-transformer/data-transformer.pdf"
+        },
+        {
+          "title": "Enterprise Components",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/enterprise-components/enterprise-components.pdf"
+        },
+        {
+          "title": "Events and Notifications Framework",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/events-and-notifications-framework/events-and-notifications-framework.pdf"
+        },
+        {
+          "title": "Integration Interfaces",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/peoplesoft-common/integration-interfaces/integration-interfaces.pdf"
+        },
+        {
+          "title": "Using and Managing the PeopleSoft Online Help",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/using-and-managing-the-peoplesoft-online-help/using-and-managing-peoplesoft-online-help.pdf"
+        },
+        {
+          "title": "Academic Advisement",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/academic-advisement/academic-advisement.pdf"
+        },
+        {
+          "title": "Campus Community Fundamentals",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/campus-community-fundamentals/campus-community-fundamentals.pdf"
+        },
+        {
+          "title": "Campus Self Service",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/campus-self-service/campus-self-service.pdf"
+        },
+        {
+          "title": "Campus Solutions Application Fundamentals",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/campus-solutions-application-fundamentals/campus-solutions-application-fundamentals.pdf"
+        },
+        {
+          "title": "Contributor Relations",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/contributor-relations/contributor-relations.pdf"
+        },
+        {
+          "title": "Financial Aid",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/financial-aid/financial-aid.pdf"
+        },
+        {
+          "title": "Gradebook",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/gradebook/gradebook.pdf"
+        },
+        {
+          "title": "Recruiting and Admissions",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/recruiting-and-admissions/recruiting-and-admissions.pdf"
+        },
+        {
+          "title": "Student Administration Integration Pack",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/student-administration-integration-pack/student-administration-integration-pack.pdf"
+        },
+        {
+          "title": "Student Financials",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/student-financials/student-financials.pdf"
+        },
+        {
+          "title": "Student Records",
+          "pdfUrl": "https://docs.oracle.com/en/applications/peoplesoft/campus-solutions/9.2.039/student-records/student-records.pdf"
+        }
+      ]
+    }
+  ]
+}

@@ -36,6 +36,36 @@ async function selectValue(driver: WebDriver, selector: string, value: string): 
     control.value = arguments[1]; control.dispatchEvent(new Event('change', { bubbles: true }));`, selector, value);
 }
 
+test("Oracle PDF lists cover Tools releases and application families with isolated favorites", async ({ driver, origin }) => {
+  await navigate(driver, `${origin}/options.html#docs`);
+  await visible(driver, "#oracle-docs h2");
+  const count = () => driver.findElements(By.css(".oracle-docs-item")).then(items => items.length);
+  expect(await count()).toBe(45);
+  await fill(driver, '#oracle-docs input[type="text"]', "8.61.06");
+  await fill(driver, '#oracle-docs input[type="search"]', "fluid");
+  await expect.poll(count).toBe(1);
+  expect(await driver.findElement(By.css(".oracle-docs-item a")).getAttribute("href")).toContain("pt861tflu");
+  await click(driver, ".oracle-docs-favorite");
+  await selectValue(driver, '#oracle-docs select[aria-label="Manual list"]', "favorites");
+  await fill(driver, '#oracle-docs input[type="text"]', "8.62");
+  await expect.poll(count).toBe(0);
+  await selectValue(driver, '#oracle-docs select[aria-label="Manual list"]', "all");
+  await fill(driver, '#oracle-docs input[type="search"]', "");
+  for (const [family, expected] of [["hcm", 71], ["fscm", 60], ["cs", 19]] as const) {
+    await selectValue(driver, "#oracle-docs label select", family);
+    await expect.poll(count).toBe(expected);
+    expect(await driver.findElement(By.css('#oracle-docs input[type="text"]')).isEnabled()).toBe(false);
+  }
+  await selectValue(driver, "#oracle-docs label select", "hcm");
+  await fill(driver, '#oracle-docs input[type="search"]', "payroll north america");
+  await expect.poll(count).toBe(1);
+  await click(driver, ".oracle-docs-favorite");
+  await expect.poll(() => driver.findElement(By.css(".oracle-docs-favorite")).getAttribute("aria-pressed")).toBe("true");
+  await audit(driver, "#panel-docs");
+  await driver.manage().window().setRect({ width: 480, height: 800 });
+  await audit(driver, "#panel-docs");
+});
+
 test("Help and PCode references open their actual Options panels; inspected field context is required for a fresh PeopleCode preview", async ({ driver, origin }) => {
   const settings = e2eSettings({ features: { ...e2eSettings().features, pageInfoOption: "Yes", recFieldInfoOption: "Yes" } });
   await seed(driver, settings);
