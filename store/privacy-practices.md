@@ -14,7 +14,9 @@ Previewed diagnostics contains an allowlisted configuration summary and is copie
 
 Explicit environment classifications and manually entered environment/component runbooks stay local. Runbooks have separate reviewed JSON import/export; notes and approved links may contain business context. Links open only by user choice without a referrer or added PeopleSoft context. No runbook fetch, upload or remote execution is performed.
 
-The subsequent comparison workspace (currently outside the prepared 1.0.33 candidate) stores only explicit reviewed UI snapshots and saved comparisons locally. These include technical labels, dates, version metadata and portal/target origins/sites, without field values or full session URLs. Reports are previewed before copy/download; no upload, background capture or cross-environment request occurs. Reconcile these disclosures with the exact package being submitted.
+The comparison workspace stores only explicit reviewed UI snapshots and saved comparisons locally. These include technical labels, dates, version metadata and portal/target origins/sites, without field values or full session URLs. Reports are previewed before copy/download; no upload, background capture or cross-environment request occurs.
+
+Scheduler, Integration Broker and Trace SQL investigations read explicitly selected sanitized files or manual/pasted evidence only after Preview. Raw sources, case findings, parsed evidence, charts and reports remain in Options tab memory; they are not stored, backed up or transmitted. Payload detail is omitted by default in IB and requires separate inclusion/review. Trace SQL cancellation discards partial reports. Export requires explicit review; exported files and clipboard contents stay under user control. Source filenames are omitted from reports. These tools do not execute or verify server operations.
 
 ## Does this extension collect or use user data?
 
@@ -50,7 +52,7 @@ MPU does not request or store passwords. Favorites may include PeopleSoft menu/c
 
 ## Permissions justification
 
-- **storage** — save feature flags, favorites, environments, and optional allowlist locally.
+- **storage** — save feature flags, favorites, environments, optional allowlist, runbooks, local reference preferences, optional Field Entry profiles, upgrade histories and explicitly reviewed environment snapshots/comparisons locally. Investigation sources and drafts stay in tab memory.
 - **sidePanel** — optional Side Panel for Favorites, Page Info and the local Agents library (opened from the popup or toolbar).
 - **tabs** — read the active tab URL to confirm a PeopleSoft origin, servlet, site, portal and node before Side Panel navigation. Unrelated tab URLs are not retained.
 
@@ -60,10 +62,10 @@ Content scripts match PeopleSoft `psp`/`psc` URL patterns. The optional allowlis
 
 See [Chrome's disclosure requirements](https://developer.chrome.com/docs/webstore/program-policies/disclosure-requirements) and [Limited Use policy](https://developer.chrome.com/docs/webstore/program-policies/limited-use). Keep listing, Dashboard answers, and [privacy policy](../docs/privacy.md) consistent.
 
-### Local reference and diagnostic additions (1.0.33 preparation)
+### Local reference and diagnostic features
 
 Oracle documentation favorites use catalog IDs and local last-opened timestamps. Searches and guided agent evidence are not persisted or transmitted. The Fluid navigation diagnostic is explicit and structural; no page values/tokens/URLs are exported. Permissions are unchanged; popup status queries only whether the scoped content script is active.
 
-### Later working-tree configuration comparison (outside the prepared candidate)
+### Configuration comparison
 
-Explicitly selected configuration files are read locally on Preview and remain in the Options tab's memory. Neither raw inputs nor reports are persisted or transmitted. Conservative masking does not guarantee removal of every secret; users must sanitize sources and review the report before enabling copy/download. Reports omit filenames and do not compare masked pairs. Clearing or reloading removes the workspace; exported files and clipboard contents remain user-controlled. No new permissions or remote code are added. Hosted disclosures must reflect this increment before a future package containing it is submitted.
+Explicitly selected configuration files are read locally on Preview and remain in the Options tab's memory. Neither raw inputs nor reports are persisted or transmitted. Conservative masking does not guarantee removal of every secret; users must sanitize sources and review the report before enabling copy/download. Reports omit filenames and do not compare masked pairs. Clearing or reloading removes the workspace; exported files and clipboard contents remain user-controlled. No new permissions or remote code are added.

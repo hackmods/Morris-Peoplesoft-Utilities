@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.34] — 2026-10-25
+
+- Ship the shared Chrome/Firefox Scheduler, Integration Broker and Trace SQL investigation workspaces, including reviewed local exports and the recent workflow/focus repairs described below.
+- Add cancellable Trace SQL previews, bounded duration charts and occurrence details, explicit first-excerpt SQL export, and corrected filtered totals and source references.
+- Expand Oracle documentation release links to PeopleTools 8.56–8.63 while keeping the searchable PDF catalog labelled as 8.62; entered builds do not pin historical manuals.
+- Update the lint, browser-test and DOM-test dependencies after full dual-browser CI. Real PeopleTools patch and assistive-technology verification remain separate evidence gaps.
+
 ## Unreleased — repository review / PeopleTools 8.62
 
 - Add Firefox desktop 140+ alongside Chrome 116+: shared MV3 manifest generation/version, browser API/sidebar adapter, separate validated browser packages, runtime asset parity audit, actual Firefox extension tests, and dual-browser CI/release checks. Future features and fixes must maintain both browsers in parity; Mozilla signing/publication and real-system PeopleTools verification remain separate steps.
