@@ -10,8 +10,12 @@ const fixture = (name: string) => readFileSync(resolve(process.cwd(), "tests/fix
 describe("PeopleSoft tracesql markers v1", () => {
   it("renders the same single and comparison evidence from already parsed reports", () => {
     const texts = [fixture("sample.tracesql"), "COM Stmt=SELECT B.DEPTID FROM PS_JOB B\n Dur=1.000 EXE"];
-    for (const selected of [texts.slice(0, 1), texts]) {
-      expect(renderParsedTraceSqlInvestigations(selected.map(parseTraceSql))).toBe(renderTraceSqlInvestigations(selected));
+    // Captured from the pre-consolidation renderer at 7e2fa15, independently of the new path.
+    const originalHashes = ["6bf182f60e94bd74d567b359cc1281eea6b33a3a78b280819e9b8158a7c0e887", "a5acc417b8937392fc89f78d0913fe85f564d551eef3d18f7a02858110a0788b"];
+    for (const [index, selected] of [texts.slice(0, 1), texts].entries()) {
+      const output = renderParsedTraceSqlInvestigations(selected.map(parseTraceSql));
+      expect(createHash("sha256").update(output).digest("hex")).toBe(originalHashes[index]);
+      expect(output).toBe(renderTraceSqlInvestigations(selected));
     }
     expect(() => renderParsedTraceSqlInvestigations([])).toThrow("file count");
     expect(() => renderParsedTraceSqlInvestigations(texts.concat(texts).map(parseTraceSql))).toThrow("file count");
