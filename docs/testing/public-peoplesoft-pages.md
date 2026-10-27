@@ -1,5 +1,16 @@
 # Public PeopleSoft page evidence
 
+## Fresh Niagara observation — 2026-10-27
+
+The maintainer authorized use of the examples below for the investigation
+usability/validation task. A connected Chrome tab opened the listed Niagara
+Careers URL and showed the real Fluid Search Jobs page **with an MPU toolbar
+present**. Installed extension version and Tools patch remain unknown. The Help
+click timed out before dispatch; site-access handoff is pending. No administrative
+workspace, server export, job/message action, form edit or save-warning comparison
+was performed. This public recruitment page cannot supply Scheduler logs, native
+IB exports or configuration pairs. See [the dated test record](peopletools-8.62.md).
+
 ## Candidate registry — user supplied, 2026-10-20
 
 The following links are references for future manual, read-only testing. Their current reachability, PeopleTools patches and extension compatibility have **not** been verified. Public accessibility does not establish permission to stress-test, submit applications, or create accounts. Do not add these sites to a user's allowlist automatically. Screenshots must record whether MPU was actually present and which build/settings were used.

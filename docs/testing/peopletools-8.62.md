@@ -22,6 +22,9 @@ Record Tools patch (`8.62.xx`), application pillar/release, PUM image, browser v
 | Search helpers | Advanced Search does not toggle closed on retry; Correct History honors delivered security and user setting | Real-system test needed |
 | Trace | Validate distinct SQL cursor/fetch checkbox IDs, PC flags, save response, start/stop and partial denial; verify server trace stops | Real-system test needed |
 | Trace SQL investigation | Accept one sanitized PeopleTools 8.62 `.tracesql`/`.trc` from a real capture; record Tools patch privately; only then change marker grammar | Not supplied — keep synthetic/unverified wording until a maintainer accepts a sanitized sample. Do not invent a “real” log |
+| Scheduler investigation | Use approved sanitized real Scheduler/run/distribution excerpts and independently expected line/process findings; verify Process Monitor entry into an empty workspace, preview, changed-source invalidation, review/export and Clear in both browsers | Synthetic journey coverage; public careers examples do not provide Process Monitor or Scheduler logs |
+| Integration Broker investigation | Review approved native artifacts separately from manually prepared envelope/form records; verify stage/citation/payload boundaries and changed-input review invalidation in both browsers | Synthetic journey coverage; public careers examples do not provide Service Operations Monitor or native IB exports |
+| Configuration comparison | Compare approved sanitized before/after INI/JSON pairs against independently expected changes and withheld secrets; do not infer effective server settings from text | Synthetic journey coverage; no representative configuration pair supplied by public careers pages |
 | Host allowlist / inactive environment | No bar, keyboard action, Page Info snapshot, or delayed search mutation; side panel cannot navigate disabled hosts | Real-system test needed |
 | Multi-tab / session | No storage churn; environment settings and favorites survive concurrent edits; sign-out/sign-in does not imply a verified trace state | Real-system test needed |
 | Keyboard / screen reader | Tab and Shift+Tab stay in dialogs; Escape works after typing; focus returns; 200% zoom, contrast, forced colors, and live announcements | Real-system test needed |
@@ -43,6 +46,28 @@ Version 1.0.32 removes broad More/Expand clicks, requires explicit search-page a
 Real-system acceptance remains open: on a fresh unchanged page, compare helpers off/on, open the affected collection and navigate between its pages, then repeat with a genuine unsaved edit. Unedited navigation should not acquire a save prompt from MPU; genuine unsaved changes must still receive PeopleSoft's normal protection. Record the Tools patch and outcome privately. Do not disable save warnings as a workaround.
 
 References: [Oracle PeopleTools 8.62 Fluid guide](https://docs.oracle.com/cd/G35126_01/psft/pdf/pt862tflu-b062025.pdf), [Oracle 8.62 accessibility report](https://docs.oracle.com/en/corporate/accessibility/templates/t2-15706.html). Oracle's report covers its product, not this extension.
+
+## Public-example validation attempt — 2026-10-27
+
+At the maintainer's direction to use the examples in the public-page note, Chrome
+opened the Niagara Region Careers page. The browser accessibility view showed
+the real Fluid Search Jobs page and an MPU toolbar (`mpu-bar`) with FLUID and
+UNCLASSIFIED indicators, Environment, Page Info, Help and reference controls.
+This is fresh evidence of an extension running on that public page, superseding
+the earlier extension-absent observation for this date only.
+
+The installed MPU version and PeopleTools patch were not established. A Help
+button action timed out **before dispatch**; no successful entry-point click,
+navigation comparison, server operation, form edit or save-warning outcome was
+recorded. The maintainer was asked to select the Careers tab and grant its
+browser-extension site access if requested. The page was kept open for handoff.
+
+The public page exposes recruitment search, not Process Monitor, IB
+administration or configuration exports. It cannot validate the three
+administrative/file scenarios above. The new 1.0.37 Options layouts have separate
+synthetic installed-extension verification; they have not been installed or
+verified against this live system. No real log, native envelope or configuration
+pair was manufactured from public job listings.
 
 ## Follow-up evidence — 2026-10-21
 

@@ -55,3 +55,22 @@ Only synthetic fixtures are recorded in the repository. A representative source
 folder and approved authenticated test environment have not yet been identified.
 Public career-page candidates cannot validate Scheduler or IB administration.
 UI and automated workflow work proceed independently while access is resolved.
+
+## Execution checkpoint
+
+- Implemented one shared three-step layout across all four workspaces. Existing
+  IDs/labels, parser semantics, storage boundaries and review invalidation remain.
+- Optional technical guidance/ticket paste/trace explorer use native keyboard
+  disclosures. Empty report fields are compact and review checkboxes align with
+  their labels. No extra business-action control was added.
+- Adversarial review of the three worker file diffs confirmed that handlers and
+  parser calls were retained. The parent tightened always-visible privacy notices
+  and integrated Trace SQL, CSS and browser journeys. Worker reports were not
+  treated as verification.
+- Initial lint/types, dual build, unchanged coverage gates and 16 targeted Chromium
+  journeys passed, including 320px expanded guidance and axe/contrast. Full fresh
+  validation follows the final layout adjustment.
+- The user chose the public examples in the note. Niagara loaded in Chrome with
+  an MPU toolbar, but Help timed out before dispatch; foreground/site-access
+  handoff is pending. These public careers pages do not supply administrative
+  exports. Representative-source and actual Tools patch validation remain open.
