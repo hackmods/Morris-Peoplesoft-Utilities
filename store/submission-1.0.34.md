@@ -2,7 +2,8 @@
 
 Prepared 2026-10-25 at the user's request to deploy updated builds to Chrome Web
 Store and Mozilla Add-ons. **Firefox 1.0.34 is submitted, approved and listed.
-Chrome submission remains in progress.**
+Chrome 1.0.34 was not submitted; the 1.0.35 PDF catalog repair supersedes that
+Chrome candidate.** The artifacts below remain preserved historical evidence.
 
 ## Firefox submission completed — 2026-10-25
 

@@ -32,7 +32,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
   const intro = doc.createElement("p");
   intro.textContent = version.supported
     ? `PeopleTools ${version.label} documentation${version.patch ? ` (entered build ${version.label}.${version.patch})` : " (default)"}. Confirm patch-level applicability against your system.`
-    : `The entered version “${version.label}” is not matched to this PeopleTools 8.62 catalog. Choose a supported release on Oracle's documentation index below.`;
+    : `The entered version “${version.label}” is not matched to an indexed PeopleTools release. Choose a supported release on Oracle's documentation index below.`;
   const versionNote = doc.createElement("p");
   versionNote.textContent = "PeopleTools tools version is separate from the application release and PUM image. This hub does not infer either one.";
   const source = doc.createElement("p");
@@ -93,7 +93,7 @@ export function bindOracleDocs(doc: Document, container: HTMLElement, initialToo
     category.value = [...category.options].some(option => option.value === selectedCategory) ? selectedCategory : "all";
     intro.textContent = match.supported
       ? `PeopleTools ${match.label}${match.patch ? `.${match.patch}` : ""} selected. The release links open Oracle's current documentation; verify the exact patch against your system. No documents are fetched until you open a link.`
-      : `The entered version “${match.label}” is not matched to this PeopleTools 8.62 catalog. Choose a supported release on Oracle's documentation index below.`;
+      : `The entered version “${match.label}” is not matched to an indexed PeopleTools release. Choose a supported release on Oracle's documentation index below.`;
     source.replaceChildren(externalLink(doc, ORACLE_PEOPLETOOLS_UPDATES_URL, "All PeopleTools versions and documentation updates"), " · ", externalLink(doc, ORACLE_PEOPLETOOLS_PATCHES_URL, "Patch downloads and build information (Oracle Support)"));
     if (family && catalog) {
       intro.textContent = `${family.title} ${catalog.release}. This application release/Update Image is independent of your PeopleTools version; confirm applicability against your system. No documents are fetched until you open a link.`;

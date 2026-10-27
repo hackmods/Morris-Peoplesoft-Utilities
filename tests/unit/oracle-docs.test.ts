@@ -18,7 +18,7 @@ describe("Oracle PeopleTools documentation catalog", () => {
     expect(ORACLE_PEOPLETOOLS_LIBRARY_URL).toContain("/cd/G41076_01/psft/index.html");
   });
 
-  it("recognizes only exact PeopleTools 8.62 forms and does not infer from malformed input", () => {
+  it("recognizes offered PeopleTools releases/builds and does not infer from malformed input", () => {
     expect(resolvePeopleToolsDocsVersion("")).toEqual({ supported: true, label: "8.62" });
     expect(resolvePeopleToolsDocsVersion("8.62")).toEqual({ supported: true, label: "8.62" });
     expect(resolvePeopleToolsDocsVersion(" 8.62.12 ")).toEqual({ supported: true, label: "8.62", patch: "12" });
@@ -53,7 +53,7 @@ describe("Oracle docs UI", () => {
     const root = document.createElement("section"); document.body.append(root);
     const cleanup = bindOracleDocs(document, root, "9.2");
     await Promise.resolve();
-    expect(root.textContent).toContain("not matched to this PeopleTools 8.62 catalog");
+    expect(root.textContent).toContain("not matched to an indexed PeopleTools release");
     expect(root.textContent).toContain("PeopleTools tools version is separate");
     for (const link of root.querySelectorAll<HTMLAnchorElement>("a")) {
       expect(link.rel).toBe("noopener noreferrer");
