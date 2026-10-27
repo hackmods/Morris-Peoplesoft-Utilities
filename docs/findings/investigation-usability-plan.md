@@ -67,10 +67,27 @@ UI and automated workflow work proceed independently while access is resolved.
   parser calls were retained. The parent tightened always-visible privacy notices
   and integrated Trace SQL, CSS and browser journeys. Worker reports were not
   treated as verification.
-- Initial lint/types, dual build, unchanged coverage gates and 16 targeted Chromium
-  journeys passed, including 320px expanded guidance and axe/contrast. Full fresh
-  validation follows the final layout adjustment.
+- Final lint/types, fresh dual build, 468 tests with unchanged coverage gates,
+  and all audits passed. Full sequential browser runs passed 56 Chromium and
+  21 actual Firefox scenarios, including keyboard disclosures, changed-source
+  invalidation, reviewed exports, Clear and 320px expanded guidance/axe/contrast.
+  Captured desktop/narrow Options screenshots were reviewed; these are synthetic
+  extension-workspace evidence, not real PeopleTools screenshots or store art.
 - The user chose the public examples in the note. Niagara loaded in Chrome with
   an MPU toolbar, but Help timed out before dispatch; foreground/site-access
   handoff is pending. These public careers pages do not supply administrative
   exports. Representative-source and actual Tools patch validation remain open.
+
+## Current completion status
+
+| Work | Result |
+| --- | --- |
+| Shared compact screen implementation | Complete in pushed 1.0.37 source on PR #44 |
+| Full automated workflow/browser/audit gate | Passed as above |
+| Public-example access | Niagara page and installed MPU toolbar observed; installed build/Tools patch unknown |
+| Live entry-point actions | Unperformed: browser Help action timed out before dispatch; site-access/foreground handoff pending |
+| Representative administrative files | Not available from the public recruitment pages; not validated |
+
+Follow [the concrete acceptance checklist](../testing/investigation-acceptance.md)
+when authorized sources/access are available. No new parser was invented to fill
+the evidence gap. The real-system portion of this task is not complete.

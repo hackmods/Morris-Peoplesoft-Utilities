@@ -1,5 +1,11 @@
 # Recent work quality review — 2026-10-27
 
+Follow-through: the subsequent user-authorized
+[investigation usability plan](investigation-usability-plan.md) implements the
+previously deferred screen simplification in shared 1.0.37 source, with full
+automated browser checks. Representative administrative sources and real-system
+acceptance remain open; the dated plan records the actual public-page observation.
+
 The maintainer reported that recent work felt rough and patchy. This pass reviews
 the PDF expansion, reference preferences, Trace SQL preview/report path and the
 recent Scheduler/IB/runbook consolidation evidence before landing PR #44.
