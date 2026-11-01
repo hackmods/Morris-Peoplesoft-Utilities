@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { Key, type WebDriver } from "selenium-webdriver";
 import { E2E_ORIGIN, FLUID_COMPONENT_PATH, startFixtureServer, stopFixtureServer } from "../e2e/helpers/fixture-server";
 import { e2eSettings } from "../e2e/helpers/extension";
-import { audit, By, click, extension, fill, launchFirefox, navigate, seed, visible } from "./helpers";
+import { audit, By, click, clickMoreAction, extension, fill, launchFirefox, navigate, seed, visible } from "./helpers";
 
 const test = base.extend<{ driver: WebDriver; origin: string }>({
   // eslint-disable-next-line no-empty-pattern
@@ -93,7 +93,7 @@ test("Help and PCode references open their actual Options panels; inspected fiel
   await navigate(driver, `${E2E_ORIGIN}${FLUID_COMPONENT_PATH}`);
   await visible(driver, "#mpu-bar");
 
-  await click(driver, "#mpu-help");
+  await clickMoreAction(driver, "#mpu-help");
   await audit(driver, "#mpu-dialog");
   await openReferencePanel(driver, origin,
     "//button[normalize-space(.)='Oracle documentation hub (PeopleTools version-aware)']", "docs");
@@ -102,7 +102,7 @@ test("Help and PCode references open their actual Options panels; inspected fiel
   await driver.switchTo().window(pageHandle);
   await driver.actions().sendKeys(Key.ESCAPE).perform();
 
-  await click(driver, "#mpu-pcode");
+  await clickMoreAction(driver, "#mpu-pcode");
   await audit(driver, "#mpu-dialog");
   await visible(driver, "#mpu-pcode-context-form");
   expect(await driver.findElement(By.css("#mpu-pcode-context-form")).getText()).toContain("No field locked");
@@ -119,11 +119,11 @@ test("Help and PCode references open their actual Options panels; inspected fiel
   await driver.switchTo().window(pageHandle);
   await driver.actions().sendKeys(Key.ESCAPE).perform();
 
-  await click(driver, "#mpu-field");
+  await clickMoreAction(driver, "#mpu-field");
   const icon = await visible(driver, '.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID"]');
   await icon.click();
   await visible(driver, '.mpu-recfield-area[data-mpu-locked="true"]');
-  await click(driver, "#mpu-pcode");
+  await clickMoreAction(driver, "#mpu-pcode");
   await visible(driver, "#mpu-pcode-context-form");
   expect(await driver.findElement(By.css("#mpu-dialog")).getText()).toContain("Locked DOM field: JOB_EMPLID");
   await fill(driver, "#mpu-pcode-record", "JOB");
@@ -221,12 +221,12 @@ test("ProcessPack refuses ambiguous rows and rechecks a changed selection before
     table.innerHTML = '<tbody><tr><td><span id="PRCSINSTANCE$0">101</span></td></tr><tr><td><span id="PRCSINSTANCE$1">202</span></td><td><span id="PRCSNAME$1">OTHER_PROCESS</span></td></tr></tbody>';
     document.body.append(table);
   });
-  await click(driver, "#mpu-pageinfo");
+  await clickMoreAction(driver, "#mpu-pageinfo");
   expect(await driver.findElement(By.css("#mpu-pi-copy-process")).isEnabled()).toBe(false);
   expect(await driver.findElement(By.css("#mpu-dialog")).getText()).toContain("No unambiguous process context");
   await driver.actions().sendKeys(Key.ESCAPE).perform();
   await driver.executeScript('document.querySelector("#synthetic-process-rows tr").setAttribute("aria-selected", "true")');
-  await click(driver, "#mpu-pageinfo"); expect(await driver.findElement(By.css("#mpu-pi-copy-process")).isEnabled()).toBe(true);
+  await clickMoreAction(driver, "#mpu-pageinfo"); expect(await driver.findElement(By.css("#mpu-pi-copy-process")).isEnabled()).toBe(true);
   await driver.executeScript('document.querySelector("#synthetic-process-rows tr").removeAttribute("aria-selected")');
   await click(driver, "#mpu-pi-copy-process");
   await expect.poll(() => driver.findElement(By.css("#mpu-live")).getText()).toBe("Process context changed. Reopen Page Info before copying.");

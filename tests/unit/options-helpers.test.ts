@@ -92,9 +92,9 @@ describe("FEATURE_LABELS / groups", () => {
 
   it("groups essentials on and careful features off by default", () => {
     const f = createDefaultSettings().features;
-    const essential = FEATURE_TOGGLE_GROUPS.find((g) => g.id === "bar")!.items.map((i) => i.key);
-    const helpers = FEATURE_TOGGLE_GROUPS.find((g) => g.id === "helpers")!.items.map((i) => i.key);
-    const careful = FEATURE_TOGGLE_GROUPS.find((g) => g.id === "careful")!.items.map((i) => i.key);
+    const essential = FEATURE_TOGGLE_GROUPS.filter((g) => g.tone === "essential").flatMap((g) => g.items.map((i) => i.key));
+    const helpers = FEATURE_TOGGLE_GROUPS.filter((g) => g.tone === "helper").flatMap((g) => g.items.map((i) => i.key));
+    const careful = FEATURE_TOGGLE_GROUPS.filter((g) => g.tone === "careful").flatMap((g) => g.items.map((i) => i.key));
     for (const key of [...essential, ...helpers]) {
       expect(f[key]).toBe("Yes");
     }

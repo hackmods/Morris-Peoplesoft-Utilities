@@ -11,18 +11,22 @@ Use before tagging a release or uploading to the Chrome Web Store. The primary t
 
 ## Features
 
-- [ ] User ID displays when comment/meta present
+- [ ] User ID appears in Environment details when enabled and metadata is available
 - [ ] Environment label resolves from Options mapping
-- [ ] Shortcuts flyout — hierarchical Category » SubCategory » items
-- [ ] Add to Shortcuts dialog (Description, Category/SubCategory select-or-new, Parameters)
-- [ ] Open shortcut same window and new-window control
+- [ ] Default toolbar shows Find page, Find field, and More; specialist tools stay inside More
+- [ ] Find page searches recent components, saved shortcuts, and pages in the current component
+- [ ] Find page → Go to a component opens direct Menu.Component navigation
+- [ ] Add current component to Shortcuts dialog (Description, Category/SubCategory select-or-new, Parameters)
+- [ ] Open recent or saved destinations in the current or a new window
 - [ ] Favorites CSV import/export (Category/SubCategory preserved)
-- [ ] Pages menu lists all tabs; current page highlighted
+- [ ] Find field searches current-page labels and IDs, locates a result, and copies the configured field format
+- [ ] More → Field Inspector toggles detailed field markers and Escape stops it
+- [ ] More → Admin jumps opens the selected setup component
 - [ ] Page Info dialog + copy
 - [ ] Customization upgrade watch — capture baseline + check drift (Page Info + Options → Upgrade)
-- [ ] Field Inspector on/off + Escape (Classic, Fluid, and Classic page inside Fluid menu/nav)
-- [ ] Field Inspector: each field has its own orange border (not one mega container)
-- [ ] New Window opens `_newwin` style URL
+- [ ] More menu keyboard navigation, focus return, Escape, and Tab exit work in Classic and Fluid
+- [ ] Field Inspector icons/highlights do not change page layout when menus or content expand
+- [ ] Login page bar is off by default and follows its Options toggle
 - [ ] Advanced Search expand (where control exists)
 - [ ] Correct History select (where control exists; enable in Options)
 - [ ] Trace on/off (user with access) and locked state (without access)

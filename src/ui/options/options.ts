@@ -140,21 +140,24 @@ function wireTabs(): void {
 function renderFeatures(settings: MpuSettings): void {
   featureBaseline = settingsDraft(settings);
   const root = document.getElementById("feature-toggles")!;
+  const expandedGroups = new Set(Array.from(root.querySelectorAll<HTMLDetailsElement>("details.feature-group[open]"))
+    .map((details) => details.getAttribute("aria-labelledby")?.replace("feature-group-", "") || ""));
   root.replaceChildren();
 
   for (const group of FEATURE_TOGGLE_GROUPS) {
-    const section = document.createElement("section");
+    const section = document.createElement(group.collapsed ? "details" : "section");
     section.className = "feature-group";
     section.dataset.tone = group.tone;
     section.setAttribute("aria-labelledby", `feature-group-${group.id}`);
+    if (section instanceof HTMLDetailsElement) section.open = expandedGroups.has(group.id);
 
-    const head = document.createElement("div");
+    const head = document.createElement(group.collapsed ? "summary" : "div");
     head.className = "feature-group-head";
-    const title = document.createElement("h3");
+    const title = document.createElement(group.collapsed ? "span" : "h3");
     title.className = "feature-group-title";
     title.id = `feature-group-${group.id}`;
     title.textContent = group.title;
-    const desc = document.createElement("p");
+    const desc = document.createElement(group.collapsed ? "span" : "p");
     desc.className = "feature-group-desc";
     desc.textContent = group.description;
     head.append(title, desc);

@@ -14,6 +14,7 @@ import {
   launchExtensionContext,
   openPsPage,
   seedMpuSettings,
+  clickMoreAction,
 } from "./helpers/extension";
 
 type Fixtures = {
@@ -60,22 +61,22 @@ async function waitForIframeBody(page: Page, frameSelector: string): Promise<voi
 }
 
 test.describe("Field Entry toolkit", () => {
-  test("Entry dialogs and populated preview pass browser axe", async ({ extensionContext, extensionId }) => {
+  test("Field Entry actions in More open dialogs that pass browser axe", async ({ extensionContext, extensionId }) => {
     await seedMpuSettings(extensionContext, extensionId, e2eSettings({
       features: { ...e2eSettings().features, fieldEntryOption: "Yes" },
       fieldEntryProfiles: [{ id: "demo", name: "Demo", updatedAt: 1, rows: [{ record: "PERSONAL_DATA", field: "FIRST_NAME", value: "Demo" }] }],
     }));
     const page = await openPsPage(extensionContext, FLUID_FIELD_ENTRY_PATH);
-    await page.locator("#mpu-entry").click();
-    const menu = page.getByRole("menu", { name: "Field Entry", exact: true });
-    await audit(page, '.mpu-flyout[aria-label="Field Entry"]');
+    await page.locator("#mpu-more").click();
+    const menu = page.getByRole("menu", { name: "More tools", exact: true });
+    await audit(page, ".mpu-more-flyout");
     await menu.getByRole("menuitem", { name: "Capture", exact: true }).click();
     for (const name of ["Paste…", "From sheet…", "Find / Replace…", "Save profile…", "Load profile…"]) {
-      await page.locator("#mpu-entry").click();
+      await page.locator("#mpu-more").click();
       await menu.getByRole("menuitem", { name, exact: true }).click();
       await audit(page, "#mpu-dialog");
       await page.keyboard.press("Escape");
-      await expect(page.locator("#mpu-entry")).toBeFocused();
+      await expect(page.locator("#mpu-more")).toBeFocused();
     }
     await page.close();
   });
@@ -99,19 +100,15 @@ test.describe("Field Entry toolkit", () => {
   }) => {
     const page = await openPsPage(extensionContext, FLUID_FIELD_ENTRY_PATH);
     await expect(page.locator("#mpu-bar")).toBeVisible();
-    await expect(page.locator("#mpu-entry")).toBeVisible();
+    await expect(page.locator("#mpu-more")).toBeVisible();
     await waitForIframeBody(page, "#ptModFrame_0");
 
-    await page.locator("#mpu-entry").click();
-    const flyout = page.locator('.mpu-flyout[aria-label="Field Entry"]');
-    await expect(flyout).toBeVisible();
-    await flyout.getByRole("menuitem", { name: "Capture" }).click();
+    await clickMoreAction(page, "Capture");
     await expect(page.locator("#mpu-live")).toContainText(/Captured/i);
 
     await page.locator("#PERSONAL_DATA_FIRST_NAME").fill("Changed");
 
-    await page.locator("#mpu-entry").click();
-    await page.locator('.mpu-flyout[aria-label="Field Entry"]').getByRole("menuitem", { name: "Paste…" }).click();
+    await clickMoreAction(page, "Paste…");
     await expect(page.locator("#mpu-fe-elig-title")).toBeVisible();
     await page.locator("#mpu-fe-elig-apply").click();
 
@@ -123,13 +120,9 @@ test.describe("Field Entry toolkit", () => {
     extensionContext,
   }) => {
     const page = await openPsPage(extensionContext, FLUID_FIELD_ENTRY_PATH);
-    await expect(page.locator("#mpu-entry")).toBeVisible();
+    await expect(page.locator("#mpu-more")).toBeVisible();
 
-    await page.locator("#mpu-entry").click();
-    await page
-      .locator('.mpu-flyout[aria-label="Field Entry"]')
-      .getByRole("menuitem", { name: "From sheet…" })
-      .click();
+    await clickMoreAction(page, "From sheet…");
 
     const sheet = [
       "PERSONAL_DATA.FIRST_NAME,PERSONAL_DATA.LAST_NAME,ADDRESSES.ADDRESS1,ADDRESSES.CITY",
@@ -157,11 +150,7 @@ test.describe("Field Entry toolkit", () => {
     await page.locator("[data-mpu-fe-add-row]").click();
     await expect(page.locator("#JOB_DEPTID\\$1")).toBeVisible();
 
-    await page.locator("#mpu-entry").click();
-    await page
-      .locator('.mpu-flyout[aria-label="Field Entry"]')
-      .getByRole("menuitem", { name: "From sheet…" })
-      .click();
+    await clickMoreAction(page, "From sheet…");
 
     const sheet = ["JOB.DEPTID\tJOB.JOBCODE", "111\tAAA", "222\tBBB"].join("\n");
     await page.locator("#mpu-fe-sheet-text").fill(sheet);
@@ -184,11 +173,7 @@ test.describe("Field Entry toolkit", () => {
     await expect(page.locator("#JOB_DEPTID\\$0")).toBeVisible();
     await expect(page.locator("#JOB_DEPTID\\$1")).toHaveCount(0);
 
-    await page.locator("#mpu-entry").click();
-    await page
-      .locator('.mpu-flyout[aria-label="Field Entry"]')
-      .getByRole("menuitem", { name: "From sheet…" })
-      .click();
+    await clickMoreAction(page, "From sheet…");
 
     const sheet = ["JOB.DEPTID\tJOB.JOBCODE", "10\tX", "20\tY", "30\tZ"].join("\n");
     await page.locator("#mpu-fe-sheet-text").fill(sheet);
@@ -205,11 +190,7 @@ test.describe("Field Entry toolkit", () => {
 
   test("Find / Replace remaps a Fluid field value with preview", async ({ extensionContext }) => {
     const page = await openPsPage(extensionContext, FLUID_FIELD_ENTRY_PATH);
-    await page.locator("#mpu-entry").click();
-    await page
-      .locator('.mpu-flyout[aria-label="Field Entry"]')
-      .getByRole("menuitem", { name: "Find / Replace…" })
-      .click();
+    await clickMoreAction(page, "Find / Replace…");
 
     await page.locator("#mpu-fe-fr-text").fill("Pat → Taylor");
     await page.locator("#mpu-fe-fr-preview").click();

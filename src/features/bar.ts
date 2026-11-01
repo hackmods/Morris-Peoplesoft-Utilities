@@ -1,8 +1,8 @@
 import { getExtensionApi } from "../platform/browser";
 import { bindModalDialog } from "./dialog";
 import { appendAgentHelp } from "./agent-references";
-import { isVisible } from "../adapters/dom";
-import type { Favorite, FieldCopyFormat, MpuSettings, RecentComponent, TraceSettings, TraceRequest } from "../storage/schema";
+import { isHtmlElement, isVisible } from "../adapters/dom";
+import type { Favorite, FieldCopyFormat, MpuSettings, TraceSettings, TraceRequest } from "../storage/schema";
 import { featureAllowedForUi, FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
 import {
@@ -37,7 +37,7 @@ import { bindPeopleCodeContextUI } from "./peoplecode-context-ui";
 import { collectFluidStructure, formatFluidStructurePlain } from "./fluid-structure";
 import { collectFluidDebugSnapshot, formatFluidDebugSnapshot } from "./fluid-debugger";
 import { groupAdminJumps, type AdminJump } from "./admin-jumps";
-import { getLockedParsedRecField } from "./field-inspector";
+import { collectInspectableFields, focusInspectableField, formatRecFieldCopy, getLockedParsedRecField } from "./field-inspector";
 import { scanMessageKeys, formatMessageKeysPlain } from "./message-keys";
 import { collectIbBreadcrumb, formatIbBreadcrumbPlain } from "./ib-breadcrumb";
 import {
@@ -79,11 +79,11 @@ export interface BarContext {
   traceRequest?: TraceRequest;
   onPageInfo: () => void;
   onFieldInspector: () => void;
+  onFindField?: () => void;
   onNewWindow: () => void;
   onAddFavorite: () => void;
   onGoToComponent?: () => void;
   onCopyLockedField?: (format?: FieldCopyFormat) => void;
-  onPageTabs?: () => void;
   fieldInspectorActive: boolean;
   lockedFieldName?: string | null;
   traceRunning: boolean;
@@ -283,7 +283,9 @@ function bindMenuDismiss(
       if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
       if (active.matches("input, textarea") && !e.key.startsWith("Arrow")) return;
       const menu = active.closest('[role="menu"]') ?? flyout.querySelector('[role="menu"]') ?? flyout;
-      const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)'))
+      const items = Array.from(menu.querySelectorAll<HTMLElement>(
+        '[role="menuitem"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)',
+      ))
         .filter((item) => item.closest('[role="menu"]') === menu && isVisible(item));
       if (!items.length) return;
       e.preventDefault();
@@ -385,7 +387,7 @@ function openFavoriteShortcut(
   });
   if (!url) return;
   onDone?.();
-  if (newWin) {
+  if (newWin && !doc.getElementById("mpu-fav-newwin")) {
     window.open(url, "_blank");
     return;
   }
@@ -674,33 +676,100 @@ function buildShortcutsFlyoutBody(
   const f = ctx.settings.features;
   const newWin = isYes(f.newWindowOption);
   flyout.replaceChildren();
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const appendHeading = (text: string): void => {
+    const heading = doc.createElement("div");
+    heading.className = "mpu-menu-heading";
+    heading.setAttribute("role", "presentation");
+    heading.textContent = text;
+    flyout.appendChild(heading);
+  };
+  const appendAction = (label: string, title: string, action: () => void): void => {
+    const item = doc.createElement("div");
+    item.className = "mpu-menu-item";
+    item.setAttribute("role", "none");
+    const button = doc.createElement("button");
+    button.type = "button";
+    button.className = "mpu-menu-open";
+    button.setAttribute("role", "menuitem");
+    button.textContent = label;
+    button.title = title;
+    button.addEventListener("click", () => { onNavigate(); action(); });
+    item.appendChild(button);
+    flyout.appendChild(item);
+  };
 
-  const addItem = doc.createElement("div");
-  addItem.className = "mpu-menu-item";
-  addItem.setAttribute("role", "none");
-  const addBtn = doc.createElement("button");
-  addBtn.type = "button";
-  addBtn.className = "mpu-menu-row mpu-menu-action";
-  addBtn.setAttribute("role", "menuitem");
-  addBtn.textContent = "Add to Shortcuts";
-  addBtn.addEventListener("click", () => {
-    onNavigate();
-    ctx.onAddFavorite();
-  });
-  addItem.appendChild(addBtn);
-  flyout.appendChild(addItem);
-
-  const tree = filterFavoriteTree(buildFavoriteTree(ctx.settings.favorites), query);
-  if (!tree.length && ctx.settings.favorites.length) {
-    const empty = doc.createElement("p");
-    empty.className = "mpu-menu-empty";
-    empty.textContent = "No shortcuts match your filter.";
-    flyout.appendChild(empty);
-    return;
+  if (ctx.onGoToComponent) {
+    appendAction("Go to a component…", "Enter a Menu.Component identifier", ctx.onGoToComponent);
   }
 
-  for (const group of tree) {
-    appendFavoriteCategory(doc, flyout, group, ctx, newWin, onNavigate);
+  if (newWin) {
+    const label = doc.createElement("label");
+    label.className = "mpu-fav-newwin";
+    label.title = "Open selected recent component in a new window";
+    const checkbox = doc.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = "mpu-fav-newwin";
+    label.append(checkbox, doc.createTextNode(" Open recent items in a new window"));
+    flyout.before(label);
+  }
+
+  const recent = (ctx.settings.recentComponents || []).filter((entry) =>
+    !normalizedQuery || `${entry.Menu}.${entry.Component}.${entry.Market} ${entry.Site}`.toLocaleLowerCase().includes(normalizedQuery));
+  if (recent.length) {
+    appendHeading("Recent");
+    recent.forEach((entry) => appendAction(
+      `${entry.Menu}.${entry.Component}.${entry.Market || "GBL"}`,
+      `Open ${entry.Menu}.${entry.Component}.${entry.Market || "GBL"}${newWin ? " (hold the new window option in More to open separately)" : ""}`,
+      () => {
+        if (!ctx.parsed.baseURL) return;
+          const openNewWindow = newWin && (doc.getElementById("mpu-fav-newwin") as HTMLInputElement | null)?.checked === true;
+          const url = buildComponentUrl({
+          baseURL: ctx.parsed.baseURL,
+          servlet: entry.Servlet,
+          site: entry.Site || ctx.parsed.site || ctx.parsed.siteNormalized,
+          portal: entry.Portal || ctx.parsed.portal,
+          node: entry.Node || ctx.parsed.node,
+          menu: entry.Menu,
+          component: entry.Component,
+          market: entry.Market,
+          newWin: openNewWindow,
+        });
+        if (url) {
+          injectClearBcs(doc);
+          if (openNewWindow) window.open(url, "_blank");
+          else window.location.href = url;
+        }
+      },
+    ));
+  }
+
+  const tabs = collectPageTabs(doc).filter((tab) =>
+    !normalizedQuery || tab.label.toLocaleLowerCase().includes(normalizedQuery));
+  if (tabs.length) {
+    appendHeading("Pages in this component");
+    tabs.forEach((tab) => appendPageTabMenuItem(doc, flyout, tab, onNavigate));
+  }
+
+  const tree = isYes(f.shortcutsOption)
+    ? filterFavoriteTree(buildFavoriteTree(ctx.settings.favorites), query)
+    : [];
+  if (normalizedQuery && !recent.length && !tabs.length && !tree.length) {
+    const empty = doc.createElement("p");
+    empty.className = "mpu-menu-empty";
+    empty.setAttribute("role", "status");
+    empty.textContent = "No page matches. Try a Menu.Component name or clear the search.";
+    flyout.appendChild(empty);
+  }
+  if (isYes(f.shortcutsOption) && ctx.settings.favorites.length) {
+    if (tree.length) {
+      appendHeading("Saved shortcuts");
+      for (const group of tree) appendFavoriteCategory(doc, flyout, group, ctx, newWin, onNavigate);
+    }
+  }
+
+  if (isYes(f.shortcutsOption)) {
+    appendAction("Add this component to shortcuts…", "Save this component in your local shortcuts", ctx.onAddFavorite);
   }
 }
 
@@ -732,37 +801,6 @@ function appendPageTabMenuItem(
   }
   item.appendChild(btn);
   container.appendChild(item);
-}
-
-function populatePagesMenu(
-  doc: Document,
-  container: HTMLElement,
-  onActivate?: () => void,
-): void {
-  const tabs = collectPageTabs(doc);
-  container.replaceChildren();
-  if (!tabs.length) {
-    const empty = doc.createElement("button");
-    empty.type = "button";
-    empty.disabled = true;
-    empty.setAttribute("role", "menuitem");
-    empty.className = "mpu-menu-empty";
-    empty.textContent = "No delivered page/tab links found on this page.";
-    container.appendChild(empty);
-    return;
-  }
-  for (const tab of tabs) {
-    appendPageTabMenuItem(doc, container, tab, onActivate);
-  }
-}
-
-function uiModeLabel(doc: Document): string {
-  const mode = detectUiModel(doc);
-  if (doc.querySelector("#ptifrmtgtframe, #ptifrmtarget")) return "Classic";
-  if (mode === "fluid") return "Fluid";
-  if (mode === "navCollection") return "Nav";
-  if (mode === "classic") return "Classic";
-  return "PS";
 }
 
 function btn(
@@ -1238,15 +1276,6 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.append(badge);
   }
 
-  if (!loginOnly) {
-    const mode = document.createElement("span");
-    mode.className = "mpu-mode";
-    mode.id = "mpu-ui-mode";
-    mode.textContent = uiModeLabel(doc);
-    mode.title = "PeopleSoft UI model (Classic / Fluid / Nav collection)";
-    bar.appendChild(mode);
-  }
-
   if (isYes(f.greetingOption)) {
     const envRoot = document.createElement("span");
     envRoot.className = "mpu-menu-root";
@@ -1280,6 +1309,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       envFlyout.replaceChildren();
       const meta = collectPageMeta(doc);
       const rows = buildEnvContextRows(meta, ctx.parsed, ctx.envLabel || "", doc);
+      if (isYes(f.userIdOption)) rows.splice(1, 0, { label: "User ID", value: meta.userId || "—" });
       const dl = document.createElement("dl");
       dl.className = "mpu-env-dl";
       for (const row of rows) {
@@ -1333,41 +1363,32 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(envRoot);
   }
 
-  if (!loginOnly && isYes(f.userIdOption)) {
-    const meta = collectPageMeta(doc);
-    const user = document.createElement("span");
-    user.className = "mpu-user";
-    user.textContent = meta.userId ? `User: ${meta.userId}` : "User: —";
-    user.title = "Signed-in PeopleSoft user";
-    bar.appendChild(user);
-  }
-
-  if (!loginOnly && isYes(f.shortcutsOption)) {
+  if (!loginOnly) {
     const menuRoot = document.createElement("span");
     menuRoot.className = "mpu-menu-root";
 
-    const shortcutsBtn = btn("mpu-fav", "Shortcuts", "Open shortcuts menu");
+    const shortcutsBtn = btn("mpu-fav", "Find page", "Find a page, saved shortcut, or component (Alt+Shift+F)");
     shortcutsBtn.setAttribute("aria-haspopup", "dialog");
     shortcutsBtn.setAttribute("aria-expanded", "false");
 
     const flyout = document.createElement("div");
     flyout.className = "mpu-flyout";
     flyout.setAttribute("role", "dialog");
-    flyout.setAttribute("aria-label", "Shortcuts");
+    flyout.setAttribute("aria-label", "Find a page");
     flyout.hidden = true;
 
     const filter = document.createElement("input");
     filter.type = "search";
     filter.id = "mpu-fav-filter";
     filter.className = "mpu-fav-filter mpu-flyout-filter";
-    filter.placeholder = "Filter…";
-    filter.setAttribute("aria-label", "Filter shortcuts");
+    filter.placeholder = "Search pages, components, shortcuts…";
+    filter.setAttribute("aria-label", "Search pages, components, and shortcuts");
     filter.autocomplete = "off";
 
     const menuBody = document.createElement("div");
     menuBody.className = "mpu-flyout-body";
     menuBody.setAttribute("role", "menu");
-    menuBody.setAttribute("aria-label", "Shortcut actions");
+    menuBody.setAttribute("aria-label", "Page and component results");
 
     const closeShortcuts = (): void => {
       if (flyout.contains(doc.activeElement)) shortcutsBtn.focus();
@@ -1409,67 +1430,12 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     menuRoot.append(shortcutsBtn, flyout);
     bar.appendChild(menuRoot);
 
-    const recent = ctx.settings.recentComponents || [];
-    if (recent.length) {
-      const wrap = document.createElement("span");
-      wrap.className = "mpu-fav-wrap";
+  }
 
-      if (isYes(f.newWindowOption)) {
-        const lab = document.createElement("label");
-        lab.className = "mpu-fav-newwin";
-        lab.title = "Open selected recent component in a new window";
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.id = "mpu-fav-newwin";
-        lab.append(cb, document.createTextNode(" New win"));
-        wrap.appendChild(lab);
-      }
-
-      const recentSelect = document.createElement("select");
-      recentSelect.id = "mpu-recent-select";
-      recentSelect.className = "mpu-select";
-      recentSelect.setAttribute("aria-label", "Open recent component");
-      const ph = document.createElement("option");
-      ph.value = "";
-      ph.textContent = "Recent…";
-      recentSelect.appendChild(ph);
-      recent.forEach((item, index) => {
-        const opt = document.createElement("option");
-        opt.value = String(index);
-        opt.textContent = `${item.Menu}.${item.Component}.${item.Market || "GBL"}`;
-        recentSelect.appendChild(opt);
-      });
-      recentSelect.addEventListener("change", () => {
-        const idx = Number(recentSelect.value);
-        if (Number.isNaN(idx)) return;
-        const item = recent[idx] as RecentComponent | undefined;
-        if (!item || !ctx.parsed.baseURL) return;
-        const newWin =
-          isYes(f.newWindowOption) &&
-          (doc.getElementById("mpu-fav-newwin") as HTMLInputElement | null)?.checked === true;
-        injectClearBcs(doc);
-        const url = buildComponentUrl({
-          baseURL: ctx.parsed.baseURL,
-          servlet: item.Servlet,
-          site: item.Site || ctx.parsed.site || ctx.parsed.siteNormalized,
-          portal: item.Portal || ctx.parsed.portal,
-          node: item.Node || ctx.parsed.node,
-          menu: item.Menu,
-          component: item.Component,
-          market: item.Market,
-          newWin,
-        });
-        if (!url) return;
-        if (newWin) {
-          window.open(url, "_blank");
-          recentSelect.value = "";
-          return;
-        }
-        window.location.href = url;
-      });
-      wrap.appendChild(recentSelect);
-      bar.appendChild(wrap);
-    }
+  if (!loginOnly && isYes(f.recFieldInfoOption)) {
+    const findField = btn("mpu-field-find", "Find field", "Find a record or field name on this page (Alt+Shift+N)");
+    findField.addEventListener("click", () => showFieldFinderDialog(doc, ctx.settings.fieldCopyFormat || "record.field"));
+    bar.appendChild(findField);
   }
 
   if (!loginOnly && isYes(f.traceOption)) {
@@ -1734,75 +1700,10 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     bar.appendChild(entryRoot);
   }
 
-  if (!loginOnly && isYes(f.pageInfoOption)) {
-    const pagesRoot = document.createElement("span");
-    pagesRoot.className = "mpu-menu-root";
-
-    const pagesBtn = btn(
-      "mpu-pagetabs",
-      "Pages",
-      "List all component pages and tabs on this component",
-    );
-    pagesBtn.setAttribute("aria-haspopup", "menu");
-    pagesBtn.setAttribute("aria-expanded", "false");
-
-    const pagesFlyout = document.createElement("div");
-    pagesFlyout.className = "mpu-flyout";
-    pagesFlyout.setAttribute("role", "menu");
-    pagesFlyout.setAttribute("aria-label", "Pages");
-    pagesFlyout.hidden = true;
-
-    const closePages = (): void => {
-      if (pagesFlyout.contains(doc.activeElement)) pagesBtn.focus();
-      pagesFlyout.hidden = true;
-      pagesBtn.setAttribute("aria-expanded", "false");
-      endFlyoutPosition();
-      restorePortaledFlyout(pagesFlyout);
-      endMenuDismiss();
-    };
-
-    const openPages = (): void => {
-      closeAllFlyouts(doc);
-      populatePagesMenu(doc, pagesFlyout, closePages);
-      pagesFlyout.hidden = false;
-      pagesBtn.setAttribute("aria-expanded", "true");
-      bindFlyoutPosition(pagesBtn, pagesFlyout);
-      bindMenuDismiss(doc, pagesRoot, closePages, pagesFlyout);
-      const first = pagesFlyout.querySelector<HTMLElement>(
-        'button[role="menuitem"]:not(:disabled)',
-      );
-      first?.focus();
-    };
-
-    pagesBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!pagesFlyout.hidden) {
-        closePages();
-        return;
-      }
-      openPages();
-    });
-
-    pagesRoot.append(pagesBtn, pagesFlyout);
-    bar.appendChild(pagesRoot);
-  }
-
   if (!loginOnly && isYes(f.newWindowOption) && ctx.parsed.kind === "component") {
     const nw = btn("mpu-newwin", "New Win", "Open component in new window");
     nw.addEventListener("click", () => ctx.onNewWindow());
     bar.appendChild(nw);
-  }
-
-  if (
-    !loginOnly &&
-    ctx.parsed.baseURL &&
-    ctx.parsed.portal &&
-    ctx.parsed.node &&
-    ctx.onGoToComponent
-  ) {
-    const go = btn("mpu-goto", "Go to", "Go to Menu.Component.Market (Alt+Shift+G)");
-    go.addEventListener("click", () => ctx.onGoToComponent?.());
-    bar.appendChild(go);
   }
 
   if (!loginOnly) {
@@ -1825,6 +1726,146 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   help.addEventListener("click", () => showHelpDialog(doc));
   bar.appendChild(help);
 
+  const moreRoot = doc.createElement("span");
+  moreRoot.className = "mpu-menu-root";
+  const moreButton = btn("mpu-more", "More", "More PeopleSoft tools and references");
+  moreButton.setAttribute("aria-haspopup", "menu");
+  moreButton.setAttribute("aria-expanded", "false");
+  const moreFlyout = doc.createElement("div");
+  moreFlyout.className = "mpu-flyout mpu-more-flyout";
+  moreFlyout.setAttribute("role", "menu");
+  moreFlyout.setAttribute("aria-label", "More tools");
+  moreFlyout.hidden = true;
+
+  const moreSections = new Map<string, HTMLElement>();
+  const section = (label: string): HTMLElement => {
+    let group = moreSections.get(label);
+    if (group) return group;
+    group = doc.createElement("div");
+    group.className = "mpu-more-section";
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", label);
+    const heading = doc.createElement("div");
+    heading.className = "mpu-menu-heading";
+    heading.setAttribute("role", "presentation");
+    heading.textContent = label;
+    group.appendChild(heading);
+    moreFlyout.appendChild(group);
+    moreSections.set(label, group);
+    return group;
+  };
+  const addMoreControl = (element: HTMLElement, groupLabel: string): void => {
+    if (element.localName === "button") {
+      const button = element as HTMLButtonElement;
+      button.classList.remove("mpu-btn");
+      button.classList.add("mpu-menu-open", "mpu-more-action");
+      const pressed = button.getAttribute("aria-pressed");
+      if (pressed !== null) {
+        button.setAttribute("role", "menuitemcheckbox");
+        button.setAttribute("aria-checked", pressed);
+        button.removeAttribute("aria-pressed");
+      } else {
+        button.setAttribute("role", "menuitem");
+      }
+      button.addEventListener("click", () => closeMore(), true);
+    }
+    section(groupLabel).appendChild(element);
+  };
+  const moveButton = (id: string, groupLabel: string): void => {
+    // The bar is still detached at this point, so look inside it rather than
+    // asking the document for descendants that are not mounted yet.
+    const element = bar.querySelector<HTMLElement>(`#${id}`);
+    if (element && isHtmlElement(element)) addMoreControl(element, groupLabel);
+  };
+  const closeMore = (): void => {
+    if (moreFlyout.contains(doc.activeElement)) moreButton.focus();
+    moreFlyout.hidden = true;
+    moreButton.setAttribute("aria-expanded", "false");
+    endFlyoutPosition();
+    restorePortaledFlyout(moreFlyout);
+    endMenuDismiss();
+  };
+  const openMore = (): void => {
+    closeAllFlyouts(doc);
+    moreFlyout.hidden = false;
+    moreButton.setAttribute("aria-expanded", "true");
+    bindFlyoutPosition(moreButton, moreFlyout);
+    bindMenuDismiss(doc, moreRoot, closeMore, moreFlyout);
+    moreFlyout.querySelector<HTMLElement>(
+      '[role="menuitem"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)',
+    )?.focus();
+  };
+  moreButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (moreFlyout.hidden) openMore();
+    else closeMore();
+  });
+
+  moveButton("mpu-pageinfo", "Page tools");
+  moveButton("mpu-structure", "Page tools");
+  moveButton("mpu-pcode", "Inspect and copy");
+  moveButton("mpu-field", "Inspect and copy");
+  const fieldName = bar.querySelector<HTMLElement>("#mpu-recfield-name");
+  if (fieldName && isHtmlElement(fieldName)) addMoreControl(fieldName, "Inspect and copy");
+  const copyFormat = bar.querySelector<HTMLElement>("#mpu-copy-format");
+  if (copyFormat && isHtmlElement(copyFormat)) addMoreControl(copyFormat, "Inspect and copy");
+  moveButton("mpu-copy-field", "Inspect and copy");
+  moveButton("mpu-trace", "Troubleshooting");
+  const ibWrap = bar.querySelector<HTMLElement>("#mpu-ib-crumb")?.parentElement;
+  const ibCopy = bar.querySelector<HTMLElement>("#mpu-ib-copy");
+  if (ibWrap && isHtmlElement(ibWrap) && ibCopy && isHtmlElement(ibCopy) && ibCopy.localName === "button") {
+    ibWrap.setAttribute("role", "group");
+    ibWrap.setAttribute("aria-label", "Integration Broker context");
+    ibCopy.classList.remove("mpu-btn");
+    ibCopy.classList.add("mpu-menu-open", "mpu-more-action");
+    ibCopy.setAttribute("role", "menuitem");
+    ibCopy.addEventListener("click", () => closeMore(), true);
+    section("Troubleshooting").appendChild(ibWrap);
+  }
+  moveButton("mpu-newwin", "Other tools");
+  moveButton("mpu-agents", "Other tools");
+  moveButton("mpu-help", "Other tools");
+
+  const adminButton = bar.querySelector<HTMLElement>("#mpu-admin");
+  const adminRoot = adminButton?.parentElement;
+  const adminFlyout = adminRoot?.querySelector<HTMLElement>('[aria-label="Admin jumps"]');
+  if (adminRoot && adminFlyout) {
+    for (const category of Array.from(adminFlyout.querySelectorAll<HTMLElement>(".mpu-menu-has-sub"))) {
+      const label = category.querySelector<HTMLElement>(".mpu-menu-subtrigger")?.textContent?.replace(/\s*»\s*$/, "").trim();
+      if (label) {
+        const heading = doc.createElement("div");
+        heading.className = "mpu-menu-subheading";
+        heading.setAttribute("role", "presentation");
+        heading.textContent = label;
+        section("Admin jumps").appendChild(heading);
+      }
+      category.querySelectorAll<HTMLElement>(".mpu-menu-open, .mpu-menu-newwin").forEach((button) => {
+        button.addEventListener("click", () => closeMore(), true);
+        section("Admin jumps").appendChild(button);
+      });
+    }
+    adminRoot.remove();
+  }
+
+  const entryButton = bar.querySelector<HTMLElement>("#mpu-entry");
+  const entryRoot = entryButton?.parentElement;
+  const entryFlyout = entryRoot?.querySelector<HTMLElement>('[aria-label="Field Entry"]');
+  if (entryRoot && entryFlyout) {
+    entryFlyout.querySelectorAll<HTMLElement>('button[role="menuitem"]').forEach((button) => {
+      button.classList.remove("mpu-btn");
+      button.classList.add("mpu-menu-open", "mpu-more-action");
+      button.addEventListener("click", () => closeMore(), true);
+      section("Field Entry").appendChild(button);
+    });
+    entryRoot.remove();
+  }
+
+  for (const group of moreSections.values()) {
+    if (group.querySelectorAll("button, select").length === 0) group.remove();
+  }
+  moreRoot.append(moreButton, moreFlyout);
+  bar.appendChild(moreRoot);
+
   bar.querySelectorAll<HTMLElement>('button[aria-haspopup="menu"], #mpu-fav').forEach((trigger) => {
     trigger.addEventListener("keydown", (e) => {
       if (!["ArrowDown", "ArrowUp"].includes(e.key)) return;
@@ -1832,7 +1873,9 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       if (trigger.getAttribute("aria-expanded") !== "true") trigger.click();
       const flyout = doc.querySelector('.mpu-flyout:not([hidden])');
       const menu = flyout?.matches('[role="menu"]') ? flyout : flyout?.querySelector('[role="menu"]');
-      const items = Array.from(menu?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])
+      const items = Array.from(menu?.querySelectorAll<HTMLElement>(
+        '[role="menuitem"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)',
+      ) ?? [])
         .filter((item) => item.closest('[role="menu"]') === menu && isVisible(item));
       (e.key === "ArrowUp" ? items.at(-1) : items[0])?.focus();
     });
@@ -1931,15 +1974,13 @@ function showHelpDialog(doc: Document): void {
     <h2 id="mpu-dialog-title">Morris PeopleSoft Utilities</h2>
     <p>Productivity overlay for PeopleSoft Classic and Fluid. Settings stay on this device. No passwords. No telemetry.</p>
     <ul>
-      <li><strong>Shortcuts</strong> — hierarchical menu by category; Add to Shortcuts from the flyout</li>
+      <li><strong>Find page</strong> — search recent pages and saved shortcuts, switch pages on this component, or enter a Menu.Component directly (Alt+Shift+F)</li>
+      <li><strong>Find field</strong> — search field labels and RECORD.FIELD names on the current page (Alt+Shift+N); it does not search a system-wide record catalog</li>
       <li><strong>Page Info</strong> — menu/component/page; Compare clipboard across envs; <strong>Upgrade watch</strong> compares UI fingerprints after PS upgrades (not PeopleCode)</li>
-      <li><strong>Pages</strong> — delivered multi-page links when present (flyout or full list)</li>
-      <li><strong>Field Inspector</strong> — orange icons; PeopleCode copy formats; Alt+Shift+C</li>
-      <li><strong>Entry</strong> — capture / paste / sheet / find-replace with eligibility preview (Alt+Shift+E; Options → careful)</li>
-      <li><strong>PCode / Structure / Admin</strong> — App Designer starters, page structure tree, setup jumps</li>
-      <li><strong>Go to</strong> — jump to Menu.Component.Market</li>
-      <li><strong>Trace</strong> — toggle configured PeopleCode/SQL flags</li>
-      <li><strong>Shortcuts</strong> — Alt+Shift+P/I/C/G/E</li>
+      <li><strong>More</strong> — specialist tools for page details, PeopleCode, structure, setup, field entry, and trace requests</li>
+      <li><strong>Field Inspector</strong> — detailed orange field markers; toggle with Alt+Shift+I and copy a locked field with Alt+Shift+C</li>
+      <li><strong>Entry</strong> — capture / paste / sheet / find-replace with preview (Alt+Shift+E; enable in Options)</li>
+      <li><strong>Keyboard shortcuts</strong> — Go to component Alt+Shift+G</li>
     </ul>
     ${tipHtml}
     <p>Maintained by <a href="https://github.com/hackmods" target="_blank" rel="noopener">hackmods</a>. Inspired by PS Utilities.</p>
@@ -1962,6 +2003,77 @@ function showHelpDialog(doc: Document): void {
       docsHelp.append(docsLink);
       dialog.querySelector("#mpu-dialog-close")?.before(docsHelp);
       dialog.querySelector("#mpu-dialog-close")?.addEventListener("click", close);
+    },
+  });
+}
+
+function showFieldFinderDialog(doc: Document, copyFormat: FieldCopyFormat = "record.field"): void {
+  const fields = collectInspectableFields(doc);
+  openModalDialog(doc, {
+    labelledBy: "mpu-field-finder-title",
+    initialFocus: "#mpu-field-finder-search",
+    build: (dialog, close) => {
+      dialog.innerHTML = `
+        <h2 id="mpu-field-finder-title">Find a field on this page</h2>
+        <p class="mpu-dialog-hint">Search this page and its same-origin frames by label, record, field, or PeopleSoft field ID. This does not search every record in your system. Copy uses your selected field format.</p>
+        <label class="mpu-field-finder-search-label" for="mpu-field-finder-search">Search fields</label>
+        <input id="mpu-field-finder-search" class="mpu-dialog-input" type="search" autocomplete="off" placeholder="For example, Employee ID or JOB_EMPLID" />
+        <p id="mpu-field-finder-status" class="mpu-field-finder-status" role="status" aria-live="polite"></p>
+        <div id="mpu-field-finder-results" class="mpu-field-finder-results"></div>
+        <div class="mpu-dialog-actions"><button type="button" class="mpu-btn" id="mpu-field-finder-close">Close</button></div>`;
+
+      const search = dialog.querySelector<HTMLInputElement>("#mpu-field-finder-search")!;
+      const results = dialog.querySelector<HTMLElement>("#mpu-field-finder-results")!;
+      const status = dialog.querySelector<HTMLElement>("#mpu-field-finder-status")!;
+      const render = (): void => {
+        const query = search.value.trim().toLocaleLowerCase();
+        const matches = fields.filter(({ id, parsed }) =>
+          !query || `${id} ${parsed.base} ${parsed.record || ""} ${parsed.field || ""} ${parsed.pageLabel || ""}`
+            .toLocaleLowerCase().includes(query));
+        results.replaceChildren();
+        const shown = matches.slice(0, 100);
+        status.textContent = matches.length > shown.length
+          ? `Showing ${shown.length} of ${matches.length} fields. Type to narrow the list.`
+          : matches.length
+            ? `${matches.length} ${matches.length === 1 ? "field" : "fields"} found on this page.`
+            : query && fields.length
+              ? "No fields match. Try a different label, record, or field ID."
+              : "No fields found on this page.";
+        for (const field of shown) {
+          const row = doc.createElement("div");
+          row.className = "mpu-field-finder-row";
+          const details = doc.createElement("span");
+          details.className = "mpu-field-finder-details";
+          const name = doc.createElement("strong");
+          name.textContent = formatRecFieldCopy(field.parsed);
+          const label = doc.createElement("span");
+          label.textContent = field.parsed.pageLabel || field.id;
+          details.append(name, label);
+          const actions = doc.createElement("span");
+          actions.className = "mpu-field-finder-actions";
+          const locate = doc.createElement("button");
+          locate.type = "button";
+          locate.className = "mpu-btn";
+          locate.textContent = "Find on page";
+          locate.setAttribute("aria-label", `Find ${field.parsed.pageLabel || formatRecFieldCopy(field.parsed)} on page`);
+          locate.addEventListener("click", () => { close(); focusInspectableField(field.element); });
+          const copy = doc.createElement("button");
+          copy.type = "button";
+          copy.className = "mpu-btn";
+          copy.textContent = "Copy";
+          copy.setAttribute("aria-label", `Copy ${formatRecFieldCopy(field.parsed, copyFormat)}`);
+          copy.addEventListener("click", () => {
+            void copyText(doc, formatRecFieldCopy(field.parsed, copyFormat), "Field reference copied");
+          });
+          actions.append(locate, copy);
+          row.append(details, actions);
+          results.appendChild(row);
+        }
+        if (!fields.length) status.textContent = "No recognizable fields were found on this page. Open a component page to search its fields.";
+      };
+      render();
+      search.addEventListener("input", render);
+      dialog.querySelector("#mpu-field-finder-close")?.addEventListener("click", close);
     },
   });
 }

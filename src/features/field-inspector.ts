@@ -73,6 +73,18 @@ export interface ParsedRecField {
   contextChips?: FieldContextChip[];
 }
 
+export interface InspectableField {
+  id: string;
+  element: HTMLElement;
+  parsed: ParsedRecField;
+}
+
+const fieldFindHighlights = new WeakMap<HTMLElement, {
+  outline: string;
+  outlineOffset: string;
+  timer: ReturnType<typeof setTimeout>;
+}>();
+
 export type FieldContextChip = "Prompt" | "Display" | "Deferred";
 
 const PROMPT_SELECTOR =
@@ -293,6 +305,42 @@ export function parseRecField(
   };
 }
 
+/** Return identified fields from the current page and its same-origin content frames. */
+export function collectInspectableFields(doc: Document = document): InspectableField[] {
+  const docs = collectDocs(getInspectorContentRoot(doc));
+  const elements = docs.flatMap((targetDoc) => Array.from(targetDoc.querySelectorAll(FIELD_SELECTOR)))
+    .filter((element): element is HTMLElement => isHtmlElement(element)
+      && Boolean(element.id?.includes("_"))
+      && !element.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil"));
+  const peers = [...new Set(elements.map((element) => fieldNameFromId(element.id)))];
+  return elements.map((element) => ({
+    id: element.id,
+    element,
+    parsed: parseRecField(element.id, peers, element),
+  }));
+}
+
+/** Scroll a selected field into view and briefly outline it without changing page geometry. */
+export function focusInspectableField(element: HTMLElement): void {
+  try { element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" }); }
+  catch { /* an older PeopleTools browser may not support scroll options */ }
+  const previous = fieldFindHighlights.get(element);
+  if (previous) clearTimeout(previous.timer);
+  const outline = previous?.outline ?? element.style.outline;
+  const outlineOffset = previous?.outlineOffset ?? element.style.outlineOffset;
+  element.style.outline = "3px solid #FF5C00";
+  element.style.outlineOffset = "2px";
+  const highlightOutline = element.style.outline;
+  const timer = setTimeout(() => {
+    if (element.style.outline === highlightOutline) {
+      element.style.outline = outline;
+      element.style.outlineOffset = outlineOffset;
+    }
+    fieldFindHighlights.delete(element);
+  }, 1600);
+  fieldFindHighlights.set(element, { outline, outlineOffset, timer });
+}
+
 /** Clipboard / announce form — prefers RECORD.FIELD without row suffix for App Designer paste. */
 export function formatRecFieldCopy(
   parsed: ParsedRecField,
@@ -379,7 +427,7 @@ function createIcon(doc: Document, stroke: string, fieldId: string): SVGSVGEleme
   svg.dataset.mpuStroke = stroke;
   svg.setAttribute("title", "Click to lock record.field name");
   svg.style.cssText =
-    "width:12px;height:12px;padding-right:4px;vertical-align:top;cursor:pointer;display:inline-block;flex-shrink:0;";
+    "position:fixed;width:12px;height:12px;padding:0;cursor:pointer;display:block;z-index:2147483000;";
 
   const circle = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
   circle.setAttribute("cx", "6.5");
@@ -417,16 +465,14 @@ function ensureTargetStyles(doc: Document): void {
   style.id = STYLE_ID;
   style.textContent = `
     .${AREA} {
-      border: ${ACTIVE_BORDER};
-      white-space: nowrap;
-      margin: 1px;
-      padding: 1px;
-      display: inline-block;
-      vertical-align: middle;
-      box-sizing: border-box;
+      display: contents;
     }
-    .${AREA}[data-mpu-locked="true"] {
-      border: ${LOCKED_BORDER};
+    .${AREA} > .mpu-recfield-target {
+      outline: ${ACTIVE_BORDER};
+      outline-offset: 1px;
+    }
+    .${AREA}[data-mpu-locked="true"] > .mpu-recfield-target {
+      outline: ${LOCKED_BORDER};
     }
     .${ICON} {
       width: 12px !important;
@@ -438,11 +484,13 @@ function ensureTargetStyles(doc: Document): void {
     }
     @media (prefers-contrast: more), (forced-colors: active) {
       .${AREA} {
-        border-width: 3px !important;
-        outline: 2px solid CanvasText;
-        outline-offset: 1px;
+        display: contents;
       }
-      .${AREA}[data-mpu-locked="true"] {
+      .${AREA} > .mpu-recfield-target {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+      }
+      .${AREA}[data-mpu-locked="true"] > .mpu-recfield-target {
         outline-color: Highlight;
       }
       .${ICON} {
@@ -549,7 +597,6 @@ function clearLocks(target: Document): void {
       setIconStroke(node, ORANGE);
     });
     doc.querySelectorAll(`.${AREA}`).forEach((node) => {
-      (node as HTMLElement).style.border = ACTIVE_BORDER;
       (node as HTMLElement).removeAttribute("data-mpu-locked");
     });
   }
@@ -683,7 +730,8 @@ function injectIcons(target: Document): number {
 
         const area = doc.createElement("span");
         area.className = AREA;
-        area.style.cssText = `border: ${ACTIVE_BORDER}; white-space: nowrap; margin: 1px; padding: 1px; display: inline-block; vertical-align: middle; box-sizing: border-box;`;
+        area.style.display = "contents";
+        wrapTarget.classList.add("mpu-recfield-target");
 
         // Always wrap the tight host/field only — never scoop all parent siblings
         // (that highlighted entire Classic TDs / Fluid containers as one block).
@@ -695,6 +743,9 @@ function injectIcons(target: Document): number {
 
         const icon = createIcon(doc, ORANGE, fieldId);
         area.insertBefore(icon, area.firstChild);
+        const rect = wrapTarget.getBoundingClientRect();
+        icon.style.left = `${Math.max(0, rect.left - 16)}px`;
+        icon.style.top = `${Math.max(0, rect.top)}px`;
         count += 1;
       }
     }
@@ -709,7 +760,6 @@ function injectIcons(target: Document): number {
         if (lockedIcon) {
           setIconStroke(lockedIcon, LOCKED_COLOR);
           if (lockedIcon.parentElement) {
-            (lockedIcon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
             lockedIcon.parentElement.setAttribute("data-mpu-locked", "true");
           }
           setNamePanel(lockedId);
@@ -732,6 +782,9 @@ function removeIcons(target: Document): void {
     doc.querySelectorAll(`.${ICON}`).forEach((img) => img.remove());
     doc.querySelectorAll(`.${AREA}`).forEach((area) => {
       const parent = area.parentElement;
+      area.querySelectorAll<HTMLElement>(".mpu-recfield-target").forEach((target) => {
+        target.classList.remove("mpu-recfield-target");
+      });
       if (!parent) {
         area.remove();
         return;
@@ -778,7 +831,6 @@ function onIconClick(e: MouseEvent): void {
   lockedId = fieldId;
   setIconStroke(icon, LOCKED_COLOR);
   if (icon.parentElement) {
-    (icon.parentElement as HTMLElement).style.border = LOCKED_BORDER;
     icon.parentElement.setAttribute("data-mpu-locked", "true");
   }
   setNamePanel(fieldId);
@@ -1159,7 +1211,11 @@ export function syncFieldInspectorChrome(doc: Document = document): void {
   if (btn) {
     const on = active;
     btn.textContent = on ? "Inspect ON" : "Inspect";
-    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (btn.getAttribute("role") === "menuitemcheckbox") {
+      btn.setAttribute("aria-checked", on ? "true" : "false");
+    } else {
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
   }
   if (panel) {
     panel.hidden = !active;

@@ -1,7 +1,7 @@
 import { test as base, expect } from "@playwright/test";
 import type { BrowserContext } from "@playwright/test";
 import { startFixtureServer, stopFixtureServer, FLUID_FIELD_ENTRY_PATH, CLASSIC_COMPONENT_PATH } from "./helpers/fixture-server";
-import { e2eSettings, launchExtensionContext, seedMpuSettings, openPsPage } from "./helpers/extension";
+import { e2eSettings, launchExtensionContext, seedMpuSettings, openPsPage, clickMoreAction } from "./helpers/extension";
 import { audit } from "./helpers/accessibility";
 
 const productionSettings = () => e2eSettings({
@@ -97,13 +97,13 @@ test("production trace start makes no request before consent; Stop remains acces
   const page = await openPsPage(extensionContext, FLUID_FIELD_ENTRY_PATH);
   const requests: string[] = [];
   await page.route("**/psc/**/c/UTILITIES.*", async route => { requests.push(route.request().url()); await route.fulfill({ status: 403, body: "Denied in fixture" }); });
-  await page.locator("#mpu-trace").click();
+  await clickMoreAction(page, "#mpu-trace");
   await page.locator("#mpu-trace-on").click();
   await expect(page.locator("#mpu-production-title")).toBeVisible();
   expect(requests).toHaveLength(0);
   await page.locator("#mpu-production-cancel").click();
   expect(requests).toHaveLength(0);
-  await page.locator("#mpu-trace").click();
+  await clickMoreAction(page, "#mpu-trace");
   await page.locator("#mpu-trace-off").click();
   await expect.poll(() => requests.length).toBe(2);
   await expect(page.locator("#mpu-production-title")).toHaveCount(0);

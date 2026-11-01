@@ -324,6 +324,84 @@ button.mpu-env {
   border-radius: 4px;
 }
 
+.mpu-field-finder-search-label {
+  display: block;
+  margin: 0.5rem 0 0.25rem;
+  font-weight: 650;
+}
+
+.mpu-field-finder-search-label + .mpu-dialog-input {
+  width: 100%;
+}
+
+.mpu-field-finder-status {
+  margin: 0.4rem 0;
+  color: #444;
+  font-size: 0.88rem;
+}
+
+.mpu-field-finder-results {
+  display: grid;
+  gap: 0.4rem;
+  max-height: min(52vh, 28rem);
+  overflow: auto;
+}
+
+.mpu-field-finder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.mpu-field-finder-details,
+.mpu-field-finder-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.mpu-field-finder-details {
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.mpu-field-finder-details strong,
+.mpu-field-finder-details span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.mpu-field-finder-details span {
+  color: #555;
+  font-size: 0.88rem;
+}
+
+.mpu-field-finder-actions {
+  flex: 0 0 auto;
+}
+
+.mpu-field-finder-actions .mpu-btn {
+  font-size: 0.86rem;
+}
+
+@media (max-width: 480px) {
+  .mpu-field-finder-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mpu-field-finder-actions .mpu-btn {
+    flex: 1 1 0;
+  }
+}
+
 .mpu-goto-form {
   display: grid;
   gap: 0.55rem;
@@ -461,6 +539,12 @@ button.mpu-env {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
+.mpu-more-flyout {
+  min-width: 15rem;
+  max-width: min(28rem, 88vw);
+  max-height: min(32rem, 78vh);
+}
+
 .mpu-flyout-sub {
   /* Placement is set in JS (fixed + getBoundingClientRect) so parent overflow cannot clip it */
   top: 0;
@@ -483,6 +567,12 @@ button.mpu-env {
   box-sizing: border-box;
 }
 
+.mpu-flyout > .mpu-fav-newwin {
+  display: flex;
+  padding: 0 0.65rem 0.4rem;
+  white-space: normal;
+}
+
 .mpu-flyout-body {
   display: block;
 }
@@ -490,6 +580,43 @@ button.mpu-env {
 .mpu-menu-item {
   display: block;
   position: relative;
+}
+
+.mpu-menu-heading {
+  padding: 0.45rem 0.65rem 0.25rem;
+  color: #c8c8c8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mpu-menu-subheading {
+  padding: 0.4rem 0.65rem 0.15rem;
+  color: #c8c8c8;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.mpu-more-section + .mpu-more-section {
+  margin-top: 0.2rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid #444;
+}
+
+.mpu-more-section .mpu-ib-wrap {
+  display: block;
+  padding: 0 0.5rem 0.35rem;
+}
+
+.mpu-more-section .mpu-ib-crumb {
+  display: block;
+  margin: 0.25rem 0;
+}
+
+.mpu-more-section select {
+  margin: 0.25rem 0.65rem;
+  max-width: calc(100% - 1.3rem);
 }
 
 .mpu-menu-has-sub {

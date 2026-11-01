@@ -15,6 +15,7 @@ import {
   launchExtensionContext,
   openPsPage,
   seedMpuSettings,
+  clickMoreAction,
 } from "./helpers/extension";
 
 type Fixtures = {
@@ -48,21 +49,21 @@ const test = base.extend<Fixtures>({
 
 test.describe("MPU extension UI", () => {
   test("Help and contextual PCode references open working private Options destinations", async ({ extensionContext, extensionId, fluidPage }) => {
-    await fluidPage.locator("#mpu-help").click();
+    await clickMoreAction(fluidPage, "#mpu-help");
     let opened = extensionContext.waitForEvent("page");
     await fluidPage.getByRole("button", { name: "Oracle documentation hub (PeopleTools version-aware)", exact: true }).click();
     let target = await opened; await expect(target.locator("#panel-docs")).toBeVisible();
     await expect(target).toHaveURL(`chrome-extension://${extensionId}/options.html?tools=8.61.15#docs`); await target.close();
-    await fluidPage.keyboard.press("Escape"); await fluidPage.locator("#mpu-pcode").click();
+    await fluidPage.keyboard.press("Escape"); await clickMoreAction(fluidPage, "#mpu-pcode");
     await expect(fluidPage.locator("#mpu-pcode-context-form")).toContainText("No field locked");
     await expect(fluidPage.getByRole("button", { name: "Copy contextual example", exact: true })).toHaveCount(0);
     for (const [name, panel] of [["Prepare a PeopleCode task with an agent", "agents"], ["Find PeopleCode API and language documentation", "docs"]]) {
       opened = extensionContext.waitForEvent("page"); await fluidPage.getByRole("button", { name, exact: true }).click();
       target = await opened; await expect(target.locator(`#panel-${panel}`)).toBeVisible(); await target.close();
     }
-    await fluidPage.keyboard.press("Escape"); await fluidPage.locator("#mpu-field").click();
+    await fluidPage.keyboard.press("Escape"); await clickMoreAction(fluidPage, "#mpu-field");
     await fluidPage.locator('.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID"]').click();
-    await fluidPage.locator("#mpu-pcode").click();
+    await clickMoreAction(fluidPage, "#mpu-pcode");
     await fluidPage.getByLabel("Verified record name", { exact: true }).fill("JOB");
     await fluidPage.getByLabel("Verified field name", { exact: true }).fill("EMPLID");
     await fluidPage.getByLabel("Intended PeopleCode event", { exact: true }).selectOption("FieldChange");
@@ -75,7 +76,7 @@ test.describe("MPU extension UI", () => {
     await audit(fluidPage, "#mpu-dialog"); await fluidPage.setViewportSize({ width: 320, height: 700 }); await audit(fluidPage, "#mpu-dialog");
     await fluidPage.getByLabel("Verified row/scroll context (up to 500 characters)", { exact: true }).fill("Changed context");
     await expect(example).toHaveText(""); await expect(fluidPage.getByRole("button", { name: "Copy contextual example", exact: true })).toBeDisabled();
-    await fluidPage.keyboard.press("Escape"); await expect(fluidPage.locator("#mpu-pcode")).toBeFocused();
+    await fluidPage.keyboard.press("Escape"); await expect(fluidPage.locator("#mpu-more")).toBeFocused();
   });
   test("Oracle hub filters locally, handles versions, and synchronizes favorites", async ({ extensionContext, extensionId }) => {
     const options = await extensionContext.newPage();
@@ -140,14 +141,14 @@ test.describe("MPU extension UI", () => {
   });
 
   test("Fluid debugger opens read-only structural diagnostics with accessible controls", async ({ fluidPage }) => {
-    await fluidPage.locator("#mpu-structure").click();
+    await clickMoreAction(fluidPage, "#mpu-structure");
     await fluidPage.locator("#mpu-fluid-debug").click();
     await expect(fluidPage.locator("#mpu-fluid-debug-output")).toContainText("active target:");
     await expect(fluidPage.locator("#mpu-fluid-debug-output")).toContainText("dialogs=0");
     await expect(fluidPage.locator("#mpu-fluid-debug-output")).not.toContainText("127.0.0.1");
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-structure")).toBeFocused();
+    await expect(fluidPage.locator("#mpu-more")).toBeFocused();
   });
 
   test("popup reports inactive on ordinary sites without requesting a page snapshot", async ({ extensionContext, extensionId }) => {
@@ -219,6 +220,7 @@ test.describe("MPU extension UI", () => {
     const url = `chrome-extension://${extensionId}/options.html`;
     await Promise.all([first.goto(url), second.goto(url)]);
     await first.locator("#greetingOption").uncheck();
+    await second.locator('details.feature-group[aria-labelledby="feature-group-advanced"] > summary').click();
     await second.locator("#traceOption").check();
     await Promise.all([first.locator("#save-features").click(), second.locator("#save-features").click()]);
     const read = () => extensionContext.serviceWorkers()[0].evaluate(async () => (await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings);
@@ -238,7 +240,7 @@ test.describe("MPU extension UI", () => {
 
   test("diagnostics are previewed before export and upgrade baselines retain selectable history", async ({ fluidPage }) => {
     test.setTimeout(120_000);
-    await fluidPage.locator("#mpu-pageinfo").click();
+    await clickMoreAction(fluidPage, "#mpu-pageinfo");
     await fluidPage.locator("#mpu-pi-diagnostics").click();
     const preview = fluidPage.getByRole("textbox", { name: "Diagnostic report", exact: true });
     await expect(preview).toBeFocused();
@@ -285,7 +287,7 @@ test.describe("MPU extension UI", () => {
     await fluidPage.setViewportSize({ width: 320, height: 600 });
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-pageinfo")).toBeFocused();
+    await expect(fluidPage.locator("#mpu-more")).toBeFocused();
   });
 
   test("trace shows request evidence and closes its action dialog when disabled", async ({ extensionContext, fluidPage }) => {
@@ -298,11 +300,13 @@ test.describe("MPU extension UI", () => {
       await chrome.storage.local.set({ mpuSettings: settings });
     });
     await expect(fluidPage.locator("#mpu-trace")).toContainText("last ON");
+    await fluidPage.locator("#mpu-more").click();
     await fluidPage.locator("#mpu-trace").click();
     await expect(fluidPage.locator("#mpu-trace-evidence")).toContainText("not a live server query");
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-trace")).toBeFocused();
+    await expect(fluidPage.locator("#mpu-more")).toBeFocused();
+    await fluidPage.locator("#mpu-more").click();
     await fluidPage.locator("#mpu-trace").click();
     await sw.evaluate(async () => {
       const settings = (await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings;
@@ -318,44 +322,50 @@ test.describe("MPU extension UI", () => {
   test("rendered bar, flyouts, and dialogs pass browser axe including contrast", async ({ fluidPage }) => {
     test.setTimeout(60_000);
     await audit(fluidPage, "#mpu-bar");
-    for (const trigger of ["#mpu-env", "#mpu-fav", "#mpu-admin", "#mpu-pagetabs"]) {
+    for (const trigger of ["#mpu-env", "#mpu-fav", "#mpu-more"]) {
       await fluidPage.locator(trigger).click();
       await audit(fluidPage, '.mpu-flyout:not([hidden])');
       await fluidPage.locator(trigger).click();
     }
-    for (const trigger of ["#mpu-pageinfo", "#mpu-pcode", "#mpu-structure", "#mpu-goto", "#mpu-help"]) {
+    await fluidPage.locator("#mpu-field-find").click();
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.keyboard.press("Escape");
+    for (const trigger of ["#mpu-pageinfo", "#mpu-pcode", "#mpu-structure", "#mpu-help"]) {
+      await fluidPage.locator("#mpu-more").click();
       await fluidPage.locator(trigger).click();
       await audit(fluidPage, "#mpu-dialog");
       await fluidPage.keyboard.press("Escape");
     }
+    await fluidPage.locator("#mpu-fav").click();
+    await fluidPage.getByRole("menuitem", { name: "Go to a component…", exact: true }).click();
+    await audit(fluidPage, "#mpu-dialog");
+    await fluidPage.keyboard.press("Escape");
   });
 
   test("menu keys navigate levels and restore focus; modal Tab wraps", async ({ fluidPage }) => {
-    const admin = fluidPage.locator("#mpu-admin");
-    await admin.focus();
+    const more = fluidPage.locator("#mpu-more");
+    await more.focus();
     await fluidPage.keyboard.press("ArrowDown");
-    const menu = fluidPage.getByRole("menu", { name: "Admin jumps", exact: true });
-    const categories = menu.locator(':scope > .mpu-menu-has-sub > button');
-    await expect(categories.first()).toBeFocused();
+    const menu = fluidPage.getByRole("menu", { name: "More tools", exact: true });
+    const items = menu.getByRole("menuitem");
+    await expect(items.first()).toBeFocused();
     await fluidPage.keyboard.press("ArrowDown");
-    await expect(categories.nth(1)).toBeFocused();
+    await expect(items.nth(1)).toBeFocused();
     await fluidPage.keyboard.press("Home");
-    await expect(categories.first()).toBeFocused();
-    await fluidPage.keyboard.press("ArrowRight");
-    const firstChild = menu.locator(':scope > .mpu-menu-has-sub').first().getByRole("menuitem").nth(1);
-    await expect(firstChild).toBeFocused();
-    await fluidPage.keyboard.press("ArrowLeft");
-    await expect(categories.first()).toBeFocused();
+    await expect(items.first()).toBeFocused();
+    await fluidPage.keyboard.press("End");
+    await expect(items.last()).toBeFocused();
     await fluidPage.keyboard.press("Escape");
-    await expect(admin).toBeFocused();
+    await expect(more).toBeFocused();
     await expect(menu).toBeHidden();
     await fluidPage.keyboard.press("ArrowUp");
-    await expect(categories.last()).toBeFocused();
+    await expect(items.last()).toBeFocused();
     await fluidPage.keyboard.press("Tab");
     await expect(menu).toBeHidden();
-    await expect(fluidPage.locator("#mpu-field")).toBeFocused();
+    expect(await fluidPage.evaluate(() => document.activeElement?.closest(".mpu-more-flyout") === null)).toBe(true);
 
-    await fluidPage.locator("#mpu-goto").click();
+    await fluidPage.locator("#mpu-fav").click();
+    await fluidPage.getByRole("menuitem", { name: "Go to a component…", exact: true }).click();
     const dialog = fluidPage.getByRole("dialog");
     const last = dialog.locator("button").last();
     await last.focus();
@@ -363,7 +373,7 @@ test.describe("MPU extension UI", () => {
     await expect(dialog.locator("input").first()).toBeFocused();
     await fluidPage.keyboard.type("M.COMP.GBL");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-goto")).toBeFocused();
+    await expect(fluidPage.locator("#mpu-fav")).toBeFocused();
   });
 
   test("bar and dialogs reflow in a narrow viewport", async ({ fluidPage }) => {
@@ -372,7 +382,14 @@ test.describe("MPU extension UI", () => {
     const bar = await fluidPage.locator("#mpu-bar").boundingBox();
     expect(bar!.x).toBeGreaterThanOrEqual(0);
     expect(bar!.x + bar!.width).toBeLessThanOrEqual(320);
-    for (const trigger of ["#mpu-pageinfo", "#mpu-pcode", "#mpu-goto", "#mpu-help"]) {
+    await fluidPage.locator("#mpu-more").click();
+    const moreFlyout = fluidPage.locator(".mpu-more-flyout");
+    const moreBox = await moreFlyout.boundingBox();
+    expect(moreBox!.x).toBeGreaterThanOrEqual(0);
+    expect(moreBox!.x + moreBox!.width).toBeLessThanOrEqual(320);
+    await fluidPage.keyboard.press("Escape");
+    for (const trigger of ["#mpu-pageinfo", "#mpu-pcode", "#mpu-structure", "#mpu-help"]) {
+      await fluidPage.locator("#mpu-more").click();
       await fluidPage.locator(trigger).click();
       const box = await fluidPage.getByRole("dialog").boundingBox();
       expect(box!.x).toBeGreaterThanOrEqual(0);
@@ -380,6 +397,18 @@ test.describe("MPU extension UI", () => {
       expect(box!.height).toBeLessThanOrEqual(600);
       await fluidPage.keyboard.press("Escape");
     }
+    await fluidPage.locator("#mpu-fav").click();
+    await fluidPage.getByRole("menuitem", { name: "Go to a component…", exact: true }).click();
+    const box = await fluidPage.getByRole("dialog").boundingBox();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+    expect(box!.height).toBeLessThanOrEqual(600);
+    await fluidPage.keyboard.press("Escape");
+    await fluidPage.locator("#mpu-field-find").click();
+    const fieldDialog = await fluidPage.getByRole("dialog").boundingBox();
+    expect(fieldDialog!.x).toBeGreaterThanOrEqual(0);
+    expect(fieldDialog!.x + fieldDialog!.width).toBeLessThanOrEqual(320);
+    expect(fieldDialog!.height).toBeLessThanOrEqual(600);
   });
 
   test("rendered extension pages pass browser axe including contrast", async ({ extensionContext, extensionId }) => {
@@ -464,13 +493,13 @@ test.describe("MPU extension UI", () => {
       await library.close();
       await page.close();
     }
-    await fluidPage.locator("#mpu-help").click();
+    await clickMoreAction(fluidPage, "#mpu-help");
     const link = fluidPage.locator("#mpu-agent-help a");
     await expect(link).toHaveAttribute("href", "https://github.com/hackmods/Morris-Peoplesoft-Utilities/tree/main/agents");
     await expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-help")).toBeFocused();
+    await expect(fluidPage.locator("#mpu-more")).toBeFocused();
   });
 
   test("toolbar Agents click opens the configured panel or its local fallback", async ({ extensionContext, extensionId, fluidPage }) => {
@@ -484,7 +513,7 @@ test.describe("MPU extension UI", () => {
         catch (error) { state.agentOpenResult = "fallback"; throw error; }
       };
     });
-    await fluidPage.locator("#mpu-agents").click();
+    await clickMoreAction(fluidPage, "#mpu-agents");
     await expect.poll(() => sw.evaluate(() => (globalThis as unknown as { agentOpenResult: string }).agentOpenResult)).toMatch(/opened|fallback/);
     const state = await sw.evaluate(async () => {
       const tab = (await chrome.tabs.query({})).find((item) => item.url?.includes("/c/MENU.COMP.GBL"))!;
@@ -607,23 +636,24 @@ test.describe("MPU extension UI", () => {
   });
 
   test("Page Info dialog opens with copy actions", async ({ fluidPage }) => {
-    await fluidPage.locator("#mpu-pageinfo").click();
+    await clickMoreAction(fluidPage, "#mpu-pageinfo");
     await expect(fluidPage.locator("#mpu-pi-title")).toHaveText("Page Information");
     await expect(fluidPage.locator("#mpu-pi-body")).toBeVisible();
     await expect(fluidPage.locator("#mpu-pi-copy")).toBeVisible();
   });
 
-  test("Shortcuts flyout opens under the bar", async ({ fluidPage }) => {
+  test("Find page flyout opens under the bar", async ({ fluidPage }) => {
     await fluidPage.locator("#mpu-fav").click();
-    const flyout = fluidPage.locator('.mpu-flyout[aria-label="Shortcuts"]');
+    const flyout = fluidPage.locator('.mpu-flyout[aria-label="Find a page"]');
     await expect(flyout).toBeVisible();
-    await expect(flyout).toContainText("Add to Shortcuts");
+    await expect(flyout).toContainText("Add this component to shortcuts");
   });
 
   test("Classic fixture mounts classic bar", async ({ extensionContext }) => {
     const page = await openPsPage(extensionContext, CLASSIC_COMPONENT_PATH);
     await expect(page.locator("#mpu-bar")).toBeVisible();
-    await expect(page.locator("#mpu-ui-mode")).toHaveText(/Classic/i);
+    await expect(page.locator("#mpu-env")).toBeVisible();
+    await expect(page.locator("#mpu-fav")).toHaveText("Find page");
     await page.close();
   });
 

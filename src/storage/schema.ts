@@ -263,10 +263,11 @@ export const DEFAULT_FEATURES: FeatureFlags = {
   shortcutsOption: "Yes",
   pageInfoOption: "Yes",
   newWindowOption: "Yes",
-  // Page helpers — on
+  // Page finding / field helpers — on
   recFieldInfoOption: "Yes",
   advSearchOption: "Yes",
-  loginPageOption: "Yes",
+  // Keep the login screen uncluttered unless explicitly enabled
+  loginPageOption: "No",
   // Optional / careful — off
   traceOption: "No",
   correctHistoryOption: "No",

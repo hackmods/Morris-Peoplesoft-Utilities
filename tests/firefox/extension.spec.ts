@@ -8,7 +8,7 @@ import {
   FLUID_FIELD_ENTRY_PATH, startFixtureServer, stopFixtureServer,
 } from "../e2e/helpers/fixture-server";
 import { e2eSettings } from "../e2e/helpers/extension";
-import { launchFirefox, extension, seed, visible, click, fill, audit, By, navigate } from "./helpers";
+import { launchFirefox, extension, seed, visible, click, clickMoreAction, fill, audit, By, navigate } from "./helpers";
 import type { MpuSettings } from "../../src/storage/schema";
 
 const test = base.extend<{ driver: WebDriver; origin: string; requests: { method: string; url: string }[] }>({
@@ -86,10 +86,10 @@ test("Classic and Fluid toolbar, keyboard focus, dialogs and contrast", async ({
     await navigate(driver, `${E2E_ORIGIN}${path}`);
     await visible(driver, "#mpu-bar");
     await audit(driver, "#mpu-bar");
-    await click(driver, "#mpu-pageinfo");
+    await clickMoreAction(driver, "#mpu-pageinfo");
     await audit(driver, "#mpu-dialog");
     await driver.actions().sendKeys(Key.ESCAPE).perform();
-    expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-pageinfo");
+    expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-more");
     await click(driver, "#mpu-fav");
     await driver.actions().sendKeys(Key.ARROW_DOWN, Key.HOME, Key.END, Key.ESCAPE).perform();
     expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-fav");
@@ -125,7 +125,7 @@ test("Field Entry Fluid and modal fields, missing rows, and disable cleanup", as
   await seed(driver, settings);
   for (const path of [FLUID_FIELD_ENTRY_PATH, CLASSIC_GRID_PATH]) {
     await navigate(driver, `${E2E_ORIGIN}${path}`);
-    await visible(driver, "#mpu-entry");
+    await visible(driver, "#mpu-more");
     await driver.actions().keyDown(Key.ALT).keyDown(Key.SHIFT).sendKeys("e").keyUp(Key.SHIFT).keyUp(Key.ALT).perform();
     await fill(driver, "#mpu-fe-sheet-text", path === CLASSIC_GRID_PATH ? "JOB.DEPTID\n200\n300" : "PERSONAL_DATA.FIRST_NAME\tADDRESSES.CITY\nJamie\tToronto");
     await click(driver, "#mpu-fe-sheet-preview");
@@ -163,9 +163,11 @@ test("host restrictions and environment activation guard injected helpers", asyn
 
 test("two Options tabs merge settings and sync agent preferences", async ({ driver, origin }) => {
   const first = await driver.getWindowHandle();
+  await click(driver, 'details.feature-group[aria-labelledby="feature-group-advanced"] > summary');
   await visible(driver, '#traceOption');
   await driver.switchTo().newWindow("tab");
   await navigate(driver, `${origin}/options.html`);
+  await click(driver, 'details.feature-group[aria-labelledby="feature-group-advanced"] > summary');
   await visible(driver, '#traceOption');
   const second = await driver.getWindowHandle();
   await extension(driver, `const s = (await browser.storage.local.get('mpuSettings')).mpuSettings;
@@ -217,17 +219,17 @@ test("clipboard uses a trusted click; trace honors consent and never reports a f
   settings.environments[0].trcProfRunning = "Yes";
   await seed(driver, settings);
   await navigate(driver, `${E2E_ORIGIN}${FLUID_COMPONENT_PATH}`);
-  await click(driver, "#mpu-pageinfo");
+  await clickMoreAction(driver, "#mpu-pageinfo");
   await click(driver, "#mpu-pi-copy");
   await expect.poll(() => driver.findElement(By.css("#mpu-live")).getText()).toBe("Page information copied");
   await driver.actions().sendKeys(Key.ESCAPE).perform();
-  await click(driver, "#mpu-trace");
+  await clickMoreAction(driver, "#mpu-trace");
   await audit(driver, "#mpu-dialog");
   await click(driver, "#mpu-trace-on");
   await visible(driver, "#mpu-production-cancel");
   expect(requests).toEqual([]);
   await click(driver, "#mpu-production-cancel");
-  await click(driver, "#mpu-trace");
+  await clickMoreAction(driver, "#mpu-trace");
   await click(driver, "#mpu-trace-off");
   await expect.poll(() => requests.length).toBe(2);
   expect(requests.every((request) => request.method === "GET" && new URL(request.url, E2E_ORIGIN).origin === E2E_ORIGIN)).toBe(true);
@@ -274,14 +276,15 @@ test("Scheduler excerpts retain cited uncertainty, require review, export locall
   await driver.navigate().refresh(); expect(await (await visible(driver, "#mpu-scheduler-report")).getAttribute("value")).toBe("");
   await driver.manage().window().setRect({ width: 1280, height: 900 });
   await navigate(driver, `${E2E_ORIGIN}${FLUID_COMPONENT_PATH}`);
-  await visible(driver, "#mpu-pageinfo");
+  await visible(driver, "#mpu-more");
   await driver.executeScript("const span = document.createElement('span'); span.id='PRCSINSTANCE'; span.textContent='90002'; document.body.append(span);");
-  await click(driver, "#mpu-pageinfo"); await visible(driver, "#mpu-pi-scheduler");
+  await clickMoreAction(driver, "#mpu-pageinfo"); await visible(driver, "#mpu-pi-scheduler");
   await audit(driver, "#mpu-dialog");
   const handles = await driver.getAllWindowHandles(); await click(driver, "#mpu-pi-scheduler");
   await driver.wait(async () => (await driver.getAllWindowHandles()).length > handles.length, 15_000);
   const opened = (await driver.getAllWindowHandles()).find(handle => !handles.includes(handle))!; await driver.switchTo().window(opened);
   await driver.wait(async () => await driver.getCurrentUrl() === `${origin}/options.html#scheduler`, 15_000);
+  await click(driver, '#scheduler-investigation-workspace details summary');
   expect(await driver.findElement(By.css("#mpu-scheduler-pack")).getAttribute("value")).toBe("");
   expect(await driver.findElement(By.css("#mpu-scheduler-report")).getAttribute("value")).toBe("");
 });
@@ -316,9 +319,9 @@ test("IB evidence keeps stages distinct, omits payload by default, requires fres
   expect(await extension(driver, "return browser.storage.local.get(null);")).toEqual(before);
   expect(await extension(driver, "return performance.getEntriesByType('resource').filter(e => /^https?:/.test(e.name)).length;")).toBe(0);
   await driver.navigate().refresh(); expect(await (await visible(driver, "#mpu-ib-report")).getAttribute("value")).toBe("");
-  await driver.manage().window().setRect({ width: 1280, height: 900 }); await navigate(driver, `${E2E_ORIGIN}${FLUID_COMPONENT_PATH}`); await visible(driver, "#mpu-pageinfo");
+  await driver.manage().window().setRect({ width: 1280, height: 900 }); await navigate(driver, `${E2E_ORIGIN}${FLUID_COMPONENT_PATH}`); await visible(driver, "#mpu-more");
   await driver.executeScript("const span = document.createElement('span'); span.id='IB_SERVICE_OPR'; span.textContent='SYNTHETIC_OPERATION'; document.body.append(span);");
-  await click(driver, "#mpu-pageinfo"); await visible(driver, "#mpu-pi-ib"); await audit(driver, "#mpu-dialog");
+  await clickMoreAction(driver, "#mpu-pageinfo"); await visible(driver, "#mpu-pi-ib"); await audit(driver, "#mpu-dialog");
   const handles = await driver.getAllWindowHandles(); await click(driver, "#mpu-pi-ib"); await driver.wait(async () => (await driver.getAllWindowHandles()).length > handles.length, 15_000);
   const opened = (await driver.getAllWindowHandles()).find(handle => !handles.includes(handle))!; await driver.switchTo().window(opened);
   await driver.wait(async () => await driver.getCurrentUrl() === `${origin}/options.html#ib`, 15_000);

@@ -73,3 +73,11 @@ export async function openPsPage(context: BrowserContext, path: string): Promise
   await page.waitForSelector("#mpu-bar", { timeout: 20_000 });
   return page;
 }
+
+/** Open a specialist toolbar action from the grouped More menu. */
+export async function clickMoreAction(page: Page, action: string): Promise<void> {
+  await page.locator("#mpu-more").click();
+  const menu = page.getByRole("menu", { name: "More tools", exact: true });
+  if (action.startsWith("#")) await menu.locator(action).click();
+  else await menu.getByRole("menuitem", { name: action, exact: true }).click();
+}

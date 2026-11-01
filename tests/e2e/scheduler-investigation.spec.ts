@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { launchExtensionContext, seedMpuSettings, openPsPage } from "./helpers/extension";
+import { launchExtensionContext, seedMpuSettings, openPsPage, clickMoreAction } from "./helpers/extension";
 import { audit } from "./helpers/accessibility";
 import { FLUID_COMPONENT_PATH, startFixtureServer, stopFixtureServer } from "./helpers/fixture-server";
 
@@ -65,18 +65,18 @@ test("Process Monitor ticket pack links to the empty Scheduler workspace without
   const server = await startFixtureServer(); const { context, extensionId } = await launchExtensionContext();
   try {
     await seedMpuSettings(context, extensionId); const page = await openPsPage(context, FLUID_COMPONENT_PATH);
-    await expect(page.locator("#mpu-pageinfo")).toBeVisible();
+    await expect(page.locator("#mpu-more")).toBeVisible();
     await page.evaluate(() => {
       const table = document.createElement("table"); table.id = "synthetic-process-rows";
       table.innerHTML = '<tbody><tr><td><span id="PRCSINSTANCE$0">90002</span></td></tr><tr><td><span id="PRCSINSTANCE$1">90003</span></td><td><span id="PRCSNAME$1">OTHER_PROCESS</span></td></tr></tbody>';
       document.body.append(table);
     });
-    await page.locator("#mpu-pageinfo").click();
+    await clickMoreAction(page, "#mpu-pageinfo");
     await expect(page.locator("#mpu-pi-copy-process")).toBeDisabled();
     await expect(page.getByRole("dialog")).toContainText("No unambiguous process context");
     await page.keyboard.press("Escape");
     await page.evaluate(() => { document.querySelector("#synthetic-process-rows tr")!.setAttribute("aria-selected", "true"); });
-    await page.locator("#mpu-pageinfo").click(); await expect(page.locator("#mpu-pi-copy-process")).toBeEnabled();
+    await clickMoreAction(page, "#mpu-pageinfo"); await expect(page.locator("#mpu-pi-copy-process")).toBeEnabled();
     await page.evaluate(() => { document.querySelector("#synthetic-process-rows tr")!.removeAttribute("aria-selected"); });
     await page.locator("#mpu-pi-copy-process").click(); await expect(page.locator("#mpu-live")).toContainText("Process context changed");
     const link = page.getByRole("button", { name: "Investigate sanitized Scheduler logs", exact: true });
