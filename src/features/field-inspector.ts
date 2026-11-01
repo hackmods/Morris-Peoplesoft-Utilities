@@ -73,6 +73,18 @@ export interface ParsedRecField {
   contextChips?: FieldContextChip[];
 }
 
+export interface InspectableField {
+  id: string;
+  element: HTMLElement;
+  parsed: ParsedRecField;
+}
+
+const fieldFindHighlights = new WeakMap<HTMLElement, {
+  outline: string;
+  outlineOffset: string;
+  timer: ReturnType<typeof setTimeout>;
+}>();
+
 export type FieldContextChip = "Prompt" | "Display" | "Deferred";
 
 const PROMPT_SELECTOR =
@@ -291,6 +303,42 @@ export function parseRecField(
     contextChips: contextChips?.length ? contextChips : undefined,
     ...attrs,
   };
+}
+
+/** Return identified fields from the current page and its same-origin content frames. */
+export function collectInspectableFields(doc: Document = document): InspectableField[] {
+  const docs = collectDocs(getInspectorContentRoot(doc));
+  const elements = docs.flatMap((targetDoc) => Array.from(targetDoc.querySelectorAll(FIELD_SELECTOR)))
+    .filter((element): element is HTMLElement => isHtmlElement(element)
+      && Boolean(element.id?.includes("_"))
+      && !element.closest("#mpu-bar, #mpu-dialog, .mpu-dialog-backdrop, #psutil"));
+  const peers = [...new Set(elements.map((element) => fieldNameFromId(element.id)))];
+  return elements.map((element) => ({
+    id: element.id,
+    element,
+    parsed: parseRecField(element.id, peers, element),
+  }));
+}
+
+/** Scroll a selected field into view and briefly outline it without changing page geometry. */
+export function focusInspectableField(element: HTMLElement): void {
+  try { element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" }); }
+  catch { /* an older PeopleTools browser may not support scroll options */ }
+  const previous = fieldFindHighlights.get(element);
+  if (previous) clearTimeout(previous.timer);
+  const outline = previous?.outline ?? element.style.outline;
+  const outlineOffset = previous?.outlineOffset ?? element.style.outlineOffset;
+  element.style.outline = "3px solid #FF5C00";
+  element.style.outlineOffset = "2px";
+  const highlightOutline = element.style.outline;
+  const timer = setTimeout(() => {
+    if (element.style.outline === highlightOutline) {
+      element.style.outline = outline;
+      element.style.outlineOffset = outlineOffset;
+    }
+    fieldFindHighlights.delete(element);
+  }, 1600);
+  fieldFindHighlights.set(element, { outline, outlineOffset, timer });
 }
 
 /** Clipboard / announce form — prefers RECORD.FIELD without row suffix for App Designer paste. */

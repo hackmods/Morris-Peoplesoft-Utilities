@@ -16,6 +16,7 @@ export interface FeatureToggleGroup {
   description: string;
   /** Visual tone for the group card */
   tone: "essential" | "helper" | "careful";
+  collapsed?: boolean;
   items: FeatureToggleDef[];
 }
 
@@ -25,66 +26,70 @@ export interface FeatureToggleGroup {
  */
 export const FEATURE_TOGGLE_GROUPS: FeatureToggleGroup[] = [
   {
-    id: "bar",
-    title: "Utilities bar",
-    description: "Orientation and navigation on every PeopleSoft page. Recommended on.",
+    id: "navigation",
+    title: "Find and navigate",
+    description: "Keep your environment context clear and find the components you use.",
     tone: "essential",
     items: [
       {
         key: "greetingOption",
-        label: "Environment indicator",
-        hint: "Colored env label so you always know DEV / QA / PRD",
-      },
-      {
-        key: "userIdOption",
-        label: "Show User ID",
-        hint: "When PeopleSoft exposes it in page meta",
+        label: "Show environment status",
+        hint: "Keep the environment name and production warning visible",
       },
       {
         key: "shortcutsOption",
-        label: "Shortcuts",
-        hint: "Favorites flyout (Category ? SubCategory ? items)",
+        label: "Include saved shortcuts in Find page",
+        hint: "Recent pages and direct component entry remain available",
       },
       {
-        key: "pageInfoOption",
-        label: "Page Information",
-        hint: "Also enables PCode, Structure, Admin, and Upgrade watch",
+        key: "userIdOption",
+        label: "Show User ID in environment details",
+        hint: "When PeopleSoft exposes it in page metadata",
       },
       {
         key: "newWindowOption",
-        label: "New Window actions",
-        hint: "Open Shortcuts / Admin / Recent in a new window",
+        label: "Allow opening destinations in a new window",
+        hint: "Adds open-in-new-window choices to Find page",
       },
     ],
   },
   {
-    id: "helpers",
-    title: "Page helpers",
-    description: "Day-to-day productivity for BAs and developers.",
+    id: "field-finding",
+    title: "Inspect and copy",
+    description: "Find field names on the current page and prepare values for PeopleCode.",
     tone: "helper",
     items: [
       {
         key: "recFieldInfoOption",
-        label: "Field Inspector",
-        hint: "Orange icons beside fields ? lock copies RECORD.FIELD",
+        label: "Find field names",
+        hint: "Search visible page fields and copy RECORD.FIELD; the search is page-local",
       },
       {
         key: "advSearchOption",
         label: "Auto-expand Advanced Search",
         hint: "Opens advanced criteria when the page supports it",
       },
+    ],
+  },
+  {
+    id: "support",
+    title: "Diagnose and support",
+    description: "Page context and support tools are grouped under More on the PeopleSoft page.",
+    tone: "helper",
+    items: [
       {
-        key: "loginPageOption",
-        label: "Show bar on login page",
-        hint: "Bar only ? never reads or stores passwords",
+        key: "pageInfoOption",
+        label: "Enable page and support tools",
+        hint: "Adds Page Info, Structure, Admin jumps, PCode starters, and upgrade watch to More",
       },
     ],
   },
   {
-    id: "careful",
-    title: "Optional / careful",
-    description: "Off by default ? turn on only when you need them.",
+    id: "advanced",
+    title: "Advanced tools",
+    description: "Off by default. Turn these on only when your work requires them.",
     tone: "careful",
+    collapsed: true,
     items: [
       {
         key: "traceOption",
@@ -100,6 +105,11 @@ export const FEATURE_TOGGLE_GROUPS: FeatureToggleGroup[] = [
         key: "fieldEntryOption",
         label: "Field Entry toolkit",
         hint: "Capture / paste / multi-row sheet / find-replace for editable fields (Fluid + modals) — preview first; profiles may hold business keys",
+      },
+      {
+        key: "loginPageOption",
+        label: "Show the utilities bar on login pages",
+        hint: "The bar does not read or store passwords",
       },
     ],
   },

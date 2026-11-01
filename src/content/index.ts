@@ -7,7 +7,6 @@ import {
   removeBar,
   showPageInfoDialog,
   showGoToComponentDialog,
-  showPageTabsDialog,
   announce,
 } from "../features/bar";
 import { showAddFavoriteDialog } from "../features/favorites-ui";
@@ -369,7 +368,6 @@ async function refreshPage(): Promise<void> {
     },
     onNewWindow: () => openNewWindow(parsed),
     onGoToComponent: () => showGoToComponentDialog(document, parsed),
-    onPageTabs: () => showPageTabsDialog(document),
     onAddFavorite: () => void addFavorite(settings, parsed),
   });
 
@@ -411,11 +409,20 @@ function onMpuShortcut(e: KeyboardEvent): void {
   if (!activeSettings || document.getElementById("mpu-dialog")) return;
   if (!(e.altKey && e.shiftKey) || e.ctrlKey || e.metaKey) return;
   const key = e.key.toLowerCase();
-  if (key !== "p" && key !== "i" && key !== "c" && key !== "g" && key !== "e") return;
+  if (key !== "p" && key !== "i" && key !== "c" && key !== "g" && key !== "e" && key !== "f" && key !== "n") return;
   if (key === "p" && !isYes(activeSettings.features.pageInfoOption)) return;
   if ((key === "i" || key === "c") && !isYes(activeSettings.features.recFieldInfoOption)) return;
+  if (key === "n" && !isYes(activeSettings.features.recFieldInfoOption)) return;
   if (key === "e" && !isYes(activeSettings.features.fieldEntryOption)) return;
   e.preventDefault();
+  if (key === "f") {
+    document.getElementById("mpu-fav")?.click();
+    return;
+  }
+  if (key === "n") {
+    document.getElementById("mpu-field-find")?.click();
+    return;
+  }
   if (key === "p") {
     const parsed = parsePsUrl(location.href);
     void (async () => {
