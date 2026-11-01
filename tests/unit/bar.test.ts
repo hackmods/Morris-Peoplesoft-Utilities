@@ -5,7 +5,6 @@ import {
   announce,
   showPageInfoDialog,
   showGoToComponentDialog,
-  showPageTabsDialog,
   groupFavoritesByCategory,
   applyClassicContentOffset,
   clearClassicContentOffset,
@@ -281,7 +280,7 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-env-copy")).toBeTruthy();
   });
 
-  it("mounts wave 6 PCode, Structure, and Admin buttons when page info is on", () => {
+  it("groups PCode, Structure, and Admin jumps under More when page info is on", () => {
     const settings = createDefaultSettings();
     mountBar({
       settings,
@@ -299,7 +298,8 @@ describe("utilities bar", () => {
     });
     expect(document.getElementById("mpu-pcode")).toBeTruthy();
     expect(document.getElementById("mpu-structure")).toBeTruthy();
-    expect(document.getElementById("mpu-admin")).toBeTruthy();
+    expect(document.getElementById("mpu-admin")).toBeNull();
+    expect(document.querySelector('.mpu-more-flyout [aria-label="Admin jumps"]')?.textContent).toContain("Admin jumps");
   });
 
   it("hides wave 6 buttons when page info and inspect are off", () => {
@@ -369,7 +369,7 @@ describe("utilities bar", () => {
     });
     expect(document.getElementById("mpu-trace")).toBeNull();
     expect(document.getElementById("mpu-field")).toBeNull();
-    expect(document.getElementById("mpu-fav")).toBeNull();
+    expect(document.getElementById("mpu-fav")?.textContent).toBe("Find page");
   });
 
   it("shows locked trace state", () => {
@@ -590,23 +590,26 @@ describe("utilities bar", () => {
       onNewWindow: vi.fn(),
       onAddFavorite: vi.fn(),
     });
-    expect(document.getElementById("mpu-ui-mode")?.textContent).toBeTruthy();
     const shortcutsBtn = document.getElementById("mpu-fav");
-    expect(shortcutsBtn?.textContent).toBe("Shortcuts");
+    expect(shortcutsBtn?.textContent).toBe("Find page");
     expect(shortcutsBtn?.getAttribute("aria-haspopup")).toBe("dialog");
     shortcutsBtn?.click();
     expect(shortcutsBtn?.getAttribute("aria-expanded")).toBe("true");
     expect(document.querySelector(".mpu-flyout")).toBeTruthy();
     expect(document.getElementById("mpu-fav-filter")).toBeTruthy();
-    expect(document.querySelector('.mpu-menu-action')?.textContent).toBe("Add to Shortcuts");
+    expect(document.querySelector('[aria-label="Find a page"]')?.textContent).toContain("Add this component to shortcuts…");
     expect(document.getElementById("mpu-fav-select")).toBeNull();
     expect(document.getElementById("mpu-fav-newwin")).toBeTruthy();
-    expect(document.getElementById("mpu-recent-select")).toBeTruthy();
+    expect(document.getElementById("mpu-recent-select")).toBeNull();
+    expect(document.getElementById("mpu-field-find")?.textContent).toBe("Find field");
+    expect(document.getElementById("mpu-more")?.textContent).toBe("More");
+    expect(document.querySelector(".mpu-more-flyout")?.textContent).toContain("Page Info");
+    expect(document.querySelector(".mpu-more-flyout")?.textContent).toContain("Agents");
     const env = document.querySelector(".mpu-env") as HTMLElement;
     expect(env.style.getPropertyValue("--mpu-env-color")).toBe("#2288aa");
   });
 
-  it("pins root Shortcuts flyout fixed so header overflow cannot clip it", () => {
+  it("pins the Find page flyout fixed so header overflow cannot clip it", () => {
     document.body.innerHTML = `
       <div id="PT_HEADER" style="overflow:hidden;height:48px;position:relative;"></div>
     `;
@@ -639,7 +642,7 @@ describe("utilities bar", () => {
     });
 
     document.getElementById("mpu-fav")?.click();
-    const flyout = document.querySelector('.mpu-flyout[aria-label="Shortcuts"]') as HTMLElement;
+    const flyout = document.querySelector('.mpu-flyout[aria-label="Find a page"]') as HTMLElement;
     const bar = document.getElementById("mpu-bar")!;
     expect(flyout.hidden).toBe(false);
     expect(flyout.style.position).toBe("fixed");
@@ -651,7 +654,7 @@ describe("utilities bar", () => {
     expect(flyout.style.left).toMatch(/px$/);
   });
 
-  it("opens nested Shortcuts submenu without immediate close on leave bridge", async () => {
+  it("opens nested saved-shortcut submenu without immediate close on leave bridge", async () => {
     vi.useFakeTimers();
     const settings = createDefaultSettings();
     settings.favorites = [
@@ -749,7 +752,7 @@ describe("utilities bar", () => {
     expect(tree[0]?.subgroups[0]?.subcategory).toBe("Payroll");
   });
 
-  it("pages flyout and dialog mark the current tab", () => {
+  it("Find page includes current-component tabs and marks the current tab", () => {
     document.body.innerHTML = `
       <div id="PT_HEADER"></div>
       <div id="pstabs">
@@ -773,19 +776,14 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
     });
 
-    document.getElementById("mpu-pagetabs")?.click();
+    document.getElementById("mpu-fav")?.click();
     const flyoutCurrent = document.querySelector(
-      '.mpu-flyout[aria-label="Pages"] .mpu-menu-current',
+      '.mpu-flyout[aria-label="Find a page"] .mpu-menu-current',
     );
     expect(flyoutCurrent?.textContent).toBe("General");
     expect(flyoutCurrent?.getAttribute("aria-current")).toBe("page");
-
-    showPageTabsDialog(document);
-    const dialogCurrent = document.querySelector("#mpu-tabs-list .mpu-menu-current");
-    expect(dialogCurrent?.textContent).toBe("General");
-    expect(dialogCurrent?.hasAttribute("disabled")).toBe(true);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    expect(document.getElementById("mpu-dialog")).toBeNull();
+    expect(document.querySelector('.mpu-flyout[aria-label="Find a page"]')?.hasAttribute("hidden")).toBe(true);
   });
 
   it("showAddFavoriteDialog submits category, subcategory, and parameters", () => {
@@ -843,7 +841,8 @@ describe("utilities bar", () => {
       onAddFavorite: vi.fn(),
       onGoToComponent: onGo,
     });
-    document.getElementById("mpu-goto")?.click();
+    document.getElementById("mpu-fav")?.click();
+    document.querySelector<HTMLButtonElement>('.mpu-flyout[aria-label="Find a page"] [role="menuitem"]')?.click();
     expect(onGo).toHaveBeenCalledOnce();
 
     let navigated = "";

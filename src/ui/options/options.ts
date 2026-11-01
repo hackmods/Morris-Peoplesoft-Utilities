@@ -153,7 +153,7 @@ function renderFeatures(settings: MpuSettings): void {
 
     const head = document.createElement(group.collapsed ? "summary" : "div");
     head.className = "feature-group-head";
-    const title = document.createElement("h3");
+    const title = document.createElement(group.collapsed ? "span" : "h3");
     title.className = "feature-group-title";
     title.id = `feature-group-${group.id}`;
     title.textContent = group.title;

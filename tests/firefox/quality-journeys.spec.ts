@@ -7,7 +7,7 @@ import {
   startFixtureServer, stopFixtureServer,
 } from "../e2e/helpers/fixture-server";
 import { e2eSettings } from "../e2e/helpers/extension";
-import { By, click, extension, fill, launchFirefox, navigate, seed, visible } from "./helpers";
+import { By, click, clickMoreAction, extension, fill, launchFirefox, navigate, seed, visible } from "./helpers";
 
 const test = base.extend<{ driver: WebDriver; origin: string }>({
   // eslint-disable-next-line no-empty-pattern
@@ -94,7 +94,7 @@ test("explicit environment snapshots retain immutable saved evidence after delet
   });
 
   const capture = async (label: string) => {
-    await click(driver, "#mpu-pageinfo");
+    await clickMoreAction(driver, "#mpu-pageinfo");
     await click(driver, "#mpu-pi-prepare-comparison");
     await visible(driver, '[aria-label="Snapshot metadata preview"]');
     const preview = await driver.findElement(By.css('[aria-label="Snapshot metadata preview"]')).getText();

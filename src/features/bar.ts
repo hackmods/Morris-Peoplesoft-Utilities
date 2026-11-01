@@ -1,7 +1,7 @@
 import { getExtensionApi } from "../platform/browser";
 import { bindModalDialog } from "./dialog";
 import { appendAgentHelp } from "./agent-references";
-import { isVisible } from "../adapters/dom";
+import { isHtmlElement, isVisible } from "../adapters/dom";
 import type { Favorite, FieldCopyFormat, MpuSettings, TraceSettings, TraceRequest } from "../storage/schema";
 import { featureAllowedForUi, FIELD_COPY_FORMATS, isYes } from "../storage/schema";
 import type { PageTabLink, ParsedPsUrl } from "../adapters/ps-page";
@@ -283,7 +283,9 @@ function bindMenuDismiss(
       if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
       if (active.matches("input, textarea") && !e.key.startsWith("Arrow")) return;
       const menu = active.closest('[role="menu"]') ?? flyout.querySelector('[role="menu"]') ?? flyout;
-      const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)'))
+      const items = Array.from(menu.querySelectorAll<HTMLElement>(
+        '[role="menuitem"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)',
+      ))
         .filter((item) => item.closest('[role="menu"]') === menu && isVisible(item));
       if (!items.length) return;
       e.preventDefault();
@@ -1753,17 +1755,27 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     return group;
   };
   const addMoreControl = (element: HTMLElement, groupLabel: string): void => {
-    if (element instanceof HTMLButtonElement) {
-      element.classList.remove("mpu-btn");
-      element.classList.add("mpu-menu-open", "mpu-more-action");
-      element.setAttribute("role", "menuitem");
-      element.addEventListener("click", () => closeMore(), true);
+    if (element.localName === "button") {
+      const button = element as HTMLButtonElement;
+      button.classList.remove("mpu-btn");
+      button.classList.add("mpu-menu-open", "mpu-more-action");
+      const pressed = button.getAttribute("aria-pressed");
+      if (pressed !== null) {
+        button.setAttribute("role", "menuitemcheckbox");
+        button.setAttribute("aria-checked", pressed);
+        button.removeAttribute("aria-pressed");
+      } else {
+        button.setAttribute("role", "menuitem");
+      }
+      button.addEventListener("click", () => closeMore(), true);
     }
     section(groupLabel).appendChild(element);
   };
   const moveButton = (id: string, groupLabel: string): void => {
-    const element = doc.getElementById(id);
-    if (element instanceof HTMLElement && bar.contains(element)) addMoreControl(element, groupLabel);
+    // The bar is still detached at this point, so look inside it rather than
+    // asking the document for descendants that are not mounted yet.
+    const element = bar.querySelector<HTMLElement>(`#${id}`);
+    if (element && isHtmlElement(element)) addMoreControl(element, groupLabel);
   };
   const closeMore = (): void => {
     if (moreFlyout.contains(doc.activeElement)) moreButton.focus();
@@ -1779,7 +1791,9 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     moreButton.setAttribute("aria-expanded", "true");
     bindFlyoutPosition(moreButton, moreFlyout);
     bindMenuDismiss(doc, moreRoot, closeMore, moreFlyout);
-    moreFlyout.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus();
+    moreFlyout.querySelector<HTMLElement>(
+      '[role="menuitem"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)',
+    )?.focus();
   };
   moreButton.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -1791,15 +1805,15 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   moveButton("mpu-structure", "Page tools");
   moveButton("mpu-pcode", "Inspect and copy");
   moveButton("mpu-field", "Inspect and copy");
-  const fieldName = doc.getElementById("mpu-recfield-name");
-  if (fieldName instanceof HTMLElement) addMoreControl(fieldName, "Inspect and copy");
-  const copyFormat = doc.getElementById("mpu-copy-format");
-  if (copyFormat instanceof HTMLElement) addMoreControl(copyFormat, "Inspect and copy");
+  const fieldName = bar.querySelector<HTMLElement>("#mpu-recfield-name");
+  if (fieldName && isHtmlElement(fieldName)) addMoreControl(fieldName, "Inspect and copy");
+  const copyFormat = bar.querySelector<HTMLElement>("#mpu-copy-format");
+  if (copyFormat && isHtmlElement(copyFormat)) addMoreControl(copyFormat, "Inspect and copy");
   moveButton("mpu-copy-field", "Inspect and copy");
   moveButton("mpu-trace", "Troubleshooting");
-  const ibWrap = doc.getElementById("mpu-ib-crumb")?.parentElement;
-  const ibCopy = doc.getElementById("mpu-ib-copy");
-  if (ibWrap instanceof HTMLElement && ibCopy instanceof HTMLButtonElement) {
+  const ibWrap = bar.querySelector<HTMLElement>("#mpu-ib-crumb")?.parentElement;
+  const ibCopy = bar.querySelector<HTMLElement>("#mpu-ib-copy");
+  if (ibWrap && isHtmlElement(ibWrap) && ibCopy && isHtmlElement(ibCopy) && ibCopy.localName === "button") {
     ibWrap.setAttribute("role", "group");
     ibWrap.setAttribute("aria-label", "Integration Broker context");
     ibCopy.classList.remove("mpu-btn");
@@ -1812,7 +1826,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
   moveButton("mpu-agents", "Other tools");
   moveButton("mpu-help", "Other tools");
 
-  const adminButton = doc.getElementById("mpu-admin");
+  const adminButton = bar.querySelector<HTMLElement>("#mpu-admin");
   const adminRoot = adminButton?.parentElement;
   const adminFlyout = adminRoot?.querySelector<HTMLElement>('[aria-label="Admin jumps"]');
   if (adminRoot && adminFlyout) {
@@ -1833,7 +1847,7 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     adminRoot.remove();
   }
 
-  const entryButton = doc.getElementById("mpu-entry");
+  const entryButton = bar.querySelector<HTMLElement>("#mpu-entry");
   const entryRoot = entryButton?.parentElement;
   const entryFlyout = entryRoot?.querySelector<HTMLElement>('[aria-label="Field Entry"]');
   if (entryRoot && entryFlyout) {
@@ -1859,7 +1873,9 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
       if (trigger.getAttribute("aria-expanded") !== "true") trigger.click();
       const flyout = doc.querySelector('.mpu-flyout:not([hidden])');
       const menu = flyout?.matches('[role="menu"]') ? flyout : flyout?.querySelector('[role="menu"]');
-      const items = Array.from(menu?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])
+      const items = Array.from(menu?.querySelectorAll<HTMLElement>(
+        '[role="menuitem"]:not(:disabled), [role="menuitemcheckbox"]:not(:disabled)',
+      ) ?? [])
         .filter((item) => item.closest('[role="menu"]') === menu && isVisible(item));
       (e.key === "ArrowUp" ? items.at(-1) : items[0])?.focus();
     });

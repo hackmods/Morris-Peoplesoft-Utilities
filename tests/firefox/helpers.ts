@@ -115,6 +115,16 @@ export async function click(driver: WebDriver, selector: string): Promise<void> 
   }, 15_000, `Click: ${selector}`);
 }
 
+/** Open a specialist toolbar action from the grouped More menu. */
+export async function clickMoreAction(driver: WebDriver, action: string): Promise<void> {
+  await click(driver, "#mpu-more");
+  const menu = await visible(driver, ".mpu-more-flyout");
+  const target = action.startsWith("#")
+    ? await menu.findElement(By.css(action))
+    : await menu.findElement(By.xpath(`.//*[@role="menuitem" and normalize-space(.)=${JSON.stringify(action)}]`));
+  await target.click();
+}
+
 export async function fill(driver: WebDriver, selector: string, text: string): Promise<void> {
   const element = await visible(driver, selector);
   await element.clear();

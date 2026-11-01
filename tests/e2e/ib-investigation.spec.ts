@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { launchExtensionContext, seedMpuSettings, openPsPage } from "./helpers/extension";
+import { launchExtensionContext, seedMpuSettings, openPsPage, clickMoreAction } from "./helpers/extension";
 import { audit } from "./helpers/accessibility";
 import { FLUID_COMPONENT_PATH, startFixtureServer, stopFixtureServer } from "./helpers/fixture-server";
 
@@ -50,9 +50,9 @@ test("IB duplicate payload keys and invalid UTF-8 fail without stale export or r
 test("IB Page Info opens an empty workspace through the fixed guarded route", async () => {
   const server = await startFixtureServer(); const { context, extensionId } = await launchExtensionContext();
   try {
-    await seedMpuSettings(context, extensionId); const page = await openPsPage(context, FLUID_COMPONENT_PATH); await expect(page.locator("#mpu-pageinfo")).toBeVisible();
+    await seedMpuSettings(context, extensionId); const page = await openPsPage(context, FLUID_COMPONENT_PATH); await expect(page.locator("#mpu-more")).toBeVisible();
     await page.evaluate(() => { const span = document.createElement("span"); span.id = "IB_SERVICE_OPR"; span.textContent = "SYNTHETIC_OPERATION"; document.body.append(span); });
-    await page.locator("#mpu-pageinfo").click(); const button = page.getByRole("button", { name: "Investigate sanitized IB samples", exact: true }); await expect(button).toBeVisible(); await audit(page, "#mpu-dialog");
+    await clickMoreAction(page, "#mpu-pageinfo"); const button = page.getByRole("button", { name: "Investigate sanitized IB samples", exact: true }); await expect(button).toBeVisible(); await audit(page, "#mpu-dialog");
     const event = context.waitForEvent("page"); await button.click(); const workspace = await event;
     await expect(workspace).toHaveURL(`chrome-extension://${extensionId}/options.html#ib`); await expect(workspace.locator("#mpu-ib-report")).toHaveValue(""); await expect(workspace.locator("#mpu-ib-files")).toHaveValue(""); await expect(workspace.locator("#mpu-ib-include-payload")).not.toBeChecked();
   } finally { await context.close(); await stopFixtureServer(server); }

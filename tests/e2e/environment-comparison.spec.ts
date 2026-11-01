@@ -1,5 +1,5 @@
 import { test as base, expect, type BrowserContext, type Page } from "@playwright/test";
-import { e2eSettings, launchExtensionContext, seedMpuSettings, openPsPage } from "./helpers/extension";
+import { e2eSettings, launchExtensionContext, seedMpuSettings, openPsPage, clickMoreAction } from "./helpers/extension";
 import { FLUID_COMPONENT_PATH, CLASSIC_COMPONENT_PATH, startFixtureServer, stopFixtureServer } from "./helpers/fixture-server";
 import { audit } from "./helpers/accessibility";
 import type { EnvironmentComparisonStore } from "../../src/storage/environment-comparisons";
@@ -17,7 +17,7 @@ async function read(context: BrowserContext) {
   return context.serviceWorkers()[0].evaluate(async () => (await chrome.storage.local.get("mpuEnvironmentComparisons")).mpuEnvironmentComparisons as EnvironmentComparisonStore | undefined);
 }
 async function prepare(page: Page, label: string) {
-  await page.locator("#mpu-pageinfo").click(); await page.locator("#mpu-pi-prepare-comparison").click();
+  await clickMoreAction(page, "#mpu-pageinfo"); await page.locator("#mpu-pi-prepare-comparison").click();
   await expect(page.getByRole("textbox", { name: "Snapshot label", exact: true })).toBeFocused();
   await page.getByRole("textbox", { name: "Snapshot label", exact: true }).fill(label);
 }
@@ -47,7 +47,7 @@ test("reviewed snapshots compare only UI metadata and retain saved evidence afte
   for (const secret of ["PRIVATE-FIELD-VALUE", "PRIVATE-SESSION", "BA_TEST", "CSDEV"]) expect(metadata).not.toContain(secret);
   await audit(page, "#mpu-dialog");
   await page.keyboard.press("Escape");
-  await expect(page.locator("#mpu-pageinfo")).toBeFocused();
+  await expect(page.locator("#mpu-more")).toBeFocused();
   expect(await read(extensionContext)).toBeUndefined();
   await capture(page, extensionContext, "Before", 1);
   await page.evaluate(() => {

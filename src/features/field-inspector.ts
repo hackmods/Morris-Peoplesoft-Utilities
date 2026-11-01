@@ -1211,7 +1211,11 @@ export function syncFieldInspectorChrome(doc: Document = document): void {
   if (btn) {
     const on = active;
     btn.textContent = on ? "Inspect ON" : "Inspect";
-    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (btn.getAttribute("role") === "menuitemcheckbox") {
+      btn.setAttribute("aria-checked", on ? "true" : "false");
+    } else {
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
   }
   if (panel) {
     panel.hidden = !active;

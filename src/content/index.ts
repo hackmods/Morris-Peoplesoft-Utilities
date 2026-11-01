@@ -227,11 +227,6 @@ async function refreshPage(): Promise<void> {
   }
 
   const loginMode = parsed.kind === "login" || parsed.kind === "logout";
-  if (loginMode && !isYes(settings.features.loginPageOption)) {
-    suspendPage();
-    return;
-  }
-
   settings = await ensureEnvRegistration(settings, location.href);
   const { label, index } = resolveEnv(settings, location.href);
   if (loginMode && index >= 0 && settings.environments[index]?.traceRequest && settings.environments[index].traceRequest?.status !== "unknown") {
@@ -240,6 +235,12 @@ async function refreshPage(): Promise<void> {
       if (request) s.environments[index].traceRequest = { ...request, status: "unknown" };
       return s;
     });
+  }
+  // Clear stale trace evidence on login/logout even when the optional login-page
+  // toolbar is disabled; the lifecycle cleanup must not depend on bar visibility.
+  if (loginMode && !isYes(settings.features.loginPageOption)) {
+    suspendPage();
+    return;
   }
   const traceRunning =
     index >= 0 && isYes(settings.environments[index]?.trcProfRunning);
