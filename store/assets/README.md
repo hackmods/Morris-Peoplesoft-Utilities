@@ -33,6 +33,14 @@ profile, without personal records. Legacy filenames remain for tooling stability
 These screenshots demonstrate extension UI, not real PeopleTools compatibility.
 The `.live-captures` marker prevents mock generation from replacing them.
 
+## Store submission evidence — 2026-11-04
+
+`submission/chrome-1.0.38-pending-review.jpg` and
+`submission/firefox-1.0.38-awaiting-review.jpg` are genuine in-app browser
+dashboard captures. They show submission/review status, not approved publication
+or real PeopleTools compatibility. Exact packages and source are recorded in
+[`store/submission-1.0.38.md`](../submission-1.0.38.md).
+
 ## Icon edit provenance
 
 Built-in image generation, October 18, 2026. Prompt: "Edit only the colors of the
