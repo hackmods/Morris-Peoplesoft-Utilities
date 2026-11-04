@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.38] — 2026-11-04
+
+- Simplify the shared toolbar around Find page, Find field and More, with grouped specialist tools and accessible keyboard navigation.
+- Improve field lookup and inspector placement without changing the PeopleSoft page layout.
+- Preserve recent-visit updates across tabs while settings change, and retain Fluid save-warning protections.
+
 ## [1.0.37] — 2026-10-27
 
 - Simplify Scheduler, Integration Broker, configuration comparison and Trace SQL into consistent source, preview and review/export steps. Detailed format guidance and advanced trace evidence expand on demand.
