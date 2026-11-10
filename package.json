@@ -62,7 +62,7 @@
     "selenium-webdriver": "^4.51.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.1",
+    "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
     "vitest": "^4.1.10",
     "web-ext": "^10.8.0"
