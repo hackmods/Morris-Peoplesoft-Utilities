@@ -47,6 +47,39 @@ const test = base.extend<Fixtures>({
   },
 });
 
+test("shortcut levels stay open and readable with click and keyboard at narrow widths", async ({ extensionContext, extensionId, fluidPage }) => {
+  await seedMpuSettings(extensionContext, extensionId, e2eSettings({ favorites: [{
+    Servlet: "psp", Menu: "M", Component: "C", Market: "GBL", Parameters: "",
+    Category: "Campus", SubCategory: "Admissions", Description: "Student details",
+  }] }));
+  await fluidPage.reload();
+  await fluidPage.setViewportSize({ width: 320, height: 600 });
+  await expect(fluidPage.locator("#mpu-pageinfo")).toBeVisible();
+  await expect(fluidPage.locator("#mpu-field")).toBeVisible();
+  await fluidPage.locator("#mpu-fav").click();
+  const category = fluidPage.getByRole("menuitem", { name: "Campus »", exact: true });
+  await category.click();
+  const subgroup = fluidPage.getByRole("menuitem", { name: "Admissions »", exact: true });
+  await subgroup.click();
+  const leaf = fluidPage.getByRole("menuitem", { name: "Student details", exact: true });
+  await fluidPage.mouse.move(0, 0);
+  await expect(leaf).toBeVisible();
+  const bounds = await leaf.boundingBox();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320);
+  await audit(fluidPage, '.mpu-flyout-top:not([hidden])');
+  await subgroup.focus();
+  await fluidPage.keyboard.press("ArrowRight");
+  await expect(leaf).toBeFocused();
+  await fluidPage.keyboard.press("ArrowLeft");
+  await expect(subgroup).toBeFocused();
+  await expect(leaf).toBeHidden();
+  await fluidPage.keyboard.press("Escape");
+  await expect(category).toBeFocused();
+  await fluidPage.keyboard.press("Escape");
+  await expect(fluidPage.locator("#mpu-fav")).toBeFocused();
+});
+
 test.describe("MPU extension UI", () => {
   test("Help and contextual PCode references open working private Options destinations", async ({ extensionContext, extensionId, fluidPage }) => {
     await clickMoreAction(fluidPage, "#mpu-help");
@@ -63,6 +96,9 @@ test.describe("MPU extension UI", () => {
     }
     await fluidPage.keyboard.press("Escape"); await clickMoreAction(fluidPage, "#mpu-field");
     await fluidPage.locator('.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID"]').click();
+    await expect(fluidPage.locator("#mpu-bar > #mpu-recfield-name")).toBeVisible();
+    await expect(fluidPage.locator("#mpu-bar > #mpu-copy-format")).toBeVisible();
+    await expect(fluidPage.locator("#mpu-bar > #mpu-copy-field")).toBeVisible();
     await clickMoreAction(fluidPage, "#mpu-pcode");
     await fluidPage.getByLabel("Verified record name", { exact: true }).fill("JOB");
     await fluidPage.getByLabel("Verified field name", { exact: true }).fill("EMPLID");
@@ -287,7 +323,7 @@ test.describe("MPU extension UI", () => {
     await fluidPage.setViewportSize({ width: 320, height: 600 });
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-more")).toBeFocused();
+    await expect(fluidPage.locator("#mpu-pageinfo")).toBeFocused();
   });
 
   test("trace shows request evidence and closes its action dialog when disabled", async ({ extensionContext, fluidPage }) => {
@@ -300,13 +336,11 @@ test.describe("MPU extension UI", () => {
       await chrome.storage.local.set({ mpuSettings: settings });
     });
     await expect(fluidPage.locator("#mpu-trace")).toContainText("last ON");
-    await fluidPage.locator("#mpu-more").click();
     await fluidPage.locator("#mpu-trace").click();
     await expect(fluidPage.locator("#mpu-trace-evidence")).toContainText("not a live server query");
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
-    await expect(fluidPage.locator("#mpu-more")).toBeFocused();
-    await fluidPage.locator("#mpu-more").click();
+    await expect(fluidPage.locator("#mpu-trace")).toBeFocused();
     await fluidPage.locator("#mpu-trace").click();
     await sw.evaluate(async () => {
       const settings = (await chrome.storage.local.get("mpuSettings")).mpuSettings as MpuSettings;
@@ -331,8 +365,7 @@ test.describe("MPU extension UI", () => {
     await audit(fluidPage, "#mpu-dialog");
     await fluidPage.keyboard.press("Escape");
     for (const trigger of ["#mpu-pageinfo", "#mpu-pcode", "#mpu-structure", "#mpu-help"]) {
-      await fluidPage.locator("#mpu-more").click();
-      await fluidPage.locator(trigger).click();
+      await clickMoreAction(fluidPage, trigger);
       await audit(fluidPage, "#mpu-dialog");
       await fluidPage.keyboard.press("Escape");
     }
@@ -389,8 +422,7 @@ test.describe("MPU extension UI", () => {
     expect(moreBox!.x + moreBox!.width).toBeLessThanOrEqual(320);
     await fluidPage.keyboard.press("Escape");
     for (const trigger of ["#mpu-pageinfo", "#mpu-pcode", "#mpu-structure", "#mpu-help"]) {
-      await fluidPage.locator("#mpu-more").click();
-      await fluidPage.locator(trigger).click();
+      await clickMoreAction(fluidPage, trigger);
       const box = await fluidPage.getByRole("dialog").boundingBox();
       expect(box!.x).toBeGreaterThanOrEqual(0);
       expect(box!.x + box!.width).toBeLessThanOrEqual(320);

@@ -47,7 +47,7 @@ test("reviewed snapshots compare only UI metadata and retain saved evidence afte
   for (const secret of ["PRIVATE-FIELD-VALUE", "PRIVATE-SESSION", "BA_TEST", "CSDEV"]) expect(metadata).not.toContain(secret);
   await audit(page, "#mpu-dialog");
   await page.keyboard.press("Escape");
-  await expect(page.locator("#mpu-more")).toBeFocused();
+  await expect(page.locator("#mpu-pageinfo")).toBeFocused();
   expect(await read(extensionContext)).toBeUndefined();
   await capture(page, extensionContext, "Before", 1);
   await page.evaluate(() => {

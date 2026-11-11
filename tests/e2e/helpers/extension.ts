@@ -74,8 +74,12 @@ export async function openPsPage(context: BrowserContext, path: string): Promise
   return page;
 }
 
-/** Open a specialist toolbar action from the grouped More menu. */
+/** Open an action directly when visible on the toolbar, otherwise from More. */
 export async function clickMoreAction(page: Page, action: string): Promise<void> {
+  if (action.startsWith("#") && await page.locator(`#mpu-bar > ${action}`).count()) {
+    await page.locator(action).click();
+    return;
+  }
   await page.locator("#mpu-more").click();
   const menu = page.getByRole("menu", { name: "More tools", exact: true });
   if (action.startsWith("#")) await menu.locator(action).click();

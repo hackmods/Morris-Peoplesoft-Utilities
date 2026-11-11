@@ -497,8 +497,9 @@ button.mpu-env {
   align-items: center;
   gap: 0.45rem;
   min-width: 0;
-  max-width: min(40rem, 55vw);
-  overflow: hidden;
+  max-width: 100%;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
   border: 1px solid #FF5C00;
   border-radius: 2px;
   background: #FF5C00;
@@ -546,12 +547,15 @@ button.mpu-env {
 }
 
 .mpu-flyout-sub {
-  /* Placement is set in JS (fixed + getBoundingClientRect) so parent overflow cannot clip it */
-  top: 0;
-  left: 0;
-  margin-left: 0;
-  z-index: 2147482100;
-  max-height: min(24rem, 70vh);
+  position: static;
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  margin: 0 0 0 0.65rem;
+  overflow: visible;
+  border: 0;
+  border-left: 2px solid #808080;
+  box-shadow: none;
 }
 
 .mpu-flyout-top {
@@ -736,9 +740,8 @@ button.mpu-env {
 }
 
 .mpu-rf-val {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .mpu-ib-wrap {
