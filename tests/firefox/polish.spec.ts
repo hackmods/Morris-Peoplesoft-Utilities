@@ -123,6 +123,9 @@ test("Help and PCode references open their actual Options panels; inspected fiel
   const icon = await visible(driver, '.mpu-recfield-icon[data-mpu-field-id="JOB_EMPLID"]');
   await icon.click();
   await visible(driver, '.mpu-recfield-area[data-mpu-locked="true"]');
+  await visible(driver, "#mpu-bar > #mpu-recfield-name");
+  await visible(driver, "#mpu-bar > #mpu-copy-format");
+  await visible(driver, "#mpu-bar > #mpu-copy-field");
   await clickMoreAction(driver, "#mpu-pcode");
   await visible(driver, "#mpu-pcode-context-form");
   expect(await driver.findElement(By.css("#mpu-dialog")).getText()).toContain("Locked DOM field: JOB_EMPLID");

@@ -165,6 +165,9 @@ function closeAllFlyouts(doc: Document): void {
   });
   doc.querySelectorAll(".mpu-flyout").forEach((el) => {
     const flyout = el as HTMLElement;
+    flyout.querySelectorAll('[aria-expanded="true"]').forEach((trigger) => {
+      trigger.setAttribute("aria-expanded", "false");
+    });
     flyout.hidden = true;
     restorePortaledFlyout(flyout);
   });
@@ -446,145 +449,39 @@ function appendFavoriteLeaf(
   container.appendChild(item);
 }
 
-function wireSubmenuHover(item: HTMLElement, sub: HTMLElement): void {
-  const HIDE_MS = 220;
-  let hideTimer: ReturnType<typeof setTimeout> | null = null;
-  const doc = item.ownerDocument;
-  const view = doc.defaultView;
-  const trigger =
-    (item.querySelector(".mpu-menu-subtrigger") as HTMLElement | null) || item;
-
-  const clearHide = (): void => {
-    if (hideTimer != null) {
-      clearTimeout(hideTimer);
-      hideTimer = null;
-    }
-  };
-
-  const setExpanded = (open: boolean): void => {
-    trigger.setAttribute("aria-expanded", open ? "true" : "false");
-  };
-
-  const place = (): void => {
-    const rect = trigger.getBoundingClientRect();
-    const vw = view?.innerWidth ?? 1200;
-    const vh = view?.innerHeight ?? 800;
-    const width = Math.min(sub.offsetWidth || 224, vw - 8);
-    const height = Math.min(sub.offsetHeight || 160, vh - 8);
-    let left = rect.right - 4; // slight overlap — no hover gap
-    let top = rect.top;
-    if (left + width > vw - 4) {
-      left = Math.max(4, rect.left - width + 4);
-    }
-    if (top + height > vh - 4) {
-      top = Math.max(4, vh - height - 4);
-    }
-    sub.style.position = "fixed";
-    sub.style.top = `${Math.round(top)}px`;
-    sub.style.left = `${Math.round(left)}px`;
-    sub.style.right = "auto";
-    sub.style.margin = "0";
-  };
-
-  const hideNested = (): void => {
-    sub.querySelectorAll(".mpu-flyout-sub").forEach((el) => {
-      (el as HTMLElement).hidden = true;
-      const nestedTrigger = el.parentElement?.querySelector(".mpu-menu-subtrigger");
-      nestedTrigger?.setAttribute("aria-expanded", "false");
-    });
-  };
-
+/** Click-to-expand levels stay in the scrollable panel, including narrow screens. */
+function bindSubmenu(item: HTMLElement, sub: HTMLElement): void {
+  const trigger = item.querySelector<HTMLElement>(".mpu-menu-subtrigger")!;
   const hide = (): void => {
-    clearHide();
     sub.hidden = true;
-    setExpanded(false);
-    hideNested();
-    view?.removeEventListener("scroll", onReposition, true);
-    view?.removeEventListener("resize", onReposition);
+    trigger.setAttribute("aria-expanded", "false");
+    sub.querySelectorAll<HTMLElement>(".mpu-flyout-sub").forEach((nested) => { nested.hidden = true; });
+    sub.querySelectorAll('[aria-expanded="true"]').forEach((nested) => nested.setAttribute("aria-expanded", "false"));
   };
-
-  const onReposition = (): void => {
-    if (!sub.hidden) place();
-  };
-
   const show = (): void => {
-    clearHide();
-    const parent = item.parentElement;
-    if (parent) {
-      parent.querySelectorAll(":scope > .mpu-menu-has-sub").forEach((sib) => {
-        if (sib === item) return;
-        const otherSub = sib.querySelector(":scope > .mpu-flyout-sub") as HTMLElement | null;
-        const otherTrigger = sib.querySelector(".mpu-menu-subtrigger");
-        if (otherSub && !otherSub.hidden) {
-          otherSub.hidden = true;
-          otherTrigger?.setAttribute("aria-expanded", "false");
-          otherSub.querySelectorAll(".mpu-flyout-sub").forEach((el) => {
-            (el as HTMLElement).hidden = true;
-          });
-        }
-      });
-    }
     sub.hidden = false;
-    setExpanded(true);
-    place();
-    // Second place after paint so offsetWidth/Height are accurate
-    view?.requestAnimationFrame(() => {
-      if (!sub.hidden) place();
-    });
-    view?.addEventListener("scroll", onReposition, { capture: true, signal: flyoutPositionAbort?.signal });
-    view?.addEventListener("resize", onReposition, { signal: flyoutPositionAbort?.signal });
+    trigger.setAttribute("aria-expanded", "true");
   };
-
-  const scheduleHide = (): void => {
-    clearHide();
-    hideTimer = setTimeout(() => {
-      hideTimer = null;
-      hide();
-    }, HIDE_MS);
-  };
-
   trigger.setAttribute("aria-expanded", "false");
-  trigger.addEventListener("keydown", (e) => {
-    if (!["ArrowRight", "Enter", " "].includes(e.key)) return;
-    e.preventDefault();
-    e.stopPropagation();
+  trigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (sub.hidden) show();
+    else hide();
+  });
+  trigger.addEventListener("keydown", (event) => {
+    if (!["ArrowRight", "Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    event.stopPropagation();
     show();
     sub.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus();
   });
-  sub.addEventListener("keydown", (e) => {
-    if (!["ArrowLeft", "Escape"].includes(e.key) ||
-      (e.target as Element).closest('[role="menu"]') !== sub) return;
-    e.preventDefault();
-    e.stopPropagation();
+  sub.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "Escape"].includes(event.key) ||
+      (event.target as Element).closest('[role="menu"]') !== sub) return;
+    event.preventDefault();
+    event.stopPropagation();
     trigger.focus();
     hide();
-  });
-
-  item.addEventListener("mouseenter", show);
-  item.addEventListener("mouseleave", scheduleHide);
-  // Sub is position:fixed (outside item box) — keep open while pointer is on it
-  sub.addEventListener("mouseenter", () => {
-    clearHide();
-    sub.hidden = false;
-    setExpanded(true);
-  });
-  sub.addEventListener("mouseleave", scheduleHide);
-
-  item.addEventListener("focusin", show);
-  item.addEventListener("focusout", (e) => {
-    const next = e.relatedTarget as Node | null;
-    if (item.contains(next) || sub.contains(next)) return;
-    scheduleHide();
-  });
-  sub.addEventListener("focusin", () => {
-    clearHide();
-    sub.hidden = false;
-    setExpanded(true);
-  });
-  sub.addEventListener("focusout", (e) => {
-    const next = e.relatedTarget as Node | null;
-    if (item.contains(next) || sub.contains(next)) return;
-    scheduleHide();
   });
 }
 
@@ -618,7 +515,7 @@ function appendFavoriteSubgroup(
 
   item.append(trigger, sub);
   parent.appendChild(item);
-  wireSubmenuHover(item, sub);
+  bindSubmenu(item, sub);
 }
 
 function appendFavoriteCategory(
@@ -663,7 +560,7 @@ function appendFavoriteCategory(
 
   item.append(trigger, sub);
   parent.appendChild(item);
-  wireSubmenuHover(item, sub);
+  bindSubmenu(item, sub);
 }
 
 function buildShortcutsFlyoutBody(
@@ -931,7 +828,7 @@ function buildAdminFlyoutBody(
 
     item.append(trigger, sub);
     flyout.appendChild(item);
-    wireSubmenuHover(item, sub);
+    bindSubmenu(item, sub);
   }
 }
 
@@ -1801,16 +1698,8 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     else closeMore();
   });
 
-  moveButton("mpu-pageinfo", "Page tools");
   moveButton("mpu-structure", "Page tools");
   moveButton("mpu-pcode", "Inspect and copy");
-  moveButton("mpu-field", "Inspect and copy");
-  const fieldName = bar.querySelector<HTMLElement>("#mpu-recfield-name");
-  if (fieldName && isHtmlElement(fieldName)) addMoreControl(fieldName, "Inspect and copy");
-  const copyFormat = bar.querySelector<HTMLElement>("#mpu-copy-format");
-  if (copyFormat && isHtmlElement(copyFormat)) addMoreControl(copyFormat, "Inspect and copy");
-  moveButton("mpu-copy-field", "Inspect and copy");
-  moveButton("mpu-trace", "Troubleshooting");
   const ibWrap = bar.querySelector<HTMLElement>("#mpu-ib-crumb")?.parentElement;
   const ibCopy = bar.querySelector<HTMLElement>("#mpu-ib-copy");
   if (ibWrap && isHtmlElement(ibWrap) && ibCopy && isHtmlElement(ibCopy) && ibCopy.localName === "button") {
@@ -1822,7 +1711,6 @@ export function mountBar(ctx: BarContext, doc: Document = document): void {
     ibCopy.addEventListener("click", () => closeMore(), true);
     section("Troubleshooting").appendChild(ibWrap);
   }
-  moveButton("mpu-newwin", "Other tools");
   moveButton("mpu-agents", "Other tools");
   moveButton("mpu-help", "Other tools");
 

@@ -129,6 +129,7 @@ describe("field inspector", () => {
         <button type="button" id="mpu-field">Inspect</button>
         <span id="mpu-recfield-name" class="mpu-recfield-name" hidden></span>
         <button type="button" id="mpu-copy-field" hidden>Copy field</button>
+        <select id="mpu-copy-format" hidden><option>record.field</option></select>
       </div>
       <div class="ps-field"><input id="NC_REHIRE_ELIG_TO_DATE$0" value="01/01/2050" /></div>
       <div class="ps-field"><input id="NC_REHIRE_ELIG_FROM_DATE$0" value="01/01/2000" /></div>
@@ -148,6 +149,7 @@ describe("field inspector", () => {
     expect(panel.querySelector(".mpu-rf-fld .mpu-rf-val")?.textContent).toBe("TO_DATE");
     expect(panel.querySelector(".mpu-rf-occ .mpu-rf-val")?.textContent).toBe("0");
     expect(panel.getAttribute("title")).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
+    expect(document.getElementById("mpu-copy-format")!.hidden).toBe(true);
 
     icon.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(getLockedFieldName()).toBe("NC_REHIRE_ELIG.TO_DATE (row 0)");
@@ -155,11 +157,13 @@ describe("field inspector", () => {
     expect(getLockedParsedRecField()?.field).toBe("TO_DATE");
     expect(icon.querySelector("circle")?.getAttribute("stroke")).toBe("#525252");
     expect(writeText).toHaveBeenCalledWith("NC_REHIRE_ELIG.TO_DATE");
+    expect(document.getElementById("mpu-copy-format")!.hidden).toBe(false);
 
     stopFieldInspector(document);
     syncFieldInspectorChrome(document);
     expect(getLockedFieldName()).toBeNull();
     expect(document.getElementById("mpu-field")?.textContent).toBe("Inspect");
+    expect(document.getElementById("mpu-copy-format")!.hidden).toBe(true);
   });
 
   it("hides empty name panel until a field is hovered", () => {

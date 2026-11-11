@@ -521,6 +521,7 @@ function resolveFieldElement(id: string): Element | null {
 function setNamePanel(id: string | null): void {
   const panel = topDocRef.getElementById("mpu-recfield-name");
   const copyBtn = topDocRef.getElementById("mpu-copy-field") as HTMLButtonElement | null;
+  const copyFmt = topDocRef.getElementById("mpu-copy-format") as HTMLSelectElement | null;
   if (!panel) return;
   panel.hidden = false;
 
@@ -529,6 +530,7 @@ function setNamePanel(id: string | null): void {
     panel.removeAttribute("title");
     panel.setAttribute("data-mpu-empty", "true");
     if (copyBtn) copyBtn.hidden = true;
+    if (copyFmt) copyFmt.hidden = true;
     return;
   }
 
@@ -580,6 +582,7 @@ function setNamePanel(id: string | null): void {
   }
 
   if (copyBtn) copyBtn.hidden = !lockedId;
+  if (copyFmt) copyFmt.hidden = !lockedId;
 }
 
 function isHtmlElement(node: EventTarget | Node | null | undefined): node is HTMLElement {

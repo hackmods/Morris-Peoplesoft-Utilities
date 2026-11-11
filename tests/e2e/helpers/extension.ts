@@ -1,4 +1,4 @@
-import { chromium, type BrowserContext, type Page, type Worker } from "@playwright/test";
+import { chromium, expect, type BrowserContext, type Page, type Worker } from "@playwright/test";
 import { resolve } from "node:path";
 import { createDefaultSettings, type MpuSettings } from "../../../src/storage/schema";
 import { E2E_ORIGIN } from "./fixture-server";
@@ -50,6 +50,14 @@ export async function launchExtensionContext(): Promise<{
   if (!extensionId) {
     throw new Error(`Unable to resolve extension id from ${sw.url()}`);
   }
+  // Installation opens Options asynchronously. Let that navigation finish before
+  // seeding settings or opening fixtures, otherwise it can reuse a new test tab.
+  const optionsUrl = `chrome-extension://${extensionId}/options.html`;
+  await expect.poll(() => context.pages().some((page) => page.url() === optionsUrl), {
+    timeout: 30_000,
+  }).toBe(true);
+  const options = context.pages().find((page) => page.url() === optionsUrl)!;
+  await options.waitForLoadState("load");
   return { context, extensionId };
 }
 
@@ -74,8 +82,12 @@ export async function openPsPage(context: BrowserContext, path: string): Promise
   return page;
 }
 
-/** Open a specialist toolbar action from the grouped More menu. */
+/** Open an action directly when visible on the toolbar, otherwise from More. */
 export async function clickMoreAction(page: Page, action: string): Promise<void> {
+  if (action.startsWith("#") && await page.locator(`#mpu-bar > ${action}`).count()) {
+    await page.locator(action).click();
+    return;
+  }
   await page.locator("#mpu-more").click();
   const menu = page.getByRole("menu", { name: "More tools", exact: true });
   if (action.startsWith("#")) await menu.locator(action).click();

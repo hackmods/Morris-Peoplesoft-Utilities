@@ -89,11 +89,36 @@ test("Classic and Fluid toolbar, keyboard focus, dialogs and contrast", async ({
     await clickMoreAction(driver, "#mpu-pageinfo");
     await audit(driver, "#mpu-dialog");
     await driver.actions().sendKeys(Key.ESCAPE).perform();
-    expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-more");
+    expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-pageinfo");
     await click(driver, "#mpu-fav");
     await driver.actions().sendKeys(Key.ARROW_DOWN, Key.HOME, Key.END, Key.ESCAPE).perform();
     expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-fav");
   }
+});
+
+test("shortcut categories expand inline and preserve nested keyboard navigation", async ({ driver }) => {
+  await seed(driver, e2eSettings({ favorites: [{
+    Servlet: "psp", Menu: "M", Component: "C", Market: "GBL", Parameters: "",
+    Category: "Campus", SubCategory: "Admissions", Description: "Student details",
+  }] }));
+  await navigate(driver, `${E2E_ORIGIN}${FLUID_COMPONENT_PATH}`);
+  await visible(driver, "#mpu-bar > #mpu-pageinfo");
+  await visible(driver, "#mpu-bar > #mpu-field");
+  await click(driver, "#mpu-fav");
+  const category = await driver.findElement(By.xpath('//button[normalize-space(.)="Campus »"]'));
+  await category.click();
+  const subgroup = await driver.findElement(By.xpath('//button[normalize-space(.)="Admissions »"]'));
+  await subgroup.click();
+  const leaf = await driver.findElement(By.xpath('//button[normalize-space(.)="Student details"]'));
+  expect(await leaf.isDisplayed()).toBe(true);
+  await audit(driver, '.mpu-flyout-top:not([hidden])');
+  await driver.actions().sendKeys(Key.ARROW_RIGHT).perform();
+  expect(await driver.executeScript('return document.activeElement.textContent')).toBe("Student details");
+  await driver.actions().sendKeys(Key.ARROW_LEFT).perform();
+  expect(await leaf.isDisplayed()).toBe(false);
+  expect(await driver.executeScript('return document.activeElement.textContent')).toBe("Admissions »");
+  await driver.actions().sendKeys(Key.ESCAPE, Key.ESCAPE).perform();
+  expect(await driver.executeScript('return document.activeElement.id')).toBe("mpu-fav");
 });
 
 test("Field Entry preview is inert; Apply reaches same-origin frame page hooks", async ({ driver }) => {

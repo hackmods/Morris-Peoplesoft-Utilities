@@ -20,7 +20,8 @@ Use before tagging a release or uploading to the Chrome Web Store. The primary t
 - [ ] Open recent or saved destinations in the current or a new window
 - [ ] Favorites CSV import/export (Category/SubCategory preserved)
 - [ ] Find field searches current-page labels and IDs, locates a result, and copies the configured field format
-- [ ] More → Field Inspector toggles detailed field markers and Escape stops it
+- [ ] Toolbar Inspect toggles detailed field markers and Escape stops it; selected field details and copy controls remain visible outside More
+- [ ] Saved-shortcut categories expand inline by click; ArrowRight enters, ArrowLeft/Escape returns, and moving the pointer away does not collapse them
 - [ ] More → Admin jumps opens the selected setup component
 - [ ] Page Info dialog + copy
 - [ ] Customization upgrade watch — capture baseline + check drift (Page Info + Options → Upgrade)

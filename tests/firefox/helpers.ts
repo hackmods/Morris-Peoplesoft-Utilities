@@ -115,8 +115,13 @@ export async function click(driver: WebDriver, selector: string): Promise<void> 
   }, 15_000, `Click: ${selector}`);
 }
 
-/** Open a specialist toolbar action from the grouped More menu. */
+/** Open an action directly when visible on the toolbar, otherwise from More. */
 export async function clickMoreAction(driver: WebDriver, action: string): Promise<void> {
+  await visible(driver, "#mpu-bar");
+  if (action.startsWith("#") && (await driver.findElements(By.css(`#mpu-bar > ${action}`))).length) {
+    await click(driver, action);
+    return;
+  }
   await click(driver, "#mpu-more");
   const menu = await visible(driver, ".mpu-more-flyout");
   const target = action.startsWith("#")

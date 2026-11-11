@@ -603,7 +603,9 @@ describe("utilities bar", () => {
     expect(document.getElementById("mpu-recent-select")).toBeNull();
     expect(document.getElementById("mpu-field-find")?.textContent).toBe("Find field");
     expect(document.getElementById("mpu-more")?.textContent).toBe("More");
-    expect(document.querySelector(".mpu-more-flyout")?.textContent).toContain("Page Info");
+    expect(document.querySelector("#mpu-bar > #mpu-pageinfo")?.textContent).toContain("Page Info");
+    expect(document.querySelector("#mpu-bar > #mpu-field")).toBeTruthy();
+    expect(document.querySelector("#mpu-bar > #mpu-copy-format")).toBeTruthy();
     expect(document.querySelector(".mpu-more-flyout")?.textContent).toContain("Agents");
     const env = document.querySelector(".mpu-env") as HTMLElement;
     expect(env.style.getPropertyValue("--mpu-env-color")).toBe("#2288aa");
@@ -654,7 +656,7 @@ describe("utilities bar", () => {
     expect(flyout.style.left).toMatch(/px$/);
   });
 
-  it("opens nested saved-shortcut submenu without immediate close on leave bridge", async () => {
+  it("opens saved-shortcut levels by click and keeps them open after the pointer leaves", async () => {
     vi.useFakeTimers();
     const settings = createDefaultSettings();
     settings.favorites = [
@@ -702,14 +704,14 @@ describe("utilities bar", () => {
     const sub = catItem.querySelector(".mpu-flyout-sub") as HTMLElement;
     expect(sub.hidden).toBe(true);
 
-    catItem.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    (catItem.querySelector(".mpu-menu-subtrigger") as HTMLElement).click();
     expect(sub.hidden).toBe(false);
-    expect(sub.style.position).toBe("fixed");
+    expect(sub.style.position).toBe("");
     expect(catItem.querySelector(".mpu-menu-subtrigger")?.getAttribute("aria-expanded")).toBe(
       "true",
     );
 
-    // Leaving the trigger starts a delay — submenu stays until timeout or pointer enters sub
+    // Pointer movement never collapses an explicitly opened category.
     catItem.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     expect(sub.hidden).toBe(false);
     sub.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
@@ -718,6 +720,8 @@ describe("utilities bar", () => {
 
     sub.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await vi.advanceTimersByTimeAsync(300);
+    expect(sub.hidden).toBe(false);
+    (catItem.querySelector(".mpu-menu-subtrigger") as HTMLElement).click();
     expect(sub.hidden).toBe(true);
     vi.useRealTimers();
   });
